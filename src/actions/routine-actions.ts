@@ -46,6 +46,82 @@ export async function getRoutines() {
     }
 }
 
+// Get Coach's Routines (for assigning to athletes)
+export async function getCoachRoutines() {
+    const session = await auth();
+    if (!session?.user?.id || session.user.role !== "coach") {
+        return { success: false, error: "No autorizado" };
+    }
+
+    try {
+        const snapshot = await adminDb.collection("routines")
+            .where("coachId", "==", session.user.id)
+            .get();
+
+        const routines = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+            createdAt: doc.data().createdAt?.toDate?.()?.toISOString(),
+            updatedAt: doc.data().updatedAt?.toDate?.()?.toISOString(),
+        }));
+
+        return { success: true, routines };
+    } catch (error) {
+        console.error("Error fetching coach routines:", error);
+        return { success: false, error: "Error al cargar rutinas" };
+    }
+}
+
+// Assign Routine to Athlete (creates a copy for the athlete)
+export async function assignRoutineToAthlete(athleteId: string, routineId: string) {
+    const session = await auth();
+    if (!session?.user?.id || session.user.role !== "coach") {
+        return { success: false, error: "No autorizado" };
+    }
+
+    try {
+        // 1. Verify routine ownership
+        const routineRef = adminDb.collection("routines").doc(routineId);
+        const routineSnap = await routineRef.get();
+        if (!routineSnap.exists || routineSnap.data()?.coachId !== session.user.id) {
+            return { success: false, error: "Rutina no encontrada o sin permisos" };
+        }
+
+        // 2. Deactivate previous active routines for this athlete
+        const batch = adminDb.batch();
+        const oldRoutines = await adminDb.collection("routines")
+            .where("athleteId", "==", athleteId)
+            .where("active", "==", true)
+            .get();
+
+        oldRoutines.forEach(doc => {
+            batch.update(doc.ref, { active: false });
+        });
+
+        // 3. Create a COPY of the routine assigned to the athlete
+        const templateData = routineSnap.data();
+        const newRoutineRef = adminDb.collection("routines").doc();
+
+        batch.set(newRoutineRef, {
+            ...templateData,
+            name: `${templateData?.name} (Assigned)`,
+            coachId: session.user.id,
+            athleteId: athleteId,
+            active: true,
+            originalRoutineId: routineId,
+            createdAt: new Date(),
+            updatedAt: new Date()
+        });
+
+        await batch.commit();
+
+        return { success: true };
+    } catch (error) {
+        console.error("Error assigning routine:", error);
+        return { success: false, error: "Error al asignar rutina" };
+    }
+}
+
 // Get Single Routine
 export async function getRoutine(id: string) {
     const session = await auth();

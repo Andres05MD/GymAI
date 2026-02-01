@@ -28,7 +28,8 @@ export function LogMeasurementDialog({ onLogSuccess }: { onLogSuccess?: () => vo
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const form = useForm<z.infer<typeof LogSchema>>({
-        resolver: zodResolver(LogSchema),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        resolver: zodResolver(LogSchema) as any,
         defaultValues: {
             date: new Date().toISOString().split('T')[0],
         }

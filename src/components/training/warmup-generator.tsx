@@ -31,9 +31,9 @@ export function WarmupGenerator() {
             // Simulamos un pequeño delay para dar sensación de "pensando"
             await new Promise(r => setTimeout(r, 1500));
 
-            const result = await generateSmartWarmup({});
+            const result = await generateSmartWarmup(["General"]);
             if (result.success) {
-                setPlan(result.warmupPlan);
+                setPlan(result.data);
             }
         } catch (error) {
             console.error(error);

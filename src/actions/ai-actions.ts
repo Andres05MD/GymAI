@@ -82,3 +82,113 @@ export async function suggestSubstitute(exerciseName: string, reason: "busy" | "
         return { success: false, error: "Error al buscar alternativas" };
     }
 }
+
+export async function generateRoutinePlan(goal: string, level: string, days: string) {
+    const session = await auth();
+    if (!session?.user?.id || session.user.role !== "coach") {
+        return { success: false, error: "No autorizado" };
+    }
+
+    try {
+        const prompt = `
+            Eres un entrenador personal experto. Genera un plan de rutina de ${days} días para un atleta de nivel ${level} con objetivo de ${goal}.
+            
+            La respuesta DEBE ser un objeto JSON con esta estructura:
+            {
+                "exercises": [
+                    {
+                        "id": "day-1",
+                        "name": "Día 1 - [Nombre descriptivo]",
+                        "exercises": [
+                            {
+                                "exerciseId": "temp-1",
+                                "exerciseName": "Nombre del Ejercicio",
+                                "notes": "Notas técnicas",
+                                "order": 0,
+                                "sets": [
+                                    { "type": "working", "reps": "8-12", "rpeTarget": 8, "restSeconds": 90 }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+            
+            Incluye 4-6 ejercicios por día, variando grupos musculares según el split elegido.
+            Usa nombres de ejercicios comunes en español.
+        `;
+
+        const groq = getGroqClient();
+        const completion = await groq.chat.completions.create({
+            messages: [{ role: "user", content: prompt }],
+            model: "llama3-70b-8192",
+            temperature: 0.6,
+            response_format: { type: "json_object" },
+        });
+
+        const content = completion.choices[0]?.message?.content;
+        if (!content) return { success: false, error: "Error de IA" };
+
+        const result = JSON.parse(content);
+        return { success: true, exercises: result.exercises };
+
+    } catch (error) {
+        console.error("Routine Plan Gen Error:", error);
+        return { success: false, error: "Error al generar rutina" };
+    }
+}
+
+// Alias para generateWarmup - usado por warmup-generator.tsx
+export async function generateSmartWarmup(muscleGroups: string[]) {
+    return generateWarmup(muscleGroups);
+}
+
+// Alias para suggestSubstitute - usado por exercise-swap-dialog.tsx
+export async function suggestAlternativeExercise(exerciseName: string, reason: "busy" | "pain" | "equipment") {
+    return suggestSubstitute(exerciseName, reason);
+}
+
+// Chat con el coach AI - usado por ai-coach-chat.tsx
+export async function chatWithCoachAI(message: string, context?: { exerciseName?: string; muscleGroups?: string[] }) {
+    const session = await auth();
+    if (!session?.user?.id) return { success: false, error: "No autorizado" };
+
+    try {
+        const contextStr = context?.exerciseName
+            ? `Contexto: El atleta está haciendo "${context.exerciseName}" (músculos: ${context.muscleGroups?.join(", ") || "no especificado"}).`
+            : "";
+
+        const prompt = `
+            Eres un coach de fitness experto y amigable. El atleta te hace la siguiente pregunta:
+            "${message}"
+            
+            ${contextStr}
+            
+            Responde de manera concisa y útil. Si es sobre técnica, da consejos prácticos.
+            Si es sobre alternativas, sugiere opciones específicas.
+            
+            Respuesta JSON:
+            {
+                "response": "Tu respuesta aquí"
+            }
+        `;
+
+        const groq = getGroqClient();
+        const completion = await groq.chat.completions.create({
+            messages: [{ role: "user", content: prompt }],
+            model: "llama3-70b-8192",
+            temperature: 0.7,
+            response_format: { type: "json_object" },
+        });
+
+        const content = completion.choices[0]?.message?.content;
+        if (!content) return { success: false, error: "Error de IA" };
+
+        const result = JSON.parse(content);
+        return { success: true, response: result.response };
+
+    } catch (error) {
+        console.error("Coach Chat Error:", error);
+        return { success: false, error: "Error al procesar tu mensaje" };
+    }
+}

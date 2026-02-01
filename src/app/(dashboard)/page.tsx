@@ -180,8 +180,8 @@ async function AthleteDashboard({ user }: { user: any }) {
                             <p className="text-xs font-bold uppercase tracking-widest text-neutral-500 mb-1">Próxima Sesión</p>
                             {routine ? (
                                 <>
-                                    <h3 className="text-2xl font-black mb-1">{routine.name}</h3>
-                                    <p className="text-sm text-neutral-600 mb-4">{routine.exercises?.length || 0} Ejercicios</p>
+                                    <h3 className="text-2xl font-black mb-1">{(routine as any).name}</h3>
+                                    <p className="text-sm text-neutral-600 mb-4">{(routine as any).exercises?.length || 0} Ejercicios</p>
                                     <Link href="/train">
                                         <Button className="w-full rounded-full bg-black text-white hover:bg-neutral-800">
                                             Iniciar Ahora

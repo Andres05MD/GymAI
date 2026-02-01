@@ -22,9 +22,9 @@ export function ExerciseSwapDialog({ currentExerciseName, onSwap }: ExerciseSwap
         if (open && alternatives.length === 0) {
             setLoading(true);
             try {
-                const result = await suggestAlternativeExercise(currentExerciseName);
+                const result = await suggestAlternativeExercise(currentExerciseName, "busy");
                 if (result.success) {
-                    setAlternatives(result.alternatives || []);
+                    setAlternatives(result.data || []);
                 }
             } catch (error) {
                 console.error(error);

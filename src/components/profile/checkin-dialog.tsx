@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Scale, Ruler, Save, Plus } from "lucide-react";
-import { logMeasurement } from "@/actions/measurement-actions";
+import { logBodyMeasurements } from "@/actions/measurement-actions";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
@@ -27,7 +27,7 @@ export function CheckinDialog() {
 
         setLoading(true);
         try {
-            const result = await logMeasurement({
+            const result = await logBodyMeasurements({
                 weight: parseFloat(weight),
                 waist: waist ? parseFloat(waist) : undefined,
                 biceps: biceps ? parseFloat(biceps) : undefined

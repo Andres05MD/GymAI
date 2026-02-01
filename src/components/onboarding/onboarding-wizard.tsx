@@ -34,7 +34,8 @@ export function OnboardingWizard() {
     const { update } = useSession();
 
     const form = useForm<z.infer<typeof OnboardingInputSchema>>({
-        resolver: zodResolver(OnboardingInputSchema),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        resolver: zodResolver(OnboardingInputSchema) as any,
         defaultValues: {
             age: 25,
             gender: "male",

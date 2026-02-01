@@ -49,8 +49,7 @@ export function ExercisesManager({ initialExercises }: ExercisesManagerProps) {
         try {
             const formData = {
                 name: newName,
-                muscleGroup: newMuscle,
-                equipment: "General" // Simplificado por ahora
+                muscleGroups: [newMuscle], // Array de grupos musculares
             };
 
             const result = await createExercise(formData);

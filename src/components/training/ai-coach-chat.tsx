@@ -42,7 +42,7 @@ export function AICoachChat({ context }: AICoachChatProps) {
         setIsLoading(true);
 
         try {
-            const result = await chatWithCoachAI(userMsg, context);
+            const result = await chatWithCoachAI(userMsg, context ? { exerciseName: context } : undefined);
             if (result.success && result.response) {
                 setMessages(prev => [...prev, { role: "ai", content: result.response! }]);
             } else {

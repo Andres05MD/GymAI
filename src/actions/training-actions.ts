@@ -119,3 +119,253 @@ export async function logWorkoutSession(data: any) {
         return { success: false, error: "Error al guardar entrenamiento" };
     }
 }
+
+// Get a single Training Log by ID
+export async function getTrainingLog(logId: string) {
+    const session = await auth();
+    if (!session?.user?.id) return { success: false, error: "No autorizado" };
+
+    try {
+        const docRef = adminDb.collection("training_logs").doc(logId);
+        const docSnap = await docRef.get();
+
+        if (!docSnap.exists) {
+            return { success: false, error: "Log no encontrado" };
+        }
+
+        const data = docSnap.data();
+        // Check ownership or coach access
+        if (data?.athleteId !== session.user.id && session.user.role !== "coach") {
+            return { success: false, error: "No autorizado" };
+        }
+
+        return {
+            success: true,
+            log: {
+                id: docSnap.id,
+                ...data,
+                date: data?.date?.toDate?.()?.toISOString(),
+                startTime: data?.startTime?.toDate?.()?.toISOString(),
+                endTime: data?.endTime?.toDate?.()?.toISOString(),
+            }
+        };
+    } catch (error) {
+        console.error("Error fetching log:", error);
+        return { success: false, error: "Error al cargar log" };
+    }
+}
+
+// Complete a Workout Session
+export async function completeWorkout(logId: string) {
+    const session = await auth();
+    if (!session?.user?.id) return { success: false, error: "No autorizado" };
+
+    try {
+        const docRef = adminDb.collection("training_logs").doc(logId);
+        const docSnap = await docRef.get();
+
+        if (!docSnap.exists) {
+            return { success: false, error: "Log no encontrado" };
+        }
+
+        const data = docSnap.data();
+        if (data?.athleteId !== session.user.id) {
+            return { success: false, error: "No autorizado" };
+        }
+
+        await docRef.update({
+            status: "completed",
+            endTime: new Date(),
+            updatedAt: new Date()
+        });
+
+        return { success: true };
+    } catch (error) {
+        console.error("Error completing workout:", error);
+        return { success: false, error: "Error al completar entrenamiento" };
+    }
+}
+
+// Get Routines Assigned to Athlete
+export async function getAthleteRoutines() {
+    const session = await auth();
+    if (!session?.user?.id) return { success: false, error: "No autorizado" };
+
+    try {
+        const snapshot = await adminDb.collection("routines")
+            .where("athleteId", "==", session.user.id)
+            .where("active", "==", true)
+            .get();
+
+        const routines = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+            createdAt: doc.data().createdAt?.toDate?.()?.toISOString(),
+            updatedAt: doc.data().updatedAt?.toDate?.()?.toISOString(),
+        }));
+
+        return { success: true, routines };
+    } catch (error) {
+        console.error("Error fetching athlete routines:", error);
+        return { success: false, error: "Error al cargar rutinas" };
+    }
+}
+
+// Start a New Workout Session
+export async function startWorkout(routineId: string) {
+    const session = await auth();
+    if (!session?.user?.id) return { success: false, error: "No autorizado" };
+
+    try {
+        // Get the routine
+        const routineRef = adminDb.collection("routines").doc(routineId);
+        const routineSnap = await routineRef.get();
+
+        if (!routineSnap.exists) {
+            return { success: false, error: "Rutina no encontrada" };
+        }
+
+        const routineData = routineSnap.data();
+
+        // Verify access
+        if (routineData?.athleteId !== session.user.id) {
+            return { success: false, error: "No autorizado" };
+        }
+
+        // Get first day of schedule for default (or could ask user to select)
+        const schedule = routineData?.schedule || [];
+        const firstDay = schedule[0] || { name: "Día 1", exercises: [] };
+
+        // Create workout log
+        const workoutRef = await adminDb.collection("training_logs").add({
+            athleteId: session.user.id,
+            routineId: routineId,
+            routineName: routineData?.name || "Rutina",
+            dayName: firstDay.name,
+            exercises: firstDay.exercises.map((ex: any) => ({
+                ...ex,
+                sets: ex.sets.map((set: any) => ({
+                    ...set,
+                    actualWeight: null,
+                    actualReps: null,
+                    actualRPE: null,
+                    completed: false
+                }))
+            })),
+            status: "in_progress",
+            startTime: new Date(),
+            createdAt: new Date()
+        });
+
+        return { success: true, workoutId: workoutRef.id };
+    } catch (error) {
+        console.error("Error starting workout:", error);
+        return { success: false, error: "Error al iniciar entrenamiento" };
+    }
+}
+
+// Get Athlete Training History
+export async function getAthleteHistory() {
+    const session = await auth();
+    if (!session?.user?.id) return { success: false, error: "No autorizado" };
+
+    try {
+        const snapshot = await adminDb.collection("training_logs")
+            .where("athleteId", "==", session.user.id)
+            .where("status", "==", "completed")
+            .orderBy("endTime", "desc")
+            .limit(50)
+            .get();
+
+        const history = snapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+                id: doc.id,
+                ...data,
+                date: data.date?.toDate?.()?.toISOString(),
+                startTime: data.startTime?.toDate?.()?.toISOString(),
+                endTime: data.endTime?.toDate?.()?.toISOString(),
+            };
+        });
+
+        return { success: true, history };
+    } catch (error) {
+        console.error("Error fetching history:", error);
+        return { success: false, error: "Error al cargar historial" };
+    }
+}
+
+// Log a single set during a workout session
+export async function logSet(data: {
+    exerciseId: string;
+    exerciseName: string;
+    weight: number;
+    reps: number;
+    rpe?: number;
+    sessionId: string;
+    timestamp: number;
+}) {
+    const session = await auth();
+    if (!session?.user?.id) return { success: false, error: "No autorizado" };
+
+    try {
+        await adminDb.collection("workout_sets").add({
+            ...data,
+            athleteId: session.user.id,
+            createdAt: new Date(),
+        });
+
+        return { success: true };
+    } catch (error) {
+        console.error("Error logging set:", error);
+        return { success: false, error: "Error al guardar serie" };
+    }
+}
+
+// Finish a workout session
+export async function finishWorkoutSession(
+    sessionId: string,
+    durationSeconds: number,
+    totalVolume: number,
+    totalSets: number
+) {
+    const session = await auth();
+    if (!session?.user?.id) return { success: false, error: "No autorizado" };
+
+    try {
+        // Get all sets for this session to calculate totals
+        const setsSnapshot = await adminDb.collection("workout_sets")
+            .where("sessionId", "==", sessionId)
+            .where("athleteId", "==", session.user.id)
+            .get();
+
+        const sets = setsSnapshot.docs.map(doc => doc.data());
+
+        // Calculate actual volume and sets
+        const calculatedVolume = sets.reduce((acc, set) => acc + (set.weight * set.reps), 0);
+        const actualSets = sets.length;
+
+        // Create training log entry
+        await adminDb.collection("training_logs").add({
+            athleteId: session.user.id,
+            sessionId: sessionId,
+            durationMinutes: Math.round(durationSeconds / 60),
+            totalVolume: calculatedVolume || totalVolume,
+            totalSets: actualSets || totalSets,
+            status: "completed",
+            date: new Date(),
+            endTime: new Date(),
+            createdAt: new Date(),
+            exercises: sets.map(set => ({
+                exerciseId: set.exerciseId,
+                exerciseName: set.exerciseName,
+                sets: [{ reps: set.reps, weight: set.weight, rpe: set.rpe }]
+            }))
+        });
+
+        return { success: true };
+    } catch (error) {
+        console.error("Error finishing session:", error);
+        return { success: false, error: "Error al finalizar entrenamiento" };
+    }
+}
