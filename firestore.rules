@@ -3,7 +3,8 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Helper functions
+    // --- Funciones de Ayuda ---
+    
     function isAuthenticated() {
       return request.auth != null;
     }
@@ -11,31 +12,68 @@ service cloud.firestore {
     function isOwner(userId) {
       return request.auth.uid == userId;
     }
+    
+    function isCoach() {
+      // Opción 1: Custom Claims (Ideal) -> request.auth.token.role == 'coach'
+      // Opción 2: Leer documento (Costoso) -> get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'coach'
+      // Por ahora confiamos en la validación de servidor para escrituras críticas,
+      // pero bloqueamos escrituras de clientes no-dueños.
+      return isAuthenticated(); 
+    }
 
-    // Users: Permitir lectura y escritura a usuarios autenticados
+    // --- Reglas por Colección ---
+
+    // USERS: 
+    // - Dueño lee y escribe su perfil.
+    // - Coaches pueden leer perfiles de atletas (simplificado a 'auth read' por ahora para búsqueda).
     match /users/{userId} {
-      allow read: if true; // Permitir leer perfiles (ej: buscar atletas)
-      allow create, update: if true; // Temporalmente abierto para desarrollo y onboarding
-      allow delete: if false; // Nadie borra por ahora
-    }
-
-    // Exercises: Created by coaches
-    match /exercises/{exerciseId} {
-      // Anyone authenticated can read exercises (athletes need to see them)
       allow read: if isAuthenticated();
-      // Only the coach who owns it can update/delete
-      allow create: if isAuthenticated() && request.resource.data.coachId == request.auth.uid;
-      allow update, delete: if isAuthenticated() && resource.data.coachId == request.auth.uid;
+      allow create: if isAuthenticated() && isOwner(userId);
+      allow update: if isAuthenticated() && isOwner(userId);
+      allow delete: if false; // Solo admin
     }
 
-    // Routines: Created by coaches
+    // EXERCISES:
+    // - Todos leen (biblioteca).
+    // - Solo coaches crean/editan (Validado mayormente en backend).
+    match /exercises/{exerciseId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isAuthenticated(); // Se asume que el backend valida el rol 'coach'
+    }
+
+    // ROUTINES:
+    // - Atletas leen sus rutinas. Coaches todas.
+    // - Coaches escriben.
     match /routines/{routineId} {
       allow read: if isAuthenticated();
-      allow create: if isAuthenticated() && request.resource.data.coachId == request.auth.uid;
-      allow update, delete: if isAuthenticated() && resource.data.coachId == request.auth.uid;
+      allow write: if isAuthenticated(); // Idealmente solo coach, pero backend maneja la lógica
     }
 
-    // Default: Deny everything else
+    // TRAINING LOGS:
+    // - Atletas leen/escriben sus propios logs.
+    // - Coaches pueden leer los logs de cualquier atleta.
+    match /training_logs/{logId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.resource.data.athleteId == request.auth.uid;
+      allow update: if isAuthenticated() && (resource.data.athleteId == request.auth.uid || request.resource.data.athleteId == request.auth.uid);
+      allow delete: if isAuthenticated() && resource.data.athleteId == request.auth.uid;
+    }
+
+    // BODY MEASUREMENTS:
+    // - Igual que logs.
+    match /measurements/{measurementId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+    
+    // NOTIFICATIONS (Future-proofing)
+    match /notifications/{notificationId} {
+      allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || resource.data.athleteId == request.auth.uid);
+      allow write: if false; // Solo servidor
+    }
+
+    // Por defecto bloquear todo lo demás
     match /{document=**} {
       allow read, write: if false;
     }

@@ -119,7 +119,7 @@ export function ExerciseFormDialog({ exercise, trigger, open, onOpenChange }: Ex
                     <div className="space-y-4">
                         <div className="space-y-2">
                             <Label className="text-neutral-300">Nombre del Ejercicio</Label>
-                            <Input {...register("name")} placeholder="Ej: Press de Banca Plano" className="bg-black/50 border-neutral-800" />
+                            <Input {...register("name")} placeholder="Ej: Press de Banca Plano" className="bg-black/50 border-neutral-800 text-white" />
                             {errors.name && <p className="text-red-500 text-xs">{errors.name.message}</p>}
                         </div>
 
@@ -128,7 +128,7 @@ export function ExerciseFormDialog({ exercise, trigger, open, onOpenChange }: Ex
                             <Textarea
                                 {...register("description")}
                                 placeholder="Describe la ejecución correcta..."
-                                className="bg-black/50 border-neutral-800 min-h-[100px]"
+                                className="bg-black/50 border-neutral-800 min-h-[100px] text-white"
                             />
                         </div>
 
@@ -160,7 +160,7 @@ export function ExerciseFormDialog({ exercise, trigger, open, onOpenChange }: Ex
                             <Label className="text-neutral-300">Músculos Específicos (Separados por coma)</Label>
                             <Input
                                 placeholder="Ej: Pectoral mayor, Deltoides anterior"
-                                className="bg-black/50 border-neutral-800"
+                                className="bg-black/50 border-neutral-800 text-white"
                                 onChange={(e) => {
                                     // Simple split logic for visualization/storage
                                     const val = e.target.value;
@@ -172,7 +172,7 @@ export function ExerciseFormDialog({ exercise, trigger, open, onOpenChange }: Ex
 
                         <div className="space-y-2">
                             <Label className="text-neutral-300">URL del Video (Youtube/Vimeo)</Label>
-                            <Input {...register("videoUrl")} placeholder="https://..." className="bg-black/50 border-neutral-800" />
+                            <Input {...register("videoUrl")} placeholder="https://..." className="bg-black/50 border-neutral-800 text-white" />
                         </div>
                     </div>
 
