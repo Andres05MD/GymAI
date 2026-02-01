@@ -32,7 +32,7 @@ export function Sidebar({ role }: SidebarProps) {
         { label: "Atletas", href: "/athletes", icon: Users },
         { label: "Rutinas", href: "/routines", icon: ClipboardList },
         { label: "Ejercicios", href: "/exercises", icon: Dumbbell },
-        { label: "Progreso", href: "/analytics", icon: BarChart2 }, // Leads to global/athlete analytics
+        { label: "Progreso", href: "/progress", icon: BarChart2 },
     ];
 
     const athleteItems = [
@@ -124,17 +124,7 @@ export function Sidebar({ role }: SidebarProps) {
                 </div>
             </div>
 
-            {/* Banner inferior opcional como en la referencia */}
-            <div className="rounded-3xl bg-gradient-to-br from-neutral-900 to-black border border-neutral-800 p-5 mt-4 relative overflow-hidden group">
-                <div className="relative z-10">
-                    <h4 className="text-white font-bold mb-1">GymIA Mobile</h4>
-                    <p className="text-xs text-neutral-400 mb-3">Descarga nuestra App</p>
-                    <button className="bg-white text-black text-xs font-bold px-4 py-2 rounded-full hover:bg-neutral-200 transition-colors">
-                        Descargar
-                    </button>
-                </div>
-                <div className="absolute -right-2 -bottom-2 w-20 h-20 bg-red-600/20 blur-2xl rounded-full group-hover:bg-red-600/30 transition-all duration-500" />
-            </div>
+
 
         </div>
     );

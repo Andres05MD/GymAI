@@ -27,13 +27,28 @@ export async function getExercises() {
             .where("coachId", "==", session.user.id)
             .get();
 
-        const exercises = snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data(),
-            // Convert timestamps to dates/strings as needed for client
-            createdAt: doc.data().createdAt?.toDate().toISOString(),
-            updatedAt: doc.data().updatedAt?.toDate().toISOString(),
-        }));
+        if (snapshot.empty) {
+            return { success: true, exercises: [] };
+        }
+
+        const exercises = snapshot.docs.map(doc => {
+            const data = doc.data();
+
+            // Helper seguro para fechas
+            const getDate = (field: any) => {
+                if (!field) return new Date().toISOString();
+                if (typeof field.toDate === 'function') return field.toDate().toISOString(); // Firestore Timestamp
+                if (field instanceof Date) return field.toISOString();
+                return String(field); // Fallback si es string directo
+            };
+
+            return {
+                id: doc.id,
+                ...data,
+                createdAt: getDate(data.createdAt),
+                updatedAt: getDate(data.updatedAt),
+            };
+        });
 
         return { success: true, exercises };
     } catch (error) {

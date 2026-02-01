@@ -1,6 +1,7 @@
 "use client";
 
 import { Search, Bell, Mail, LayoutDashboard, Users, ClipboardList, Dumbbell, BarChart2, History, UserCircle, LogOut, Target } from "lucide-react";
+import { NotificationBell } from "@/components/notifications/notification-bell";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -54,13 +55,8 @@ export function Header({ user }: HeaderProps) {
 
             {/* Right Actions */}
             <div className="flex items-center gap-2 sm:gap-4">
-                <button className="relative w-10 h-10 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center text-neutral-400 hover:text-white hover:bg-neutral-800 transition-all hidden sm:flex">
-                    <Mail className="h-5 w-5" />
-                </button>
-                <button className="relative w-10 h-10 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center text-neutral-400 hover:text-white hover:bg-neutral-800 transition-all hidden sm:flex">
-                    <Bell className="h-5 w-5" />
-                    <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-neutral-900"></span>
-                </button>
+
+                <NotificationBell role={role} />
 
                 <div className="h-8 w-[1px] bg-neutral-800 mx-2 hidden sm:block" />
 

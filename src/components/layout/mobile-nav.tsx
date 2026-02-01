@@ -27,6 +27,7 @@ export function MobileNav({ role }: MobileNavProps) {
         { label: "Atletas", href: "/athletes", icon: Users },
         { label: "Rutinas", href: "/routines", icon: ClipboardList },
         { label: "Ejercicios", href: "/exercises", icon: Dumbbell },
+        { label: "Progreso", href: "/progress", icon: BarChart2 },
     ];
 
     // For coach, limit to 4 items in main bar, maybe put Analytics in "More"?
@@ -45,8 +46,8 @@ export function MobileNav({ role }: MobileNavProps) {
 
     const items = role === "coach" ? [...coachItems, { label: "Perfil", href: "/profile", icon: UserCircle }] : athleteItems;
 
-    // Use only top 5 items for mobile bar to avoid overcrowding
-    const displayItems = items.slice(0, 5);
+    // Use up to 6 items for mobile bar if needed
+    const displayItems = items.slice(0, 6);
 
     return (
         <div className="md:hidden fixed bottom-4 left-4 right-4 bg-neutral-900/90 backdrop-blur-lg border border-neutral-800 rounded-3xl shadow-2xl z-50 h-16 flex items-center justify-around px-2">
