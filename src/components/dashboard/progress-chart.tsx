@@ -1,13 +1,22 @@
 "use client";
 
 import { PieChart, Pie, Cell, ResponsiveContainer, Label } from "recharts";
+import { useState, useEffect } from "react";
 
 export function ProgressChart({ completed = 0, target = 3 }: { completed?: number, target?: number }) {
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
     const percentage = Math.min(Math.round((completed / target) * 100), 100);
     const data = [
         { name: "Completado", value: percentage, color: "#ef4444" },
         { name: "Restante", value: 100 - percentage, color: "#262626" },
     ];
+
+    if (!mounted) return <div className="h-[200px] w-full bg-neutral-800/50 animate-pulse rounded-full" />;
 
     return (
         <div className="h-[200px] w-full relative">

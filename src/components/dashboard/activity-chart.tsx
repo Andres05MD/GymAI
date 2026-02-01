@@ -1,6 +1,7 @@
 "use client";
 
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Cell } from "recharts";
+import { useState, useEffect } from "react";
 
 const defaultData = [
     { name: "Lun", total: 0 },
@@ -13,6 +14,15 @@ const defaultData = [
 ];
 
 export function ActivityChart({ data = defaultData }: { data?: any[] }) {
+    // Prevent SSR hydration mismatch for Recharts
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    if (!mounted) return <div className="w-full h-[250px] bg-neutral-800/50 animate-pulse rounded-xl" />;
+
     return (
         <div className="w-full h-[250px]">
             <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>

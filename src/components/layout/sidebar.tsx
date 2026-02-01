@@ -51,12 +51,12 @@ export function Sidebar({ role }: SidebarProps) {
 
     return (
         <div className="hidden md:flex h-screen w-72 flex-col bg-black p-6 border-r border-neutral-900">
-            <div className="flex items-center gap-3 px-2 mb-10">
+            <Link href="/dashboard" className="flex items-center gap-3 px-2 mb-10 hover:opacity-80 transition-opacity">
                 <div className="h-10 w-10 bg-white rounded-full flex items-center justify-center">
                     <Target className="h-6 w-6 text-black" />
                 </div>
                 <span className="text-2xl font-bold text-white tracking-tighter">GymIA</span>
-            </div>
+            </Link>
 
             <div className="space-y-8 flex-1">
                 <div>
