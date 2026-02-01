@@ -2,21 +2,19 @@ import type { NextAuthConfig } from "next-auth";
 
 export const authConfig = {
     pages: {
-        signIn: "/login",
+        signIn: "/",
     },
     callbacks: {
         authorized({ auth, request: { nextUrl } }) {
             const isLoggedIn = !!auth?.user;
-            const isOnDashboard = nextUrl.pathname.startsWith("/") && !nextUrl.pathname.startsWith("/onboarding");
+            const isOnDashboard = nextUrl.pathname.startsWith("/dashboard");
             const isOnOnboarding = nextUrl.pathname.startsWith("/onboarding");
-            const isOnAuth = nextUrl.pathname.startsWith("/login") || nextUrl.pathname.startsWith("/register");
+            const isOnAuth = nextUrl.pathname === "/" || nextUrl.pathname.startsWith("/register");
 
             if (isOnAuth) {
                 if (isLoggedIn) {
-                    // Si ya está logueado y es coach o completó onboarding -> home
-                    // Si es atleta y no completó onboarding -> onboarding
                     if (auth.user.role === "coach" || auth.user.onboardingCompleted) {
-                        return Response.redirect(new URL("/", nextUrl));
+                        return Response.redirect(new URL("/dashboard", nextUrl));
                     } else {
                         return Response.redirect(new URL("/onboarding", nextUrl));
                     }
@@ -25,10 +23,9 @@ export const authConfig = {
             }
 
             if (isOnOnboarding) {
-                if (!isLoggedIn) return false; // Debe estar logueado
-                // Coaches no necesitan onboarding
+                if (!isLoggedIn) return false;
                 if (auth.user.role === "coach" || auth.user.onboardingCompleted) {
-                    return Response.redirect(new URL("/", nextUrl)); // Si ya terminó o es coach, fuera de aquí
+                    return Response.redirect(new URL("/dashboard", nextUrl));
                 }
                 return true;
             }

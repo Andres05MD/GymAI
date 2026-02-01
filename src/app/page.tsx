@@ -1,14 +1,32 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AuthLoginForm } from "@/components/forms/auth-login-form";
 import { AuthRegisterForm } from "@/components/forms/auth-register-form";
 import { Dumbbell } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 export default function LoggingPage() {
     const [isLogin, setIsLogin] = useState(true);
+    const { data: session, status } = useSession();
+    const router = useRouter();
+
+    useEffect(() => {
+        if (status === "authenticated") {
+            router.push("/dashboard");
+        }
+    }, [status, router]);
+
+    if (status === "loading" || status === "authenticated") {
+        return (
+            <div className="min-h-screen bg-black flex items-center justify-center">
+                <Dumbbell className="w-12 h-12 text-white animate-bounce" />
+            </div>
+        );
+    }
 
     return (
         <div className="flex flex-col md:flex-row min-h-screen w-full bg-black md:bg-white overflow-hidden">

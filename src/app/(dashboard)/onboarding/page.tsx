@@ -10,7 +10,7 @@ export default async function OnboardingPage() {
     }
 
     if (session.user.onboardingCompleted) {
-        redirect("/");
+        redirect("/dashboard");
     }
 
     return (

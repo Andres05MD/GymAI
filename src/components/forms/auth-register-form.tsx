@@ -65,7 +65,7 @@ export function AuthRegisterForm() {
                     redirect: false,
                 });
 
-                router.push("/");
+                router.push("/dashboard");
                 router.refresh();
             } else {
                 toast.error(result.error || "Error al registrar");

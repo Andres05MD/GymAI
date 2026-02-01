@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 
 export default async function NewRoutinePage() {
     const session = await auth();
-    if (!session?.user?.id || session.user.role !== "coach") redirect("/");
+    if (!session?.user?.id || session.user.role !== "coach") redirect("/dashboard");
 
     const { exercises } = await getExercises();
 

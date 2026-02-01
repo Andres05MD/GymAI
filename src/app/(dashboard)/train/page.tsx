@@ -22,7 +22,7 @@ export default async function TrainPage() {
                 <p className="text-neutral-400 max-w-md">
                     No tienes una rutina asignada actualmente. Contacta a tu coach para comenzar.
                 </p>
-                <Link href="/">
+                <Link href="/dashboard">
                     <Button variant="outline" className="rounded-full border-neutral-700 text-white hover:bg-neutral-800">
                         Volver al inicio
                     </Button>

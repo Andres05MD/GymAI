@@ -19,7 +19,7 @@ export function MobileNav({ role }: MobileNavProps) {
     const pathname = usePathname();
 
     const commonItems = [
-        { label: "Home", href: "/", icon: LayoutDashboard },
+        { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
     ];
 
     const coachItems = [

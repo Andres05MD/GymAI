@@ -24,7 +24,7 @@ export function Sidebar({ role }: SidebarProps) {
     const pathname = usePathname();
 
     const commonItems = [
-        { label: "Dashboard", href: "/", icon: LayoutDashboard },
+        { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
     ];
 
     const coachItems = [
@@ -114,7 +114,7 @@ export function Sidebar({ role }: SidebarProps) {
                             );
                         })}
                         <button
-                            onClick={() => signOut({ callbackUrl: "/login" })}
+                            onClick={() => signOut({ callbackUrl: "/" })}
                             className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-neutral-400 hover:bg-red-500/10 hover:text-red-500 transition-all duration-200 font-medium group text-left mt-2"
                         >
                             <LogOut className="h-5 w-5 text-neutral-500 group-hover:text-red-500" />

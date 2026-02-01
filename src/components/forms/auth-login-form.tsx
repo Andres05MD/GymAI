@@ -48,7 +48,7 @@ export function AuthLoginForm() {
                 toast.error("Credenciales incorrectas");
             } else {
                 toast.success("Bienvenido de nuevo");
-                router.push("/");
+                router.push("/dashboard");
                 router.refresh();
             }
         } catch (error) {
@@ -75,7 +75,7 @@ export function AuthLoginForm() {
                 toast.error("Error iniciando sesión con Google en el servidor");
             } else {
                 toast.success("Acceso concedido con Google");
-                router.push("/");
+                router.push("/dashboard");
                 router.refresh();
             }
 

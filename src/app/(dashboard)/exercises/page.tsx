@@ -15,7 +15,7 @@ export default async function ExercisesPage() {
     // Access Check: Only coaches can manage the library
     // Athletes might have a read-only view in the future, but for now this is the management console
     if (session.user.role !== "coach") {
-        redirect("/");
+        redirect("/dashboard");
     }
 
     const { exercises, error } = await getExercises();

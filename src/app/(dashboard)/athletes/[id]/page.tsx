@@ -21,7 +21,7 @@ export default async function AthleteDetailsPage({ params }: PageProps) {
     const { id } = await params;
     const session = await auth();
 
-    if (!session?.user?.id || session.user.role !== "coach") redirect("/");
+    if (!session?.user?.id || session.user.role !== "coach") redirect("/dashboard");
 
     // 1. Verify access & fetch basic user info
     const userDoc = await adminDb.collection("users").doc(id).get();
