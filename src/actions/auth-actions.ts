@@ -1,0 +1,103 @@
+"use server";
+
+import { z } from "zod";
+import { RegisterInputSchemaServer, OnboardingInputSchema } from "@/lib/schemas";
+import { db, auth as firebaseAuth } from "@/lib/firebase";
+import { doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, limit } from "firebase/firestore";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { auth } from "@/lib/auth";
+
+/**
+ * Registra un nuevo usuario usando Firebase Authentication + Firestore.
+ * 
+ * Este flujo:
+ * 1. Valida los datos de entrada
+ * 2. Crea el usuario en Firebase Authentication (esto genera el UID)
+ * 3. Crea el documento del usuario en Firestore con ese UID
+ * 
+ * Nota: La contraseña es manejada por Firebase Auth, NO guardamos hash manual.
+ */
+export async function registerUser(data: z.infer<typeof RegisterInputSchemaServer>) {
+    const validation = RegisterInputSchemaServer.safeParse(data);
+
+    if (!validation.success) {
+        return { success: false, error: "Datos inválidos" };
+    }
+
+    const { name, email, password, role } = validation.data;
+
+    try {
+        // 1. Crear usuario en Firebase Authentication
+        const userCredential = await createUserWithEmailAndPassword(firebaseAuth, email, password);
+        const firebaseUser = userCredential.user;
+
+        // 2. Actualizar el perfil con el nombre
+        await updateProfile(firebaseUser, { displayName: name });
+
+        // 3. Crear el documento del usuario en Firestore
+        const newUserData = {
+            id: firebaseUser.uid,
+            name,
+            email,
+            role,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            onboardingCompleted: false,
+        };
+
+        const userDocRef = doc(db, "users", firebaseUser.uid);
+        await setDoc(userDocRef, newUserData);
+
+        // 4. Cerrar sesión de Firebase Auth (NextAuth manejará la sesión)
+        await firebaseAuth.signOut();
+
+        return { success: true };
+
+    } catch (error: any) {
+        console.error("Error registrando usuario:", error);
+
+        // Manejar errores específicos de Firebase Auth
+        if (error.code === "auth/email-already-in-use") {
+            return { success: false, error: "El email ya está registrado" };
+        }
+        if (error.code === "auth/weak-password") {
+            return { success: false, error: "La contraseña es muy débil" };
+        }
+        if (error.code === "auth/invalid-email") {
+            return { success: false, error: "El email no es válido" };
+        }
+
+        return { success: false, error: "Error al crear usuario. Por favor intenta de nuevo." };
+    }
+}
+
+import { adminDb } from "@/lib/firebase-admin";
+
+/**
+ * Completa el onboarding del usuario actual.
+ */
+export async function completeOnboarding(data: z.infer<typeof OnboardingInputSchema>) {
+    const session = await auth();
+    if (!session?.user?.id) {
+        return { success: false, error: "No autorizado" };
+    }
+
+    const validation = OnboardingInputSchema.safeParse(data);
+    if (!validation.success) {
+        return { success: false, error: "Datos inválidos" };
+    }
+
+    try {
+        // Usamos Admin SDK para saltar las reglas de Firestore en el servidor
+        await adminDb.collection("users").doc(session.user.id).update({
+            ...validation.data,
+            onboardingCompleted: true,
+            updatedAt: new Date()
+        });
+
+        return { success: true };
+    } catch (error) {
+        console.error("Error onboarding:", error);
+        return { success: false, error: "Error al guardar datos en Firestore" };
+    }
+}

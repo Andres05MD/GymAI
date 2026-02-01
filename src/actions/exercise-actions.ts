@@ -1,0 +1,135 @@
+"use server";
+
+import { z } from "zod";
+import { ExerciseSchema } from "@/lib/schemas";
+import { adminDb } from "@/lib/firebase-admin";
+import { auth } from "@/lib/auth";
+
+// Input schema for creating/updating exercises (excludes system fields)
+const ExerciseInputSchema = ExerciseSchema.omit({
+    id: true,
+    coachId: true,
+    createdAt: true,
+    updatedAt: true
+});
+
+export type ExerciseInput = z.infer<typeof ExerciseInputSchema>;
+
+export async function getExercises() {
+    const session = await auth();
+    if (!session?.user?.id || session.user.role !== "coach") {
+        return { success: false, error: "No autorizado" };
+    }
+
+    try {
+        const snapshot = await adminDb
+            .collection("exercises")
+            .where("coachId", "==", session.user.id)
+            .get();
+
+        const exercises = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+            // Convert timestamps to dates/strings as needed for client
+            createdAt: doc.data().createdAt?.toDate().toISOString(),
+            updatedAt: doc.data().updatedAt?.toDate().toISOString(),
+        }));
+
+        return { success: true, exercises };
+    } catch (error) {
+        console.error("Error fetching exercises:", error);
+        return { success: false, error: "Error al cargar ejercicios" };
+    }
+}
+
+export async function createExercise(data: ExerciseInput) {
+    const session = await auth();
+    if (!session?.user?.id || session.user.role !== "coach") {
+        return { success: false, error: "No autorizado" };
+    }
+
+    const validation = ExerciseInputSchema.safeParse(data);
+    if (!validation.success) {
+        return { success: false, error: "Datos inválidos" };
+    }
+
+    try {
+        const newExercise = {
+            ...validation.data,
+            coachId: session.user.id,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        };
+
+        const docRef = await adminDb.collection("exercises").add(newExercise);
+
+        return { success: true, id: docRef.id };
+    } catch (error) {
+        console.error("Error creating exercise:", error);
+        return { success: false, error: "Error al crear ejercicio" };
+    }
+}
+
+export async function updateExercise(id: string, data: ExerciseInput) {
+    const session = await auth();
+    if (!session?.user?.id || session.user.role !== "coach") {
+        return { success: false, error: "No autorizado" };
+    }
+
+    const validation = ExerciseInputSchema.safeParse(data);
+    if (!validation.success) {
+        return { success: false, error: "Datos inválidos" };
+    }
+
+    try {
+        // Verify ownership
+        const docRef = adminDb.collection("exercises").doc(id);
+        const docSnap = await docRef.get();
+
+        if (!docSnap.exists) {
+            return { success: false, error: "Ejercicio no encontrado" };
+        }
+
+        if (docSnap.data()?.coachId !== session.user.id) {
+            return { success: false, error: "No tienes permiso para editar este ejercicio" };
+        }
+
+        await docRef.update({
+            ...validation.data,
+            updatedAt: new Date(),
+        });
+
+        return { success: true };
+    } catch (error) {
+        console.error("Error updating exercise:", error);
+        return { success: false, error: "Error al actualizar ejercicio" };
+    }
+}
+
+export async function deleteExercise(id: string) {
+    const session = await auth();
+    if (!session?.user?.id || session.user.role !== "coach") {
+        return { success: false, error: "No autorizado" };
+    }
+
+    try {
+        // Verify ownership
+        const docRef = adminDb.collection("exercises").doc(id);
+        const docSnap = await docRef.get();
+
+        if (!docSnap.exists) {
+            return { success: false, error: "Ejercicio no encontrado" };
+        }
+
+        if (docSnap.data()?.coachId !== session.user.id) {
+            return { success: false, error: "No tienes permiso para eliminar este ejercicio" };
+        }
+
+        await docRef.delete();
+
+        return { success: true };
+    } catch (error) {
+        console.error("Error deleting exercise:", error);
+        return { success: false, error: "Error al eliminar ejercicio" };
+    }
+}

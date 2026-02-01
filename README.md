@@ -1,36 +1,67 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# GymIA
 
-## Getting Started
+Un asistente de entrenamiento inteligente potenciado por IA, construido con la última tecnología web.
 
-First, run the development server:
+## 🚀 Tech Stack
+
+- **Framework:** [Next.js 16](https://nextjs.org/) (App Router)
+- **Lenguaje:** [TypeScript](https://www.typescriptlang.org/)
+- **Estilos:** [Tailwind CSS 4](https://tailwindcss.com/)
+- **UI Components:** [Radix UI](https://www.radix-ui.com/) + [Lucide Icons](https://lucide.dev/)
+- **Base de Datos & Auth:** [Firebase](https://firebase.google.com/)
+- **Autenticación:** [Auth.js (NextAuth)](https://authjs.dev/)
+- **IA:** [Groq SDK](https://groq.com/)
+- **Gestión de Estado:** [Zustand](https://zustand-demo.pmnd.rs/) + [React Query](https://tanstack.com/query/latest)
+- **Validación:** [Zod](https://zod.dev/) + [React Hook Form](https://react-hook-form.com/)
+
+## 🛠️ Configuración del Proyecto
+
+### 1. Clonar el repositorio
+
+```bash
+git clone <tu-repositorio-url>
+cd GymIA
+```
+
+### 2. Instalar dependencias
+
+```bash
+npm install
+```
+
+### 3. Configurar variables de entorno
+
+Copia el archivo de ejemplo y configura tus credenciales:
+
+```bash
+cp .env.example .env
+```
+
+Asegúrate de llenar todas las variables en `.env`:
+
+- **Firebase Public Config**: Obtenlas de la consola de Firebase.
+- **Groq API Key**: Necesaria para las funciones de IA.
+- **Auth Secret**: Genera uno seguro con `openssl rand -base64 32`.
+- **Firebase Admin SDK**: Genera una nueva clave privada desde la consola de Firebase (Service Accounts) y pega el JSON minificado.
+
+### 4. Ejecutar el servidor de desarrollo
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abre [http://localhost:3000](http://localhost:3000) en tu navegador.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 📦 Despliegue en Vercel
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Este proyecto está optimizado para ser desplegado en [Vercel](https://vercel.com).
 
-## Learn More
+1. Importa tu repositorio en Vercel.
+2. Configura las variables de entorno (Environment Variables) copiando los valores de tu `.env` local.
+   - **IMPORTANTE**: Genera un nuevo `AUTH_SECRET` para producción.
+   - Actualiza `AUTH_URL` con tu dominio de Vercel (ej. `https://tu-proyecto.vercel.app`).
+3. Despliega.
 
-To learn more about Next.js, take a look at the following resources:
+## 📄 Licencia
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Este proyecto es privado y de uso personal.

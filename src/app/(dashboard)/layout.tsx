@@ -1,0 +1,37 @@
+import { auth } from "@/lib/auth";
+import { Header } from "@/components/layout/header";
+import { Sidebar } from "@/components/layout/sidebar";
+import { Chatbot } from "@/components/ai/chatbot";
+import { MobileNav } from "@/components/layout/mobile-nav";
+
+export default async function DashboardLayout({
+    children,
+}: {
+    children: React.ReactNode;
+}) {
+    const session = await auth();
+    const role = session?.user?.role;
+
+    return (
+        <div className="flex min-h-screen w-full bg-black">
+            {/* New Sidebar */}
+            <Sidebar role={role} />
+
+            {/* Main Content Area */}
+            <div className="flex flex-1 flex-col relative overflow-hidden">
+                {/* Background effects */}
+                <div className="absolute top-0 right-0 -z-10 h-[500px] w-[500px] bg-red-600/5 blur-[120px] rounded-full pointer-events-none" />
+
+                <Header user={session?.user} />
+
+                <main className="flex-1 overflow-y-auto p-6 lg:p-10 relative z-10 w-full max-w-7xl mx-auto scrollbar-thin scrollbar-thumb-neutral-800 scrollbar-track-transparent pb-32 md:pb-10">
+                    {children}
+                    <Chatbot />
+                </main>
+            </div>
+            <MobileNav role={role} />
+        </div>
+    );
+}
+
+import Link from "next/link";
