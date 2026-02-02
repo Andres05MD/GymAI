@@ -127,7 +127,7 @@ export function AuthLoginForm() {
                     {errors.password && <p className="ml-1 text-sm text-red-500 font-medium">{errors.password.message}</p>}
                 </div>
 
-                <Button type="submit" className="w-full h-14 rounded-xl bg-black text-white hover:bg-neutral-800 text-base font-bold tracking-widest uppercase shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300" disabled={loading}>
+                <Button type="submit" className="w-full h-14 rounded-xl bg-red-600 text-white hover:bg-red-700 text-base font-bold tracking-widest uppercase shadow-xl shadow-red-900/20 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300" disabled={loading}>
                     {loading ? "Iniciando..." : "Iniciar Sesión"}
                 </Button>
             </form>
@@ -144,7 +144,7 @@ export function AuthLoginForm() {
             <Button
                 variant="outline"
                 type="button"
-                className="w-full h-14 rounded-2xl border-2 border-gray-100 bg-white text-black hover:bg-gray-50 font-medium"
+                className="w-full h-14 rounded-2xl border-2 border-gray-100 bg-white text-black hover:bg-gray-50 hover:text-black font-medium"
                 disabled={loading}
                 onClick={handleGoogleLogin}
             >

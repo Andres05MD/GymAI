@@ -150,7 +150,7 @@ export function AuthRegisterForm() {
                     </div>
                 </div>
 
-                <Button type="submit" className="w-full h-14 rounded-xl bg-black text-white hover:bg-neutral-800 text-base font-bold tracking-widest uppercase shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 mt-4" disabled={loading}>
+                <Button type="submit" className="w-full h-14 rounded-xl bg-red-600 text-white hover:bg-red-700 text-base font-bold tracking-widest uppercase shadow-xl shadow-red-900/20 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 mt-4" disabled={loading}>
                     {loading ? "Registrando..." : "Crear Cuenta"}
                 </Button>
             </form>
