@@ -3,7 +3,7 @@ import { z } from "zod";
 // --- Enums y Constantes ---
 
 export const RoleEnum = z.enum(["athlete", "coach"]);
-export const GenderEnum = z.enum(["male", "female", "other"]);
+export const GenderEnum = z.enum(["male", "female"]);
 export const GoalEnum = z.enum(["hypertrophy", "weight_loss", "endurance", "flexibility", "strength"]);
 
 // --- Schemas Base ---
@@ -33,11 +33,18 @@ export const BodyMeasurementsSchema = z.object({
     waist: z.number().optional(),
     hips: z.number().optional(),
     shoulders: z.number().optional(),
-    biceps: z.number().optional(),
-    triceps: z.number().optional(),
-    forearms: z.number().optional(),
-    quads: z.number().optional(),
-    calves: z.number().optional(),
+    glutes: z.number().optional(),
+
+    // Extremidades
+    bicepsLeft: z.number().optional(),
+    bicepsRight: z.number().optional(),
+    forearmsLeft: z.number().optional(),
+    forearmsRight: z.number().optional(),
+    quadsLeft: z.number().optional(),
+    quadsRight: z.number().optional(),
+    calvesLeft: z.number().optional(),
+    calvesRight: z.number().optional(),
+
     weight: z.number().optional(),
     height: z.number().optional(),
     updatedAt: z.date().optional(),
@@ -76,7 +83,7 @@ export const UserSchema = z.object({
 export const OnboardingInputSchema = z.object({
     // Datos Personales Básicos
     age: z.coerce.number().min(10).max(100),
-    gender: z.enum(["male", "female", "other"]),
+    gender: z.enum(["male", "female"]),
     weight: z.coerce.number().min(30).max(300),
     height: z.coerce.number().min(100).max(250),
 
@@ -190,15 +197,22 @@ export const BodyMeasurementLogSchema = z.object({
     userId: z.string(),
     date: z.date(),
     weight: z.number().optional(),
+
     chest: z.number().optional(),
     waist: z.number().optional(),
     hips: z.number().optional(),
     shoulders: z.number().optional(),
-    biceps: z.number().optional(),
-    triceps: z.number().optional(),
-    forearms: z.number().optional(),
-    quads: z.number().optional(),
-    calves: z.number().optional(),
+    glutes: z.number().optional(),
+
+    bicepsLeft: z.number().optional(),
+    bicepsRight: z.number().optional(),
+    forearmsLeft: z.number().optional(),
+    forearmsRight: z.number().optional(),
+    quadsLeft: z.number().optional(),
+    quadsRight: z.number().optional(),
+    calvesLeft: z.number().optional(),
+    calvesRight: z.number().optional(),
+
     notes: z.string().optional(),
     createdAt: z.date(),
 });

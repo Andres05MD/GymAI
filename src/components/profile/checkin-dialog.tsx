@@ -30,7 +30,8 @@ export function CheckinDialog() {
             const result = await logBodyMeasurements({
                 weight: parseFloat(weight),
                 waist: waist ? parseFloat(waist) : undefined,
-                biceps: biceps ? parseFloat(biceps) : undefined
+                bicepsLeft: biceps ? parseFloat(biceps) : undefined,
+                bicepsRight: biceps ? parseFloat(biceps) : undefined
             });
 
             if (result.success) {

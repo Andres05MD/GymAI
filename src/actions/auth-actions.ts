@@ -88,12 +88,13 @@ export async function completeOnboarding(data: z.infer<typeof OnboardingInputSch
     }
 
     try {
-        // Usamos Admin SDK para saltar las reglas de Firestore en el servidor
-        await adminDb.collection("users").doc(session.user.id).update({
+        // Usamos set con { merge: true } para crear el documento si no existe 
+        // o actualizarlo si ya existe, evitando el error NOT_FOUND.
+        await adminDb.collection("users").doc(session.user.id).set({
             ...validation.data,
             onboardingCompleted: true,
             updatedAt: new Date()
-        });
+        }, { merge: true });
 
         return { success: true };
     } catch (error) {

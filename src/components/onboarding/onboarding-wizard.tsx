@@ -43,7 +43,7 @@ export function OnboardingWizard() {
             height: 170,
             experienceLevel: "beginner",
             goal: "hypertrophy",
-            availableDays: 3,
+            availableDays: 5,
             injuries: [],
             medicalConditions: [],
             measurements: {},
@@ -176,7 +176,7 @@ export function OnboardingWizard() {
                                                     <SelectContent className="bg-neutral-900 border-neutral-800 text-white">
                                                         <SelectItem value="male">Hombre</SelectItem>
                                                         <SelectItem value="female">Mujer</SelectItem>
-                                                        <SelectItem value="other">Otro</SelectItem>
+
                                                     </SelectContent>
                                                 </Select>
                                             </div>
@@ -259,7 +259,7 @@ export function OnboardingWizard() {
                                                     min="1"
                                                     max="7"
                                                     step="1"
-                                                    value={formData.availableDays || 3}
+                                                    value={formData.availableDays || 5}
                                                     onChange={(e) => setValue("availableDays", parseInt(e.target.value))}
                                                     className="w-full h-2 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-red-600"
                                                 />

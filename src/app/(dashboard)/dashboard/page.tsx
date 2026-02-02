@@ -53,11 +53,10 @@ async function CoachDashboard() {
                     icon={Dumbbell}
                 />
                 <StatCard
-                    title="Actividad"
-                    value="Alta"
-                    label="Global"
-                    trend="up"
-                    trendValue="Fire"
+                    title="Volumen Global"
+                    value={`${Math.round((stats?.weeklyVolume || 0) / 1000)}k`}
+                    label="Kg esta semana"
+                    trend={(stats?.weeklyVolume || 0) > 0 ? "up" : "neutral"}
                     icon={Activity}
                 />
             </div>
@@ -67,23 +66,19 @@ async function CoachDashboard() {
                 {/* Analytics Chart - Spans 2 cols */}
                 <div className="lg:col-span-2 bg-neutral-900 border border-neutral-800 rounded-[2rem] p-8">
                     <div className="flex justify-between items-center mb-8">
-                        <h3 className="text-xl font-bold text-white">Análisis de Progreso</h3>
-                        <div className="flex gap-2">
-                            <div className="h-2 w-2 rounded-full bg-red-500"></div>
-                            <div className="h-2 w-2 rounded-full bg-neutral-700"></div>
-                        </div>
+                        <h3 className="text-xl font-bold text-white">Actividad de Atletas</h3>
+                        <p className="text-sm text-neutral-500">Volumen combinado semanal</p>
                     </div>
-                    <ActivityChart />
+                    <ActivityChart data={stats?.weeklyChartData || []} />
                 </div>
 
                 {/* General Progress */}
                 <div className="bg-neutral-900 border border-neutral-800 rounded-[2rem] p-8 flex flex-col items-center justify-center text-center">
-                    <h3 className="text-xl font-bold text-white mb-2">Resumen Semanal</h3>
-                    <ProgressChart />
-                    <div className="flex gap-4 mt-6 text-xs font-medium">
-                        <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-red-500"></div>Completado</div>
-                        <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-neutral-700"></div>Pendiente</div>
+                    <h3 className="text-xl font-bold text-white mb-2">Estado del Gym</h3>
+                    <div className="flex-1 flex items-center justify-center w-full">
+                        <ProgressChart completed={(stats?.totalAthletes || 0) > 0 ? 100 : 0} target={100} />
                     </div>
+                    <p className="text-xs text-neutral-400 mt-4">Atletas activos vs inactivos (Simulado)</p>
                 </div>
             </div>
         </div>

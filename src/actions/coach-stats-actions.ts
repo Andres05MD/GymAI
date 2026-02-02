@@ -44,12 +44,57 @@ export async function getCoachStats() {
 
         const totalExercises = exercisesSnapshot.data().count;
 
+        // 4. Calculate Global Activity (Total Volume this week)
+        const now = new Date();
+        const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay() + (now.getDay() === 0 ? -6 : 1)));
+        startOfWeek.setHours(0, 0, 0, 0);
+
+        const globalLogs = await adminDb.collection("training_logs")
+            .where("date", ">=", startOfWeek)
+            .get();
+
+        let weeklyVolume = 0;
+        globalLogs.docs.forEach(doc => {
+            const data = doc.data();
+            data.exercises?.forEach((ex: any) => {
+                ex.sets?.forEach((s: any) => {
+                    if (s.completed && s.weight && s.reps) {
+                        weeklyVolume += (s.weight * s.reps);
+                    }
+                });
+            });
+        });
+
+        // Weekly activity chart data (simplified)
+        const days = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
+        const activityMap = new Map();
+        days.forEach(d => activityMap.set(d, 0));
+
+        const DAYS_ES = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
+        globalLogs.docs.forEach(doc => {
+            const date = doc.data().date.toDate();
+            let dayName = DAYS_ES[date.getDay()];
+            if (date.getDay() === 0) dayName = "Dom";
+
+            let sessionVol = 0;
+            doc.data().exercises?.forEach((ex: any) => {
+                ex.sets?.forEach((s: any) => {
+                    if (s.completed && s.weight && s.reps) sessionVol += (s.weight * s.reps);
+                });
+            });
+            activityMap.set(dayName, (activityMap.get(dayName) || 0) + sessionVol);
+        });
+
+        const weeklyChartData = days.map(d => ({ name: d, total: activityMap.get(d) }));
+
         return {
             success: true,
             stats: {
                 totalAthletes,
                 totalRoutines,
-                totalExercises
+                totalExercises,
+                weeklyVolume,
+                weeklyChartData
             }
         };
 

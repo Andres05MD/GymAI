@@ -15,8 +15,20 @@ export default async function ProfilePage() {
     if (!session?.user?.id) redirect("/login");
 
     // Fetch fresh user data
+    // Fetch fresh user data
     const userDoc = await adminDb.collection("users").doc(session.user.id).get();
-    const userData = { id: userDoc.id, ...userDoc.data() } as any;
+    const rawData = userDoc.data() || {};
+
+    const userData = {
+        id: userDoc.id,
+        ...rawData,
+        createdAt: rawData.createdAt?.toDate?.()?.toISOString() || null,
+        updatedAt: rawData.updatedAt?.toDate?.()?.toISOString() || null,
+        measurements: rawData.measurements ? {
+            ...rawData.measurements,
+            updatedAt: rawData.measurements.updatedAt?.toDate?.()?.toISOString() || null
+        } : undefined
+    } as any;
 
     // Fetch measurement history
     const historyResult = await getBodyMeasurementsHistory(session.user.id);
@@ -72,25 +84,30 @@ export default async function ProfilePage() {
                             data={historyData}
                             metrics={[
                                 { key: "chest", label: "Pecho", color: "#3b82f6" },
+                                { key: "shoulders", label: "Hombros", color: "#8b5cf6" },
                                 { key: "waist", label: "Cintura", color: "#10b981" },
-                                { key: "hips", label: "Cadera", color: "#f59e0b" }
+                                { key: "hips", label: "Cadera", color: "#f59e0b" },
+                                { key: "glutes", label: "Glúteos", color: "#ec4899" }
                             ]}
                         />
                         <MeasurementChart
                             title="Brazos (cm)"
                             data={historyData}
                             metrics={[
-                                { key: "biceps", label: "Bíceps", color: "#8b5cf6" },
-                                { key: "triceps", label: "Tríceps", color: "#ec4899" },
-                                { key: "forearms", label: "Antebrazo", color: "#6366f1" }
+                                { key: "bicepsLeft", label: "Bíceps (I)", color: "#06b6d4" },
+                                { key: "bicepsRight", label: "Bíceps (D)", color: "#0ea5e9" },
+                                { key: "forearmsLeft", label: "Antebrazo (I)", color: "#6366f1" },
+                                { key: "forearmsRight", label: "Antebrazo (D)", color: "#8b5cf6" }
                             ]}
                         />
                         <MeasurementChart
                             title="Piernas (cm)"
                             data={historyData}
                             metrics={[
-                                { key: "quads", label: "Cuádriceps", color: "#14b8a6" },
-                                { key: "calves", label: "Pantorilla", color: "#f97316" }
+                                { key: "quadsLeft", label: "Cuádriceps (I)", color: "#14b8a6" },
+                                { key: "quadsRight", label: "Cuádriceps (D)", color: "#059669" },
+                                { key: "calvesLeft", label: "Pantorilla (I)", color: "#f97316" },
+                                { key: "calvesRight", label: "Pantorilla (D)", color: "#ea580c" }
                             ]}
                         />
                     </div>

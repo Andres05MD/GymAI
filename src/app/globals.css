@@ -4,40 +4,50 @@
 
 :root {
   /* Default to Dark Theme metrics but allow override if we really need light (unlikely per plan) */
-  --background: 0 0% 0%; /* Pure Black */
-  --foreground: 0 0% 100%; /* Pure White */
-  
-  --card: 0 0% 3%; /* Very dark grey, almost black */
+  --background: 0 0% 0%;
+  /* Pure Black */
+  --foreground: 0 0% 100%;
+  /* Pure White */
+
+  --card: 0 0% 3%;
+  /* Very dark grey, almost black */
   --card-foreground: 0 0% 100%;
-  
+
   --popover: 0 0% 3%;
   --popover-foreground: 0 0% 100%;
-  
-  --primary: 0 72% 51%; /* Red - #DC2626 (Approx) - Vibrant Red */
+
+  --primary: 0 72% 51%;
+  /* Red - #DC2626 (Approx) - Vibrant Red */
   --primary-foreground: 0 0% 100%;
-  
-  --secondary: 0 0% 10%; /* Dark Grey */
+
+  --secondary: 0 0% 10%;
+  /* Dark Grey */
   --secondary-foreground: 0 0% 100%;
-  
+
   --muted: 0 0% 15%;
   --muted-foreground: 0 0% 60%;
-  
-  --accent: 0 72% 51%; /* Red Accent */
+
+  --accent: 0 72% 51%;
+  /* Red Accent */
   --accent-foreground: 0 0% 100%;
-  
+
   --destructive: 0 62.8% 30.6%;
   --destructive-foreground: 0 0% 100%;
-  
+
   --border: 0 0% 20%;
   --input: 0 0% 20%;
-  --ring: 0 72% 51%; /* Red Ring */
-  
+  --ring: 0 72% 51%;
+  /* Red Ring */
+
   --radius: 0.5rem;
 
   /* Custom Charts - Can be adjusted later */
-  --chart-1: 0 72% 51%; /* Main Red */
-  --chart-2: 0 0% 50%; /* Grey */
-  --chart-3: 0 0% 80%; /* Light Grey */
+  --chart-1: 0 72% 51%;
+  /* Main Red */
+  --chart-2: 0 0% 50%;
+  /* Grey */
+  --chart-3: 0 0% 80%;
+  /* Light Grey */
   --chart-4: 0 70% 40%;
   --chart-5: 0 60% 30%;
 }
@@ -49,7 +59,8 @@
   --card-foreground: 0 0% 100%;
   --popover: 0 0% 4%;
   --popover-foreground: 0 0% 100%;
-  --primary: 0 84% 60%; /* Brighter Red for Dark Mode */
+  --primary: 0 84% 60%;
+  /* Brighter Red for Dark Mode */
   --primary-foreground: 0 0% 100%;
   --secondary: 0 0% 12%;
   --secondary-foreground: 0 0% 100%;
@@ -93,19 +104,31 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-  
+
   /* Custom Animations */
   --animate-fade-in: fade-in 0.5s ease-out;
   --animate-slide-up: slide-up 0.5s ease-out;
-  
+
   @keyframes fade-in {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
   }
-  
+
   @keyframes slide-up {
-    from { transform: translateY(20px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
+    from {
+      transform: translateY(20px);
+      opacity: 0;
+    }
+
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
   }
 }
 
@@ -124,34 +147,44 @@ body {
 }
 
 .glass-card {
-  background: rgba(20, 20, 20, 0.7); /* Slightly lighter/more opaque */
-  backdrop-filter: blur(16px); /* More blur */
-  border: 1px solid rgba(255, 255, 255, 0.12); /* Stronger border */
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5); /* Deep shadow for depth */
+  background: rgba(20, 20, 20, 0.7);
+  /* Slightly lighter/more opaque */
+  backdrop-filter: blur(16px);
+  /* More blur */
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  /* Stronger border */
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+  /* Deep shadow for depth */
 }
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
 }
+
 ::-webkit-scrollbar-track {
-  background: black; 
-}
-::-webkit-scrollbar-thumb {
-  background: #333; 
-  border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #ef4444; 
+  background: black;
 }
 
+::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #ef4444;
+}
+
+/* Override browser autofill styles */
 /* Override browser autofill styles */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
-  -webkit-box-shadow: 0 0 0 30px white inset !important;
-  -webkit-text-fill-color: #171717 !important;
-  background-color: white !important;
+  -webkit-box-shadow: 0 0 0 1000px #0a0a0a inset !important;
+  -webkit-text-fill-color: white !important;
+  caret-color: white !important;
+  background-color: #0a0a0a !important;
+  color: white !important;
   transition: background-color 5000s ease-in-out 0s;
 }

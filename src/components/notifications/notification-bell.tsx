@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Bell, Brain, ExternalLink } from "lucide-react";
+import { Bell, Brain, ExternalLink, AlertCircle } from "lucide-react";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -10,7 +10,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { getCoachNotifications } from "@/actions/notification-actions";
+import { getCoachNotifications, getAthleteNotifications } from "@/actions/notification-actions";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
@@ -20,25 +20,21 @@ export function NotificationBell({ role }: { role?: string }) {
     const [hasUnread, setHasUnread] = useState(false);
 
     useEffect(() => {
-        if (role === "coach") {
-            const fetchNotifications = async () => {
-                const res = await getCoachNotifications();
-                if (res.success && res.notifications) {
-                    setNotifications(res.notifications);
-                    setHasUnread(res.notifications.length > 0);
-                }
-            };
-            fetchNotifications();
-        }
-    }, [role]);
+        const fetchNotifications = async () => {
+            let res;
+            if (role === "coach") {
+                res = await getCoachNotifications();
+            } else {
+                res = await getAthleteNotifications();
+            }
 
-    if (role !== "coach") {
-        return (
-            <button className="relative w-10 h-10 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center text-neutral-400 hover:text-white hover:bg-neutral-800 transition-all hidden sm:flex">
-                <Bell className="h-5 w-5" />
-            </button>
-        );
-    }
+            if (res.success && res.notifications) {
+                setNotifications(res.notifications);
+                setHasUnread(res.notifications.length > 0);
+            }
+        };
+        fetchNotifications();
+    }, [role]);
 
     return (
         <DropdownMenu>
@@ -50,14 +46,14 @@ export function NotificationBell({ role }: { role?: string }) {
                     )}
                 </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-80 bg-neutral-950 border-neutral-800 text-white rounded-2xl shadow-2xl p-0 overflow-hidden">
+            <DropdownMenuContent align="end" className="w-80 bg-neutral-950 border-neutral-800 text-white rounded-2xl shadow-2xl p-0 overflow-hidden z-50">
                 <div className="p-4 bg-neutral-900/50 border-b border-neutral-800 flex items-center justify-between">
                     <DropdownMenuLabel className="font-bold text-base p-0 flex items-center gap-2">
-                        <Brain className="w-4 h-4 text-purple-500" />
-                        Alertas de IA
+                        {role === 'coach' ? <Brain className="w-4 h-4 text-purple-500" /> : <Bell className="w-4 h-4 text-red-500" />}
+                        Notificaciones
                     </DropdownMenuLabel>
                     <span className="text-[10px] uppercase tracking-widest text-neutral-500 font-bold">
-                        Tiempo Real
+                        Recientes
                     </span>
                 </div>
 
@@ -69,10 +65,14 @@ export function NotificationBell({ role }: { role?: string }) {
                         </div>
                     ) : (
                         notifications.map((notif) => (
-                            <div key={notif.id} className="p-4 border-b border-neutral-900 hover:bg-neutral-900/50 transition-colors group">
+                            <div key={notif.id} className="p-4 border-b border-neutral-900 hover:bg-neutral-900/50 transition-colors group relative">
+                                <Link
+                                    href={notif.link || (role === 'coach' ? `/athletes/${notif.athleteId}` : '#')}
+                                    className={`absolute inset-0 z-10 ${!notif.link && role !== 'coach' ? 'pointer-events-none' : ''}`}
+                                />
                                 <div className="flex justify-between items-start mb-1">
                                     <h4 className="text-sm font-bold text-white flex items-center gap-2">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-purple-500" />
+                                        <div className={`w-1.5 h-1.5 rounded-full ${notif.type === 'alert' ? 'bg-red-500' : 'bg-purple-500'}`} />
                                         {notif.title}
                                     </h4>
                                     <span className="text-[10px] text-neutral-500">
@@ -82,12 +82,16 @@ export function NotificationBell({ role }: { role?: string }) {
                                 <p className="text-xs text-neutral-400 leading-relaxed mb-3">
                                     {notif.message}
                                 </p>
-                                <Link
-                                    href={`/athletes/${notif.athleteId}`}
-                                    className="text-[10px] font-bold text-purple-400 hover:text-purple-300 flex items-center gap-1 transition-colors uppercase tracking-wider"
-                                >
-                                    Ver Atleta <ExternalLink className="w-3 h-3" />
-                                </Link>
+                                {notif.link && (
+                                    <span className="text-[10px] font-bold text-red-400 group-hover:text-red-300 flex items-center gap-1 transition-colors uppercase tracking-wider">
+                                        Tomar Acción <ExternalLink className="w-3 h-3" />
+                                    </span>
+                                )}
+                                {!notif.link && role === 'coach' && (
+                                    <span className="text-[10px] font-bold text-purple-400 group-hover:text-purple-300 flex items-center gap-1 transition-colors uppercase tracking-wider">
+                                        Ver Atleta <ExternalLink className="w-3 h-3" />
+                                    </span>
+                                )}
                             </div>
                         ))
                     )}
