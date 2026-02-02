@@ -11,8 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Plus, Dumbbell } from "lucide-react";
+import { Loader2, Plus, Dumbbell, PlayCircle, Tag } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -104,37 +103,52 @@ export function ExerciseFormDialog({ exercise, trigger, open, onOpenChange }: Ex
     return (
         <Dialog open={isOpen} onOpenChange={setOpen}>
             {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
-            <DialogContent className="sm:max-w-[600px] bg-neutral-900 border-neutral-800 text-white">
-                <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2 text-xl font-black uppercase">
-                        <Dumbbell className="h-5 w-5 text-red-600" />
-                        {exercise ? "Editar Ejercicio" : "Nuevo Ejercicio"}
-                    </DialogTitle>
-                    <DialogDescription className="text-neutral-400">
-                        Añade los detalles técnicos para que la IA pueda usar este ejercicio.
-                    </DialogDescription>
-                </DialogHeader>
+            <DialogContent className="sm:max-w-[650px] bg-neutral-950 border-neutral-800 text-white p-0 overflow-hidden gap-0 rounded-3xl shadow-2xl shadow-black/50">
 
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 py-4">
-                    <div className="space-y-4">
-                        <div className="space-y-2">
-                            <Label className="text-neutral-300">Nombre del Ejercicio</Label>
-                            <Input {...register("name")} placeholder="Ej: Press de Banca Plano" className="bg-black/50 border-neutral-800 text-white" />
-                            {errors.name && <p className="text-red-500 text-xs">{errors.name.message}</p>}
+                {/* Header Estilizado */}
+                <div className="bg-gradient-to-br from-neutral-900 to-neutral-950 p-8 border-b border-white/5">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-3 text-2xl font-black uppercase tracking-tight text-white">
+                            <div className="h-10 w-10 rounded-full bg-red-600/10 flex items-center justify-center border border-red-600/20">
+                                <Dumbbell className="h-5 w-5 text-red-600" />
+                            </div>
+                            {exercise ? "Editar Ejercicio" : "Nuevo Ejercicio"}
+                        </DialogTitle>
+                        <DialogDescription className="text-neutral-400 text-base mt-2">
+                            Define los parámetros técnicos para potenciar el motor de IA.
+                        </DialogDescription>
+                    </DialogHeader>
+                </div>
+
+                <form onSubmit={handleSubmit(onSubmit)} className="p-8 space-y-8">
+                    <div className="space-y-6">
+                        {/* Nombre */}
+                        <div className="space-y-3">
+                            <Label className="text-xs font-bold uppercase tracking-widest text-neutral-500 ml-1">Nombre Técnico</Label>
+                            <Input
+                                {...register("name")}
+                                placeholder="Ej: Press de Banca Plano con Barra"
+                                className="bg-neutral-900/50 border-neutral-800 text-white h-14 rounded-xl px-4 text-lg font-bold focus-visible:ring-red-600/50 focus-visible:border-red-600 transition-all placeholder:text-neutral-600"
+                            />
+                            {errors.name && <p className="text-red-500 text-xs font-medium ml-1">{errors.name.message}</p>}
                         </div>
 
-                        <div className="space-y-2">
-                            <Label className="text-neutral-300">Descripción / Técnica</Label>
+                        {/* Descripción */}
+                        <div className="space-y-3">
+                            <Label className="text-xs font-bold uppercase tracking-widest text-neutral-500 ml-1">Técnica de Ejecución</Label>
                             <Textarea
                                 {...register("description")}
-                                placeholder="Describe la ejecución correcta..."
-                                className="bg-black/50 border-neutral-800 min-h-[100px] text-white"
+                                placeholder="Describe los puntos clave de la ejecución, respiración y postura..."
+                                className="bg-neutral-900/50 border-neutral-800 min-h-[120px] text-white rounded-xl p-4 text-base focus-visible:ring-red-600/50 focus-visible:border-red-600 transition-all placeholder:text-neutral-600 resize-none"
                             />
                         </div>
 
-                        <div className="space-y-2">
-                            <Label className="text-neutral-300">Grupos Musculares (Tags)</Label>
-                            <div className="flex flex-wrap gap-2">
+                        {/* Tags Muscles */}
+                        <div className="space-y-3">
+                            <Label className="text-xs font-bold uppercase tracking-widest text-neutral-500 ml-1 flex items-center gap-2">
+                                <Tag className="w-3 h-3" /> Grupos Musculares Principales
+                            </Label>
+                            <div className="flex flex-wrap gap-2 p-4 bg-neutral-900/30 rounded-2xl border border-white/5">
                                 {MUSCLE_GROUPS.map(group => {
                                     const isSelected = selectedGroups?.includes(group);
                                     return (
@@ -142,10 +156,10 @@ export function ExerciseFormDialog({ exercise, trigger, open, onOpenChange }: Ex
                                             key={group}
                                             onClick={() => toggleMuscleGroup(group)}
                                             className={cn(
-                                                "px-3 py-1 rounded-full text-xs font-bold cursor-pointer transition-all border",
+                                                "px-4 py-2 rounded-xl text-sm font-bold cursor-pointer transition-all border select-none",
                                                 isSelected
-                                                    ? "bg-red-600/20 border-red-600 text-red-500"
-                                                    : "bg-black/40 border-neutral-800 text-neutral-400 hover:border-neutral-600"
+                                                    ? "bg-red-600 text-white border-red-500 shadow-lg shadow-red-900/20"
+                                                    : "bg-neutral-800 border-transparent text-neutral-400 hover:bg-neutral-700 hover:text-white"
                                             )}
                                         >
                                             {group}
@@ -153,34 +167,47 @@ export function ExerciseFormDialog({ exercise, trigger, open, onOpenChange }: Ex
                                     );
                                 })}
                             </div>
-                            {errors.muscleGroups && <p className="text-red-500 text-xs">{errors.muscleGroups.message}</p>}
+                            {errors.muscleGroups && <p className="text-red-500 text-xs font-medium ml-1">{errors.muscleGroups.message}</p>}
                         </div>
 
-                        <div className="space-y-2">
-                            <Label className="text-neutral-300">Músculos Específicos (Separados por coma)</Label>
-                            <Input
-                                placeholder="Ej: Pectoral mayor, Deltoides anterior"
-                                className="bg-black/50 border-neutral-800 text-white"
-                                onChange={(e) => {
-                                    // Simple split logic for visualization/storage
-                                    const val = e.target.value;
-                                    setValue("specificMuscles", val.split(",").map(s => s.trim()).filter(Boolean));
-                                }}
-                                defaultValue={exercise?.specificMuscles?.join(", ")}
-                            />
-                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {/* Specific Muscles */}
+                            <div className="space-y-3">
+                                <Label className="text-xs font-bold uppercase tracking-widest text-neutral-500 ml-1">Músculos Específicos</Label>
+                                <Input
+                                    placeholder="Ej: Pectoral mayor, Tríceps..."
+                                    className="bg-neutral-900/50 border-neutral-800 text-white h-12 rounded-xl px-4 focus-visible:ring-red-600/50 focus-visible:border-red-600 transition-all placeholder:text-neutral-600"
+                                    onChange={(e) => {
+                                        const val = e.target.value;
+                                        setValue("specificMuscles", val.split(",").map(s => s.trim()).filter(Boolean));
+                                    }}
+                                    defaultValue={exercise?.specificMuscles?.join(", ")}
+                                />
+                            </div>
 
-                        <div className="space-y-2">
-                            <Label className="text-neutral-300">URL del Video (Youtube/Vimeo)</Label>
-                            <Input {...register("videoUrl")} placeholder="https://..." className="bg-black/50 border-neutral-800 text-white" />
+                            {/* Video URL */}
+                            <div className="space-y-3">
+                                <Label className="text-xs font-bold uppercase tracking-widest text-neutral-500 ml-1 flex items-center gap-2">
+                                    <PlayCircle className="w-3 h-3" /> Video Tutorial (URL)
+                                </Label>
+                                <Input
+                                    {...register("videoUrl")}
+                                    placeholder="https://youtube.com/..."
+                                    className="bg-neutral-900/50 border-neutral-800 text-white h-12 rounded-xl px-4 focus-visible:ring-red-600/50 focus-visible:border-red-600 transition-all placeholder:text-neutral-600"
+                                />
+                            </div>
                         </div>
                     </div>
 
-                    <DialogFooter>
-                        <Button type="button" variant="ghost" onClick={() => setOpen(false)} className="text-neutral-400 hover:text-white">
+                    <DialogFooter className="pt-4 border-t border-white/5 gap-3">
+                        <Button type="button" variant="ghost" onClick={() => setOpen(false)} className="h-12 rounded-xl text-neutral-400 hover:text-white hover:bg-neutral-800 font-medium px-6">
                             Cancelar
                         </Button>
-                        <Button type="submit" disabled={isSubmitting} className="bg-red-600 hover:bg-red-700 text-white font-bold rounded-full">
+                        <Button
+                            type="submit"
+                            disabled={isSubmitting}
+                            className="h-12 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold px-8 shadow-xl shadow-red-900/20 hover:shadow-2xl hover:-translate-y-0.5 transition-all duration-300"
+                        >
                             {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                             {exercise ? "Guardar Cambios" : "Crear Ejercicio"}
                         </Button>

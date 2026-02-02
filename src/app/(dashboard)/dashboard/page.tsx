@@ -1,19 +1,26 @@
 import { auth } from "@/lib/auth";
-import { Users, Dumbbell, CalendarDays, TrendingUp, Activity, PlayCircle, Clock } from "lucide-react";
+import { Users, Dumbbell, CalendarDays, TrendingUp, Activity, PlayCircle, Clock, Plus, UserPlus, FileText, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { ActivityChart } from "@/components/dashboard/activity-chart";
 import { ProgressChart } from "@/components/dashboard/progress-chart";
 import { getPersonalRecords, getWeeklyActivity, getWeeklyProgress } from "@/actions/analytics-actions";
-import { getCoachStats } from "@/actions/coach-stats-actions";
+import { getCoachStats, getRecentActivity } from "@/actions/coach-stats-actions";
 import { getActiveRoutine } from "@/actions/athlete-actions";
 import Link from "next/link";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 async function CoachDashboard() {
-    const { stats } = await getCoachStats();
+    const [statsResult, activityResult] = await Promise.all([
+        getCoachStats(),
+        getRecentActivity()
+    ]);
+
+    const stats = statsResult.success ? statsResult.stats : null;
+    const activities = activityResult.success ? activityResult.activities : [];
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-8 pb-10">
             <div className="flex justify-between items-center mb-6">
                 <div>
                     <h2 className="text-3xl font-bold text-white tracking-tight">Dashboard Entrenador</h2>
@@ -21,7 +28,7 @@ async function CoachDashboard() {
                 </div>
                 <div className="flex gap-3">
                     <Link href="/athletes">
-                        <Button className="rounded-full bg-red-600 hover:bg-red-700 text-white font-bold px-6 h-10">
+                        <Button className="rounded-full bg-red-600 hover:bg-red-700 text-white font-bold px-6 h-10 shadow-lg shadow-red-900/20">
                             Ver Atletas
                         </Button>
                     </Link>
@@ -61,24 +68,114 @@ async function CoachDashboard() {
                 />
             </div>
 
-            {/* Charts Row */}
+            {/* Main Content Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Analytics Chart - Spans 2 cols */}
-                <div className="lg:col-span-2 bg-neutral-900 border border-neutral-800 rounded-[2rem] p-8">
-                    <div className="flex justify-between items-center mb-8">
-                        <h3 className="text-xl font-bold text-white">Actividad de Atletas</h3>
-                        <p className="text-sm text-neutral-500">Volumen combinado semanal</p>
+
+                {/* Left Col: Charts & Activity */}
+                <div className="lg:col-span-2 space-y-6">
+                    {/* Activity Chart */}
+                    <div className="bg-neutral-900 border border-neutral-800 rounded-[2rem] p-8">
+                        <div className="flex justify-between items-center mb-8">
+                            <h3 className="text-xl font-bold text-white">Actividad de Atletas</h3>
+                            <p className="text-sm text-neutral-500">Volumen combinado semanal</p>
+                        </div>
+                        <ActivityChart data={stats?.weeklyChartData || []} />
                     </div>
-                    <ActivityChart data={stats?.weeklyChartData || []} />
+
+                    {/* Recent Activity Feed */}
+                    <div className="bg-neutral-900 border border-neutral-800 rounded-[2rem] p-8">
+                        <div className="flex justify-between items-center mb-6">
+                            <h3 className="text-xl font-bold text-white">Últimas Actividades</h3>
+                            <Link href="/progress" className="text-sm font-bold text-red-500 hover:text-red-400 flex items-center">
+                                Ver Todo <ChevronRight className="w-4 h-4 ml-1" />
+                            </Link>
+                        </div>
+
+                        <div className="space-y-4">
+                            {activities.length > 0 ? (
+                                activities.map((activity: any) => (
+                                    <div key={activity.id} className="flex items-center justify-between p-4 bg-black/40 border border-white/5 rounded-2xl hover:bg-white/5 transition-colors group">
+                                        <div className="flex items-center gap-4">
+                                            <Avatar className="h-10 w-10 border border-white/10">
+                                                <AvatarImage src={activity.athleteImage} />
+                                                <AvatarFallback className="bg-neutral-800 text-neutral-400 font-bold">
+                                                    {activity.athleteName?.[0]?.toUpperCase()}
+                                                </AvatarFallback>
+                                            </Avatar>
+                                            <div>
+                                                <p className="font-bold text-white text-sm">{activity.athleteName}</p>
+                                                <p className="text-neutral-500 text-xs flex items-center gap-1">
+                                                    <Dumbbell className="w-3 h-3" /> {activity.routineName}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="text-white font-black text-sm">{activity.volume} <span className="text-neutral-500 font-normal text-xs">kg</span></p>
+                                            <p className="text-neutral-600 text-[10px] uppercase font-bold tracking-wider flex items-center justify-end gap-1">
+                                                <Clock className="w-3 h-3" /> {new Date(activity.date).toLocaleDateString()}
+                                            </p>
+                                        </div>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="text-center py-8 text-neutral-500">
+                                    <Activity className="w-10 h-10 mx-auto mb-3 opacity-20" />
+                                    <p>No hay actividad reciente registrada.</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
                 </div>
 
-                {/* General Progress */}
-                <div className="bg-neutral-900 border border-neutral-800 rounded-[2rem] p-8 flex flex-col items-center justify-center text-center">
-                    <h3 className="text-xl font-bold text-white mb-2">Estado del Gym</h3>
-                    <div className="flex-1 flex items-center justify-center w-full">
-                        <ProgressChart completed={(stats?.totalAthletes || 0) > 0 ? 100 : 0} target={100} />
+                {/* Right Col: Actions & Status */}
+                <div className="space-y-6">
+                    {/* Quick Actions Card */}
+                    <div className="bg-white rounded-[2rem] p-6 shadow-xl relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                            <TrendingUp className="w-24 h-24 text-black" />
+                        </div>
+                        <h3 className="text-black text-xl font-black mb-1 relative z-10">Acciones Rápidas</h3>
+                        <p className="text-neutral-600 text-sm mb-6 relative z-10">Gestión eficiente del gimnasio.</p>
+
+                        <div className="space-y-3 relative z-10">
+                            <Link href="/routines" className="block">
+                                <Button variant="outline" className="w-full justify-start h-12 rounded-xl border-neutral-200 hover:bg-neutral-100 hover:text-black text-neutral-800 font-bold">
+                                    <FileText className="w-4 h-4 mr-2" /> Nueva Rutina
+                                </Button>
+                            </Link>
+                            <Link href="/exercises" className="block">
+                                <Button variant="outline" className="w-full justify-start h-12 rounded-xl border-neutral-200 hover:bg-neutral-100 hover:text-black text-neutral-800 font-bold">
+                                    <Plus className="w-4 h-4 mr-2 text-red-600" /> Agregar Ejercicio
+                                </Button>
+                            </Link>
+                            <Link href="/athletes" className="block">
+                                <Button variant="outline" className="w-full justify-start h-12 rounded-xl border-neutral-200 hover:bg-neutral-100 hover:text-black text-neutral-800 font-bold">
+                                    <UserPlus className="w-4 h-4 mr-2" /> Gestionar Atletas
+                                </Button>
+                            </Link>
+                        </div>
                     </div>
-                    <p className="text-xs text-neutral-400 mt-4">Atletas activos vs inactivos (Simulado)</p>
+
+                    {/* Progress / Status */}
+                    <div className="bg-neutral-900 border border-neutral-800 rounded-[2rem] p-8 flex flex-col items-center justify-center text-center">
+                        <h3 className="text-lg font-bold text-white mb-4">Estado del Objetivo</h3>
+                        <div className="flex-1 flex items-center justify-center w-full min-h-[160px]">
+                            <ProgressChart completed={(stats?.totalAthletes || 0) * 10} target={100} />
+                        </div>
+                        <p className="text-xs text-neutral-500 mt-4">Metas mensuales (Demo)</p>
+                    </div>
+
+                    {/* Active Sessions Mini-List (Placeholder for MVP) */}
+                    <div className="bg-neutral-900 border border-neutral-800 rounded-[2rem] p-6">
+                        <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-4 text-neutral-400">En este momento</h3>
+                        <div className="flex items-center gap-3 text-neutral-500 text-sm">
+                            <span className="relative flex h-3 w-3">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                            </span>
+                            Sistema Activo
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

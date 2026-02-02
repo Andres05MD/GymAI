@@ -110,3 +110,60 @@ export async function getCoachStats() {
         };
     }
 }
+
+export async function getRecentActivity() {
+    const session = await auth();
+    if (session?.user?.role !== "coach") {
+        return { success: false, error: "No autorizado" };
+    }
+
+    try {
+        const snapshot = await adminDb.collection("training_logs")
+            .orderBy("date", "desc")
+            .limit(5)
+            .get();
+
+        const activities = await Promise.all(snapshot.docs.map(async (doc) => {
+            const data = doc.data();
+
+            // Fetch athlete details
+            let athleteName = "Atleta Desconocido";
+            let athleteImage = null;
+
+            // Check for userId or athleteId
+            const uid = data.userId || data.athleteId; // Fallback support
+
+            if (uid) {
+                const userDoc = await adminDb.collection("users").doc(uid).get();
+                if (userDoc.exists) {
+                    const userData = userDoc.data();
+                    athleteName = userData?.name || "Atleta";
+                    athleteImage = userData?.image || null;
+                }
+            }
+
+            // Calculate Volume
+            let sessionVol = 0;
+            data.exercises?.forEach((ex: any) => {
+                ex.sets?.forEach((s: any) => {
+                    if (s.completed && s.weight && s.reps) sessionVol += (s.weight * s.reps);
+                });
+            });
+
+            return {
+                id: doc.id,
+                athleteName,
+                athleteImage,
+                routineName: data.routineName || "Entrenamiento Libre",
+                date: data.date?.toDate ? data.date.toDate().toISOString() : new Date().toISOString(), // Return ISO string for client
+                volume: sessionVol,
+                exercisesCount: data.exercises?.length || 0
+            };
+        }));
+
+        return { success: true, activities };
+    } catch (error) {
+        console.error("Error fetching recent activity:", error);
+        return { success: false, activities: [] };
+    }
+}
