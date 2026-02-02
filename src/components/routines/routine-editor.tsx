@@ -6,7 +6,7 @@ import { createRoutine, updateRoutine, generateRoutineWithAI } from "@/actions/r
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Plus, Trash2, Wand2, Sparkles, Save, ArrowLeft, Check, ChevronsUpDown, Dumbbell } from "lucide-react";
+import { Loader2, Plus, Trash2, Wand2, Sparkles, Save, ArrowLeft, Check, ChevronsUpDown, Dumbbell, CalendarDays, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -156,6 +156,7 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
         defaultValues: initialData || {
             name: "",
             description: "",
+            type: "weekly",
             schedule: [
                 { name: "Día 1", exercises: [] }
             ]
@@ -169,6 +170,7 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
     });
 
     const schedule = watch("schedule");
+    const routineType = watch("type");
 
     const addExerciseToDay = (dayIndex: number) => {
         const currentExercises = schedule[dayIndex].exercises || [];
@@ -212,6 +214,7 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
         reset({
             name: aiRoutine.name,
             description: aiRoutine.description,
+            type: aiRoutine.type || "weekly",
             schedule: aiRoutine.schedule
         });
         toast.success("Rutina aplicada al editor");
@@ -282,6 +285,37 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                                 className="bg-neutral-900 border-neutral-800 text-white placeholder:text-neutral-600 rounded-xl h-14 px-4 text-lg font-medium focus-visible:ring-red-500 transition-all"
                             />
                         </div>
+
+                        {/* Routine Type Selector */}
+                        <div className="space-y-3">
+                            <Label className="text-xs font-bold uppercase tracking-widest text-neutral-500 ml-1">Tipo de Planificación</Label>
+                            <div className="grid grid-cols-2 gap-2 p-1 bg-neutral-900 rounded-xl border border-neutral-800">
+                                <button
+                                    type="button"
+                                    onClick={() => setValue("type", "weekly")}
+                                    className={cn(
+                                        "flex items-center justify-center gap-2 py-3 rounded-lg text-sm font-bold transition-all",
+                                        routineType === "weekly" ? "bg-neutral-800 text-white shadow-sm border border-neutral-700/50" : "text-neutral-500 hover:text-neutral-300"
+                                    )}
+                                >
+                                    <CalendarDays className="w-4 h-4" /> Semanal
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setValue("type", "daily");
+                                        setActiveDayIndex(0);
+                                    }}
+                                    className={cn(
+                                        "flex items-center justify-center gap-2 py-3 rounded-lg text-sm font-bold transition-all",
+                                        routineType === "daily" ? "bg-neutral-800 text-white shadow-sm border border-neutral-700/50" : "text-neutral-500 hover:text-neutral-300"
+                                    )}
+                                >
+                                    <Clock className="w-4 h-4" /> Diaria
+                                </button>
+                            </div>
+                        </div>
+
                         <div className="space-y-3">
                             <Label className="text-xs font-bold uppercase tracking-widest text-neutral-500 ml-1">Descripción</Label>
                             <Textarea
@@ -293,65 +327,67 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                     </div>
 
                     {/* Week Structure */}
-                    <div className="space-y-4">
-                        <div className="flex items-center justify-between px-1">
-                            <Label className="text-xs font-bold uppercase tracking-widest text-neutral-500">Estructura Semanal</Label>
-                            <span className="text-xs text-neutral-600 font-mono bg-neutral-900 px-2 py-1 rounded-md">{schedule.length} Días</span>
-                        </div>
+                    {(routineType === "weekly" || (routineType !== "daily" && schedule.length > 1)) && (
+                        <div className="space-y-4">
+                            <div className="flex items-center justify-between px-1">
+                                <Label className="text-xs font-bold uppercase tracking-widest text-neutral-500">Estructura Semanal</Label>
+                                <span className="text-xs text-neutral-600 font-mono bg-neutral-900 px-2 py-1 rounded-md">{schedule.length} Días</span>
+                            </div>
 
-                        <div className="space-y-3">
-                            {dayFields.map((field, index) => (
-                                <div
-                                    key={field.id}
-                                    onClick={() => setActiveDayIndex(index)}
-                                    className={cn(
-                                        "group relative p-4 rounded-2xl cursor-pointer flex justify-between items-center transition-all duration-300 border-2",
-                                        activeDayIndex === index
-                                            ? "bg-neutral-900 border-red-600 shadow-[0_0_20px_-5px_theme(colors.red.900)]"
-                                            : "bg-neutral-900 border-transparent hover:border-neutral-800 hover:bg-neutral-800"
-                                    )}
-                                >
-                                    <div className="flex items-center gap-4">
-                                        <div className={cn(
-                                            "w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold border transition-colors",
-                                            activeDayIndex === index ? "bg-red-600 border-red-500 text-white" : "bg-neutral-800 border-neutral-700 text-neutral-500 group-hover:text-white"
-                                        )}>
-                                            {index + 1}
-                                        </div>
-                                        <div>
-                                            <p className={cn("font-bold text-base transition-colors", activeDayIndex === index ? "text-white" : "text-neutral-400 group-hover:text-white")}>
-                                                {schedule[index]?.name || `Día ${index + 1}`}
-                                            </p>
-                                            <p className="text-xs text-neutral-600 font-medium">
-                                                {schedule[index]?.exercises?.length || 0} Ejercicios
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    {activeDayIndex === index && (
-                                        <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-red-600 rounded-l-full" />
-                                    )}
-
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="h-8 w-8 text-neutral-600 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
-                                        onClick={(e) => { e.stopPropagation(); removeDay(index); }}
+                            <div className="space-y-3">
+                                {dayFields.map((field, index) => (
+                                    <div
+                                        key={field.id}
+                                        onClick={() => setActiveDayIndex(index)}
+                                        className={cn(
+                                            "group relative p-4 rounded-2xl cursor-pointer flex justify-between items-center transition-all duration-300 border-2",
+                                            activeDayIndex === index
+                                                ? "bg-neutral-900 border-red-600 shadow-[0_0_20px_-5px_theme(colors.red.900)]"
+                                                : "bg-neutral-900 border-transparent hover:border-neutral-800 hover:bg-neutral-800"
+                                        )}
                                     >
-                                        <Trash2 className="w-4 h-4" />
-                                    </Button>
-                                </div>
-                            ))}
+                                        <div className="flex items-center gap-4">
+                                            <div className={cn(
+                                                "w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold border transition-colors",
+                                                activeDayIndex === index ? "bg-red-600 border-red-500 text-white" : "bg-neutral-800 border-neutral-700 text-neutral-500 group-hover:text-white"
+                                            )}>
+                                                {index + 1}
+                                            </div>
+                                            <div>
+                                                <p className={cn("font-bold text-base transition-colors", activeDayIndex === index ? "text-white" : "text-neutral-400 group-hover:text-white")}>
+                                                    {schedule[index]?.name || `Día ${index + 1}`}
+                                                </p>
+                                                <p className="text-xs text-neutral-600 font-medium">
+                                                    {schedule[index]?.exercises?.length || 0} Ejercicios
+                                                </p>
+                                            </div>
+                                        </div>
 
-                            <Button
-                                variant="outline"
-                                className="w-full h-14 border-dashed border-neutral-800 bg-transparent text-neutral-500 hover:text-white hover:bg-neutral-900 hover:border-neutral-700 rounded-2xl transition-all"
-                                onClick={() => appendDay({ name: `Día ${dayFields.length + 1}`, exercises: [] })}
-                            >
-                                <Plus className="w-5 h-5 mr-2" /> AÑADIR DÍA
-                            </Button>
+                                        {activeDayIndex === index && (
+                                            <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-red-600 rounded-l-full" />
+                                        )}
+
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-8 w-8 text-neutral-600 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                                            onClick={(e) => { e.stopPropagation(); removeDay(index); }}
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </Button>
+                                    </div>
+                                ))}
+
+                                <Button
+                                    variant="outline"
+                                    className="w-full h-14 border-dashed border-neutral-800 bg-transparent text-neutral-500 hover:text-white hover:bg-neutral-900 hover:border-neutral-700 rounded-2xl transition-all"
+                                    onClick={() => appendDay({ name: `Día ${dayFields.length + 1}`, exercises: [] })}
+                                >
+                                    <Plus className="w-5 h-5 mr-2" /> AÑADIR DÍA
+                                </Button>
+                            </div>
                         </div>
-                    </div>
+                    )}
                 </div>
 
                 {/* Right Column: Day Editor (8 cols) */}
@@ -361,7 +397,9 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                             {/* Header Day */}
                             <div className="bg-neutral-900 border-b border-neutral-800 p-6 sm:px-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 rounded-t-3xl">
                                 <div>
-                                    <Label className="text-xs font-bold uppercase tracking-widest text-neutral-500 block mb-1">Editando</Label>
+                                    <Label className="text-xs font-bold uppercase tracking-widest text-neutral-500 block mb-1">
+                                        {routineType === 'daily' ? 'Sesión Única' : 'Editando Día'}
+                                    </Label>
                                     <Input
                                         value={schedule[activeDayIndex].name}
                                         onChange={(e) => {

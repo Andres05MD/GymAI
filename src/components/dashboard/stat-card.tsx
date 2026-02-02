@@ -8,7 +8,7 @@ interface StatCardProps {
     icon: LucideIcon;
     trend?: "up" | "down" | "neutral";
     trendValue?: string;
-    color?: "red" | "green" | "blue" | "neutral";
+    color?: "red" | "green" | "blue" | "yellow" | "neutral";
     className?: string;
 }
 
@@ -23,11 +23,12 @@ export function StatCard({
     className
 }: StatCardProps) {
 
-    const colorMap = {
-        red: "bg-red-500",
-        green: "bg-emerald-500",
-        blue: "bg-blue-500",
-        neutral: "bg-white",
+    const colorStyles = {
+        red: "bg-red-500/10 text-red-500",
+        green: "bg-emerald-500/10 text-emerald-500",
+        blue: "bg-blue-500/10 text-blue-500",
+        yellow: "bg-yellow-500/10 text-yellow-500",
+        neutral: "bg-neutral-800 text-white",
     };
 
     const trendColor = trend === "up" ? "text-emerald-500" : trend === "down" ? "text-red-500" : "text-neutral-500";
@@ -40,8 +41,7 @@ export function StatCard({
                     <p className="text-neutral-400 font-medium text-sm mb-1">{title}</p>
                     <h3 className="text-3xl font-bold text-white tracking-tight">{value}</h3>
                 </div>
-                <div className={cn("w-12 h-12 rounded-full flex items-center justify-center transition-transform group-hover:scale-110", color === "red" ? "bg-red-500/10 text-red-500" : "bg-neutral-800 text-white")}>
-                    {/* Si es red, fondo rojo suave. Si es neutral (default para otros), fondo gris */}
+                <div className={cn("w-12 h-12 rounded-full flex items-center justify-center transition-transform group-hover:scale-110", colorStyles[color])}>
                     <Icon className="w-6 h-6" />
                 </div>
             </div>

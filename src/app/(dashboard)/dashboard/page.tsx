@@ -17,7 +17,7 @@ async function CoachDashboard() {
     ]);
 
     const stats = statsResult.success ? statsResult.stats : null;
-    const activities = activityResult.success ? activityResult.activities : [];
+    const activities = (activityResult.success && activityResult.activities) ? activityResult.activities : [];
 
     return (
         <div className="space-y-8 pb-10">

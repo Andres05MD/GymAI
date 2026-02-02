@@ -8,10 +8,11 @@ import { ProgressChart } from "@/components/dashboard/progress-chart";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { TrainingHistoryList } from "@/components/training/training-history-list";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Dumbbell, TrendingUp, Clock, Activity } from "lucide-react";
+import { ArrowLeft, Dumbbell, TrendingUp, Activity, Trophy, Target, Calendar, Flame } from "lucide-react";
 import Link from "next/link";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CoachAIAnalysis } from "@/components/dashboard/coach-ai-analysis";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface PageProps {
     params: Promise<{ id: string }>;
@@ -26,7 +27,20 @@ export default async function AthleteDetailsPage({ params }: PageProps) {
     // 1. Verify access & fetch basic user info
     const userDoc = await adminDb.collection("users").doc(id).get();
     if (!userDoc.exists || userDoc.data()?.coachId !== session.user.id) {
-        return <div>No autorizado o atleta no encontrado.</div>;
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
+                <div className="w-20 h-20 bg-red-900/20 rounded-full flex items-center justify-center mb-6">
+                    <Target className="w-10 h-10 text-red-500" />
+                </div>
+                <h1 className="text-2xl font-bold text-white mb-2">Atleta no encontrado</h1>
+                <p className="text-neutral-400 mb-6">No tienes acceso a este perfil o no existe.</p>
+                <Link href="/athletes">
+                    <Button variant="outline" className="rounded-full">
+                        <ArrowLeft className="w-4 h-4 mr-2" /> Volver a Atletas
+                    </Button>
+                </Link>
+            </div>
+        );
     }
 
     const athlete = { id: userDoc.id, ...userDoc.data() } as any;
@@ -37,35 +51,72 @@ export default async function AthleteDetailsPage({ params }: PageProps) {
     const { completed: weeklyCompleted, target: weeklyTarget } = await getWeeklyProgress(id);
     const { logs } = await getTrainingLogs(id);
 
+    // Calculate total volume from activity data
+    const weeklyVolume = activityData?.reduce((acc: number, cur: any) => acc + cur.total, 0) || 0;
+
     return (
         <div className="space-y-8 pb-20">
             {/* Header */}
-            <div className="flex items-center gap-4">
-                <Link href="/athletes">
-                    <Button variant="ghost" size="icon" className="rounded-full">
-                        <ArrowLeft className="w-5 h-5" />
-                    </Button>
-                </Link>
-                <div>
-                    <h1 className="text-3xl font-black text-white uppercase tracking-tight">{athlete.name}</h1>
-                    <p className="text-neutral-400 text-sm">Perfil del Atleta • {athlete.email}</p>
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div className="flex items-center gap-5">
+                    <Link href="/athletes">
+                        <Button variant="ghost" size="icon" className="rounded-full text-neutral-400 hover:text-white hover:bg-neutral-800">
+                            <ArrowLeft className="w-5 h-5" />
+                        </Button>
+                    </Link>
+
+                    <Avatar className="h-16 w-16 border-2 border-neutral-800">
+                        <AvatarImage src={athlete.image} />
+                        <AvatarFallback className="bg-neutral-800 text-white font-bold text-xl">
+                            {athlete.name?.[0]?.toUpperCase()}
+                        </AvatarFallback>
+                    </Avatar>
+
+                    <div>
+                        <h1 className="text-2xl md:text-3xl font-black text-white uppercase tracking-tight">
+                            {athlete.name}
+                        </h1>
+                        <p className="text-neutral-500 text-sm">{athlete.email}</p>
+                    </div>
+                </div>
+
+                {/* Quick Info Pills */}
+                <div className="flex gap-3">
+                    {athlete.goal && (
+                        <div className="flex items-center gap-2 bg-red-500/10 text-red-500 px-4 py-2 rounded-full text-sm font-bold border border-red-500/20">
+                            <Target className="w-4 h-4" />
+                            {athlete.goal}
+                        </div>
+                    )}
+                    <div className="flex items-center gap-2 bg-neutral-900 text-neutral-400 px-4 py-2 rounded-full text-sm font-bold border border-neutral-800">
+                        <Calendar className="w-4 h-4" />
+                        Desde {athlete.createdAt ? new Date(athlete.createdAt.toDate?.() || athlete.createdAt).toLocaleDateString('es', { month: 'short', year: 'numeric' }) : 'N/A'}
+                    </div>
                 </div>
             </div>
 
             <Tabs defaultValue="overview" className="space-y-6">
-                <TabsList className="bg-neutral-900 border border-neutral-800">
-                    <TabsTrigger value="overview">Visión General</TabsTrigger>
-                    <TabsTrigger value="history">Historial</TabsTrigger>
+                <TabsList className="bg-neutral-900 border border-neutral-800 p-1 rounded-2xl">
+                    <TabsTrigger
+                        value="overview"
+                        className="rounded-xl data-[state=active]:bg-red-600 data-[state=active]:text-white data-[state=active]:shadow-lg px-6"
+                    >
+                        Visión General
+                    </TabsTrigger>
+                    <TabsTrigger
+                        value="history"
+                        className="rounded-xl data-[state=active]:bg-red-600 data-[state=active]:text-white data-[state=active]:shadow-lg px-6"
+                    >
+                        Historial
+                    </TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="overview" className="space-y-8">
                     {/* AI Analysis Section */}
-                    <div className="grid grid-cols-1">
-                        <CoachAIAnalysis athleteId={athlete.id} />
-                    </div>
+                    <CoachAIAnalysis athleteId={athlete.id} />
 
                     {/* KPIs */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <StatCard
                             title="Sesiones"
                             value={weeklyCompleted?.toString() || "0"}
@@ -75,36 +126,76 @@ export default async function AthleteDetailsPage({ params }: PageProps) {
                             color="red"
                         />
                         <StatCard
-                            title="Volumen Semanal"
-                            value={`${Math.round((activityData?.reduce((acc: number, cur: any) => acc + cur.total, 0) || 0) / 1000)}k`}
-                            label="Kg levantados"
+                            title="Volumen"
+                            value={`${Math.round(weeklyVolume / 1000)}k`}
+                            label="Kg semanal"
                             trend="neutral"
                             icon={TrendingUp}
                         />
                         <StatCard
                             title="Récords"
                             value={prs?.length?.toString() || "0"}
-                            label="Registrados"
-                            trend="up"
-                            trendValue="New"
-                            icon={Activity}
-                            color="blue"
+                            label="Personales"
+                            trend={(prs?.length || 0) > 0 ? "up" : "neutral"}
+                            trendValue={(prs?.length || 0) > 0 ? "New" : undefined}
+                            icon={Trophy}
+                            color="yellow"
+                        />
+                        <StatCard
+                            title="Racha"
+                            value="—"
+                            label="Días seguidos"
+                            trend="neutral"
+                            icon={Flame}
                         />
                     </div>
 
                     {/* Charts */}
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <div className="lg:col-span-2 bg-neutral-900 border border-neutral-800 rounded-[2rem] p-8">
-                            <h3 className="text-xl font-bold text-white mb-6">Actividad</h3>
-                            <div className="h-[300px]">
+                        <div className="lg:col-span-2 bg-neutral-900 border border-neutral-800 rounded-3xl p-6 md:p-8">
+                            <div className="flex justify-between items-center mb-6">
+                                <div>
+                                    <h3 className="text-xl font-bold text-white">Actividad Semanal</h3>
+                                    <p className="text-sm text-neutral-500">Volumen de entrenamiento</p>
+                                </div>
+                            </div>
+                            <div className="h-[280px]">
                                 <ActivityChart data={activityData} />
                             </div>
                         </div>
-                        <div className="bg-neutral-900 border border-neutral-800 rounded-[2rem] p-8">
-                            <h3 className="text-xl font-bold text-white mb-6">Cumplimiento</h3>
-                            <ProgressChart completed={weeklyCompleted} target={weeklyTarget} />
+
+                        <div className="bg-neutral-900 border border-neutral-800 rounded-3xl p-6 md:p-8 flex flex-col">
+                            <h3 className="text-xl font-bold text-white mb-2">Cumplimiento</h3>
+                            <p className="text-sm text-neutral-500 mb-6">Meta semanal de sesiones</p>
+                            <div className="flex-1 flex items-center justify-center">
+                                <ProgressChart completed={weeklyCompleted} target={weeklyTarget} />
+                            </div>
                         </div>
                     </div>
+
+                    {/* PRs Preview */}
+                    {prs && prs.length > 0 && (
+                        <div className="bg-neutral-900 border border-neutral-800 rounded-3xl p-6 md:p-8">
+                            <div className="flex items-center gap-3 mb-6">
+                                <Trophy className="w-5 h-5 text-yellow-500" />
+                                <h3 className="text-xl font-bold text-white">Records Personales</h3>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                {prs.slice(0, 3).map((pr: any, i: number) => (
+                                    <div key={i} className="bg-black/40 border border-yellow-500/10 rounded-2xl p-4 flex items-center justify-between hover:border-yellow-500/30 transition-colors">
+                                        <div>
+                                            <p className="font-bold text-white">{pr.exercise}</p>
+                                            <p className="text-xs text-neutral-500">{pr.date}</p>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="text-xl font-black text-yellow-500">{pr.weight}</p>
+                                            <p className="text-[10px] text-neutral-500 uppercase tracking-wider">kg</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </TabsContent>
 
                 <TabsContent value="history">
