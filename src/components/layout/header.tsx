@@ -90,7 +90,7 @@ export function Header({ user }: HeaderProps) {
                             </DropdownMenuItem>
                         </Link>
                         <DropdownMenuSeparator className="bg-neutral-800" />
-                        <DropdownMenuItem className="cursor-pointer hover:bg-red-900/20 focus:bg-red-900/20 text-red-500 focus:text-red-500 rounded-lg my-1" onClick={() => signOut()}>
+                        <DropdownMenuItem className="cursor-pointer hover:bg-red-900/20 focus:bg-red-900/20 text-red-500 focus:text-red-500 rounded-lg my-1" onClick={() => signOut({ redirectTo: "/" })}>
                             <LogOut className="mr-2 h-4 w-4" />
                             <span>Cerrar Sesión</span>
                         </DropdownMenuItem>

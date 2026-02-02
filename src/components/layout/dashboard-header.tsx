@@ -61,7 +61,7 @@ export function DashboardHeader() {
                         </div>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => signOut()}>
+                    <DropdownMenuItem onClick={() => signOut({ redirectTo: "/" })}>
                         Cerrar Sesión
                     </DropdownMenuItem>
                 </DropdownMenuContent>
