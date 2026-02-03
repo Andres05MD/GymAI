@@ -53,28 +53,28 @@ export default async function ProfilePage() {
             </div>
 
             <Tabs defaultValue="details" className="w-full">
-                <TabsList className={`grid w-full bg-neutral-900 mb-8 ${isCoach ? 'grid-cols-1' : 'grid-cols-2'}`}>
-                    <TabsTrigger value="details" className="data-[state=active]:bg-red-600 data-[state=active]:text-white">
+                <TabsList className={`grid w-full bg-neutral-900/50 backdrop-blur-md border border-white/5 mb-8 rounded-full p-1 ${isCoach ? 'grid-cols-1' : 'grid-cols-2'}`}>
+                    <TabsTrigger value="details" className="rounded-full data-[state=active]:bg-red-600 data-[state=active]:text-white transition-all text-neutral-400">
                         <User className="w-4 h-4 mr-2" /> Datos Personales
                     </TabsTrigger>
                     {!isCoach && (
-                        <TabsTrigger value="measurements" className="data-[state=active]:bg-red-600 data-[state=active]:text-white">
+                        <TabsTrigger value="measurements" className="rounded-full data-[state=active]:bg-red-600 data-[state=active]:text-white transition-all text-neutral-400">
                             <Ruler className="w-4 h-4 mr-2" /> Progreso Corporal
                         </TabsTrigger>
                     )}
                 </TabsList>
 
                 <TabsContent value="details">
-                    <div className="bg-neutral-900/50 border border-neutral-800 rounded-3xl p-8">
+                    <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-[2rem] p-6 shadow-xl shadow-black/20">
                         <ProfileForm user={userData} />
                     </div>
                 </TabsContent>
 
                 {!isCoach && (
                     <TabsContent value="measurements" className="space-y-6">
-                        <div className="flex justify-between items-center bg-neutral-900/50 border border-neutral-800 rounded-3xl p-6">
+                        <div className="flex justify-between items-center bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-[2rem] p-6 shadow-xl shadow-black/20">
                             <div>
-                                <h2 className="text-xl font-bold text-white">Historial de Medidas</h2>
+                                <h2 className="text-xl font-black text-white uppercase tracking-tight">Historial de Medidas</h2>
                                 <p className="text-neutral-400 text-sm">Registro de tu evolución corporal en el tiempo.</p>
                             </div>
                             <LogMeasurementDialog />

@@ -68,48 +68,50 @@ export function ExerciseList({ exercises }: ExerciseListProps) {
     return (
         <div className="space-y-6">
             {/* Controls */}
-            <div className="flex flex-col md:flex-row gap-4">
-                <div className="relative flex-1">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-500" />
-                    <Input
-                        placeholder="Buscar por nombre o músculo..."
-                        className="pl-11 h-12 bg-neutral-900 border-neutral-800 rounded-full text-white focus-visible:ring-red-500"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                </div>
+            <div className="sticky top-24 z-20 bg-black/80 backdrop-blur-xl border border-white/5 rounded-[2rem] p-2 shadow-2xl shadow-black/50">
+                <div className="flex flex-col md:flex-row gap-2">
+                    <div className="relative flex-1">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-neutral-400" />
+                        <Input
+                            placeholder="Buscar ejercicios..."
+                            className="pl-12 h-14 bg-transparent border-transparent rounded-full text-white placeholder:text-neutral-500 focus-visible:ring-0 text-lg font-medium"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </div>
 
-                {/* Filter Pills */}
-                <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0 scrollbar-hide">
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setFilterGroup(null)}
-                        className={cn(
-                            "rounded-full h-10 px-5 font-bold border-2 transition-all",
-                            !filterGroup
-                                ? "bg-white text-black border-white hover:bg-neutral-200"
-                                : "bg-transparent text-neutral-400 border-neutral-800 hover:border-neutral-600 hover:text-white"
-                        )}
-                    >
-                        Todos
-                    </Button>
-                    {allGroups.map(group => (
+                    {/* Filter Pills */}
+                    <div className="flex gap-2 overflow-x-auto items-center px-2 pb-2 md:pb-0 scrollbar-hide mask-fade-right">
                         <Button
-                            key={group}
-                            variant="outline"
+                            variant="ghost"
                             size="sm"
-                            onClick={() => setFilterGroup(group === filterGroup ? null : group)}
+                            onClick={() => setFilterGroup(null)}
                             className={cn(
-                                "rounded-full h-10 px-5 font-bold whitespace-nowrap border-2 transition-all",
-                                filterGroup === group
-                                    ? "bg-white text-black border-white hover:bg-neutral-200"
-                                    : "bg-transparent text-neutral-400 border-neutral-800 hover:border-neutral-600 hover:text-white"
+                                "rounded-full h-10 px-5 font-bold transition-all border",
+                                !filterGroup
+                                    ? "bg-white text-black border-white"
+                                    : "bg-neutral-800/50 text-neutral-400 border-transparent hover:bg-neutral-800 hover:text-white"
                             )}
                         >
-                            {group}
+                            Todos
                         </Button>
-                    ))}
+                        {allGroups.map(group => (
+                            <Button
+                                key={group}
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setFilterGroup(group === filterGroup ? null : group)}
+                                className={cn(
+                                    "rounded-full h-10 px-5 font-bold whitespace-nowrap transition-all border",
+                                    filterGroup === group
+                                        ? "bg-white text-black border-white"
+                                        : "bg-neutral-800/50 text-neutral-400 border-transparent hover:bg-neutral-800 hover:text-white"
+                                )}
+                            >
+                                {group}
+                            </Button>
+                        ))}
+                    </div>
                 </div>
             </div>
 
@@ -118,25 +120,28 @@ export function ExerciseList({ exercises }: ExerciseListProps) {
                 {filteredExercises.map((exercise) => (
                     <div
                         key={exercise.id}
-                        className="group bg-neutral-900 border border-neutral-800 rounded-3xl p-6 hover:border-red-600/50 hover:shadow-2xl hover:shadow-red-900/10 transition-all duration-300"
+                        className="group bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-[2rem] p-6 hover:border-red-500/30 transition-all duration-300 relative overflow-hidden"
                     >
+                        {/* Gradient Blob */}
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-red-600/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none group-hover:bg-red-600/10 transition-colors"></div>
+
                         {/* Header */}
-                        <div className="flex justify-between items-start mb-4">
-                            <div className="h-12 w-12 bg-gradient-to-br from-neutral-800 to-neutral-900 rounded-2xl flex items-center justify-center text-red-500 group-hover:from-red-600 group-hover:to-red-700 group-hover:text-white transition-all shadow-lg">
-                                <Dumbbell className="h-6 w-6" />
+                        <div className="flex justify-between items-start mb-4 relative z-10">
+                            <div className="h-14 w-14 bg-neutral-900 rounded-2xl flex items-center justify-center text-red-500 group-hover:scale-110 transition-transform shadow-lg border border-neutral-800">
+                                <Dumbbell className="h-7 w-7" />
                             </div>
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl text-neutral-500 hover:text-white hover:bg-neutral-800">
-                                        <MoreVertical className="h-4 w-4" />
+                                    <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full text-neutral-500 hover:text-white hover:bg-black/40">
+                                        <MoreVertical className="h-5 w-5" />
                                     </Button>
                                 </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="bg-neutral-900 border-neutral-800 text-white rounded-xl">
-                                    <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                <DropdownMenuContent align="end" className="bg-neutral-900/90 backdrop-blur-xl border-neutral-800 text-white rounded-xl shadow-xl">
+                                    <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="focus:bg-neutral-800 focus:text-white cursor-pointer p-2 rounded-lg">
                                         <ExerciseFormDialog
                                             exercise={exercise}
                                             trigger={
-                                                <div className="flex items-center w-full cursor-pointer">
+                                                <div className="flex items-center w-full">
                                                     <Edit className="h-4 w-4 mr-2" /> Editar
                                                 </div>
                                             }
@@ -144,7 +149,7 @@ export function ExerciseList({ exercises }: ExerciseListProps) {
                                     </DropdownMenuItem>
                                     <DropdownMenuItem
                                         onClick={() => handleDelete(exercise.id)}
-                                        className="text-red-500 hover:text-red-400 focus:text-red-400 focus:bg-red-500/10"
+                                        className="text-red-500 hover:text-red-400 focus:text-red-400 focus:bg-red-950/30 cursor-pointer p-2 rounded-lg mt-1"
                                     >
                                         <Trash className="h-4 w-4 mr-2" /> Eliminar
                                     </DropdownMenuItem>
@@ -153,23 +158,29 @@ export function ExerciseList({ exercises }: ExerciseListProps) {
                         </div>
 
                         {/* Title & Description */}
-                        <h3 className="font-bold text-white text-lg mb-2 line-clamp-1 group-hover:text-red-500 transition-colors">
-                            {exercise.name}
-                        </h3>
+                        <div className="relative z-10 mb-4">
+                            <h3 className="font-bold text-white text-xl mb-1.5 line-clamp-1 group-hover:text-red-500 transition-colors tracking-tight">
+                                {exercise.name}
+                            </h3>
 
-                        {exercise.description && (
-                            <p className="text-sm text-neutral-400 line-clamp-2 mb-4 min-h-[40px]">
-                                {exercise.description}
-                            </p>
-                        )}
+                            {exercise.description ? (
+                                <p className="text-sm text-neutral-400 line-clamp-2 min-h-[40px] leading-relaxed">
+                                    {exercise.description}
+                                </p>
+                            ) : (
+                                <p className="text-sm text-neutral-600 italic min-h-[40px] flex items-center">
+                                    Sin descripción disponible.
+                                </p>
+                            )}
+                        </div>
 
                         {/* Muscle Tags */}
-                        <div className="flex flex-wrap gap-2 mb-4">
+                        <div className="flex flex-wrap gap-2 mb-5 relative z-10">
                             {exercise.muscleGroups?.slice(0, 3).map((g: string) => (
                                 <span
                                     key={g}
                                     className={cn(
-                                        "text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 rounded-full border",
+                                        "text-[9px] uppercase font-bold tracking-widest px-3 py-1.5 rounded-lg border shadow-sm",
                                         getGroupColor(g)
                                     )}
                                 >
@@ -177,24 +188,32 @@ export function ExerciseList({ exercises }: ExerciseListProps) {
                                 </span>
                             ))}
                             {(exercise.muscleGroups?.length || 0) > 3 && (
-                                <span className="text-[10px] text-neutral-500 py-1 font-bold">
+                                <span className="text-[10px] text-neutral-500 py-1.5 px-2 font-bold bg-neutral-900 rounded-lg border border-neutral-800">
                                     +{exercise.muscleGroups.length - 3}
                                 </span>
                             )}
                         </div>
 
                         {/* Video Link */}
-                        {exercise.videoUrl && (
-                            <a
-                                href={exercise.videoUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-2 text-xs text-red-500 hover:text-red-400 font-bold bg-red-500/10 px-3 py-2 rounded-full transition-colors"
-                            >
-                                <PlayCircle className="h-4 w-4" /> Ver Demostración
-                                <ExternalLink className="h-3 w-3 opacity-50" />
-                            </a>
-                        )}
+                        <div className="relative z-10">
+                            {exercise.videoUrl ? (
+                                <a
+                                    href={exercise.videoUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center justify-center gap-2 text-xs text-white font-bold bg-neutral-800 hover:bg-red-600 px-4 py-3 rounded-xl transition-all w-full group/btn"
+                                >
+                                    <PlayCircle className="h-4 w-4 text-red-500 group-hover/btn:text-white transition-colors" />
+                                    <span>Ver Video</span>
+                                    <ExternalLink className="h-3 w-3 opacity-30 group-hover/btn:opacity-100 transition-opacity ml-auto" />
+                                </a>
+                            ) : (
+                                <div className="flex items-center justify-center gap-2 text-xs text-neutral-600 font-bold bg-neutral-900/50 px-4 py-3 rounded-xl w-full border border-neutral-800 border-dashed cursor-not-allowed">
+                                    <PlayCircle className="h-4 w-4 opacity-20" />
+                                    <span>Sin Video</span>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 ))}
 

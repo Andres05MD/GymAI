@@ -126,89 +126,98 @@ export default async function ProgressPage({ searchParams }: ProgressPageProps) 
             </div>
 
             {/* Metrics Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="bg-neutral-900 border border-neutral-800 rounded-3xl p-6 text-center hover:border-neutral-700 transition-colors">
-                    <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center mx-auto mb-3">
-                        <Scale className="h-6 w-6 text-blue-500" />
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-[2rem] p-6 relative overflow-hidden group hover:border-blue-500/30 transition-all">
+                    <div className="absolute top-0 right-0 w-20 h-20 bg-blue-600/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none group-hover:bg-blue-600/20 transition-colors"></div>
+                    <div className="flex flex-col items-center text-center relative z-10">
+                        <div className="w-14 h-14 bg-neutral-900 rounded-2xl flex items-center justify-center mb-4 shadow-lg border border-neutral-800 group-hover:scale-105 transition-transform duration-300">
+                            <Scale className="h-6 w-6 text-blue-500" />
+                        </div>
+                        <p className="text-3xl font-black text-white tracking-tighter mb-1">{metrics?.weight || "—"}</p>
+                        <p className="text-[10px] text-neutral-500 uppercase tracking-widest font-bold mb-2">Peso (kg)</p>
+                        <span className={cn(
+                            "px-2 py-0.5 rounded-md text-[10px] font-bold border",
+                            isWeightLoss ? 'bg-green-500/10 text-green-500 border-green-500/20' : 'bg-neutral-800 text-neutral-500 border-neutral-700'
+                        )}>
+                            {parseFloat(weightChange) > 0 ? '+' : ''}{weightChange} kg
+                        </span>
                     </div>
-                    <p className="text-3xl font-black text-white mb-1">{metrics?.weight || "—"}</p>
-                    <p className="text-[10px] text-neutral-500 uppercase tracking-wider font-bold mb-2">Peso (kg)</p>
-                    <p className={cn("text-xs font-medium", isWeightLoss ? 'text-green-500' : 'text-neutral-500')}>
-                        {parseFloat(weightChange) > 0 ? '+' : ''}{weightChange} kg
-                    </p>
                 </div>
 
-                <div className="bg-neutral-900 border border-neutral-800 rounded-3xl p-6 text-center hover:border-neutral-700 transition-colors">
-                    <div className="w-12 h-12 bg-orange-500/10 rounded-2xl flex items-center justify-center mx-auto mb-3">
-                        <Flame className="h-6 w-6 text-orange-500" />
+                <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-[2rem] p-6 relative overflow-hidden group hover:border-orange-500/30 transition-all">
+                    <div className="absolute top-0 right-0 w-20 h-20 bg-orange-600/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none group-hover:bg-orange-600/20 transition-colors"></div>
+                    <div className="flex flex-col items-center text-center relative z-10">
+                        <div className="w-14 h-14 bg-neutral-900 rounded-2xl flex items-center justify-center mb-4 shadow-lg border border-neutral-800 group-hover:scale-105 transition-transform duration-300">
+                            <Flame className="h-6 w-6 text-orange-500" />
+                        </div>
+                        <p className="text-3xl font-black text-white tracking-tighter mb-1">{metrics?.bodyFat ? `${metrics.bodyFat}%` : "—"}</p>
+                        <p className="text-[10px] text-neutral-500 uppercase tracking-widest font-bold mb-2">Grasa Est.</p>
+                        <p className="text-xs text-neutral-600 font-medium">N/A</p>
                     </div>
-                    <p className="text-3xl font-black text-white mb-1">{metrics?.bodyFat ? `${metrics.bodyFat}%` : "—"}</p>
-                    <p className="text-[10px] text-neutral-500 uppercase tracking-wider font-bold mb-2">Grasa Est.</p>
-                    <p className="text-xs text-neutral-500 font-medium">N/A</p>
                 </div>
 
-                <div className="bg-neutral-900 border border-neutral-800 rounded-3xl p-6 text-center hover:border-neutral-700 transition-colors">
-                    <div className="w-12 h-12 bg-yellow-500/10 rounded-2xl flex items-center justify-center mx-auto mb-3">
-                        <Trophy className="h-6 w-6 text-yellow-500" />
+                <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-[2rem] p-6 relative overflow-hidden group hover:border-yellow-500/30 transition-all">
+                    <div className="absolute top-0 right-0 w-20 h-20 bg-yellow-600/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none group-hover:bg-yellow-600/20 transition-colors"></div>
+                    <div className="flex flex-col items-center text-center relative z-10">
+                        <div className="w-14 h-14 bg-neutral-900 rounded-2xl flex items-center justify-center mb-4 shadow-lg border border-neutral-800 group-hover:scale-105 transition-transform duration-300">
+                            <Trophy className="h-6 w-6 text-yellow-500" />
+                        </div>
+                        <p className="text-3xl font-black text-white tracking-tighter mb-1">{prs?.length || 0}</p>
+                        <p className="text-[10px] text-neutral-500 uppercase tracking-widest font-bold mb-2">PRs Nuevos</p>
+                        <p className="text-xs text-neutral-600 font-medium">Últimos 20 entrenos</p>
                     </div>
-                    <p className="text-3xl font-black text-white mb-1">{prs?.length || 0}</p>
-                    <p className="text-[10px] text-neutral-500 uppercase tracking-wider font-bold mb-2">PRs Nuevos</p>
-                    <p className="text-xs text-neutral-500 font-medium">Últimos 20 entrenos</p>
                 </div>
 
-                <div className="bg-neutral-900 border border-neutral-800 rounded-3xl p-6 text-center hover:border-neutral-700 transition-colors">
-                    <div className="w-12 h-12 bg-green-500/10 rounded-2xl flex items-center justify-center mx-auto mb-3">
-                        <TrendingUp className="h-6 w-6 text-green-500" />
+                <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-[2rem] p-6 relative overflow-hidden group hover:border-green-500/30 transition-all">
+                    <div className="absolute top-0 right-0 w-20 h-20 bg-green-600/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none group-hover:bg-green-600/20 transition-colors"></div>
+                    <div className="flex flex-col items-center text-center relative z-10">
+                        <div className="w-14 h-14 bg-neutral-900 rounded-2xl flex items-center justify-center mb-4 shadow-lg border border-neutral-800 group-hover:scale-105 transition-transform duration-300">
+                            <TrendingUp className="h-6 w-6 text-green-500" />
+                        </div>
+                        <p className="text-3xl font-black text-white tracking-tighter mb-1">—</p>
+                        <p className="text-[10px] text-neutral-500 uppercase tracking-widest font-bold mb-2">Volumen</p>
+                        <p className="text-xs text-neutral-600 font-medium">Próximamente</p>
                     </div>
-                    <p className="text-3xl font-black text-white mb-1">—</p>
-                    <p className="text-[10px] text-neutral-500 uppercase tracking-wider font-bold mb-2">Volumen</p>
-                    <p className="text-xs text-neutral-500 font-medium">Próximamente</p>
                 </div>
             </div>
 
             {/* Body Measurements */}
-            <div className="bg-neutral-900 border border-neutral-800 rounded-3xl overflow-hidden">
-                <div className="border-b border-neutral-800 p-6 flex items-center gap-3">
-                    <div className="w-10 h-10 bg-red-500/10 rounded-xl flex items-center justify-center">
-                        <Ruler className="h-5 w-5 text-red-500" />
+            <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-[2rem] overflow-hidden">
+                <div className="border-b border-neutral-800/50 p-6 flex items-center gap-4 bg-black/20">
+                    <div className="w-12 h-12 bg-red-900/20 rounded-2xl flex items-center justify-center border border-red-500/10 shadow-[0_0_15px_rgba(220,38,38,0.1)]">
+                        <Ruler className="h-6 w-6 text-red-500" />
                     </div>
-                    <h3 className="text-lg font-bold text-white uppercase tracking-tight">Medidas Corporales</h3>
+                    <div>
+                        <h3 className="text-xl font-black text-white uppercase tracking-tight">Medidas Corporales</h3>
+                        <p className="text-xs text-neutral-500 font-medium">Seguimiento de circunferencia (cm)</p>
+                    </div>
                 </div>
                 <div className="p-6">
                     {metrics?.measurements && Object.keys(metrics.measurements).length > 0 ? (
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                             {Object.entries(metrics.measurements).map(([key, value]) => {
                                 const labels: Record<string, string> = {
-                                    chest: "Pecho / Espalda",
-                                    hips: "Cadera",
-                                    waist: "Cintura",
-                                    shoulders: "Hombros",
-                                    glutes: "Glúteos",
-                                    neck: "Cuello",
-                                    biceps: "Bíceps",
-                                    quads: "Cuádriceps",
-                                    calves: "Pantorrillas",
-                                    forearms: "Antebrazos",
-                                    bicepsleft: "Bíceps (Izq)",
-                                    bicepsright: "Bíceps (Der)",
-                                    forearmsleft: "Antebrazos (Izq)",
-                                    forearmsright: "Antebrazos (Der)",
-                                    quadsleft: "Cuádriceps (Izq)",
-                                    quadsright: "Cuádriceps (Der)",
-                                    calvesleft: "Pantorrillas (Izq)",
-                                    calvesright: "Pantorrillas (Der)",
+                                    chest: "Pecho", hips: "Cadera", waist: "Cintura", shoulders: "Hombros",
+                                    glutes: "Glúteos", neck: "Cuello", biceps: "Bíceps", quads: "Cuádriceps",
+                                    calves: "Pantorrillas", forearms: "Antebrazos",
+                                    bicepsleft: "Bíceps (Izq)", bicepsright: "Bíceps (Der)",
+                                    forearmsleft: "Antebrazos (Izq)", forearmsright: "Antebrazos (Der)",
+                                    quadsleft: "Cuádriceps (Izq)", quadsright: "Cuádriceps (Der)",
+                                    calvesleft: "Pantorrillas (Izq)", calvesright: "Pantorrillas (Der)",
                                 };
                                 return (
-                                    <div key={key} className="text-center p-4 bg-black/40 border border-white/5 rounded-2xl hover:border-red-500/30 transition-colors">
-                                        <p className="text-2xl font-black text-white mb-1">{value as number}<span className="text-sm text-neutral-500 ml-1 font-bold">cm</span></p>
-                                        <p className="text-[10px] text-neutral-400 uppercase tracking-widest font-bold">{labels[key.toLowerCase()] || key}</p>
+                                    <div key={key} className="text-center p-5 bg-neutral-900/50 border border-neutral-800 rounded-3xl hover:border-red-500/30 transition-all hover:bg-neutral-800/50 group">
+                                        <p className="text-3xl font-black text-white mb-1 group-hover:scale-110 transition-transform origin-bottom">{value as number}<span className="text-sm text-neutral-500 ml-1 font-bold">cm</span></p>
+                                        <p className="text-[10px] text-neutral-400 uppercase tracking-widest font-bold group-hover:text-red-400 transition-colors">{labels[key.toLowerCase()] || key}</p>
                                     </div>
                                 );
                             })}
                         </div>
                     ) : (
-                        <div className="text-center py-12 text-neutral-500 flex flex-col items-center gap-3">
-                            <Ruler className="h-10 w-10 text-neutral-700" />
+                        <div className="text-center py-20 text-neutral-500 flex flex-col items-center gap-4">
+                            <div className="bg-neutral-800/50 p-4 rounded-full">
+                                <Ruler className="h-8 w-8 text-neutral-600" />
+                            </div>
                             <p className="font-medium">No se han registrado medidas corporales aún.</p>
                         </div>
                     )}
@@ -216,40 +225,45 @@ export default async function ProgressPage({ searchParams }: ProgressPageProps) 
             </div>
 
             {/* Personal Records */}
-            <div className="bg-neutral-900 border border-neutral-800 rounded-3xl overflow-hidden">
-                <div className="border-b border-neutral-800 p-6 flex items-center gap-3">
-                    <div className="w-10 h-10 bg-yellow-500/10 rounded-xl flex items-center justify-center">
-                        <Trophy className="h-5 w-5 text-yellow-500" />
+            <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-[2rem] overflow-hidden">
+                <div className="border-b border-neutral-800/50 p-6 flex items-center gap-4 bg-black/20">
+                    <div className="w-12 h-12 bg-yellow-900/20 rounded-2xl flex items-center justify-center border border-yellow-500/10 shadow-[0_0_15px_rgba(234,179,8,0.1)]">
+                        <Trophy className="h-6 w-6 text-yellow-500" />
                     </div>
-                    <h3 className="text-lg font-bold text-white uppercase tracking-tight">Records Personales (PRs)</h3>
+                    <div>
+                        <h3 className="text-xl font-black text-white uppercase tracking-tight">Records Personales (PRs)</h3>
+                        <p className="text-xs text-neutral-500 font-medium">Tus mejores marcas históricas</p>
+                    </div>
                 </div>
 
                 {prs && prs.length > 0 ? (
                     <div className="divide-y divide-neutral-800">
                         {prs.map((pr: any, i: number) => (
-                            <div key={i} className="p-5 flex items-center justify-between hover:bg-neutral-800/30 transition-colors group">
-                                <div className="flex items-center gap-4">
-                                    <div className="h-12 w-12 bg-yellow-500/10 rounded-2xl flex items-center justify-center border border-yellow-500/20 group-hover:border-yellow-500/50 transition-colors">
-                                        <Trophy className="h-5 w-5 text-yellow-500" />
+                            <div key={i} className="p-6 flex items-center justify-between hover:bg-neutral-800/30 transition-colors group">
+                                <div className="flex items-center gap-5">
+                                    <div className="h-14 w-14 bg-yellow-500/5 rounded-2xl flex items-center justify-center border border-yellow-500/10 group-hover:border-yellow-500/30 transition-colors">
+                                        <Trophy className="h-6 w-6 text-yellow-600 group-hover:text-yellow-500 transition-colors" />
                                     </div>
                                     <div>
-                                        <h4 className="font-bold text-white text-lg">{pr.exercise}</h4>
-                                        <p className="text-xs text-neutral-500 font-medium">{pr.date}</p>
+                                        <h4 className="font-bold text-white text-lg mb-0.5">{pr.exercise}</h4>
+                                        <p className="text-xs text-neutral-500 font-medium font-mono">{pr.date}</p>
                                     </div>
                                 </div>
                                 <div className="text-right">
-                                    <p className="font-black text-2xl text-white">{pr.weight} <span className="text-sm font-bold text-neutral-500">kg</span></p>
-                                    <p className="text-[10px] uppercase tracking-wider text-neutral-600 font-bold">Mejor Serie</p>
+                                    <p className="font-black text-3xl text-white tracking-tighter">{pr.weight} <span className="text-base font-bold text-neutral-600">kg</span></p>
+                                    <p className="text-[9px] uppercase tracking-widest text-yellow-500/70 font-bold">Mejor Serie</p>
                                 </div>
                             </div>
                         ))}
                     </div>
                 ) : (
-                    <div className="text-center py-12 text-neutral-500 flex flex-col items-center gap-3">
-                        <Trophy className="h-12 w-12 text-neutral-700" />
+                    <div className="text-center py-20 text-neutral-500 flex flex-col items-center gap-4">
+                        <div className="bg-neutral-800/50 p-4 rounded-full">
+                            <Trophy className="h-8 w-8 text-neutral-600" />
+                        </div>
                         <div>
                             <p className="font-medium">Aún no hay datos suficientes para calcular PRs.</p>
-                            <p className="text-sm">Los registros aparecerán automáticamente al entrenar.</p>
+                            <p className="text-sm mt-1">Sigue entrenando duro.</p>
                         </div>
                     </div>
                 )}

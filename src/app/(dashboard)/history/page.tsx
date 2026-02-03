@@ -44,27 +44,36 @@ export default async function HistoryPage() {
             </div>
 
             {/* Quick Stats */}
-            <div className="grid grid-cols-3 gap-4">
-                <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-5 text-center">
-                    <div className="w-10 h-10 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                        <Dumbbell className="w-5 h-5 text-red-500" />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-[2rem] p-6 relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-20 h-20 bg-red-600/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none group-hover:bg-red-600/20 transition-colors"></div>
+                    <div className="flex flex-col items-center text-center relative z-10">
+                        <div className="w-12 h-12 bg-neutral-900 rounded-2xl flex items-center justify-center mb-3 shadow-lg border border-neutral-800 group-hover:scale-110 transition-transform duration-300">
+                            <Dumbbell className="w-6 h-6 text-white" />
+                        </div>
+                        <p className="text-3xl font-black text-white tracking-tighter mb-1">{totalSessions}</p>
+                        <p className="text-[10px] text-neutral-500 uppercase tracking-widest font-bold">Total Sesiones</p>
                     </div>
-                    <p className="text-2xl font-black text-white">{totalSessions}</p>
-                    <p className="text-[10px] text-neutral-500 uppercase tracking-widest font-bold">Total Sesiones</p>
                 </div>
-                <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-5 text-center">
-                    <div className="w-10 h-10 bg-orange-500/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                        <Flame className="w-5 h-5 text-orange-500" />
+                <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-[2rem] p-6 relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-20 h-20 bg-orange-600/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none group-hover:bg-orange-600/20 transition-colors"></div>
+                    <div className="flex flex-col items-center text-center relative z-10">
+                        <div className="w-12 h-12 bg-neutral-900 rounded-2xl flex items-center justify-center mb-3 shadow-lg border border-neutral-800 group-hover:scale-110 transition-transform duration-300">
+                            <Flame className="w-6 h-6 text-orange-500" />
+                        </div>
+                        <p className="text-3xl font-black text-white tracking-tighter mb-1">{Math.round(totalVolume / 1000)}k</p>
+                        <p className="text-[10px] text-neutral-500 uppercase tracking-widest font-bold">Kg Totales</p>
                     </div>
-                    <p className="text-2xl font-black text-white">{Math.round(totalVolume / 1000)}k</p>
-                    <p className="text-[10px] text-neutral-500 uppercase tracking-widest font-bold">Kg Totales</p>
                 </div>
-                <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-5 text-center">
-                    <div className="w-10 h-10 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                        <Calendar className="w-5 h-5 text-green-500" />
+                <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-[2rem] p-6 relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-20 h-20 bg-emerald-600/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none group-hover:bg-emerald-600/20 transition-colors"></div>
+                    <div className="flex flex-col items-center text-center relative z-10">
+                        <div className="w-12 h-12 bg-neutral-900 rounded-2xl flex items-center justify-center mb-3 shadow-lg border border-neutral-800 group-hover:scale-110 transition-transform duration-300">
+                            <Calendar className="w-6 h-6 text-emerald-500" />
+                        </div>
+                        <p className="text-3xl font-black text-white tracking-tighter mb-1">{thisMonthLogs.length}</p>
+                        <p className="text-[10px] text-neutral-500 uppercase tracking-widest font-bold">Este Mes</p>
                     </div>
-                    <p className="text-2xl font-black text-white">{thisMonthLogs.length}</p>
-                    <p className="text-[10px] text-neutral-500 uppercase tracking-widest font-bold">Este Mes</p>
                 </div>
             </div>
 

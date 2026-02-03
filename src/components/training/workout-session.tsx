@@ -114,21 +114,25 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
     return (
         <div className="max-w-3xl mx-auto pb-24 space-y-6">
             {/* Header Sticky */}
-            <div className="sticky top-0 z-20 bg-black/80 backdrop-blur-lg border-b border-neutral-800 p-4 -mx-4 md:rounded-b-3xl md:mx-0">
-                <div className="flex justify-between items-center">
+            <div className="sticky top-0 z-30 bg-black/90 backdrop-blur-xl border-b border-white/5 py-4 px-4 -mx-4 md:rounded-b-3xl md:mx-0 shadow-2xl shadow-black/50">
+                <div className="flex justify-between items-center max-w-3xl mx-auto">
                     <div>
-                        <h2 className="text-lg font-black text-white">{activeDay.name}</h2>
-                        <div className="flex items-center text-red-500 font-mono text-sm">
-                            <Clock className="w-4 h-4 mr-1" />
+                        <h2 className="text-lg font-black text-white tracking-tight">{activeDay.name}</h2>
+                        <div className="flex items-center text-red-500 font-mono text-sm font-bold tracking-widest bg-red-500/10 px-2 py-0.5 rounded-md w-fit mt-1">
+                            <Clock className="w-3.5 h-3.5 mr-1.5" />
                             {formatTime(elapsedTime)}
                         </div>
                     </div>
                     <div className="flex gap-2">
                         <AIAssistantDialog
-                            muscleGroups={activeDay.exercises.map((e: any) => e.exerciseName)} // Naive mapping, improving later
+                            muscleGroups={activeDay.exercises.map((e: any) => e.exerciseName)}
                             availableExercises={activeDay.exercises.map((e: any) => e.exerciseName)}
                         />
-                        <Button onClick={handleFinish} disabled={isSubmitting} className="rounded-full bg-white text-black font-bold hover:bg-neutral-200">
+                        <Button
+                            onClick={handleFinish}
+                            disabled={isSubmitting}
+                            className="rounded-full bg-white text-black font-bold hover:bg-neutral-200 shadow-[0_0_20px_rgba(255,255,255,0.3)] transition-all hover:scale-105 active:scale-95"
+                        >
                             {isSubmitting ? "Guardando..." : "Terminar"}
                         </Button>
                     </div>
@@ -142,27 +146,29 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
                     if (!logExercise) return null;
 
                     return (
-                        <Card key={exIndex} className="bg-neutral-900/50 border-neutral-800 overflow-hidden">
-                            <CardHeader className="bg-neutral-900 border-b border-neutral-800 py-3">
-                                <CardTitle className="text-lg text-white flex justify-between items-start">
-                                    <span>{exercise.exerciseName}</span>
+                        <div key={exIndex} className="bg-neutral-900 rounded-[2rem] border border-neutral-800 overflow-hidden shadow-xl">
+                            <div className="bg-neutral-900 border-b border-neutral-800/50 p-5 flex flex-col gap-1">
+                                <div className="flex justify-between items-start">
+                                    <h3 className="text-xl font-bold text-white">{exercise.exerciseName}</h3>
                                     {exercise.notes && (
-                                        <div className="text-neutral-500 hover:text-white cursor-help" title={exercise.notes}>
+                                        <div className="text-neutral-500 hover:text-white transition-colors cursor-help" title={exercise.notes}>
                                             <Info className="w-5 h-5" />
                                         </div>
                                     )}
-                                </CardTitle>
-                                {exercise.notes && <p className="text-xs text-neutral-400 mt-1 line-clamp-1">{exercise.notes}</p>}
-                            </CardHeader>
-                            <CardContent className="p-0">
-                                <div className="divide-y divide-neutral-800">
-                                    <div className="grid grid-cols-12 gap-2 p-2 px-4 text-xs font-bold text-neutral-500 text-center uppercase">
-                                        <div className="col-span-1">Set</div>
-                                        <div className="col-span-3">Target</div>
-                                        <div className="col-span-3">Kg</div>
-                                        <div className="col-span-3">Reps</div>
-                                        <div className="col-span-2">Done</div>
-                                    </div>
+                                </div>
+                                {exercise.notes && <p className="text-sm text-neutral-400 line-clamp-2">{exercise.notes}</p>}
+                            </div>
+
+                            <div className="p-2 md:p-4">
+                                <div className="grid grid-cols-12 gap-2 mb-2 px-2 text-[10px] md:text-xs font-bold text-neutral-500 text-center uppercase tracking-widest">
+                                    <div className="col-span-1">#</div>
+                                    <div className="col-span-3">Meta</div>
+                                    <div className="col-span-3">Kg</div>
+                                    <div className="col-span-3">Reps</div>
+                                    <div className="col-span-2">Ok</div>
+                                </div>
+
+                                <div className="space-y-2">
                                     {exercise.sets.map((set: any, setIndex: number) => {
                                         const logSet = logExercise.sets[setIndex];
                                         const isCompleted = logSet?.completed;
@@ -171,45 +177,47 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
                                             <div
                                                 key={setIndex}
                                                 className={cn(
-                                                    "grid grid-cols-12 gap-2 p-3 items-center transition-colors",
-                                                    isCompleted ? "bg-green-900/10" : "hover:bg-neutral-800/30"
+                                                    "grid grid-cols-12 gap-2 p-2 rounded-xl items-center transition-all duration-300",
+                                                    isCompleted ? "bg-green-500/10 border border-green-500/20" : "bg-black/20 border border-transparent"
                                                 )}
                                             >
-                                                <div className="col-span-1 flex flex-col items-center justify-center">
+                                                <div className="col-span-1 flex justify-center">
                                                     <span className={cn(
-                                                        "text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center border",
-                                                        set.type === 'warmup' ? "border-yellow-600/50 text-yellow-600" :
-                                                            set.type === 'failure' ? "border-red-600/50 text-red-600" :
-                                                                "border-neutral-700 text-neutral-400"
+                                                        "text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center",
+                                                        set.type === 'warmup' ? "text-yellow-500 bg-yellow-500/10" :
+                                                            set.type === 'failure' ? "text-red-500 bg-red-500/10" :
+                                                                "text-neutral-500 bg-neutral-800"
                                                     )}>
                                                         {setIndex + 1}
                                                     </span>
                                                 </div>
-                                                <div className="col-span-3 text-center text-sm text-neutral-400">
-                                                    <div>{set.reps} reps</div>
-                                                    {set.rpeTarget && <div className="text-[10px] opacity-70">RPE {set.rpeTarget}</div>}
+                                                <div className="col-span-3 text-center">
+                                                    <div className="text-white font-medium text-sm">{set.reps}</div>
+                                                    {set.rpeTarget && <div className="text-[10px] text-neutral-500">RPE {set.rpeTarget}</div>}
                                                 </div>
                                                 <div className="col-span-3">
                                                     <Input
                                                         type="number"
-                                                        placeholder="0"
+                                                        inputMode="decimal"
+                                                        placeholder="-"
                                                         value={logSet?.weight}
                                                         onChange={(e) => updateSet(exIndex, setIndex, "weight", e.target.value)}
                                                         className={cn(
-                                                            "h-9 text-center font-mono font-bold border-neutral-800 bg-black/50 focus:border-red-500 transition-all",
-                                                            isCompleted && "text-green-500 border-green-900/50"
+                                                            "h-12 text-center text-lg font-bold border-0 bg-neutral-800/50 rounded-lg focus:ring-1 focus:ring-red-500 transition-all placeholder:text-neutral-700 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
+                                                            isCompleted && "text-green-500 bg-green-500/5"
                                                         )}
                                                     />
                                                 </div>
                                                 <div className="col-span-3">
                                                     <Input
                                                         type="number"
-                                                        placeholder="0"
+                                                        inputMode="decimal"
+                                                        placeholder="-"
                                                         value={logSet?.reps}
                                                         onChange={(e) => updateSet(exIndex, setIndex, "reps", e.target.value)}
                                                         className={cn(
-                                                            "h-9 text-center font-mono font-bold border-neutral-800 bg-black/50 focus:border-red-500 transition-all",
-                                                            isCompleted && "text-green-500 border-green-900/50"
+                                                            "h-12 text-center text-lg font-bold border-0 bg-neutral-800/50 rounded-lg focus:ring-1 focus:ring-red-500 transition-all placeholder:text-neutral-700 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
+                                                            isCompleted && "text-green-500 bg-green-500/5"
                                                         )}
                                                     />
                                                 </div>
@@ -219,33 +227,34 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
                                                         size="icon"
                                                         onClick={() => toggleSetComplete(exIndex, setIndex)}
                                                         className={cn(
-                                                            "h-9 w-9 rounded-xl transition-all",
+                                                            "h-12 w-12 rounded-xl transition-all duration-300",
                                                             isCompleted
-                                                                ? "bg-green-500 text-black hover:bg-green-600"
-                                                                : "bg-neutral-800 text-neutral-500 hover:bg-neutral-700"
+                                                                ? "bg-green-500 text-black hover:bg-green-400 shadow-[0_0_15px_rgba(34,197,94,0.4)]"
+                                                                : "bg-neutral-800 text-neutral-600 hover:bg-neutral-700 hover:text-neutral-400"
                                                         )}
                                                     >
-                                                        <Check className="w-5 h-5" />
+                                                        <Check className={cn("w-6 h-6 transition-transform", isCompleted ? "scale-110" : "scale-100")} />
                                                     </Button>
                                                 </div>
                                             </div>
                                         );
                                     })}
                                 </div>
-                                <div className="p-3">
+
+                                <div className="mt-4 px-1">
                                     <Input
-                                        placeholder="Notas o sensaciones..."
+                                        placeholder="Notas de la serie..."
                                         value={logExercise.feedback}
                                         onChange={(e) => {
                                             const newLog = [...sessionLog];
                                             newLog[exIndex].feedback = e.target.value;
                                             setSessionLog(newLog);
                                         }}
-                                        className="bg-transparent border-none text-sm text-neutral-400 focus-visible:ring-0 placeholder:text-neutral-700 h-auto py-1"
+                                        className="bg-transparent border-0 border-b border-neutral-800 rounded-none px-0 text-sm text-neutral-300 focus-visible:ring-0 focus-visible:border-neutral-500 placeholder:text-neutral-600 transition-colors"
                                     />
                                 </div>
-                            </CardContent>
-                        </Card>
+                            </div>
+                        </div>
                     );
                 })}
             </div>

@@ -70,84 +70,89 @@ export default async function MyRoutinePage() {
 
             {/* Info Metrics */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-neutral-900 border border-neutral-800 rounded-[2rem] p-6 flex items-center gap-4">
-                    <div className="h-12 w-12 rounded-full bg-neutral-800 flex items-center justify-center text-white font-bold text-xl">
+                <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-[2rem] p-6 flex items-center gap-5 relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-red-600/5 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
+                    <div className="h-14 w-14 rounded-2xl bg-neutral-800 flex items-center justify-center text-white font-bold text-xl shadow-lg group-hover:scale-105 transition-transform">
                         {frequency}
                     </div>
                     <div>
-                        <p className="text-neutral-400 text-xs uppercase font-bold tracking-wider">Frecuencia</p>
-                        <p className="text-white font-bold">Días / Semana</p>
+                        <p className="text-neutral-500 text-xs uppercase font-bold tracking-wider mb-1">Frecuencia</p>
+                        <p className="text-white font-bold text-lg">Días / Semana</p>
                     </div>
                 </div>
-                <div className="bg-neutral-900 border border-neutral-800 rounded-[2rem] p-6 flex items-center gap-4">
-                    <div className="h-12 w-12 rounded-full bg-neutral-800 flex items-center justify-center text-white font-bold text-xl">
+                <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-[2rem] p-6 flex items-center gap-5 relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-blue-600/5 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
+                    <div className="h-14 w-14 rounded-2xl bg-neutral-800 flex items-center justify-center text-white font-bold text-xl shadow-lg group-hover:scale-105 transition-transform">
                         {totalExercises}
                     </div>
                     <div>
-                        <p className="text-neutral-400 text-xs uppercase font-bold tracking-wider">Volumen</p>
-                        <p className="text-white font-bold">Ejercicios Totales</p>
+                        <p className="text-neutral-500 text-xs uppercase font-bold tracking-wider mb-1">Volumen</p>
+                        <p className="text-white font-bold text-lg">Ejercicios Totales</p>
                     </div>
                 </div>
-                <div className="bg-neutral-900 border border-neutral-800 rounded-[2rem] p-6 flex items-center gap-4">
-                    <div className="h-12 w-12 rounded-full bg-red-900/20 text-red-500 flex items-center justify-center font-bold text-xl">
+                <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-[2rem] p-6 flex items-center gap-5 relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-600/5 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
+                    <div className="h-14 w-14 rounded-2xl bg-emerald-900/20 text-emerald-500 flex items-center justify-center font-bold text-xl shadow-lg border border-emerald-900/30 group-hover:scale-105 transition-transform">
                         W{weeksActive}
                     </div>
                     <div>
-                        <p className="text-neutral-400 text-xs uppercase font-bold tracking-wider">Antigüedad</p>
-                        <p className="text-white font-bold">Semana {weeksActive}</p>
+                        <p className="text-neutral-500 text-xs uppercase font-bold tracking-wider mb-1">Antigüedad</p>
+                        <p className="text-white font-bold text-lg">Semana {weeksActive}</p>
                     </div>
                 </div>
             </div>
 
             {/* Rutina Activa */}
-            <div className="bg-neutral-900 border border-neutral-800 rounded-[2rem] overflow-hidden">
-                <div className="p-8 border-b border-neutral-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div className="space-y-6">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 px-2">
                     <div>
-                        <div className="flex items-center gap-3 mb-2">
-                            <h3 className="text-2xl font-bold text-white">{activeRoutine.name}</h3>
-                            <span className="bg-emerald-500/10 text-emerald-500 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border border-emerald-500/20">
-                                Activa
-                            </span>
-                        </div>
+                        <h3 className="text-2xl font-black text-white mb-2">{activeRoutine.name}</h3>
                         {activeRoutine.description && (
-                            <p className="text-neutral-400 text-sm max-w-2xl">{activeRoutine.description}</p>
+                            <p className="text-neutral-400 text-sm max-w-2xl leading-relaxed">{activeRoutine.description}</p>
                         )}
                     </div>
+                    <span className="bg-emerald-500/10 text-emerald-500 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border border-emerald-500/20 self-start md:self-auto">
+                        Rutina Activa
+                    </span>
                 </div>
 
-                <div className="divide-y divide-neutral-800">
+                <div className="grid gap-4">
                     {schedule.map((day: any, index: number) => (
                         <div
                             key={index}
-                            className="p-6 flex items-center justify-between hover:bg-neutral-800/50 transition-colors group cursor-pointer"
+                            className="bg-neutral-900 border border-neutral-800 rounded-[1.5rem] p-6 flex flex-col md:flex-row items-start md:items-center justify-between hover:border-neutral-700 transition-all group relative overflow-hidden"
                         >
-                            <div className="flex items-center gap-6">
-                                <div className="h-14 w-14 bg-black border border-neutral-800 rounded-2xl flex items-center justify-center font-black text-neutral-500 group-hover:border-red-500 group-hover:text-white transition-all">
+                            <div className="absolute inset-0 bg-gradient-to-r from-white/0 to-white/[0.02] opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+
+                            <div className="flex items-center gap-6 relative z-10 w-full md:w-auto">
+                                <div className="h-16 w-16 bg-black border border-neutral-800 rounded-2xl flex items-center justify-center font-black text-2xl text-neutral-600 group-hover:text-white group-hover:border-red-900/50 group-hover:bg-red-900/10 transition-all">
                                     {index + 1}
                                 </div>
-                                <div>
-                                    <h3 className="font-bold text-white text-lg mb-1">{day.name}</h3>
+                                <div className="flex-1">
+                                    <h3 className="font-bold text-white text-lg mb-1 group-hover:text-red-500 transition-colors">{day.name}</h3>
                                     <div className="flex items-center gap-4 text-xs font-medium text-neutral-500">
-                                        <span className="flex items-center gap-1.5">
-                                            <Dumbbell className="h-3.5 w-3.5" /> {day.exercises?.length || 0} ejercicios
+                                        <span className="flex items-center gap-1.5 bg-neutral-800/50 px-2 py-1 rounded-md">
+                                            <Dumbbell className="h-3.5 w-3.5" /> {day.exercises?.length || 0} Ejercicios
                                         </span>
-                                        {/* La duración es un estimado, podríamos calcularla basado en sets * 3 min */}
-                                        <span className="flex items-center gap-1.5">
-                                            <Clock className="h-3.5 w-3.5" /> {day.exercises?.length * 4} - {day.exercises?.length * 6} min (est.)
+                                        <span className="flex items-center gap-1.5 bg-neutral-800/50 px-2 py-1 rounded-md">
+                                            <Clock className="h-3.5 w-3.5" /> {day.exercises?.length * 4} min
                                         </span>
                                     </div>
                                 </div>
                             </div>
-                            <Link href={`/my-routine/day/${index}`}>
-                                <Button variant="ghost" className="rounded-full hover:bg-white hover:text-black">
-                                    Ver Detalles
-                                </Button>
-                            </Link>
+
+                            <div className="mt-4 md:mt-0 w-full md:w-auto relative z-10">
+                                <Link href={`/my-routine/day/${index}`} className="block">
+                                    <Button variant="outline" className="w-full md:w-auto rounded-xl border-neutral-700 hover:bg-white hover:text-black font-bold transition-all">
+                                        Ver Detalles
+                                    </Button>
+                                </Link>
+                            </div>
                         </div>
                     ))}
 
                     {schedule.length === 0 && (
-                        <div className="p-12 text-center text-neutral-500">
+                        <div className="p-12 text-center text-neutral-500 bg-neutral-900 rounded-[2rem] border border-neutral-800">
                             Esta rutina no tiene días configurados.
                         </div>
                     )}
