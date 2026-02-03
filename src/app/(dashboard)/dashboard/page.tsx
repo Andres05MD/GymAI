@@ -130,26 +130,26 @@ async function CoachDashboard() {
                 {/* Right Col: Actions & Status */}
                 <div className="space-y-6">
                     {/* Quick Actions Card */}
-                    <div className="bg-white rounded-[2rem] p-6 shadow-xl relative overflow-hidden group">
+                    <div className="bg-neutral-900 border border-neutral-800 rounded-[2rem] p-6 shadow-xl relative overflow-hidden group">
                         <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                            <TrendingUp className="w-24 h-24 text-black" />
+                            <TrendingUp className="w-24 h-24 text-white" />
                         </div>
-                        <h3 className="text-black text-xl font-black mb-1 relative z-10">Acciones Rápidas</h3>
-                        <p className="text-neutral-600 text-sm mb-6 relative z-10">Gestión eficiente del gimnasio.</p>
+                        <h3 className="text-white text-xl font-black mb-1 relative z-10">Acciones Rápidas</h3>
+                        <p className="text-neutral-500 text-sm mb-6 relative z-10">Gestión eficiente del gimnasio.</p>
 
                         <div className="space-y-3 relative z-10">
                             <Link href="/routines" className="block">
-                                <Button variant="outline" className="w-full justify-start h-12 rounded-xl border-neutral-200 hover:bg-neutral-100 hover:text-black text-neutral-800 font-bold">
+                                <Button variant="outline" className="w-full justify-start h-12 rounded-xl border-neutral-700 bg-neutral-800/50 hover:bg-neutral-800 hover:text-white text-neutral-200 font-bold">
                                     <FileText className="w-4 h-4 mr-2" /> Nueva Rutina
                                 </Button>
                             </Link>
                             <Link href="/exercises" className="block">
-                                <Button variant="outline" className="w-full justify-start h-12 rounded-xl border-neutral-200 hover:bg-neutral-100 hover:text-black text-neutral-800 font-bold">
-                                    <Plus className="w-4 h-4 mr-2 text-red-600" /> Agregar Ejercicio
+                                <Button variant="outline" className="w-full justify-start h-12 rounded-xl border-neutral-700 bg-neutral-800/50 hover:bg-neutral-800 hover:text-white text-neutral-200 font-bold">
+                                    <Plus className="w-4 h-4 mr-2 text-red-500" /> Agregar Ejercicio
                                 </Button>
                             </Link>
                             <Link href="/athletes" className="block">
-                                <Button variant="outline" className="w-full justify-start h-12 rounded-xl border-neutral-200 hover:bg-neutral-100 hover:text-black text-neutral-800 font-bold">
+                                <Button variant="outline" className="w-full justify-start h-12 rounded-xl border-neutral-700 bg-neutral-800/50 hover:bg-neutral-800 hover:text-white text-neutral-200 font-bold">
                                     <UserPlus className="w-4 h-4 mr-2" /> Gestionar Atletas
                                 </Button>
                             </Link>
@@ -267,15 +267,15 @@ async function AthleteDashboard({ user }: { user: any }) {
                         <ProgressChart completed={weeklyCompleted} target={weeklyTarget} />
                     </div>
 
-                    <div className="bg-white rounded-[2rem] p-6 text-black relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300 shadow-xl">
+                    <div className="bg-neutral-900 border border-neutral-800 rounded-[2rem] p-6 text-white relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300 shadow-xl">
                         <div className="relative z-10">
                             <p className="text-xs font-bold uppercase tracking-widest text-neutral-500 mb-1">Próxima Sesión</p>
                             {routine ? (
                                 <>
                                     <h3 className="text-2xl font-black mb-1">{(routine as any).name}</h3>
-                                    <p className="text-sm text-neutral-600 mb-4">{(routine as any).exercises?.length || 0} Ejercicios</p>
+                                    <p className="text-sm text-neutral-400 mb-4">{(routine as any).exercises?.length || 0} Ejercicios</p>
                                     <Link href="/train">
-                                        <Button className="w-full rounded-full bg-black text-white hover:bg-neutral-800">
+                                        <Button className="w-full rounded-full bg-white text-black hover:bg-neutral-200 font-bold">
                                             Iniciar Ahora
                                         </Button>
                                     </Link>
@@ -283,8 +283,8 @@ async function AthleteDashboard({ user }: { user: any }) {
                             ) : (
                                 <>
                                     <h3 className="text-xl font-black mb-1">Sin rutina asignada</h3>
-                                    <p className="text-sm text-neutral-600 mb-4">Contacta a tu entrenador.</p>
-                                    <Button disabled className="w-full rounded-full bg-neutral-200 text-neutral-400">
+                                    <p className="text-sm text-neutral-400 mb-4">Contacta a tu entrenador.</p>
+                                    <Button disabled className="w-full rounded-full bg-neutral-800 text-neutral-500">
                                         No disponible
                                     </Button>
                                 </>
