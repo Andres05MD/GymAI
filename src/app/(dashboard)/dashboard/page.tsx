@@ -1,5 +1,5 @@
 import { auth } from "@/lib/auth";
-import { Users, Dumbbell, CalendarDays, TrendingUp, Activity, PlayCircle, Clock, Plus, UserPlus, FileText, ChevronRight } from "lucide-react";
+import { Users, Dumbbell, CalendarDays, TrendingUp, Activity, PlayCircle, Clock, Plus, UserPlus, FileText, ChevronRight, Copy, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { ActivityChart } from "@/components/dashboard/activity-chart";
@@ -36,7 +36,7 @@ async function CoachDashboard() {
             </div>
 
             {/* KPI Row */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <StatCard
                     title="Atletas Totales"
                     value={stats?.totalAthletes?.toString() || "0"}
@@ -59,13 +59,7 @@ async function CoachDashboard() {
                     trend="neutral"
                     icon={Dumbbell}
                 />
-                <StatCard
-                    title="Volumen Global"
-                    value={`${Math.round((stats?.weeklyVolume || 0) / 1000)}k`}
-                    label="Kg esta semana"
-                    trend={(stats?.weeklyVolume || 0) > 0 ? "up" : "neutral"}
-                    icon={Activity}
-                />
+
             </div>
 
             {/* Main Content Grid */}
@@ -157,13 +151,7 @@ async function CoachDashboard() {
                     </div>
 
                     {/* Progress / Status */}
-                    <div className="bg-neutral-900 border border-neutral-800 rounded-[2rem] p-8 flex flex-col items-center justify-center text-center">
-                        <h3 className="text-lg font-bold text-white mb-4">Estado del Objetivo</h3>
-                        <div className="flex-1 flex items-center justify-center w-full min-h-[160px]">
-                            <ProgressChart completed={(stats?.totalAthletes || 0) * 10} target={100} />
-                        </div>
-                        <p className="text-xs text-neutral-500 mt-4">Metas mensuales (Demo)</p>
-                    </div>
+
 
                     {/* Active Sessions Mini-List (Placeholder for MVP) */}
                     <div className="bg-neutral-900 border border-neutral-800 rounded-[2rem] p-6">
@@ -263,7 +251,10 @@ async function AthleteDashboard({ user }: { user: any }) {
                 {/* Next Routine / Progress */}
                 <div className="space-y-6">
                     <div className="bg-neutral-900 border border-neutral-800 rounded-[2rem] p-8">
-                        <h3 className="text-xl font-bold text-white mb-6">Progreso Semanal</h3>
+                        <div className="mb-6">
+                            <h3 className="text-xl font-bold text-white">Objetivo Semanal</h3>
+                            <p className="text-sm text-neutral-400">Mantén tu constancia de entrenamiento.</p>
+                        </div>
                         <ProgressChart completed={weeklyCompleted} target={weeklyTarget} />
                     </div>
 

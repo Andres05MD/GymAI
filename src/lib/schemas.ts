@@ -116,7 +116,7 @@ export const ExerciseSchema = z.object({
     description: z.string().optional(),
     muscleGroups: z.array(z.string()).min(1, "Debe seleccionar al menos un grupo muscular"), // Ej: "pecho", "espalda"
     specificMuscles: z.array(z.string()).optional(), // Ej: "pectoral mayor", "dorsal ancho"
-    videoUrl: z.string().url().optional(),
+    videoUrl: z.string().optional(),
     coachId: z.string(), // ID del coach que creó o posee este ejercicio en su librería
 
     createdAt: z.date(),
