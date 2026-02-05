@@ -2,6 +2,79 @@
 
 import { adminDb } from "@/lib/firebase-admin";
 import { auth } from "@/lib/auth";
+import { unstable_cache } from "next/cache";
+
+// Caché para estadísticas del coach (revalida cada 60 segundos)
+const getCachedCoachStats = unstable_cache(
+    async (coachId: string) => {
+        // 1. Contar atletas
+        const athletesSnapshot = await adminDb.collection("users")
+            .where("role", "==", "athlete")
+            .count()
+            .get();
+        const totalAthletes = athletesSnapshot.data().count;
+
+        // 2. Contar rutinas
+        const routinesSnapshot = await adminDb.collection("routines")
+            .where("coachId", "==", coachId)
+            .count()
+            .get();
+        const totalRoutines = routinesSnapshot.data().count;
+
+        // 3. Contar ejercicios
+        const exercisesSnapshot = await adminDb.collection("exercises")
+            .count()
+            .get();
+        const totalExercises = exercisesSnapshot.data().count;
+
+        // 4. Calcular volumen semanal
+        const now = new Date();
+        const startOfWeek = new Date(now);
+        startOfWeek.setDate(now.getDate() - now.getDay() + (now.getDay() === 0 ? -6 : 1));
+        startOfWeek.setHours(0, 0, 0, 0);
+
+        const globalLogs = await adminDb.collection("training_logs")
+            .where("date", ">=", startOfWeek)
+            .get();
+
+        let weeklyVolume = 0;
+        const days = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
+        const activityMap = new Map<string, number>();
+        days.forEach(d => activityMap.set(d, 0));
+
+        const DAYS_ES = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
+
+        globalLogs.docs.forEach(doc => {
+            const data = doc.data();
+            let sessionVol = 0;
+
+            data.exercises?.forEach((ex: any) => {
+                ex.sets?.forEach((s: any) => {
+                    if (s.completed && s.weight && s.reps) {
+                        sessionVol += (s.weight * s.reps);
+                        weeklyVolume += (s.weight * s.reps);
+                    }
+                });
+            });
+
+            const date = data.date?.toDate?.() || new Date();
+            const dayName = DAYS_ES[date.getDay()];
+            activityMap.set(dayName, (activityMap.get(dayName) || 0) + sessionVol);
+        });
+
+        const weeklyChartData = days.map(d => ({ name: d, total: activityMap.get(d) || 0 }));
+
+        return {
+            totalAthletes,
+            totalRoutines,
+            totalExercises,
+            weeklyVolume,
+            weeklyChartData
+        };
+    },
+    ["coach-stats"],
+    { revalidate: 60, tags: ["coach-stats"] } // Revalida cada 60 segundos
+);
 
 export async function getCoachStats() {
     const session = await auth();
@@ -10,94 +83,8 @@ export async function getCoachStats() {
     }
 
     try {
-        // 1. Count Athletes
-        // Assuming athletes are users with role 'athlete'. 
-        // If there's a specific assignment, we should query by 'coachId'. 
-        // For MVP, we'll count ALL athletes if no 'coachId' field exists on users, 
-        // OR filtering by coachId if users have it. 
-        // Let's assume for now we might filter by a 'coachId' field on the user profile if it exists,
-        // otherwise we just count all for this demo or return 0.
-        // BETTER MVP: Query 'users' where role == 'athlete'. 
-        // If you strictly want *assigned* athletes, we'd need that relation. 
-        // Let's assume we query all athletes for now as the app seems single-coach or open.
-
-        const athletesSnapshot = await adminDb.collection("users")
-            .where("role", "==", "athlete")
-            // .where("coachId", "==", session.user.id) // Uncomment if relationship exists
-            .count()
-            .get();
-
-        const totalAthletes = athletesSnapshot.data().count;
-
-        // 2. Count Routines
-        const routinesSnapshot = await adminDb.collection("routines")
-            .where("coachId", "==", session.user.id)
-            .count()
-            .get();
-
-        const totalRoutines = routinesSnapshot.data().count;
-
-        // 3. Count Exercises (Library)
-        const exercisesSnapshot = await adminDb.collection("exercises")
-            .count()
-            .get();
-
-        const totalExercises = exercisesSnapshot.data().count;
-
-        // 4. Calculate Global Activity (Total Volume this week)
-        const now = new Date();
-        const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay() + (now.getDay() === 0 ? -6 : 1)));
-        startOfWeek.setHours(0, 0, 0, 0);
-
-        const globalLogs = await adminDb.collection("training_logs")
-            .where("date", ">=", startOfWeek)
-            .get();
-
-        let weeklyVolume = 0;
-        globalLogs.docs.forEach(doc => {
-            const data = doc.data();
-            data.exercises?.forEach((ex: any) => {
-                ex.sets?.forEach((s: any) => {
-                    if (s.completed && s.weight && s.reps) {
-                        weeklyVolume += (s.weight * s.reps);
-                    }
-                });
-            });
-        });
-
-        // Weekly activity chart data (simplified)
-        const days = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
-        const activityMap = new Map();
-        days.forEach(d => activityMap.set(d, 0));
-
-        const DAYS_ES = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
-        globalLogs.docs.forEach(doc => {
-            const date = doc.data().date.toDate();
-            let dayName = DAYS_ES[date.getDay()];
-            if (date.getDay() === 0) dayName = "Dom";
-
-            let sessionVol = 0;
-            doc.data().exercises?.forEach((ex: any) => {
-                ex.sets?.forEach((s: any) => {
-                    if (s.completed && s.weight && s.reps) sessionVol += (s.weight * s.reps);
-                });
-            });
-            activityMap.set(dayName, (activityMap.get(dayName) || 0) + sessionVol);
-        });
-
-        const weeklyChartData = days.map(d => ({ name: d, total: activityMap.get(d) }));
-
-        return {
-            success: true,
-            stats: {
-                totalAthletes,
-                totalRoutines,
-                totalExercises,
-                weeklyVolume,
-                weeklyChartData
-            }
-        };
-
+        const stats = await getCachedCoachStats(session.user.id);
+        return { success: true, stats };
     } catch (error) {
         console.error("Error fetching coach stats:", error);
         return {
@@ -105,44 +92,51 @@ export async function getCoachStats() {
             stats: {
                 totalAthletes: 0,
                 totalRoutines: 0,
-                totalExercises: 0
+                totalExercises: 0,
+                weeklyVolume: 0,
+                weeklyChartData: []
             }
         };
     }
 }
 
-export async function getRecentActivity() {
-    const session = await auth();
-    if (session?.user?.role !== "coach") {
-        return { success: false, error: "No autorizado" };
-    }
-
-    try {
+// Caché para actividad reciente con datos de usuario pre-cargados
+const getCachedRecentActivity = unstable_cache(
+    async () => {
         const snapshot = await adminDb.collection("training_logs")
             .orderBy("date", "desc")
             .limit(5)
             .get();
 
-        const activities = await Promise.all(snapshot.docs.map(async (doc) => {
+        // Obtener IDs únicos de usuarios para hacer una sola consulta batch
+        const userIds = new Set<string>();
+        snapshot.docs.forEach(doc => {
             const data = doc.data();
+            const uid = data.userId || data.athleteId;
+            if (uid) userIds.add(uid);
+        });
 
-            // Fetch athlete details
-            let athleteName = "Atleta Desconocido";
-            let athleteImage = null;
+        // Fetch de usuarios en batch (una sola consulta)
+        const userMap = new Map<string, { name: string; image: string | null }>();
+        if (userIds.size > 0) {
+            const userDocs = await adminDb.collection("users")
+                .where("__name__", "in", Array.from(userIds).slice(0, 10)) // Limit de Firestore
+                .get();
 
-            // Check for userId or athleteId
-            const uid = data.userId || data.athleteId; // Fallback support
+            userDocs.docs.forEach(doc => {
+                const data = doc.data();
+                userMap.set(doc.id, {
+                    name: data.name || "Atleta",
+                    image: data.image || null
+                });
+            });
+        }
 
-            if (uid) {
-                const userDoc = await adminDb.collection("users").doc(uid).get();
-                if (userDoc.exists) {
-                    const userData = userDoc.data();
-                    athleteName = userData?.name || "Atleta";
-                    athleteImage = userData?.image || null;
-                }
-            }
+        const activities = snapshot.docs.map(doc => {
+            const data = doc.data();
+            const uid = data.userId || data.athleteId;
+            const user = userMap.get(uid) || { name: "Atleta Desconocido", image: null };
 
-            // Calculate Volume
             let sessionVol = 0;
             data.exercises?.forEach((ex: any) => {
                 ex.sets?.forEach((s: any) => {
@@ -152,15 +146,29 @@ export async function getRecentActivity() {
 
             return {
                 id: doc.id,
-                athleteName,
-                athleteImage,
+                athleteName: user.name,
+                athleteImage: user.image,
                 routineName: data.routineName || "Entrenamiento Libre",
-                date: data.date?.toDate ? data.date.toDate().toISOString() : new Date().toISOString(), // Return ISO string for client
+                date: data.date?.toDate?.()?.toISOString() || new Date().toISOString(),
                 volume: sessionVol,
                 exercisesCount: data.exercises?.length || 0
             };
-        }));
+        });
 
+        return activities;
+    },
+    ["recent-activity"],
+    { revalidate: 30, tags: ["recent-activity"] } // Revalida cada 30 segundos
+);
+
+export async function getRecentActivity() {
+    const session = await auth();
+    if (session?.user?.role !== "coach") {
+        return { success: false, error: "No autorizado" };
+    }
+
+    try {
+        const activities = await getCachedRecentActivity();
         return { success: true, activities };
     } catch (error) {
         console.error("Error fetching recent activity:", error);

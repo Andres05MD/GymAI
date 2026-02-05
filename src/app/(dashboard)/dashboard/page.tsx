@@ -2,13 +2,24 @@ import { auth } from "@/lib/auth";
 import { Users, Dumbbell, CalendarDays, TrendingUp, Activity, PlayCircle, Clock, Plus, UserPlus, FileText, ChevronRight, Copy, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StatCard } from "@/components/dashboard/stat-card";
-import { ActivityChart } from "@/components/dashboard/activity-chart";
-import { ProgressChart } from "@/components/dashboard/progress-chart";
 import { getPersonalRecords, getWeeklyActivity, getWeeklyProgress } from "@/actions/analytics-actions";
 import { getCoachStats, getRecentActivity } from "@/actions/coach-stats-actions";
 import { getActiveRoutine } from "@/actions/athlete-actions";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import dynamic from "next/dynamic";
+import { Skeleton } from "@/components/ui/skeleton";
+
+// Lazy loading de gráficos pesados (Recharts ~200KB)
+const ActivityChart = dynamic(
+    () => import("@/components/dashboard/activity-chart").then(mod => mod.ActivityChart),
+    { loading: () => <Skeleton className="w-full h-[250px] rounded-xl bg-neutral-800" /> }
+);
+
+const ProgressChart = dynamic(
+    () => import("@/components/dashboard/progress-chart").then(mod => mod.ProgressChart),
+    { loading: () => <Skeleton className="w-full h-[200px] rounded-xl bg-neutral-800" /> }
+);
 
 async function CoachDashboard() {
     const [statsResult, activityResult] = await Promise.all([

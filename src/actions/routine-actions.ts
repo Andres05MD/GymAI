@@ -6,6 +6,7 @@ import { adminDb } from "@/lib/firebase-admin";
 import { auth } from "@/lib/auth";
 import { getGroqClient } from "@/lib/ai";
 import { getExercises } from "./exercise-actions";
+import { unstable_cache, revalidatePath } from "next/cache";
 
 // Schema for generating a routine with AI
 const GenerateRoutineSchema = z.object({
@@ -162,6 +163,8 @@ export async function createRoutine(data: Partial<RoutineInput>) {
         };
 
         const docRef = await adminDb.collection("routines").add(newRoutine);
+        revalidatePath("/routines");
+        revalidatePath("/dashboard");
         return { success: true, id: docRef.id };
     } catch (error) {
         console.error("Error creating routine:", error);
@@ -181,6 +184,7 @@ export async function updateRoutine(id: string, data: Partial<RoutineInput>) {
             ...data,
             updatedAt: new Date(),
         });
+        revalidatePath("/routines");
         return { success: true };
     } catch (error) {
         return { success: false, error: "Error al actualizar" };
@@ -196,6 +200,8 @@ export async function deleteRoutine(id: string) {
 
     try {
         await adminDb.collection("routines").doc(id).delete();
+        revalidatePath("/routines");
+        revalidatePath("/dashboard");
         return { success: true };
     } catch (error) {
         return { success: false, error: "Error al eliminar" };

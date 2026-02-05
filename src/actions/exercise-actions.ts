@@ -4,6 +4,7 @@ import { z } from "zod";
 import { ExerciseSchema } from "@/lib/schemas";
 import { adminDb } from "@/lib/firebase-admin";
 import { auth } from "@/lib/auth";
+import { unstable_cache, revalidatePath } from "next/cache";
 
 // Input schema for creating/updating exercises (excludes system fields)
 const ExerciseInputSchema = ExerciseSchema.omit({
@@ -15,31 +16,25 @@ const ExerciseInputSchema = ExerciseSchema.omit({
 
 export type ExerciseInput = z.infer<typeof ExerciseInputSchema>;
 
-export async function getExercises() {
-    const session = await auth();
-    if (!session?.user?.id || session.user.role !== "coach") {
-        return { success: false, error: "No autorizado" };
-    }
-
-    try {
+// Función interna cacheada
+const getCachedExercises = unstable_cache(
+    async (coachId: string) => {
         const snapshot = await adminDb
             .collection("exercises")
-            .where("coachId", "==", session.user.id)
+            .where("coachId", "==", coachId)
             .get();
 
         if (snapshot.empty) {
-            return { success: true, exercises: [] };
+            return [];
         }
 
-        const exercises = snapshot.docs.map(doc => {
+        return snapshot.docs.map(doc => {
             const data = doc.data();
-
-            // Helper seguro para fechas
             const getDate = (field: any) => {
                 if (!field) return new Date().toISOString();
-                if (typeof field.toDate === 'function') return field.toDate().toISOString(); // Firestore Timestamp
+                if (typeof field.toDate === 'function') return field.toDate().toISOString();
                 if (field instanceof Date) return field.toISOString();
-                return String(field); // Fallback si es string directo
+                return String(field);
             };
 
             return {
@@ -49,7 +44,19 @@ export async function getExercises() {
                 updatedAt: getDate(data.updatedAt),
             };
         });
+    },
+    ["exercises-list"],
+    { revalidate: 3600, tags: ["exercises"] } // Cache por 1 hora o hasta revalidación manual
+);
 
+export async function getExercises() {
+    const session = await auth();
+    if (!session?.user?.id || session.user.role !== "coach") {
+        return { success: false, error: "No autorizado" };
+    }
+
+    try {
+        const exercises = await getCachedExercises(session.user.id);
         return { success: true, exercises };
     } catch (error) {
         console.error("Error fetching exercises:", error);
@@ -78,6 +85,9 @@ export async function createExercise(data: ExerciseInput) {
 
         const docRef = await adminDb.collection("exercises").add(newExercise);
 
+        revalidatePath("/exercises");
+        revalidatePath("/dashboard");
+
         return { success: true, id: docRef.id };
     } catch (error) {
         console.error("Error creating exercise:", error);
@@ -97,7 +107,6 @@ export async function updateExercise(id: string, data: ExerciseInput) {
     }
 
     try {
-        // Verify ownership
         const docRef = adminDb.collection("exercises").doc(id);
         const docSnap = await docRef.get();
 
@@ -114,6 +123,9 @@ export async function updateExercise(id: string, data: ExerciseInput) {
             updatedAt: new Date(),
         });
 
+        revalidatePath("/exercises");
+        revalidatePath("/dashboard");
+
         return { success: true };
     } catch (error) {
         console.error("Error updating exercise:", error);
@@ -128,7 +140,6 @@ export async function deleteExercise(id: string) {
     }
 
     try {
-        // Verify ownership
         const docRef = adminDb.collection("exercises").doc(id);
         const docSnap = await docRef.get();
 
@@ -141,6 +152,9 @@ export async function deleteExercise(id: string) {
         }
 
         await docRef.delete();
+
+        revalidatePath("/exercises");
+        revalidatePath("/dashboard");
 
         return { success: true };
     } catch (error) {

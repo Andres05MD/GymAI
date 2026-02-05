@@ -2,6 +2,7 @@
 
 import { adminDb } from "@/lib/firebase-admin";
 import { auth } from "@/lib/auth";
+import { unstable_cache } from "next/cache";
 
 // --- HELPERS ---
 
@@ -17,6 +18,48 @@ const DAYS_ES = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
 
 // --- ACTIONS ---
 
+// Función interna cacheada para actividad semanal
+const getCachedWeeklyActivity = unstable_cache(
+    async (targetUserId: string) => {
+        const startOfWeek = getStartOfWeek(new Date());
+
+        const logsSnapshot = await adminDb.collection("training_logs")
+            .where("athleteId", "==", targetUserId)
+            .where("date", ">=", startOfWeek)
+            .get();
+
+        const activityMap = new Map<string, number>();
+        const days = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
+        days.forEach(d => activityMap.set(d, 0));
+
+        logsSnapshot.docs.forEach(doc => {
+            const data = doc.data();
+            const date = data.date?.toDate?.() || new Date();
+            let dayName = DAYS_ES[date.getDay()];
+            if (date.getDay() === 0) dayName = "Dom";
+
+            let sessionVolume = 0;
+            data.exercises?.forEach((ex: any) => {
+                ex.sets?.forEach((s: any) => {
+                    if (s.completed && s.weight && s.reps) {
+                        sessionVolume += (s.weight * s.reps);
+                    }
+                });
+            });
+
+            const current = activityMap.get(dayName) || 0;
+            activityMap.set(dayName, current + sessionVolume);
+        });
+
+        return days.map(day => ({
+            name: day,
+            total: Math.round(activityMap.get(day) || 0)
+        }));
+    },
+    ["weekly-activity"],
+    { revalidate: 30, tags: ["weekly-activity"] }
+);
+
 export async function getWeeklyActivity(userId?: string) {
     const session = await auth();
     if (!session?.user?.id) return { success: false, error: "No autorizado" };
@@ -24,54 +67,8 @@ export async function getWeeklyActivity(userId?: string) {
     const targetUserId = userId || session.user.id;
 
     try {
-        const now = new Date();
-        const startOfWeek = getStartOfWeek(new Date()); // Start of current week (Monday)
-
-        const logsSnapshot = await adminDb.collection("training_logs")
-            .where("athleteId", "==", targetUserId)
-            .where("date", ">=", startOfWeek)
-            .get();
-
-        // Initialize Activity Map (Mon-Sun)
-        const activityMap = new Map();
-        // Fill 0 for last 7 days or current week days
-        // Let's show current week M-S
-        const days = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
-        days.forEach(d => activityMap.set(d, 0));
-
-        logsSnapshot.docs.forEach(doc => {
-            const data = doc.data();
-            const date = data.date.toDate();
-            // Get day name
-            let dayName = DAYS_ES[date.getDay()];
-            if (date.getDay() === 0) dayName = "Dom"; // Ensure consistent naming
-
-            // Calculate Volume for this session
-            let sessionVolume = 0;
-            if (data.exercises) {
-                data.exercises.forEach((ex: any) => {
-                    ex.sets.forEach((s: any) => {
-                        if (s.completed && s.weight && s.reps) {
-                            sessionVolume += (s.weight * s.reps);
-                        }
-                    });
-                });
-            }
-
-            // Accumulate (in tons/kgs)
-            // Using logic: If multiple sessions same day, sum.
-            const current = activityMap.get(dayName) || 0;
-            activityMap.set(dayName, current + sessionVolume);
-        });
-
-        // Convert to array
-        const data = days.map(day => ({
-            name: day,
-            total: Math.round(activityMap.get(day) || 0)
-        }));
-
+        const data = await getCachedWeeklyActivity(targetUserId);
         return { success: true, data };
-
     } catch (error) {
         console.error("Error fetching activity:", error);
         return { success: false, error: "Error al cargar actividad" };

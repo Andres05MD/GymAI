@@ -1,8 +1,14 @@
 import { auth } from "@/lib/auth";
 import { Header } from "@/components/layout/header";
 import { Sidebar } from "@/components/layout/sidebar";
-import { Chatbot } from "@/components/ai/chatbot";
 import { MobileNav } from "@/components/layout/mobile-nav";
+import dynamic from "next/dynamic";
+
+// Lazy loading del Chatbot - solo se carga cuando el usuario interactúa
+const Chatbot = dynamic(
+    () => import("@/components/ai/chatbot").then(mod => mod.Chatbot),
+    { loading: () => null }
+);
 
 export default async function DashboardLayout({
     children,
@@ -33,5 +39,3 @@ export default async function DashboardLayout({
         </div>
     );
 }
-
-import Link from "next/link";

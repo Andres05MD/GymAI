@@ -11,7 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Plus, Dumbbell, PlayCircle, Tag, Image } from "lucide-react";
+import { MediaUpload } from "@/components/ui/media-upload";
+import { Loader2, Dumbbell, Tag, ImagePlay } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -171,32 +172,40 @@ export function ExerciseFormDialog({ exercise, trigger, open, onOpenChange }: Ex
                                 {errors.muscleGroups && <p className="text-red-500 text-xs font-medium ml-1">{errors.muscleGroups.message}</p>}
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {/* Specific Muscles */}
-                                <div className="space-y-3">
-                                    <Label className="text-xs font-bold uppercase tracking-widest text-neutral-500 ml-1">Músculos Específicos</Label>
-                                    <Input
-                                        placeholder="Ej: Pectoral mayor, Tríceps..."
-                                        className="bg-neutral-900/50 border-neutral-800 text-white h-12 rounded-xl px-4 focus-visible:ring-red-600/50 focus-visible:border-red-600 transition-all placeholder:text-neutral-600"
-                                        onChange={(e) => {
-                                            const val = e.target.value;
-                                            setValue("specificMuscles", val.split(",").map(s => s.trim()).filter(Boolean));
-                                        }}
-                                        defaultValue={exercise?.specificMuscles?.join(", ")}
-                                    />
-                                </div>
+                            {/* Músculos Específicos */}
+                            <div className="space-y-3">
+                                <Label className="text-xs font-bold uppercase tracking-widest text-neutral-500 ml-1">Músculos Específicos</Label>
+                                <Input
+                                    placeholder="Ej: Pectoral mayor, Tríceps..."
+                                    className="bg-neutral-900/50 border-neutral-800 text-white h-12 rounded-xl px-4 focus-visible:ring-red-600/50 focus-visible:border-red-600 transition-all placeholder:text-neutral-600"
+                                    onChange={(e) => {
+                                        const val = e.target.value;
+                                        setValue("specificMuscles", val.split(",").map(s => s.trim()).filter(Boolean));
+                                    }}
+                                    defaultValue={exercise?.specificMuscles?.join(", ")}
+                                />
+                            </div>
 
-                                {/* Multimedia URL */}
-                                <div className="space-y-3">
-                                    <Label className="text-xs font-bold uppercase tracking-widest text-neutral-500 ml-1 flex items-center gap-2">
-                                        <Image className="w-3 h-3" /> Multimedia de Referencia (Opcional)
-                                    </Label>
-                                    <Input
-                                        {...register("videoUrl")}
-                                        placeholder="Enlace a video o imagen..."
-                                        className="bg-neutral-900/50 border-neutral-800 text-white h-12 rounded-xl px-4 focus-visible:ring-red-600/50 focus-visible:border-red-600 transition-all placeholder:text-neutral-600"
-                                    />
-                                </div>
+                            {/* Multimedia - Subida de archivos */}
+                            <div className="space-y-3">
+                                <Label className="text-xs font-bold uppercase tracking-widest text-neutral-500 ml-1 flex items-center gap-2">
+                                    <ImagePlay className="w-3 h-3" /> Multimedia de Referencia (Opcional)
+                                </Label>
+
+                                {/* Componente de subida */}
+                                <MediaUpload
+                                    value={watch("videoUrl") || ""}
+                                    onChange={(url) => setValue("videoUrl", url)}
+                                    onClear={() => setValue("videoUrl", "")}
+                                    disabled={isSubmitting}
+                                />
+
+                                {/* Input para URL manual */}
+                                <Input
+                                    {...register("videoUrl")}
+                                    placeholder="O pega una URL de imagen/video..."
+                                    className="bg-neutral-900/50 border-neutral-800 text-white h-12 rounded-xl px-4 focus-visible:ring-red-600/50 focus-visible:border-red-600 transition-all placeholder:text-neutral-600"
+                                />
                             </div>
                         </div>
                     </div>
