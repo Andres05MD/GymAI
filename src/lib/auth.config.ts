@@ -35,7 +35,7 @@ export const authConfig = {
                 if (isLoggedIn) {
                     // Si es atleta y no completó onboarding -> forzar onboarding
                     // Los coaches no necesitan onboarding
-                    if (auth.user.role === "athlete" && !auth.user.onboardingCompleted) {
+                    if (auth.user.role !== "coach" && !auth.user.onboardingCompleted) {
                         return Response.redirect(new URL("/onboarding", nextUrl));
                     }
                     return true;

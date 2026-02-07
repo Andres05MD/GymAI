@@ -89,6 +89,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                                 image: firebaseUser.photoUrl || "",
                                 role: "athlete",
                                 emailVerified: new Date(),
+                                onboardingCompleted: false,
                                 createdAt: Timestamp.now(),
                                 updatedAt: Timestamp.now(),
                             };
@@ -105,7 +106,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                                     name: newUser.name,
                                     email: newUser.email,
                                     image: newUser.image,
-                                    emailVerified: newUser.emailVerified
+                                    emailVerified: newUser.emailVerified,
+                                    role: newUser.role,
+                                    onboardingCompleted: newUser.onboardingCompleted
                                 };
                             }
                         }
@@ -151,7 +154,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                         email: firebaseUser.email,
                         name: firebaseUser.displayName || email,
                         image: firebaseUser.photoURL,
-                        emailVerified: firebaseUser.emailVerified ? new Date() : null
+                        emailVerified: firebaseUser.emailVerified ? new Date() : null,
+                        role: "athlete",
+                        onboardingCompleted: false
                     };
 
                 } catch (error: any) {
