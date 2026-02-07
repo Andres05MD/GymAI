@@ -211,9 +211,9 @@ export function ExerciseList({ exercises }: ExerciseListProps) {
                                             <span>Por ejemplo</span>
                                         </button>
                                     </DialogTrigger>
-                                    <DialogContent className="w-[95vw] sm:w-[85vw] md:w-[75vw] lg:w-[60vw] max-w-5xl bg-neutral-900 border-neutral-800 p-0 text-white overflow-hidden outline-none">
-                                        <DialogHeader className="p-4 bg-neutral-900 border-b border-neutral-800 z-10 flex flex-row items-center justify-between">
-                                            <DialogTitle className="truncate pr-8">{exercise.name}</DialogTitle>
+                                    <DialogContent className="w-[95%] sm:w-[90%] max-w-4xl bg-neutral-900 border-neutral-800 p-0 text-white overflow-hidden outline-none rounded-2xl sm:rounded-3xl">
+                                        <DialogHeader className="px-4 py-3 sm:px-6 sm:py-4 bg-neutral-900 border-b border-neutral-800 z-10 flex flex-row items-center justify-between">
+                                            <DialogTitle className="truncate pr-8 text-base sm:text-lg">{exercise.name}</DialogTitle>
                                         </DialogHeader>
                                         <div className="aspect-video w-full bg-black relative flex items-center justify-center">
                                             {(() => {
