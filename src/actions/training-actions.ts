@@ -4,6 +4,8 @@ import { adminDb } from "@/lib/firebase-admin";
 import { auth } from "@/lib/auth";
 import { z } from "zod";
 import { TrainingLogSchema } from "@/lib/schemas";
+import { unstable_cache } from "next/cache";
+import { revalidateCacheTags, CACHE_TAGS } from "./cache-actions";
 
 // --- COACH ACTIONS ---
 

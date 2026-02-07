@@ -1,5 +1,10 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+import {
+    initializeFirestore,
+    persistentLocalCache,
+    persistentSingleTabManager,
+    getFirestore
+} from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
@@ -14,7 +19,30 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-const db = getFirestore(app);
+
+// Firestore con persistencia local para reducir lecturas de red
+// Solo se activa en el cliente (browser)
+let db: ReturnType<typeof getFirestore>;
+
+if (typeof window !== "undefined" && !getApps().length) {
+    // Cliente: usar persistencia local
+    try {
+        db = initializeFirestore(app, {
+            localCache: persistentLocalCache({
+                tabManager: persistentSingleTabManager({
+                    forceOwnership: true
+                })
+            })
+        });
+    } catch (e) {
+        // Si ya está inicializado, usar la instancia existente
+        db = getFirestore(app);
+    }
+} else {
+    // Servidor o app ya inicializada: usar getFirestore normal
+    db = getFirestore(app);
+}
+
 const auth = getAuth(app);
 
 // --- Helpers para Firestore con Zod ---

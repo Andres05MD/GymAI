@@ -1,12 +1,28 @@
 // Configuración del cliente de ImageKit para subidas
-// Usamos require para evitar problemas con la importación default en Next.js
-const ImageKit = require("@imagekit/javascript");
+// Adaptado para @imagekit/javascript v5+ (API funcional)
+import { upload, buildSrc } from "@imagekit/javascript";
 
-// Cliente de ImageKit configurado con las credenciales públicas
-export const imagekit = new ImageKit({
-    urlEndpoint: process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT!,
-    publicKey: process.env.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY!,
-});
+const urlEndpoint = process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT!;
+const publicKey = process.env.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY!;
+
+// Cliente de ImageKit simulado para mantener compatibilidad con la estructura anterior
+export const imagekit = {
+    // Wrapper para la función upload del SDK v5
+    upload: (options: any) => {
+        return upload({
+            urlEndpoint, // Aunque upload endpoints de IKit son fijos, a veces se pasa
+            publicKey,
+            ...options,
+        });
+    },
+    // Wrapper para la función url del SDK v5 (usando buildSrc)
+    url: (options: any) => {
+        return buildSrc({
+            urlEndpoint,
+            ...options
+        });
+    }
+};
 
 // Tipos de archivo permitidos para ejercicios
 export const ALLOWED_FILE_TYPES = {

@@ -1,5 +1,7 @@
 import { auth } from "@/lib/auth";
 import { Users, Dumbbell, CalendarDays, TrendingUp, Activity, PlayCircle, Clock, Plus, UserPlus, FileText, ChevronRight, Copy, Share2 } from "lucide-react";
+import { NotificationBell } from "@/components/notifications/notification-bell";
+import { UserNav } from "@/components/layout/user-nav";
 import { Button } from "@/components/ui/button";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { getPersonalRecords, getWeeklyActivity, getWeeklyProgress } from "@/actions/analytics-actions";
@@ -21,7 +23,7 @@ const ProgressChart = dynamic(
     { loading: () => <Skeleton className="w-full h-[200px] rounded-xl bg-neutral-800" /> }
 );
 
-async function CoachDashboard() {
+async function CoachDashboard({ user }: { user: any }) {
     const [statsResult, activityResult] = await Promise.all([
         getCoachStats(),
         getRecentActivity()
@@ -34,20 +36,27 @@ async function CoachDashboard() {
         <div className="space-y-8 pb-24 md:pb-10">
             <div className="flex flex-col gap-4 md:flex-row md:justify-between md:items-center mb-6">
                 <div>
-                    <h2 className="text-3xl font-bold text-white tracking-tight">Dashboard Entrenador</h2>
+                    <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight">Dashboard Entrenador</h2>
                     <p className="text-neutral-400">Gestiona tus atletas y rutinas desde aquí.</p>
                 </div>
-                <div className="flex gap-3 w-full md:w-auto">
+                <div className="flex gap-4 items-center w-full md:w-auto">
                     <Link href="/athletes" className="w-full md:w-auto">
                         <Button className="w-full md:w-auto rounded-full bg-red-600 hover:bg-red-700 text-white font-bold px-6 h-10 shadow-lg shadow-red-900/20">
                             Ver Atletas
                         </Button>
                     </Link>
+
+                    {/* Notification & User Nav - Desktop Only for Dashboard */}
+                    <div className="hidden md:flex items-center gap-4">
+                        <div className="h-8 w-px bg-neutral-800 mx-2" />
+                        <NotificationBell role="coach" />
+                        <UserNav user={user} />
+                    </div>
                 </div>
             </div>
 
             {/* KPI Row */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <StatCard
                     title="Atletas Totales"
                     value={stats?.totalAthletes?.toString() || "0"}
@@ -191,7 +200,7 @@ async function AthleteDashboard({ user }: { user: any }) {
         <div className="space-y-8 pb-24 md:pb-10">
             <div className="flex flex-col gap-4 md:flex-row md:justify-between md:items-center mb-2">
                 <div>
-                    <h2 className="text-3xl font-bold text-white tracking-tight">Dashboard</h2>
+                    <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight">Dashboard</h2>
                     <p className="text-neutral-400">Bienvenido de nuevo, {user?.name?.split(' ')[0]}</p>
                 </div>
                 <div className="flex gap-3 w-full md:w-auto">
@@ -210,7 +219,7 @@ async function AthleteDashboard({ user }: { user: any }) {
             </div>
 
             {/* KPI Cards - Simplified */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <StatCard
                     title="Sesiones"
                     value={weeklyCompleted?.toString() || "0"}
@@ -327,7 +336,7 @@ export default async function DashboardPage() {
     const role = session?.user?.role;
 
     if (role === "coach") {
-        return <CoachDashboard />;
+        return <CoachDashboard user={session?.user} />;
     }
 
     return <AthleteDashboard user={session?.user} />;

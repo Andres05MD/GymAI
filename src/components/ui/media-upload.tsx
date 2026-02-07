@@ -82,7 +82,7 @@ export function MediaUpload({
             // Guardar la URL resultante
             const category = getFileCategory(file);
             setPreviewInfo({ type: category || "image", name: file.name });
-            onChange(result.url);
+            onChange(result.url || "");
             setStatus("success");
             setProgress(100);
         } catch (err) {

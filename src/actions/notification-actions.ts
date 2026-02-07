@@ -2,34 +2,24 @@
 
 import { adminDb } from "@/lib/firebase-admin";
 import { auth } from "@/lib/auth";
+import { unstable_cache } from "next/cache";
 
-export async function getCoachNotifications() {
-    const session = await auth();
-    if (session?.user?.role !== "coach") {
-        return { success: false, error: "No autorizado" };
-    }
-
-    try {
-        // En una app real, esto vendría de una colección 'notifications'
-        // Para este requerimiento, vamos a simular que la IA genera alertas
-        // basándonos en los logs de entrenamiento recientes de los atletas.
-
-        // 1. Obtener logs de entrenamiento recientes (últimos 24-48h o últimos 10 globales)
+// Caché para notificaciones del coach (revalida cada 2 minutos)
+const getCachedCoachNotifications = unstable_cache(
+    async () => {
         const logsSnapshot = await adminDb.collection("training_logs")
             .orderBy("date", "desc")
             .limit(5)
             .get();
 
         if (logsSnapshot.empty) {
-            return { success: true, notifications: [] };
+            return [];
         }
 
-        // 2. Mapear logs a notificaciones simuladas de IA
         const notifications = logsSnapshot.docs.map(doc => {
             const data = doc.data();
             const date = data.date.toDate();
 
-            // Lógica simple: si un atleta completó un entrenamiento, la IA "notifica" al coach
             return {
                 id: doc.id,
                 title: "Análisis de Sesión",
@@ -41,6 +31,20 @@ export async function getCoachNotifications() {
             };
         });
 
+        return notifications;
+    },
+    ["coach-notifications"],
+    { revalidate: 120, tags: ["notifications", "coach-notifications"] }
+);
+
+export async function getCoachNotifications() {
+    const session = await auth();
+    if (session?.user?.role !== "coach") {
+        return { success: false, error: "No autorizado" };
+    }
+
+    try {
+        const notifications = await getCachedCoachNotifications();
         return { success: true, notifications };
     } catch (error) {
         console.error("Error fetching notifications:", error);
@@ -48,15 +52,11 @@ export async function getCoachNotifications() {
     }
 }
 
-export async function getAthleteNotifications() {
-    const session = await auth();
-    if (!session?.user?.id) {
-        return { success: false, error: "No autorizado" };
-    }
-
-    try {
-        const userDoc = await adminDb.collection("users").doc(session.user.id).get();
-        if (!userDoc.exists) return { success: true, notifications: [] };
+// Caché para notificaciones del atleta (revalida cada 5 minutos)
+const getCachedAthleteNotifications = unstable_cache(
+    async (userId: string) => {
+        const userDoc = await adminDb.collection("users").doc(userId).get();
+        if (!userDoc.exists) return [];
 
         const userData = userDoc.data();
         const notifications = [];
@@ -66,7 +66,6 @@ export async function getAthleteNotifications() {
         const lastMeasurementDate = userData?.measurements?.updatedAt?.toDate();
 
         let needsUpdate = false;
-        // Si no tiene medidas, o si no tiene fecha, o si pasó más de 30 días
         if (!userData?.measurements || !lastMeasurementDate) {
             needsUpdate = true;
         } else {
@@ -77,16 +76,30 @@ export async function getAthleteNotifications() {
 
         if (needsUpdate) {
             notifications.push({
-                id: "measurements-update-needed", // ID fijo para que no se duplique visualmente si generamos dinámicamente
+                id: "measurements-update-needed",
                 title: "Actualizar Medidas",
                 message: "Ha pasado un mes desde tu último registro. ¡Actualiza tus medidas para ver tu progreso!",
                 time: new Date().toISOString(),
                 type: "alert",
                 read: false,
-                link: "/profile" // Redirigir al perfil
+                link: "/profile"
             });
         }
 
+        return notifications;
+    },
+    ["athlete-notifications"],
+    { revalidate: 300, tags: ["notifications", "athlete-notifications"] }
+);
+
+export async function getAthleteNotifications() {
+    const session = await auth();
+    if (!session?.user?.id) {
+        return { success: false, error: "No autorizado" };
+    }
+
+    try {
+        const notifications = await getCachedAthleteNotifications(session.user.id);
         return { success: true, notifications };
     } catch (error) {
         console.error("Error fetching athlete notifications:", error);

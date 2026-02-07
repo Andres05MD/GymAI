@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Providers from "./providers";
@@ -6,18 +6,44 @@ import Providers from "./providers";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
-  display: "swap", // Muestra texto inmediatamente con fallback
+  display: "swap",
+  preload: true,
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
   display: "swap",
+  preload: false, // Solo precargar la fuente principal
 });
 
+export const viewport: Viewport = {
+  themeColor: "#000000",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+};
+
 export const metadata: Metadata = {
-  title: "GymIA",
-  description: "Tu compañero de entrenamiento personal",
+  title: {
+    default: "GymIA - Tu Entrenador Personal Inteligente",
+    template: "%s | GymIA"
+  },
+  description: "Gestiona rutinas, seguimiento de progreso y entrenamientos personalizados con inteligencia artificial.",
+  keywords: ["gimnasio", "entrenamiento", "fitness", "rutinas", "IA", "progreso"],
+  authors: [{ name: "GymIA Team" }],
+  creator: "GymIA",
+  openGraph: {
+    type: "website",
+    locale: "es_ES",
+    siteName: "GymIA",
+    title: "GymIA - Tu Entrenador Personal Inteligente",
+    description: "Gestiona rutinas, seguimiento de progreso y entrenamientos personalizados con IA.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({
@@ -26,7 +52,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="es" suppressHydrationWarning>
+      <head>
+        {/* Preconnect para recursos externos críticos */}
+        <link rel="preconnect" href="https://ik.imagekit.io" />
+        <link rel="dns-prefetch" href="https://ik.imagekit.io" />
+        <link rel="preconnect" href="https://firestore.googleapis.com" />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >

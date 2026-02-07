@@ -139,22 +139,32 @@ body {
   overflow-x: hidden;
 }
 
-/* Glassmorphism Utilities */
-.glass {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
+/* Glassmorphism Utilities - Optimizado con herencia */
+@layer components {
+  .glass-base {
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .glass {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
 
-.glass-card {
-  background: rgba(20, 20, 20, 0.7);
-  /* Slightly lighter/more opaque */
-  backdrop-filter: blur(16px);
-  /* More blur */
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  /* Stronger border */
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
-  /* Deep shadow for depth */
+  .glass-card {
+    background: rgba(20, 20, 20, 0.7);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+  }
+  
+  /* Variante más sutil para elementos secundarios */
+  .glass-subtle {
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
 }
 
 /* Custom Scrollbar */

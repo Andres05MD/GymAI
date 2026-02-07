@@ -24,29 +24,29 @@ export function Sidebar({ role }: SidebarProps) {
     const pathname = usePathname();
 
     const commonItems = [
-        { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+        { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard, prefetch: true },
     ];
 
     const coachItems = [
         ...commonItems,
-        { label: "Atletas", href: "/athletes", icon: Users },
-        { label: "Rutinas", href: "/routines", icon: ClipboardList },
-        { label: "Ejercicios", href: "/exercises", icon: Dumbbell },
-        { label: "Progreso", href: "/progress", icon: BarChart2 },
+        { label: "Atletas", href: "/athletes", icon: Users, prefetch: true },
+        { label: "Rutinas", href: "/routines", icon: ClipboardList, prefetch: true },
+        { label: "Ejercicios", href: "/exercises", icon: Dumbbell, prefetch: false },
+        { label: "Progreso", href: "/progress", icon: BarChart2, prefetch: false },
     ];
 
     const athleteItems = [
         ...commonItems,
-        { label: "Rutina Hoy", href: "/train", icon: Dumbbell },
-        { label: "Rutina Semanal", href: "/my-routine", icon: ClipboardList },
-        { label: "Historial", href: "/history", icon: History },
-        { label: "Progreso", href: "/progress", icon: BarChart2 },
+        { label: "Rutina Hoy", href: "/train", icon: Dumbbell, prefetch: true },
+        { label: "Rutina Semanal", href: "/my-routine", icon: ClipboardList, prefetch: true },
+        { label: "Historial", href: "/history", icon: History, prefetch: false },
+        { label: "Progreso", href: "/progress", icon: BarChart2, prefetch: false },
     ];
 
     const menuItems = role === "coach" ? coachItems : athleteItems;
 
     const generalItems = [
-        { label: "Perfil", href: "/profile", icon: UserCircle },
+        { label: "Perfil", href: "/profile", icon: UserCircle, prefetch: false },
     ];
 
     return (
@@ -71,6 +71,7 @@ export function Sidebar({ role }: SidebarProps) {
                                 <Link
                                     key={item.href}
                                     href={item.href}
+                                    prefetch={item.prefetch}
                                     className={cn(
                                         "flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-200 group font-medium",
                                         isActive
@@ -101,6 +102,7 @@ export function Sidebar({ role }: SidebarProps) {
                                 <Link
                                     key={item.href}
                                     href={item.href}
+                                    prefetch={item.prefetch}
                                     className={cn(
                                         "flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-200 group font-medium",
                                         isActive
