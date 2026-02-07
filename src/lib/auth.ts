@@ -2,7 +2,7 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { FirestoreAdapter } from "@auth/firebase-adapter";
 import { db, auth as firebaseAuth } from "@/lib/firebase";
-import { collection, query, where, getDocs, limit, doc, getDoc } from "firebase/firestore";
+import { collection, query, where, getDocs, limit, doc, getDoc, setDoc, Timestamp } from "firebase/firestore";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { z } from "zod";
 import { authConfig } from "./auth.config";
@@ -56,7 +56,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                     try {
                         const idToken = credentials.idToken as string;
 
-                        // Verificar el token con la API REST de Google Identity Toolkit
+                        // Verificar el token con la API REST de Google Identity Toolkit (método seguro server-side)
+                        // Alternativamente, se puede usar firebase-admin si se prefiere no usar REST directo
                         const res = await fetch(
                             `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${process.env.NEXT_PUBLIC_FIREBASE_API_KEY}`,
                             {
@@ -74,20 +75,39 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                         }
 
                         const firebaseUser = data.users[0];
+                        const userId = firebaseUser.localId;
 
                         // Buscar usuario en Firestore por su UID
-                        let user = await getUserById(firebaseUser.localId);
+                        let user = await getUserById(userId);
 
                         if (!user) {
-                            // Si no existe en Firestore, retornamos datos básicos
-                            // El usuario puede ser creado más tarde o durante onboarding
-                            return {
-                                id: firebaseUser.localId,
+                            // Si no existe, lo creamos automáticamente en Firestore
+                            const newUser = {
+                                id: userId,
+                                name: firebaseUser.displayName || "Usuario",
                                 email: firebaseUser.email,
-                                name: firebaseUser.displayName || firebaseUser.email,
-                                image: firebaseUser.photoUrl,
-                                emailVerified: new Date()
+                                image: firebaseUser.photoUrl || "",
+                                role: "athlete",
+                                emailVerified: new Date(),
+                                createdAt: Timestamp.now(),
+                                updatedAt: Timestamp.now(),
                             };
+
+                            try {
+                                await setDoc(doc(db, "users", userId), newUser);
+                                return newUser;
+                            } catch (createError) {
+                                console.error("Error creando usuario en Firestore:", createError);
+                                // Si falla la creación, retornamos el objeto básico para permitir login
+                                // aunque no se haya guardado en BD (fallback)
+                                return {
+                                    id: userId,
+                                    name: newUser.name,
+                                    email: newUser.email,
+                                    image: newUser.image,
+                                    emailVerified: newUser.emailVerified
+                                };
+                            }
                         }
 
                         return user;
