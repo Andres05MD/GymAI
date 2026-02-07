@@ -3,77 +3,298 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // --- Funciones de Ayuda ---
+    // ============================================
+    // FUNCIONES DE AYUDA
+    // ============================================
     
+    // Verifica si el usuario está autenticado
     function isAuthenticated() {
       return request.auth != null;
     }
 
+    // Verifica si el usuario es el propietario del documento
     function isOwner(userId) {
       return request.auth.uid == userId;
     }
     
+    // Verifica si el usuario tiene rol de coach (usando Custom Claims)
+    // Fallback: lee el documento del usuario si no hay custom claims
     function isCoach() {
-      // Opción 1: Custom Claims (Ideal) -> request.auth.token.role == 'coach'
-      // Opción 2: Leer documento (Costoso) -> get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'coach'
-      // Por ahora confiamos en la validación de servidor para escrituras críticas,
-      // pero bloqueamos escrituras de clientes no-dueños.
-      return isAuthenticated(); 
-    }
-
-    // --- Reglas por Colección ---
-
-    // USERS: 
-    // - Dueño lee y escribe su perfil.
-    // - Coaches pueden leer perfiles de atletas (simplificado a 'auth read' por ahora para búsqueda).
-    match /users/{userId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated() && isOwner(userId);
-      allow update: if isAuthenticated() && isOwner(userId);
-      allow delete: if false; // Solo admin
-    }
-
-    // EXERCISES:
-    // - Todos leen (biblioteca).
-    // - Solo coaches crean/editan (Validado mayormente en backend).
-    match /exercises/{exerciseId} {
-      allow read: if isAuthenticated();
-      allow create, update, delete: if isAuthenticated(); // Se asume que el backend valida el rol 'coach'
-    }
-
-    // ROUTINES:
-    // - Atletas leen sus rutinas. Coaches todas.
-    // - Coaches escriben.
-    match /routines/{routineId} {
-      allow read: if isAuthenticated();
-      allow write: if isAuthenticated(); // Idealmente solo coach, pero backend maneja la lógica
-    }
-
-    // TRAINING LOGS:
-    // - Atletas leen/escriben sus propios logs.
-    // - Coaches pueden leer los logs de cualquier atleta.
-    match /training_logs/{logId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated() && request.resource.data.athleteId == request.auth.uid;
-      allow update: if isAuthenticated() && (resource.data.athleteId == request.auth.uid || request.resource.data.athleteId == request.auth.uid);
-      allow delete: if isAuthenticated() && resource.data.athleteId == request.auth.uid;
-    }
-
-    // BODY MEASUREMENTS:
-    // - Igual que logs.
-    match /measurements/{measurementId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
-      allow update, delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      return isAuthenticated() && (
+        request.auth.token.role == 'coach' ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'coach'
+      );
     }
     
-    // NOTIFICATIONS (Future-proofing)
-    match /notifications/{notificationId} {
-      allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || resource.data.athleteId == request.auth.uid);
-      allow write: if false; // Solo servidor
+    // Verifica si el usuario tiene rol de atleta
+    function isAthlete() {
+      return isAuthenticated() && (
+        request.auth.token.role == 'athlete' ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'athlete'
+      );
+    }
+    
+    // Verifica si el coach tiene asignado a un atleta específico
+    function isCoachOfAthlete(athleteId) {
+      return isCoach() && (
+        get(/databases/$(database)/documents/users/$(athleteId)).data.coachId == request.auth.uid
+      );
+    }
+    
+    // Verifica que los datos de entrada contengan un campo específico
+    function hasField(field) {
+      return field in request.resource.data;
+    }
+    
+    // Verifica el tamaño máximo de una cadena
+    function isValidString(field, maxLength) {
+      return request.resource.data[field] is string && 
+             request.resource.data[field].size() <= maxLength;
     }
 
-    // Por defecto bloquear todo lo demás
+    // ============================================
+    // REGLAS POR COLECCIÓN
+    // ============================================
+
+    // ----------------------------------------
+    // USERS (Perfiles de usuarios)
+    // ----------------------------------------
+    // - Cualquier autenticado puede leer (para búsqueda de coaches/atletas)
+    // - Solo el propietario puede crear/editar su perfil
+    // - Nadie puede eliminar (solo admin desde consola)
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      
+      allow create: if isAuthenticated() 
+                    && isOwner(userId)
+                    && hasField('role')
+                    && request.resource.data.role in ['coach', 'athlete'];
+      
+      allow update: if isAuthenticated() 
+                    && isOwner(userId)
+                    // No permitir cambiar el rol una vez establecido
+                    && (!('role' in request.resource.data) || 
+                        request.resource.data.role == resource.data.role);
+      
+      allow delete: if false;
+    }
+
+    // ----------------------------------------
+    // EXERCISES (Biblioteca de ejercicios)
+    // ----------------------------------------
+    // - Cualquier autenticado puede leer
+    // - Solo coaches pueden crear/editar/eliminar
+    match /exercises/{exerciseId} {
+      allow read: if isAuthenticated();
+      
+      allow create: if isCoach()
+                    && hasField('name')
+                    && hasField('muscleGroup')
+                    && hasField('createdBy')
+                    && request.resource.data.createdBy == request.auth.uid;
+      
+      allow update: if isCoach()
+                    // Solo el creador puede editar, o cualquier coach si no hay creador
+                    && (resource.data.createdBy == request.auth.uid || 
+                        !('createdBy' in resource.data));
+      
+      allow delete: if isCoach()
+                    && resource.data.createdBy == request.auth.uid;
+    }
+
+    // ----------------------------------------
+    // ROUTINES (Rutinas de entrenamiento)
+    // ----------------------------------------
+    // - Atletas leen sus propias rutinas
+    // - Coaches leen/escriben rutinas que ellos crearon
+    match /routines/{routineId} {
+      allow read: if isAuthenticated() && (
+        // Atleta lee su rutina asignada
+        resource.data.athleteId == request.auth.uid ||
+        // Coach lee rutinas que creó
+        resource.data.coachId == request.auth.uid ||
+        // Coach lee rutinas de sus atletas
+        isCoachOfAthlete(resource.data.athleteId)
+      );
+      
+      allow create: if isCoach()
+                    && hasField('coachId')
+                    && request.resource.data.coachId == request.auth.uid
+                    && hasField('athleteId')
+                    && hasField('name');
+      
+      allow update: if isCoach()
+                    && resource.data.coachId == request.auth.uid;
+      
+      allow delete: if isCoach()
+                    && resource.data.coachId == request.auth.uid;
+    }
+
+    // ----------------------------------------
+    // TRAINING_LOGS (Registros de entrenamientos)
+    // ----------------------------------------
+    // - Atletas leen/escriben sus propios logs
+    // - Coaches leen los logs de sus atletas
+    match /training_logs/{logId} {
+      allow read: if isAuthenticated() && (
+        resource.data.athleteId == request.auth.uid ||
+        isCoachOfAthlete(resource.data.athleteId) ||
+        isCoach() // Coaches pueden ver todos para análisis global
+      );
+      
+      allow create: if isAuthenticated()
+                    && hasField('athleteId')
+                    && request.resource.data.athleteId == request.auth.uid
+                    && hasField('date');
+      
+      allow update: if isAuthenticated()
+                    && resource.data.athleteId == request.auth.uid;
+      
+      allow delete: if isAuthenticated()
+                    && resource.data.athleteId == request.auth.uid;
+    }
+
+    // ----------------------------------------
+    // WORKOUTS (Entrenamientos completados)
+    // ----------------------------------------
+    // Similar a training_logs
+    match /workouts/{workoutId} {
+      allow read: if isAuthenticated() && (
+        resource.data.athleteId == request.auth.uid ||
+        isCoachOfAthlete(resource.data.athleteId) ||
+        isCoach()
+      );
+      
+      allow create: if isAuthenticated()
+                    && hasField('athleteId')
+                    && request.resource.data.athleteId == request.auth.uid;
+      
+      allow update: if isAuthenticated()
+                    && resource.data.athleteId == request.auth.uid;
+      
+      allow delete: if isAuthenticated()
+                    && resource.data.athleteId == request.auth.uid;
+    }
+
+    // ----------------------------------------
+    // WORKOUT_SETS (Sets individuales de entrenamientos)
+    // ----------------------------------------
+    match /workout_sets/{setId} {
+      allow read: if isAuthenticated() && (
+        resource.data.athleteId == request.auth.uid ||
+        isCoachOfAthlete(resource.data.athleteId) ||
+        isCoach()
+      );
+      
+      allow create: if isAuthenticated()
+                    && hasField('athleteId')
+                    && request.resource.data.athleteId == request.auth.uid
+                    && hasField('workoutId')
+                    && hasField('exerciseId');
+      
+      allow update: if isAuthenticated()
+                    && resource.data.athleteId == request.auth.uid;
+      
+      allow delete: if isAuthenticated()
+                    && resource.data.athleteId == request.auth.uid;
+    }
+
+    // ----------------------------------------
+    // BODY_MEASUREMENTS (Medidas corporales)
+    // ----------------------------------------
+    // - Atletas leen/escriben sus propias medidas
+    // - Coaches leen las medidas de sus atletas
+    match /body_measurements/{measurementId} {
+      allow read: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid ||
+        isCoachOfAthlete(resource.data.userId)
+      );
+      
+      allow create: if isAuthenticated()
+                    && hasField('userId')
+                    && request.resource.data.userId == request.auth.uid
+                    && hasField('date');
+      
+      allow update: if isAuthenticated()
+                    && resource.data.userId == request.auth.uid;
+      
+      allow delete: if isAuthenticated()
+                    && resource.data.userId == request.auth.uid;
+    }
+    
+    // ----------------------------------------
+    // MEASUREMENTS (Alias/Compatibilidad)
+    // ----------------------------------------
+    // Por si se usa 'measurements' en lugar de 'body_measurements'
+    match /measurements/{measurementId} {
+      allow read: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid ||
+        isCoachOfAthlete(resource.data.userId)
+      );
+      
+      allow create: if isAuthenticated()
+                    && hasField('userId')
+                    && request.resource.data.userId == request.auth.uid;
+      
+      allow update, delete: if isAuthenticated()
+                            && resource.data.userId == request.auth.uid;
+    }
+    
+    // ----------------------------------------
+    // NOTIFICATIONS (Notificaciones)
+    // ----------------------------------------
+    // - Los usuarios leen sus propias notificaciones
+    // - Solo el servidor puede escribir (via Admin SDK)
+    match /notifications/{notificationId} {
+      allow read: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid || 
+        resource.data.athleteId == request.auth.uid ||
+        resource.data.coachId == request.auth.uid
+      );
+      
+      // Permitir actualizar solo el campo 'read' para marcar como leída
+      allow update: if isAuthenticated() 
+                    && (resource.data.userId == request.auth.uid ||
+                        resource.data.athleteId == request.auth.uid)
+                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']);
+      
+      allow create, delete: if false; // Solo servidor
+    }
+    
+    // ----------------------------------------
+    // AI_ANALYSIS (Análisis de IA - futuro)
+    // ----------------------------------------
+    match /ai_analysis/{analysisId} {
+      allow read: if isAuthenticated() && (
+        resource.data.athleteId == request.auth.uid ||
+        resource.data.coachId == request.auth.uid ||
+        isCoachOfAthlete(resource.data.athleteId)
+      );
+      
+      allow write: if false; // Solo servidor (Admin SDK)
+    }
+    
+    // ----------------------------------------
+    // PROGRESS_RECORDS (Récords personales - futuro)
+    // ----------------------------------------
+    match /progress_records/{recordId} {
+      allow read: if isAuthenticated() && (
+        resource.data.athleteId == request.auth.uid ||
+        isCoachOfAthlete(resource.data.athleteId) ||
+        isCoach()
+      );
+      
+      allow create, update: if isAuthenticated()
+                            && hasField('athleteId')
+                            && request.resource.data.athleteId == request.auth.uid;
+      
+      allow delete: if isAuthenticated()
+                    && resource.data.athleteId == request.auth.uid;
+    }
+
+    // ============================================
+    // REGLA POR DEFECTO - DENEGAR TODO LO DEMÁS
+    // ============================================
     match /{document=**} {
       allow read, write: if false;
     }
