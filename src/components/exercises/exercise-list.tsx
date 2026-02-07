@@ -211,17 +211,17 @@ export function ExerciseList({ exercises }: ExerciseListProps) {
                                             <span>Por ejemplo</span>
                                         </button>
                                     </DialogTrigger>
-                                    <DialogContent className="sm:max-w-3xl bg-neutral-900 border-neutral-800 p-0 text-white overflow-hidden">
-                                        <DialogHeader className="p-4 bg-neutral-900 z-10">
-                                            <DialogTitle>{exercise.name}</DialogTitle>
+                                    <DialogContent className="w-[95vw] sm:w-[85vw] md:w-[75vw] lg:w-[60vw] max-w-5xl bg-neutral-900 border-neutral-800 p-0 text-white overflow-hidden outline-none">
+                                        <DialogHeader className="p-4 bg-neutral-900 border-b border-neutral-800 z-10 flex flex-row items-center justify-between">
+                                            <DialogTitle className="truncate pr-8">{exercise.name}</DialogTitle>
                                         </DialogHeader>
-                                        <div className="aspect-video w-full bg-black relative">
+                                        <div className="aspect-video w-full bg-black relative flex items-center justify-center">
                                             {(() => {
                                                 const url = exercise.videoUrl;
                                                 let embedUrl = url;
                                                 const ytMatch = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
                                                 if (ytMatch && ytMatch[1]) {
-                                                    embedUrl = `https://www.youtube.com/embed/${ytMatch[1]}?autoplay=1`;
+                                                    embedUrl = `https://www.youtube.com/embed/${ytMatch[1]}?autoplay=1&rel=0`;
                                                 } else {
                                                     const vimeoMatch = url.match(/vimeo\.com\/(?:channels\/(?:\w+\/)?|groups\/(?:[^\/]*)\/videos\/|album\/(?:\d+)\/video\/|video\/|)(\d+)(?:$|\/|\?)/);
                                                     if (vimeoMatch && vimeoMatch[1]) {
@@ -232,7 +232,7 @@ export function ExerciseList({ exercises }: ExerciseListProps) {
                                                 return (
                                                     <iframe
                                                         src={embedUrl}
-                                                        className="w-full h-full"
+                                                        className="w-full h-full border-0"
                                                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                                         allowFullScreen
                                                     />
