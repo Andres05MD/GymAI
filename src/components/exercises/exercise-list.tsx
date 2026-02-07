@@ -3,14 +3,7 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Dumbbell, MoreVertical, Edit, Trash, PlayCircle } from "lucide-react";
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog";
+import { Search, Dumbbell, MoreVertical, Edit, Trash, PlayCircle, ExternalLink } from "lucide-react";
 import { ExerciseFormDialog } from "./exercise-form-dialog";
 import {
     DropdownMenu,
@@ -204,43 +197,16 @@ export function ExerciseList({ exercises }: ExerciseListProps) {
                         {/* Video Modal */}
                         <div className="relative z-10 w-full">
                             {exercise.videoUrl ? (
-                                <Dialog>
-                                    <DialogTrigger asChild>
-                                        <button className="flex items-center justify-center gap-2 text-xs text-white font-bold bg-neutral-800 hover:bg-red-600 px-4 py-3 rounded-xl transition-all w-full group/btn">
-                                            <PlayCircle className="h-4 w-4 text-red-500 group-hover/btn:text-white transition-colors" />
-                                            <span>Por ejemplo</span>
-                                        </button>
-                                    </DialogTrigger>
-                                    <DialogContent className="w-[95%] sm:w-[90%] max-w-4xl bg-neutral-900 border-neutral-800 p-0 text-white overflow-hidden outline-none rounded-2xl sm:rounded-3xl">
-                                        <DialogHeader className="px-4 py-3 sm:px-6 sm:py-4 bg-neutral-900 border-b border-neutral-800 z-10 flex flex-row items-center justify-between">
-                                            <DialogTitle className="truncate pr-8 text-base sm:text-lg">{exercise.name}</DialogTitle>
-                                        </DialogHeader>
-                                        <div className="aspect-video w-full bg-black relative flex items-center justify-center">
-                                            {(() => {
-                                                const url = exercise.videoUrl;
-                                                let embedUrl = url;
-                                                const ytMatch = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
-                                                if (ytMatch && ytMatch[1]) {
-                                                    embedUrl = `https://www.youtube.com/embed/${ytMatch[1]}?autoplay=1&rel=0`;
-                                                } else {
-                                                    const vimeoMatch = url.match(/vimeo\.com\/(?:channels\/(?:\w+\/)?|groups\/(?:[^\/]*)\/videos\/|album\/(?:\d+)\/video\/|video\/|)(\d+)(?:$|\/|\?)/);
-                                                    if (vimeoMatch && vimeoMatch[1]) {
-                                                        embedUrl = `https://player.vimeo.com/video/${vimeoMatch[1]}?autoplay=1`;
-                                                    }
-                                                }
-
-                                                return (
-                                                    <iframe
-                                                        src={embedUrl}
-                                                        className="w-full h-full border-0"
-                                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                                        allowFullScreen
-                                                    />
-                                                );
-                                            })()}
-                                        </div>
-                                    </DialogContent>
-                                </Dialog>
+                                <a
+                                    href={exercise.videoUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center justify-center gap-2 text-xs text-white font-bold bg-neutral-800 hover:bg-red-600 px-4 py-3 rounded-xl transition-all w-full group/btn"
+                                >
+                                    <PlayCircle className="h-4 w-4 text-red-500 group-hover/btn:text-white transition-colors" />
+                                    <span>Por ejemplo</span>
+                                    <ExternalLink className="h-3 w-3 opacity-30 group-hover/btn:opacity-100 transition-opacity ml-auto" />
+                                </a>
                             ) : (
                                 <div className="flex items-center justify-center gap-2 text-xs text-neutral-600 font-bold bg-neutral-900/50 px-4 py-3 rounded-xl w-full border border-neutral-800 border-dashed cursor-not-allowed">
                                     <PlayCircle className="h-4 w-4 opacity-20" />
