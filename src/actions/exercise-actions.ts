@@ -4,7 +4,7 @@ import { z } from "zod";
 import { ExerciseSchema } from "@/lib/schemas";
 import { adminDb } from "@/lib/firebase-admin";
 import { auth } from "@/lib/auth";
-import { unstable_cache, revalidatePath } from "next/cache";
+import { revalidatePath } from "next/cache";
 
 // Input schema for creating/updating exercises (excludes system fields)
 const ExerciseInputSchema = ExerciseSchema.omit({
@@ -16,19 +16,23 @@ const ExerciseInputSchema = ExerciseSchema.omit({
 
 export type ExerciseInput = z.infer<typeof ExerciseInputSchema>;
 
-// Función interna cacheada
-const getCachedExercises = unstable_cache(
-    async (coachId: string) => {
+export async function getExercises() {
+    const session = await auth();
+    if (!session?.user?.id || session.user.role !== "coach") {
+        return { success: false, error: "No autorizado" };
+    }
+
+    try {
         const snapshot = await adminDb
             .collection("exercises")
-            .where("coachId", "==", coachId)
+            .where("coachId", "==", session.user.id)
             .get();
 
         if (snapshot.empty) {
-            return [];
+            return { success: true, exercises: [] };
         }
 
-        return snapshot.docs.map(doc => {
+        const exercises = snapshot.docs.map(doc => {
             const data = doc.data();
             const getDate = (field: any) => {
                 if (!field) return new Date().toISOString();
@@ -44,19 +48,7 @@ const getCachedExercises = unstable_cache(
                 updatedAt: getDate(data.updatedAt),
             };
         });
-    },
-    ["exercises-list"],
-    { revalidate: 3600, tags: ["exercises"] } // Cache por 1 hora o hasta revalidación manual
-);
 
-export async function getExercises() {
-    const session = await auth();
-    if (!session?.user?.id || session.user.role !== "coach") {
-        return { success: false, error: "No autorizado" };
-    }
-
-    try {
-        const exercises = await getCachedExercises(session.user.id);
         return { success: true, exercises };
     } catch (error) {
         console.error("Error fetching exercises:", error);
