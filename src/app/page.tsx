@@ -32,16 +32,16 @@ export default function LoggingPage() {
         <div className="flex flex-col md:flex-row min-h-screen w-full bg-black md:bg-white overflow-hidden">
             {/* Black Header Area (Top on Mobile, Left on Desktop) */}
             <div className={cn(
-                "relative flex flex-col items-center justify-center bg-black p-6",
-                "h-[30vh] w-full",
+                "relative flex flex-col items-center justify-center bg-black p-4",
+                "h-[20vh] w-full",
                 "md:min-h-screen md:w-1/2 md:p-12 transition-all duration-500"
             )}>
 
                 <motion.div
                     layout
-                    className="bg-white p-4 rounded-3xl shadow-lg shadow-white/10 mb-6 md:mb-0 md:scale-150 transition-transform"
+                    className="bg-white p-3 rounded-2xl shadow-lg shadow-white/10 mb-2 md:mb-0 md:scale-150 transition-transform"
                 >
-                    <Dumbbell className="w-10 h-10 md:w-12 md:h-12 text-black" />
+                    <Dumbbell className="w-8 h-8 md:w-12 md:h-12 text-black" />
                 </motion.div>
 
                 {/* Desktop Welcome Text with transitions */}

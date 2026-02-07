@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -19,12 +19,33 @@ interface MeasurementChartProps {
 }
 
 export function MeasurementChart({ data, metrics, title }: MeasurementChartProps) {
+    // Prevenir problemas de hidratación SSR con Recharts
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
     const formattedData = useMemo(() => {
         return data.map(item => ({
             ...item,
             formattedDate: format(new Date(item.date), "d MMM", { locale: es })
         }));
     }, [data]);
+
+    // Mostrar loading mientras se monta el componente
+    if (!mounted) {
+        return (
+            <Card className="bg-neutral-900 border-neutral-800">
+                <CardHeader>
+                    <CardTitle className="text-white text-lg font-medium">{title}</CardTitle>
+                </CardHeader>
+                <CardContent className="h-[300px] flex items-center justify-center">
+                    <div className="w-full h-full bg-neutral-800/50 animate-pulse rounded-xl" />
+                </CardContent>
+            </Card>
+        );
+    }
 
     if (!data || data.length === 0) {
         return (
@@ -53,7 +74,7 @@ export function MeasurementChart({ data, metrics, title }: MeasurementChartProps
             </CardHeader>
             <CardContent>
                 <div className="h-[300px] w-full">
-                    <ResponsiveContainer width="100%" height="100%">
+                    <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                         <LineChart data={formattedData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
                             <XAxis

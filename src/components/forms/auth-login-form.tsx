@@ -144,7 +144,7 @@ export function AuthLoginForm() {
             <Button
                 variant="outline"
                 type="button"
-                className="w-full h-14 rounded-2xl border-2 border-gray-100 bg-white text-black hover:bg-gray-50 hover:text-black font-medium"
+                className="w-full h-14 rounded-2xl border-2 border-gray-100 bg-black text-white hover:bg-black hover:text-white md:bg-white md:text-black md:hover:bg-black md:hover:text-white font-medium transition-colors"
                 disabled={loading}
                 onClick={handleGoogleLogin}
             >

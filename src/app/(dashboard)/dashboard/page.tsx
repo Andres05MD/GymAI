@@ -31,15 +31,15 @@ async function CoachDashboard() {
     const activities = (activityResult.success && activityResult.activities) ? activityResult.activities : [];
 
     return (
-        <div className="space-y-8 pb-10">
-            <div className="flex justify-between items-center mb-6">
+        <div className="space-y-8 pb-24 md:pb-10">
+            <div className="flex flex-col gap-4 md:flex-row md:justify-between md:items-center mb-6">
                 <div>
                     <h2 className="text-3xl font-bold text-white tracking-tight">Dashboard Entrenador</h2>
                     <p className="text-neutral-400">Gestiona tus atletas y rutinas desde aquí.</p>
                 </div>
-                <div className="flex gap-3">
-                    <Link href="/athletes">
-                        <Button className="rounded-full bg-red-600 hover:bg-red-700 text-white font-bold px-6 h-10 shadow-lg shadow-red-900/20">
+                <div className="flex gap-3 w-full md:w-auto">
+                    <Link href="/athletes" className="w-full md:w-auto">
+                        <Button className="w-full md:w-auto rounded-full bg-red-600 hover:bg-red-700 text-white font-bold px-6 h-10 shadow-lg shadow-red-900/20">
                             Ver Atletas
                         </Button>
                     </Link>
@@ -188,20 +188,20 @@ async function AthleteDashboard({ user }: { user: any }) {
     const { completed: weeklyCompleted, target: weeklyTarget } = await getWeeklyProgress(user.id);
 
     return (
-        <div className="space-y-8">
-            <div className="flex justify-between items-center mb-2">
+        <div className="space-y-8 pb-24 md:pb-10">
+            <div className="flex flex-col gap-4 md:flex-row md:justify-between md:items-center mb-2">
                 <div>
                     <h2 className="text-3xl font-bold text-white tracking-tight">Dashboard</h2>
                     <p className="text-neutral-400">Bienvenido de nuevo, {user?.name?.split(' ')[0]}</p>
                 </div>
-                <div className="flex gap-3">
-                    <Link href="/history">
-                        <Button variant="outline" className="rounded-full border-neutral-700 hover:bg-neutral-800 text-white h-12 px-6">
+                <div className="flex gap-3 w-full md:w-auto">
+                    <Link href="/history" className="flex-1 md:flex-none">
+                        <Button variant="outline" className="w-full md:w-auto rounded-full border-neutral-700 hover:bg-neutral-800 text-white h-12 px-6">
                             Ver Historial
                         </Button>
                     </Link>
-                    <Link href="/train">
-                        <Button className="rounded-full bg-red-600 hover:bg-red-700 text-white font-bold h-12 px-8 shadow-lg shadow-red-900/20">
+                    <Link href="/train" className="flex-1 md:flex-none">
+                        <Button className="w-full md:w-auto rounded-full bg-red-600 hover:bg-red-700 text-white font-bold h-12 px-8 shadow-lg shadow-red-900/20">
                             <PlayCircle className="w-5 h-5 mr-2" />
                             Entrenar
                         </Button>
