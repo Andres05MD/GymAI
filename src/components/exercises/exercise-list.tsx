@@ -68,7 +68,7 @@ export function ExerciseList({ exercises }: ExerciseListProps) {
     return (
         <div className="space-y-6">
             {/* Controls */}
-            <div className="sticky top-24 z-20 bg-black/80 backdrop-blur-xl border border-white/5 rounded-[2rem] p-2 shadow-2xl shadow-black/50">
+            <div className="sticky top-4 md:top-6 z-20 bg-black/80 backdrop-blur-xl border border-white/5 rounded-[2rem] p-2 shadow-2xl shadow-black/50">
                 <div className="flex flex-col md:flex-row gap-2">
                     <div className="relative flex-1">
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-neutral-400" />
