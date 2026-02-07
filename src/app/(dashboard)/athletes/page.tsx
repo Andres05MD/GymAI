@@ -12,10 +12,10 @@ export default async function AthletesPage() {
     return (
         <div className="space-y-8">
             {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-2 md:gap-6">
                 <div>
-                    <h1 className="text-3xl font-black text-white uppercase tracking-tighter">Mis Atletas</h1>
-                    <p className="text-neutral-400">Gestiona y supervisa el progreso de cada miembro.</p>
+                    <h1 className="text-xl sm:text-3xl font-black text-white uppercase tracking-tighter leading-tight">Mis Atletas</h1>
+                    <p className="text-xs sm:text-base text-neutral-400">Gestiona y supervisa el progreso de cada miembro.</p>
                 </div>
 
                 {/* Search Bar */}

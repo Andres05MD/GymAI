@@ -22,16 +22,16 @@ export default async function ExercisesPage() {
 
     return (
         <div className="space-y-8">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4">
                 <div>
-                    <h1 className="text-3xl font-black text-white uppercase tracking-tighter">Biblioteca de Ejercicios</h1>
-                    <p className="text-neutral-400">Gestiona tu repertorio técnico para asignarlo a rutinas.</p>
+                    <h1 className="text-xl sm:text-3xl font-black text-white uppercase tracking-tighter leading-tight">Biblioteca de Ejercicios</h1>
+                    <p className="text-xs sm:text-base text-neutral-400">Gestiona tu repertorio técnico para asignarlo a rutinas.</p>
                 </div>
 
                 <ExerciseFormDialog
                     trigger={
-                        <Button className="bg-red-600 hover:bg-red-700 text-white rounded-full font-bold shadow-lg shadow-red-900/20">
-                            <Plus className="w-5 h-5 mr-2" /> Nuevo Ejercicio
+                        <Button className="h-9 px-4 text-xs md:h-11 md:px-6 md:text-sm bg-red-600 hover:bg-red-700 text-white rounded-full font-bold shadow-lg shadow-red-900/20">
+                            <Plus className="w-4 h-4 mr-1 md:w-5 md:h-5 md:mr-2" /> Nuevo Ejercicio
                         </Button>
                     }
                 />

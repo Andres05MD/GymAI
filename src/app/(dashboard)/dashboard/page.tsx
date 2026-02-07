@@ -34,15 +34,20 @@ async function CoachDashboard({ user }: { user: any }) {
 
     return (
         <div className="space-y-8 pb-24 md:pb-10">
-            <div className="flex flex-col gap-4 md:flex-row md:justify-between md:items-center mb-6">
+            <div className="flex flex-col gap-2 md:flex-row md:justify-between md:items-center mb-4 md:mb-6">
                 <div>
-                    <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight">Dashboard Entrenador</h2>
-                    <p className="text-neutral-400">Gestiona tus atletas y rutinas desde aquí.</p>
+                    <h2 className="text-xl sm:text-3xl font-bold text-white tracking-tight leading-tight">Dashboard Entrenador</h2>
+                    <p className="text-xs sm:text-base text-neutral-400">Gestiona tus atletas y rutinas desde aquí.</p>
                 </div>
                 <div className="flex gap-4 items-center w-full md:w-auto">
                     <Link href="/athletes" className="w-full md:w-auto">
-                        <Button className="w-full md:w-auto rounded-full bg-red-600 hover:bg-red-700 text-white font-bold px-6 h-10 shadow-lg shadow-red-900/20">
-                            Ver Atletas
+                        <Button className="group relative w-full md:w-auto overflow-hidden rounded-full bg-linear-to-r from-red-600 to-red-500 px-6 py-4 md:px-8 md:py-6 text-sm md:text-base font-bold text-white shadow-lg shadow-red-500/20 transition-all duration-300 hover:scale-105 hover:shadow-red-500/40 hover:from-red-500 hover:to-orange-500 border border-red-500/20 h-10 md:h-14">
+                            <span className="relative z-10 flex items-center gap-2">
+                                <Users className="w-4 h-4 md:w-5 md:h-5 transition-transform duration-300 group-hover:scale-110" />
+                                <span className="tracking-widest text-xs md:text-base">VER ATLETAS</span>
+                                <ChevronRight className="w-4 h-4 md:w-5 md:h-5 transition-transform duration-300 group-hover:translate-x-1" />
+                            </span>
+                            <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out" />
                         </Button>
                     </Link>
 
