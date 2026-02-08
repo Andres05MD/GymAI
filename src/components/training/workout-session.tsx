@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Check, Clock, Save, ArrowLeft, Trophy, Info } from "lucide-react";
+import { Check, Clock, Save, ArrowLeft, Trophy, Info, Loader2 } from "lucide-react";
 import { logWorkoutSession, WorkoutSessionData } from "@/actions/training-actions";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 import { AIAssistantDialog } from "@/components/training/ai-assistant-dialog";
 import { ProgressionTip } from "@/components/training/progression-tip";
 import { useOfflineSync } from "@/hooks/use-offline-sync";
+import { SessionFeedbackDialog } from "@/components/training/session-feedback-dialog";
 
 // --- INTERFACES ---
 
@@ -74,6 +75,7 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
     // Form state structure matching schema
     // We map the active day exercises to a local state for logging
     const [sessionLog, setSessionLog] = useState<SessionExercise[]>([]);
+    const [showFeedback, setShowFeedback] = useState(false);
     const { saveLogLocally, isOnline } = useOfflineSync();
 
     const activeDay = routine.schedule[activeDayIndex];
@@ -118,9 +120,16 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
         updateSet(exerciseIndex, setIndex, "completed", !current);
     };
 
-    const handleFinish = async () => {
-        if (!confirm("¿Terminar entrenamiento? Asegúrate de haber completado las series.")) return;
+    const handleFinishClick = () => {
+        // Opcional: Validar si hay series sin completar y avisar
+        const incomplete = sessionLog.some(ex => ex.sets.some((s: SessionSet) => !s.completed));
+        if (incomplete) {
+            if (!confirm("Hay series sin marcar como completadas. ¿Deseas terminar igual?")) return;
+        }
+        setShowFeedback(true);
+    };
 
+    const handleCompleteSession = async (sessionRpe: number, sessionNotes: string) => {
         setIsSubmitting(true);
 
         // Transform data to fit Schema
@@ -128,6 +137,8 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
             routineId: routine.id,
             dayId: activeDay.id || activeDay.name, // Fallback if no specific ID
             durationMinutes: Math.round(elapsedTime / 60),
+            sessionRpe,
+            sessionNotes,
             exercises: sessionLog.map(ex => ({
                 exerciseName: ex.exerciseName,
                 exerciseId: ex.exerciseId,
@@ -164,6 +175,7 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
             }
         } finally {
             setIsSubmitting(false);
+            setShowFeedback(false);
         }
     };
 
@@ -187,7 +199,7 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
                             availableExercises={activeDay.exercises.map((e: RoutineExercise) => e.exerciseName)}
                         />
                         <Button
-                            onClick={handleFinish}
+                            onClick={handleFinishClick}
                             disabled={isSubmitting}
                             className="rounded-full bg-white text-black font-bold hover:bg-neutral-200 shadow-[0_0_20px_rgba(255,255,255,0.3)] transition-all hover:scale-105 active:scale-95"
                         >
@@ -318,10 +330,38 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
                 })}
             </div>
 
-            <div className="text-center pt-8 text-neutral-500 text-sm">
+            <div className="text-center pt-8 pb-32 text-neutral-500 text-sm">
                 <Trophy className="w-8 h-8 mx-auto mb-2 opacity-20" />
                 <p>Termina fuerte. Cada repetición cuenta.</p>
             </div>
+
+            {/* Footer Buttons */}
+            <div className="fixed bottom-0 left-0 right-0 p-4 bg-neutral-900 border-t border-neutral-800 flex justify-between items-center gap-4 z-50 lg:hidden">
+                <Button variant="outline" onClick={() => router.back()} disabled={isSubmitting} className="rounded-xl h-12 px-6 border-neutral-700 bg-neutral-800 text-white hover:bg-neutral-700">
+                    Cancelar
+                </Button>
+                <Button onClick={handleFinishClick} disabled={isSubmitting} className="flex-1 rounded-xl h-12 bg-white text-black font-bold text-lg hover:bg-neutral-200 shadow-[0_0_20px_-5px_rgba(255,255,255,0.3)] transition-all">
+                    {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : "Terminar"}
+                </Button>
+            </div>
+
+            {/* Desktop Footer (Hidden on mobile) */}
+            <div className="hidden lg:flex p-4 bg-neutral-900 border-t border-neutral-800 justify-between items-center gap-4 mt-8">
+                <Button variant="outline" onClick={() => router.back()} disabled={isSubmitting} className="rounded-xl h-12 px-6 border-neutral-700 bg-neutral-800 text-white hover:bg-neutral-700">
+                    Cancelar
+                </Button>
+                <Button onClick={handleFinishClick} disabled={isSubmitting} className="flex-1 rounded-xl h-12 bg-white text-black font-bold text-lg hover:bg-neutral-200 shadow-[0_0_20px_-5px_rgba(255,255,255,0.3)] transition-all">
+                    {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : "Terminar Entrenamiento"}
+                </Button>
+            </div>
+
+            <AIAssistantDialog open={showAI} onOpenChange={setShowAI} />
+            <SessionFeedbackDialog
+                open={showFeedback}
+                onOpenChange={setShowFeedback}
+                onConfirm={handleCompleteSession}
+                isSubmitting={isSubmitting}
+            />
         </div>
     );
 }

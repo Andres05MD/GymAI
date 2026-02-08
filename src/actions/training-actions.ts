@@ -28,6 +28,10 @@ export interface WorkoutSessionData {
     routineName?: string;
     exercises?: RoutineExercise[];
     notes?: string;
+    sessionRpe?: number;
+    sessionNotes?: string;
+    durationMinutes?: number;
+    dayId?: string;
 }
 
 export interface ProgressionSuggestion {
