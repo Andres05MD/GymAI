@@ -24,7 +24,7 @@ export async function generateWarmup(muscleGroups: string[]) {
         const groq = getGroqClient();
         const completion = await groq.chat.completions.create({
             messages: [{ role: "user", content: prompt }],
-            model: "llama3-70b-8192",
+            model: "llama-3.3-70b-versatile",
             temperature: 0.5,
             response_format: { type: "json_object" },
         });
@@ -66,7 +66,7 @@ export async function suggestSubstitute(exerciseName: string, reason: "busy" | "
         const groq = getGroqClient();
         const completion = await groq.chat.completions.create({
             messages: [{ role: "user", content: prompt }],
-            model: "llama3-70b-8192",
+            model: "llama-3.3-70b-versatile",
             temperature: 0.4,
             response_format: { type: "json_object" },
         });
@@ -121,7 +121,7 @@ export async function generateRoutinePlan(goal: string, level: string, days: str
         const groq = getGroqClient();
         const completion = await groq.chat.completions.create({
             messages: [{ role: "user", content: prompt }],
-            model: "llama3-70b-8192",
+            model: "llama-3.3-70b-versatile",
             temperature: 0.6,
             response_format: { type: "json_object" },
         });
@@ -176,7 +176,7 @@ export async function chatWithCoachAI(message: string, context?: { exerciseName?
         const groq = getGroqClient();
         const completion = await groq.chat.completions.create({
             messages: [{ role: "user", content: prompt }],
-            model: "llama3-70b-8192",
+            model: "llama-3.3-70b-versatile",
             temperature: 0.7,
             response_format: { type: "json_object" },
         });
@@ -241,7 +241,7 @@ export async function analyzeRoutineSafety(routineData: any, athleteId: string) 
 
         const completion = await groq.chat.completions.create({
             messages: [{ role: "user", content: prompt }],
-            model: "llama3-70b-8192",
+            model: "llama-3.3-70b-versatile",
             temperature: 0.3,
             response_format: { type: "json_object" },
         });
@@ -263,22 +263,42 @@ export async function generateExerciseDetails(exerciseName: string) {
 
     try {
         const prompt = `
-            Actúa como un experto en biomecánica. Dado el nombre del ejercicio "${exerciseName}", identifica los grupos musculares principales y los músculos específicos trabajados.
+            Actúa como un experto en biomecánica y cinesiología deportiva. Tu objetivo es analizar el ejercicio "${exerciseName}" y determinar con precisión qué músculos trabaja.
 
-            LISTA DE GRUPOS IMPORANTES (Usa estos nombres exactos si aplican):
+            INSTRUCCIONES CLAVE:
+            1. Identifica los **Músculos Agonistas** (principales ejecutores).
+            2. Identifica los **Músculos Sinergistas** (ayudantes importantes).
+            3. Selecciona los "Grupos Musculares Principales" que engloben a AMBOS (agonistas y sinergistas importantes). Por ejemplo, en un Press de Banca, incluye "Pecho" (agonista) y "Tríceps" (sinergista), y también "Hombros" si la implicación del deltoides anterior es alta.
+            4. Selecciona los músculos anatómicos específicos de la lista validada.
+
+            LISTA DE GRUPOS VÁLIDOS:
             "Pecho", "Espalda", "Hombros", "Bíceps", "Tríceps", "Cuádriceps", "Isquiotibiales", "Glúteos", "Pantorrillas", "Abdominales", "Cardio", "Full Body"
+
+            LISTA DE MÚSCULOS ESPECÍFICOS VÁLIDOS (Usa EXACTAMENTE estos nombres):
+            - Pecho: "Pectoral Mayor", "Pectoral Menor", "Serrato Anterior"
+            - Espalda: "Dorsal Ancho", "Trapecio", "Romboides", "Redondo Mayor", "Redondo Menor", "Erector de la Columna", "Lumbar"
+            - Hombros: "Deltoides Anterior", "Deltoides Medio", "Deltoides Posterior", "Manguito Rotador"
+            - Bíceps: "Bíceps Braquial", "Braquial", "Braquiorradial"
+            - Tríceps: "Tríceps Braquial (Cabeza Larga)", "Tríceps Braquial (Cabeza Lateral)", "Tríceps Braquial (Cabeza Medial)"
+            - Cuádriceps: "Recto Femoral", "Vasto Lateral", "Vasto Medial", "Vasto Intermedio"
+            - Isquiotibiales: "Bíceps Femoral", "Semitendinoso", "Semimembranoso"
+            - Glúteos: "Glúteo Mayor", "Glúteo Medio", "Glúteo Menor"
+            - Pantorrillas: "Gastrocnemio", "Sóleo"
+            - Abdominales: "Recto Abdominal", "Oblicuos", "Transverso del Abdomen"
+            - Cardio: "Corazón", "Resistencia General"
+            - Full Body: "Cuerpo Completo"
 
             Respuesta JSON estricta:
             {
-                "muscleGroups": ["Pecho", "Tríceps"], // Array de strings
-                "specificMuscles": ["Pectoral Mayor", "Tríceps Braquial"] // Array de strings con músculos anatómicos específicos
+                "muscleGroups": ["Pecho", "Tríceps", "Hombros"], // Incluye grupos de agonistas y sinergistas
+                "specificMuscles": ["Pectoral Mayor", "Tríceps Braquial (Cabeza Lateral)", "Deltoides Anterior"] // Músculos específicos exactos
             }
         `;
 
         const groq = getGroqClient();
         const completion = await groq.chat.completions.create({
             messages: [{ role: "user", content: prompt }],
-            model: "llama3-70b-8192",
+            model: "llama-3.3-70b-versatile",
             temperature: 0.1,
             response_format: { type: "json_object" },
         });
@@ -295,3 +315,39 @@ export async function generateExerciseDetails(exerciseName: string) {
     }
 }
 
+export async function generateRoutineDescription(schedule: any) {
+    const session = await auth();
+    if (!session?.user?.id) return { success: false, error: "No autorizado" };
+
+    try {
+        const prompt = `
+            Actúa como un entrenador experto. Analiza la siguiente estructura de rutina y genera una descripción breve y motivadora (máximo 2-3 frases) que explique el enfoque principal (ej: Frecuencia 2, Torso/Pierna, énfasis en fuerza, etc.).
+
+            RUTINA:
+            ${JSON.stringify(schedule, null, 2)}
+
+            Respuesta JSON:
+            {
+                "description": "Tu descripción aquí"
+            }
+        `;
+
+        const groq = getGroqClient();
+        const completion = await groq.chat.completions.create({
+            messages: [{ role: "user", content: prompt }],
+            model: "llama-3.3-70b-versatile",
+            temperature: 0.5,
+            response_format: { type: "json_object" },
+        });
+
+        const content = completion.choices[0]?.message?.content;
+        if (!content) return { success: false, error: "Error de IA" };
+
+        const result = JSON.parse(content);
+        return { success: true, description: result.description };
+
+    } catch (error) {
+        console.error("Description Gen Error:", error);
+        return { success: false, error: "Error al generar descripción" };
+    }
+}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { MediaUpload } from "@/components/ui/media-upload";
-import { Loader2, Dumbbell, Tag, ImagePlay, Search } from "lucide-react";
+import { Loader2, Dumbbell, Tag, ImagePlay, Search, Eraser } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -30,7 +30,7 @@ const FormSchema = ExerciseSchema.omit({
 type FormInput = z.infer<typeof FormSchema>;
 
 const MUSCLE_GROUPS = [
-    "Pecho", "Espalda", "Hombros", "Bíceps", "Tríceps", "Cuádriceps", "Isquiotibiales", "Glúteos", "Pantorrillas", "Abdominales", "Cardio", "Full Body"
+    "Pecho", "Espalda", "Hombros", "Bíceps", "Tríceps", "Cuádriceps", "Isquiotibiales", "Glúteos", "Aductores", "Pantorrillas", "Abdominales", "Cardio", "Full Body"
 ];
 
 const SPECIFIC_MUSCLES_BY_GROUP: Record<string, string[]> = {
@@ -42,6 +42,7 @@ const SPECIFIC_MUSCLES_BY_GROUP: Record<string, string[]> = {
     "Cuádriceps": ["Recto Femoral", "Vasto Lateral", "Vasto Medial", "Vasto Intermedio"],
     "Isquiotibiales": ["Bíceps Femoral", "Semitendinoso", "Semimembranoso"],
     "Glúteos": ["Glúteo Mayor", "Glúteo Medio", "Glúteo Menor"],
+    "Aductores": ["Aductor Mayor", "Aductor Largo", "Aductor Corto", "Pectíneo", "Grácil"],
     "Pantorrillas": ["Gastrocnemio", "Sóleo"],
     "Abdominales": ["Recto Abdominal", "Oblicuos", "Transverso del Abdomen"],
     "Cardio": ["Corazón", "Resistencia General"],
@@ -82,6 +83,27 @@ export function ExerciseFormDialog({ exercise, trigger, open, onOpenChange }: Ex
 
     const { register, handleSubmit, setValue, watch, getValues, reset, formState: { errors } } = form;
     const selectedGroups = watch("muscleGroups");
+
+    // Efecto para actualizar el formulario si cambia el ejercicio o se abre el diálogo
+    useEffect(() => {
+        if (isOpen) {
+            if (exercise) {
+                reset({
+                    name: exercise.name,
+                    muscleGroups: exercise.muscleGroups || [],
+                    specificMuscles: exercise.specificMuscles || [],
+                    videoUrl: exercise.videoUrl
+                });
+            } else {
+                reset({
+                    name: "",
+                    muscleGroups: [],
+                    specificMuscles: [],
+                    videoUrl: ""
+                });
+            }
+        }
+    }, [isOpen, exercise?.id, reset]);
 
     const onSubmit = async (data: FormInput) => {
         setIsSubmitting(true);
@@ -146,6 +168,12 @@ export function ExerciseFormDialog({ exercise, trigger, open, onOpenChange }: Ex
         }
     };
 
+    const handleClear = () => {
+        setValue("muscleGroups", []);
+        setValue("specificMuscles", []);
+        toast.info("Datos de músculos limpiados");
+    };
+
     return (
         <Dialog open={isOpen} onOpenChange={setOpen}>
             {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
@@ -183,8 +211,19 @@ export function ExerciseFormDialog({ exercise, trigger, open, onOpenChange }: Ex
                                         onClick={handleSearch}
                                         disabled={isSearching || isSubmitting}
                                         className="h-14 w-14 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-white border border-neutral-700 hover:border-neutral-600 transition-all"
+                                        title="Buscar detalles con IA"
                                     >
                                         {isSearching ? <Loader2 className="w-5 h-5 animate-spin" /> : <Search className="w-5 h-5" />}
+                                    </Button>
+                                    <Button
+                                        type="button"
+                                        onClick={handleClear}
+                                        disabled={isSearching || isSubmitting}
+                                        variant="outline"
+                                        className="h-14 w-14 rounded-xl border-neutral-800 bg-neutral-900/30 hover:bg-neutral-800 text-neutral-400 hover:text-white transition-all"
+                                        title="Limpiar datos de músculos"
+                                    >
+                                        <Eraser className="w-5 h-5" />
                                     </Button>
                                 </div>
                                 {errors.name && <p className="text-red-500 text-xs font-medium ml-1">{errors.name.message}</p>}

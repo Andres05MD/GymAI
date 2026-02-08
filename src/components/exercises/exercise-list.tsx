@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Dumbbell, MoreVertical, Edit, Trash, PlayCircle, ExternalLink } from "lucide-react";
+import { Search, Dumbbell, MoreVertical, Edit, Trash, PlayCircle, ExternalLink, X } from "lucide-react";
 import { ExerciseFormDialog } from "./exercise-form-dialog";
 import {
     DropdownMenu,
@@ -23,16 +23,23 @@ interface ExerciseListProps {
 export function ExerciseList({ exercises }: ExerciseListProps) {
     const [searchTerm, setSearchTerm] = useState("");
     const [filterGroup, setFilterGroup] = useState<string | null>(null);
+    const [editingExercise, setEditingExercise] = useState<any>(null);
     const router = useRouter();
 
-    const filteredExercises = exercises.filter(ex => {
-        const matchesSearch = ex.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            ex.specificMuscles?.some((m: string) => m.toLowerCase().includes(searchTerm.toLowerCase()));
+    const filteredExercises = useMemo(() => {
+        return exercises.filter(ex => {
+            const term = searchTerm.toLowerCase().trim();
+            if (!term && !filterGroup) return true;
 
-        const matchesFilter = filterGroup ? ex.muscleGroups?.includes(filterGroup) : true;
+            const matchesSearch = !term ||
+                (ex.name?.toLowerCase().includes(term) ||
+                    ex.specificMuscles?.some((m: string) => m.toLowerCase().includes(term)));
 
-        return matchesSearch && matchesFilter;
-    });
+            const matchesFilter = filterGroup ? ex.muscleGroups?.includes(filterGroup) : true;
+
+            return matchesSearch && matchesFilter;
+        });
+    }, [exercises, searchTerm, filterGroup]);
 
     const handleDelete = async (id: string) => {
         if (confirm("¿Estás seguro de que deseas eliminar este ejercicio?")) {
@@ -47,7 +54,7 @@ export function ExerciseList({ exercises }: ExerciseListProps) {
     };
 
     // Extract unique muscle groups for filter tabs
-    const allGroups = Array.from(new Set(exercises.flatMap(e => e.muscleGroups || [])));
+    const allGroups = useMemo(() => Array.from(new Set(exercises.flatMap(e => e.muscleGroups || []))), [exercises]);
 
     // Muscle group colors
     const groupColors: Record<string, string> = {
@@ -59,6 +66,7 @@ export function ExerciseList({ exercises }: ExerciseListProps) {
         "cuádriceps": "bg-green-500/10 text-green-500 border-green-500/20",
         "isquiotibiales": "bg-yellow-500/10 text-yellow-500 border-yellow-500/20",
         "glúteos": "bg-rose-500/10 text-rose-500 border-rose-500/20",
+        "aductores": "bg-lime-500/10 text-lime-500 border-lime-500/20",
         "pantorrillas": "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
         "abdominales": "bg-cyan-500/10 text-cyan-500 border-cyan-500/20",
         "cardio": "bg-indigo-500/10 text-indigo-500 border-indigo-500/20",
@@ -74,15 +82,25 @@ export function ExerciseList({ exercises }: ExerciseListProps) {
         <div className="space-y-6">
             {/* Controls */}
             <div className="sticky top-4 md:top-6 z-20 bg-black/80 backdrop-blur-xl border border-white/5 rounded-[2rem] p-2 shadow-2xl shadow-black/50">
-                <div className="flex flex-col md:flex-row gap-2">
-                    <div className="relative flex-1">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-neutral-400" />
+                <div className="flex flex-col gap-2">
+                    <div className="relative flex-1 group">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-neutral-500 group-focus-within:text-white transition-colors" />
                         <Input
-                            placeholder="Buscar ejercicios..."
+                            placeholder="Buscar por nombre o músculo..."
                             className="pl-12 h-14 bg-transparent border-transparent rounded-full text-white placeholder:text-neutral-500 focus-visible:ring-0 text-lg font-medium"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
+                        {searchTerm && (
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="absolute right-2 top-1/2 -translate-y-1/2 h-10 w-10 text-neutral-500 hover:text-white rounded-full hover:bg-white/10"
+                                onClick={() => setSearchTerm("")}
+                            >
+                                <X className="h-5 w-5" />
+                            </Button>
+                        )}
                     </div>
 
                     {/* Filter Pills */}
@@ -145,7 +163,7 @@ export function ExerciseList({ exercises }: ExerciseListProps) {
                         );
                     }
 
-                    return groupsToDisplay.map(group => {
+                    return groupsToDisplay.map((group: string) => {
                         const groupExercises = filteredExercises.filter(ex => ex.muscleGroups?.includes(group));
 
                         if (groupExercises.length === 0) return null;
@@ -185,15 +203,13 @@ export function ExerciseList({ exercises }: ExerciseListProps) {
                                                             </Button>
                                                         </DropdownMenuTrigger>
                                                         <DropdownMenuContent align="end" className="bg-neutral-900/90 backdrop-blur-xl border-neutral-800 text-white rounded-xl shadow-xl">
-                                                            <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="focus:bg-neutral-800 focus:text-white cursor-pointer p-2 rounded-lg">
-                                                                <ExerciseFormDialog
-                                                                    exercise={exercise}
-                                                                    trigger={
-                                                                        <div className="flex items-center w-full">
-                                                                            <Edit className="h-4 w-4 mr-2" /> Editar
-                                                                        </div>
-                                                                    }
-                                                                />
+                                                            <DropdownMenuItem
+                                                                onClick={() => setEditingExercise(exercise)}
+                                                                className="focus:bg-neutral-800 focus:text-white cursor-pointer p-2 rounded-lg"
+                                                            >
+                                                                <div className="flex items-center w-full">
+                                                                    <Edit className="h-4 w-4 mr-2" /> Editar
+                                                                </div>
                                                             </DropdownMenuItem>
                                                             <DropdownMenuItem
                                                                 onClick={() => handleDelete(exercise.id)}
@@ -270,6 +286,14 @@ export function ExerciseList({ exercises }: ExerciseListProps) {
                     });
                 })()}
             </div>
+
+            {/* Diálogo de Edición Controlado (Fuera del Dropdown para evitar conflictos de eventos) */}
+            <ExerciseFormDialog
+                key={editingExercise?.id || 'new'}
+                open={!!editingExercise}
+                onOpenChange={(open) => !open && setEditingExercise(null)}
+                exercise={editingExercise}
+            />
         </div>
     );
 }

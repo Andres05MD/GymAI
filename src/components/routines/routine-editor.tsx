@@ -3,10 +3,11 @@
 import { useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { createRoutine, updateRoutine, generateRoutineWithAI } from "@/actions/routine-actions";
+import { generateRoutineDescription } from "@/actions/ai-actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Plus, Trash2, Wand2, Sparkles, Save, ArrowLeft, Check, ChevronsUpDown, Dumbbell, CalendarDays, Clock } from "lucide-react";
+import { Loader2, Plus, Trash2, Wand2, Sparkles, Save, ArrowLeft, Check, ChevronsUpDown, Dumbbell, CalendarDays, Clock, Copy } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -101,8 +102,8 @@ function AIGenerator({ onGenerate }: { onGenerate: (routine: AIRoutine) => void 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button variant="outline" className="border-red-500/30 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white gap-2 transition-all rounded-full px-6">
-                    <Sparkles className="w-4 h-4" /> Generar con IA
+                <Button variant="outline" className="border-red-500/30 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white gap-2 transition-all rounded-full px-8 h-12 text-sm font-bold tracking-wide">
+                    <Sparkles className="w-4 h-4" /> GENERAR CON IA
                 </Button>
             </DialogTrigger>
             <DialogContent className="bg-neutral-900 border-neutral-800 text-white sm:max-w-[500px] p-6 rounded-2xl">
@@ -198,6 +199,7 @@ interface RoutineEditorProps {
 export function RoutineEditor({ initialData, isEditing = false, availableExercises = [], athleteId }: RoutineEditorProps) {
     const router = useRouter();
     const [isSaving, setIsSaving] = useState(false);
+    const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
     const [activeDayIndex, setActiveDayIndex] = useState(0);
 
     const form = useForm({
@@ -256,6 +258,23 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
             [field]: value
         };
         setValue("schedule", updatedSchedule);
+    };
+
+    const handleGenerateDescription = async () => {
+        setIsGeneratingDescription(true);
+        try {
+            const res = await generateRoutineDescription(schedule);
+            if (res.success && res.description) {
+                setValue("description", res.description);
+                toast.success("Descripción generada");
+            } else {
+                toast.error("No se pudo generar la descripción");
+            }
+        } catch (error) {
+            toast.error("Error al conectar con IA");
+        } finally {
+            setIsGeneratingDescription(false);
+        }
     };
 
     const onAIResult = (aiRoutine: AIRoutine) => {
@@ -319,7 +338,7 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                         <RoutineSafetyCheck routine={watch()} athleteId={athleteId} />
                     )}
                     <AIGenerator onGenerate={onAIResult} />
-                    <Button onClick={handleSubmit(onSubmit)} disabled={isSaving} className="bg-white text-black hover:bg-neutral-200 font-bold rounded-full px-8 h-10 tracking-wide transition-all shadow-md hover:shadow-lg">
+                    <Button onClick={handleSubmit(onSubmit)} disabled={isSaving} className="bg-white text-black hover:bg-neutral-200 font-bold rounded-full px-8 h-12 tracking-wide transition-all shadow-md hover:shadow-lg text-sm">
                         {isSaving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
                         GUARDAR
                     </Button>
@@ -372,7 +391,20 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                         </div>
 
                         <div className="space-y-3">
-                            <Label className="text-xs font-bold uppercase tracking-widest text-neutral-500 ml-1">Descripción</Label>
+                            <div className="flex justify-between items-center">
+                                <Label className="text-xs font-bold uppercase tracking-widest text-neutral-500 ml-1">Descripción</Label>
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={handleGenerateDescription}
+                                    disabled={isGeneratingDescription}
+                                    className="h-6 text-[10px] uppercase font-bold text-red-500 hover:text-white hover:bg-red-500/10 px-2 rounded-full"
+                                >
+                                    {isGeneratingDescription ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <Sparkles className="w-3 h-3 mr-1" />}
+                                    Generar con IA
+                                </Button>
+                            </div>
                             <Textarea
                                 {...register("description")}
                                 placeholder="Objetivos principales, duración recomendada, notas..."
@@ -630,11 +662,26 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                                                                             className="h-8 text-xs bg-neutral-800 border-transparent text-center text-white focus-visible:ring-1 focus-visible:ring-neutral-600 rounded-md"
                                                                         />
                                                                     </div>
-                                                                    <div className="col-span-1 flex justify-center">
+                                                                    <div className="col-span-1 flex justify-center gap-1">
                                                                         <Button
                                                                             variant="ghost"
                                                                             size="icon"
-                                                                            className="h-6 w-6 text-neutral-600 hover:text-red-500 opacity-0 group-hover/set:opacity-100 transition-opacity"
+                                                                            className="h-6 w-6 text-neutral-600 hover:text-white hover:bg-neutral-800 opacity-0 group-hover/set:opacity-100 transition-opacity"
+                                                                            title="Duplicar serie"
+                                                                            onClick={() => {
+                                                                                const newSets = [...exercise.sets];
+                                                                                // Insertar copia justo después de este índice
+                                                                                newSets.splice(setIndex + 1, 0, { ...set });
+                                                                                updateExerciseField(activeDayIndex, exIndex, "sets", newSets);
+                                                                            }}
+                                                                        >
+                                                                            <Copy className="w-3 h-3" />
+                                                                        </Button>
+                                                                        <Button
+                                                                            variant="ghost"
+                                                                            size="icon"
+                                                                            className="h-6 w-6 text-neutral-600 hover:text-red-500 hover:bg-red-500/10 opacity-0 group-hover/set:opacity-100 transition-opacity"
+                                                                            title="Eliminar serie"
                                                                             onClick={() => {
                                                                                 const newSets = [...exercise.sets];
                                                                                 newSets.splice(setIndex, 1);
@@ -664,6 +711,17 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                                             </div>
                                         ))}
                                     </div>
+                                )}
+
+                                {schedule[activeDayIndex].exercises?.length > 0 && (
+                                    <Button
+                                        onClick={() => addExerciseToDay(activeDayIndex)}
+                                        variant="outline"
+                                        className="w-full h-16 border-dashed border-2 border-neutral-800 bg-transparent text-neutral-500 hover:text-white hover:bg-neutral-900 hover:border-neutral-700 rounded-2xl transition-all group"
+                                    >
+                                        <Plus className="w-6 h-6 mr-2 group-hover:scale-110 transition-transform" />
+                                        <span className="text-lg font-bold">AÑADIR SIGUIENTE EJERCICIO</span>
+                                    </Button>
                                 )}
                             </div>
                         </div>

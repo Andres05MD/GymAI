@@ -50,10 +50,50 @@ export default async function RoutinesPage() {
                     </Link>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {routines.map((routine: any) => (
-                        <RoutineCard key={routine.id} routine={routine} athletes={athletes} />
-                    ))}
+                <div className="space-y-12">
+                    {/* Weekly Routines Section */}
+                    <div className="space-y-6">
+                        <div className="flex items-center gap-2 border-b border-neutral-800 pb-2">
+                            <h2 className="text-lg font-bold text-white uppercase tracking-wider">Planificación Semanal</h2>
+                            <span className="text-xs bg-neutral-800 text-neutral-400 px-2 py-0.5 rounded-md font-mono">
+                                {routines.filter((r: any) => r.type !== 'daily').length}
+                            </span>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {routines
+                                .filter((r: any) => r.type !== 'daily')
+                                .map((routine: any) => (
+                                    <RoutineCard key={routine.id} routine={routine} athletes={athletes || []} />
+                                ))}
+                            {routines.filter((r: any) => r.type !== 'daily').length === 0 && (
+                                <div className="col-span-full py-8 text-center text-neutral-500 text-sm italic border border-dashed border-neutral-800 rounded-xl">
+                                    No hay rutinas semanales
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Daily Routines Section */}
+                    <div className="space-y-6">
+                        <div className="flex items-center gap-2 border-b border-neutral-800 pb-2">
+                            <h2 className="text-lg font-bold text-white uppercase tracking-wider">Sesiones Diarias</h2>
+                            <span className="text-xs bg-neutral-800 text-neutral-400 px-2 py-0.5 rounded-md font-mono">
+                                {routines.filter((r: any) => r.type === 'daily').length}
+                            </span>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {routines
+                                .filter((r: any) => r.type === 'daily')
+                                .map((routine: any) => (
+                                    <RoutineCard key={routine.id} routine={routine} athletes={athletes || []} />
+                                ))}
+                            {routines.filter((r: any) => r.type === 'daily').length === 0 && (
+                                <div className="col-span-full py-8 text-center text-neutral-500 text-sm italic border border-dashed border-neutral-800 rounded-xl">
+                                    No hay sesiones diarias sueltas
+                                </div>
+                            )}
+                        </div>
+                    </div>
                 </div>
             )}
         </div>

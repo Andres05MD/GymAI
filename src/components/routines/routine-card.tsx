@@ -53,48 +53,80 @@ export function RoutineCard({ routine, athletes }: RoutineCardProps) {
         }
     };
 
+    // Calcular estadísticas básicas
+    const totalExercises = routine.schedule?.reduce((acc: number, day: any) => acc + (day.exercises?.length || 0), 0) || 0;
+    const dayCount = routine.schedule?.length || 0;
+    const isDaily = (routine as any).type === 'daily';
+
+
     return (
-        <Card className="group bg-neutral-900/50 border-neutral-800 hover:border-red-600/50 transition-all rounded-3xl overflow-hidden hover:shadow-2xl hover:shadow-red-900/10">
-            <CardHeader className="pb-3">
-                <CardTitle className="flex justify-between items-start gap-2">
-                    <span className="text-xl font-bold text-white line-clamp-1">{routine.name}</span>
-                    {routine.active && (
-                        <span className="bg-green-500/10 text-green-500 text-[10px] px-2 py-0.5 rounded-full uppercase font-bold tracking-wider shrink-0 border border-green-500/20">
-                            Activa
-                        </span>
-                    )}
+        <Card className="group relative bg-neutral-900 border-neutral-800 hover:border-red-600/50 transition-all duration-300 rounded-3xl overflow-hidden hover:shadow-[0_0_30px_-10px_rgba(220,38,38,0.2)] flex flex-col h-full">
+            {/* Gradient Overlay on Hover */}
+            <div className="absolute inset-0 bg-linear-to-br from-red-600/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+
+            <CardHeader className="pb-3 relative z-10">
+                <div className="flex justify-between items-start gap-2 mb-2">
+                    <div className="flex items-center gap-2">
+                        {isDaily ? (
+                            <span className="bg-neutral-800 text-neutral-400 text-[10px] px-2 py-0.5 rounded-md font-mono uppercase tracking-wider border border-neutral-700">
+                                Diaria
+                            </span>
+                        ) : (
+                            <span className="bg-neutral-800 text-neutral-400 text-[10px] px-2 py-0.5 rounded-md font-mono uppercase tracking-wider border border-neutral-700">
+                                Semanal
+                            </span>
+                        )}
+                        {routine.active && (
+                            <span className="bg-green-500/10 text-green-500 text-[10px] px-2 py-0.5 rounded-full uppercase font-bold tracking-wider border border-green-500/20 shadow-[0_0_10px_-4px_rgba(34,197,94,0.5)]">
+                                Activa
+                            </span>
+                        )}
+                    </div>
+
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-neutral-600 hover:text-red-500 hover:bg-red-500/10 rounded-full h-8 w-8 -mr-2 -mt-2 opacity-0 group-hover:opacity-100 transition-all"
+                        onClick={handleDelete}
+                        disabled={isDeleting}
+                    >
+                        <Trash className="w-4 h-4" />
+                    </Button>
+                </div>
+
+                <CardTitle className="text-xl font-black text-white leading-tight uppercase tracking-tight group-hover:text-red-500 transition-colors">
+                    {routine.name}
                 </CardTitle>
-                <p className="text-sm text-neutral-400 line-clamp-2 min-h-[40px]">
-                    {routine.description || "Sin descripción"}
+                <p className="text-sm text-neutral-500 line-clamp-2 min-h-[40px] mt-2 font-medium">
+                    {routine.description || "Sin descripción definida."}
                 </p>
             </CardHeader>
-            <CardContent>
+
+            <CardContent className="mt-auto relative z-10">
                 <div className="space-y-4">
-                    <div className="flex items-center gap-4 text-sm text-neutral-500">
-                        <div className="flex items-center gap-1.5">
-                            <Calendar className="w-4 h-4" />
-                            {routine.schedule?.length || 0} Días/sem
+                    {/* Stats Grid */}
+                    <div className="grid grid-cols-2 gap-2 text-xs font-medium text-neutral-400 bg-neutral-950/50 p-3 rounded-xl border border-neutral-800/50">
+                        <div className="flex flex-col items-center justify-center p-1">
+                            <span className="text-white font-bold text-base">{dayCount}</span>
+                            <span className="uppercase tracking-wider text-[10px]">Días</span>
+                        </div>
+                        <div className="flex flex-col items-center justify-center p-1 border-l border-neutral-800">
+                            <span className="text-white font-bold text-base">{totalExercises}</span>
+                            <span className="uppercase tracking-wider text-[10px]">Ejercicios</span>
                         </div>
                     </div>
 
-                    <div className="flex gap-2 pt-2">
-                        <div className="flex-1 flex gap-2">
-                            <Link href={`/routines/${routine.id}`} className="flex-1">
-                                <Button variant="secondary" className="w-full bg-white text-black hover:bg-neutral-200 rounded-xl font-bold h-9">
-                                    <Edit className="w-4 h-4 mr-2" /> Editar
+                    <div className="flex gap-2">
+                        <div className="flex-1">
+                            <Link href={`/routines/${routine.id}`} className="block w-full">
+                                <Button className="w-full bg-white text-black hover:bg-neutral-200 rounded-xl font-bold h-10 shadow-sm transition-all hover:scale-[1.02]">
+                                    <Edit className="w-4 h-4 mr-2" /> EDITAR
                                 </Button>
                             </Link>
+                        </div>
+                        <div className="flex-1">
                             <AssignRoutineDialog routineId={routine.id} athletes={athletes} />
                         </div>
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="text-neutral-500 hover:text-red-500 hover:bg-red-500/10 rounded-xl h-9 w-9"
-                            onClick={handleDelete}
-                            disabled={isDeleting}
-                        >
-                            <Trash className="w-4 h-4" />
-                        </Button>
                     </div>
                 </div>
             </CardContent>

@@ -18,7 +18,7 @@ interface Message {
 export function Chatbot() {
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState<Message[]>([
-        { role: "assistant", content: "¡Hola! Soy GymIA. ¿En qué puedo ayudarte con tu entrenamiento hoy?" }
+        { role: "assistant", content: "¡Hola! Soy Vivi. ¿En qué puedo ayudarte con tu entrenamiento hoy?" }
     ]);
     const [input, setInput] = useState("");
     const [isLoading, setIsLoading] = useState(false);
@@ -64,75 +64,116 @@ export function Chatbot() {
     };
 
     return (
-        <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end gap-2">
-            {isOpen && (
-                <Card className="w-[350px] h-[500px] flex flex-col shadow-xl animate-in fade-in slide-in-from-bottom-5">
-                    <CardHeader className="flex flex-row items-center justify-between py-3 bg-primary text-primary-foreground rounded-t-lg">
-                        <div className="flex items-center gap-2">
-                            <Bot className="h-5 w-5" />
-                            <CardTitle className="text-sm font-medium">Asistente GymIA</CardTitle>
+        <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3 font-sans">
+            {isOpen ? (
+                <div className="w-[380px] h-[600px] flex flex-col bg-neutral-950 border border-neutral-800 rounded-3xl shadow-[0_0_50px_-10px_rgba(220,38,38,0.2)] overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-300">
+                    {/* Header */}
+                    <div className="flex flex-row items-center justify-between p-4 bg-gradient-to-r from-red-900/50 to-neutral-900 border-b border-neutral-800 backdrop-blur-md">
+                        <div className="flex items-center gap-3">
+                            <div className="relative">
+                                <div className="absolute inset-0 bg-red-500 rounded-full blur-[8px] opacity-50"></div>
+                                <div className="h-10 w-10 rounded-full bg-linear-to-br from-red-600 to-red-800 flex items-center justify-center shrink-0 border border-red-500/30 relative z-10 shadow-lg">
+                                    <Bot className="h-5 w-5 text-white" />
+                                </div>
+                                <div className="absolute bottom-0 right-0 h-3 w-3 bg-green-500 border-2 border-neutral-900 rounded-full z-20"></div>
+                            </div>
+                            <div className="flex flex-col">
+                                <h3 className="text-base font-black text-white leading-none tracking-tight">Vivi</h3>
+                                <p className="text-[10px] font-bold text-red-400 uppercase tracking-widest mt-1">AI Coach Expert</p>
+                            </div>
                         </div>
-                        <Button variant="ghost" size="icon" className="h-6 w-6 text-primary-foreground hover:bg-primary-foreground/20" onClick={() => setIsOpen(false)}>
-                            <Minimize2 className="h-4 w-4" />
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-neutral-400 hover:text-white hover:bg-white/10 rounded-full transition-colors"
+                            onClick={() => setIsOpen(false)}
+                        >
+                            <Minimize2 className="h-5 w-5" />
                         </Button>
-                    </CardHeader>
-                    <CardContent className="flex-1 p-0 overflow-hidden">
-                        <div className="h-full overflow-y-auto p-4 space-y-4" ref={scrollRef}>
+                    </div>
+
+                    {/* Chat Area */}
+                    <div className="flex-1 overflow-hidden relative bg-neutral-950/50">
+                        {/* Chat Background Pattern */}
+                        <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white to-transparent" style={{ backgroundSize: '20px 20px', backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)' }}></div>
+
+                        <div className="h-full overflow-y-auto p-5 space-y-6 relative z-10 custom-scrollbar" ref={scrollRef}>
+                            <div className="flex flex-col items-center justify-center py-6 text-center space-y-2 opacity-50">
+                                <p className="text-xs font-medium text-neutral-500 uppercase tracking-widest">Hoy {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                            </div>
+
                             {messages.map((m, idx) => (
-                                <div key={idx} className={cn("flex gap-2", m.role === "user" ? "flex-row-reverse" : "flex-row")}>
+                                <div key={idx} className={cn("flex gap-3", m.role === "user" ? "flex-row-reverse" : "flex-row")}>
+                                    {m.role !== "user" && (
+                                        <div className="h-8 w-8 rounded-full bg-neutral-800 flex items-center justify-center shrink-0 border border-neutral-700 mt-1 self-start">
+                                            <Bot className="h-4 w-4 text-red-500" />
+                                        </div>
+                                    )}
                                     <div className={cn(
-                                        "h-8 w-8 rounded-full flex items-center justify-center shrink-0",
-                                        m.role === "user" ? "bg-muted" : "bg-primary/20"
-                                    )}>
-                                        {m.role === "user" ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4 text-primary" />}
-                                    </div>
-                                    <div className={cn(
-                                        "rounded-lg px-3 py-2 text-sm max-w-[80%]",
+                                        "rounded-2xl px-5 py-3 text-sm font-medium shadow-sm max-w-[85%] leading-relaxed",
                                         m.role === "user"
-                                            ? "bg-primary text-primary-foreground rounded-tr-none"
-                                            : "bg-muted rounded-tl-none"
+                                            ? "bg-white text-black rounded-tr-sm"
+                                            : "bg-neutral-800/80 text-neutral-100 border border-neutral-700/50 rounded-tl-sm backdrop-blur-sm"
                                     )}>
                                         {m.content}
                                     </div>
                                 </div>
                             ))}
                             {isLoading && (
-                                <div className="flex gap-2">
-                                    <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
-                                        <Bot className="h-4 w-4 text-primary" />
+                                <div className="flex gap-3">
+                                    <div className="h-8 w-8 rounded-full bg-neutral-800 flex items-center justify-center shrink-0 border border-neutral-700 mt-1">
+                                        <Bot className="h-4 w-4 text-red-400 animate-pulse" />
                                     </div>
-                                    <div className="bg-muted rounded-lg rounded-tl-none px-3 py-2 text-sm">
-                                        Escribiendo...
+                                    <div className="bg-neutral-800/50 border border-neutral-800 rounded-2xl rounded-tl-sm px-4 py-3 flex gap-1 items-center">
+                                        <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                                        <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                                        <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-bounce"></div>
                                     </div>
                                 </div>
                             )}
                         </div>
-                    </CardContent>
-                    <CardFooter className="p-3 bg-background border-t">
-                        <div className="flex w-full gap-2">
+                    </div>
+
+                    {/* Input Area */}
+                    <div className="p-4 bg-neutral-900 border-t border-neutral-800">
+                        <div className="flex gap-3 relative">
                             <Input
-                                placeholder="Pregunta sobre tu entrenamiento..."
+                                placeholder="Escribe tu consulta..."
                                 value={input}
                                 onChange={(e) => setInput(e.target.value)}
-                                onKeyDown={handleKeyDown}
+                                onKeyDown={(e) => {
+                                    if (e.key === "Enter" && !e.shiftKey) {
+                                        e.preventDefault();
+                                        handleSend();
+                                    }
+                                }}
                                 disabled={isLoading}
-                                className="flex-1"
+                                className="flex-1 bg-neutral-950 border-neutral-800 text-white placeholder:text-neutral-500 focus-visible:ring-red-500/50 h-12 rounded-xl pl-4 pr-12 shadow-inner"
                             />
-                            <Button size="icon" onClick={handleSend} disabled={isLoading || !input.trim()}>
+                            <Button
+                                size="icon"
+                                onClick={handleSend}
+                                disabled={isLoading || !input.trim()}
+                                className="absolute right-1.5 top-1.5 h-9 w-9 bg-red-600hover:bg-red-500 text-white rounded-lg transition-all hover:scale-105 disabled:opacity-50 disabled:hover:scale-100"
+                            >
                                 <Send className="h-4 w-4" />
                             </Button>
                         </div>
-                    </CardFooter>
-                </Card>
-            )}
-
-            {!isOpen && (
+                        <p className="text-[10px] text-center text-neutral-600 mt-3 font-medium">
+                            Vivi puede cometer errores. Verifica la info importante.
+                        </p>
+                    </div>
+                </div>
+            ) : (
                 <Button
                     size="lg"
-                    className="h-14 w-14 rounded-full shadow-lg p-0 bg-primary hover:scale-105 transition-transform"
+                    className="h-16 w-16 rounded-full shadow-[0_0_30px_-5px_rgba(220,38,38,0.5)] p-0 bg-linear-to-br from-red-600 to-red-800 hover:scale-110 transition-all duration-300 border-2 border-white/10 group"
                     onClick={() => setIsOpen(true)}
                 >
-                    <MessageSquare className="h-7 w-7" />
+                    <div className="absolute inset-0 bg-red-500 rounded-full animate-ping opacity-20 group-hover:opacity-40 duration-1000"></div>
+                    <Bot className="h-8 w-8 text-white relative z-10" />
+                    {/* Notification Badge if needed */}
+                    <span className="absolute top-0 right-0 h-4 w-4 bg-green-500 border-2 border-neutral-900 rounded-full z-20"></span>
                 </Button>
             )}
         </div>

@@ -41,8 +41,8 @@ export function AssignRoutineDialog({ routineId, athletes }: { routineId: string
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button variant="outline" size="sm" className="gap-2 text-neutral-400 hover:text-white border-neutral-800">
-                    <Users className="w-4 h-4" /> Asignar
+                <Button className="w-full bg-neutral-800 text-white hover:bg-neutral-700/80 rounded-xl font-bold h-10 shadow-sm transition-all hover:scale-[1.02]">
+                    <Users className="w-4 h-4 mr-2" /> ASIGNAR
                 </Button>
             </DialogTrigger>
             <DialogContent className="bg-neutral-900 border-neutral-800 text-white">

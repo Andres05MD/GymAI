@@ -36,8 +36,8 @@ export async function getRoutines() {
         const routines = snapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data(),
-            createdAt: doc.data().createdAt?.toDate().toISOString(),
-            updatedAt: doc.data().updatedAt?.toDate().toISOString(),
+            createdAt: doc.data().createdAt?.toDate ? doc.data().createdAt.toDate().toISOString() : doc.data().createdAt,
+            updatedAt: doc.data().updatedAt?.toDate ? doc.data().updatedAt.toDate().toISOString() : doc.data().updatedAt,
         }));
 
         return { success: true, routines };
@@ -65,8 +65,8 @@ export async function getAthleteRoutine(athleteId: string) {
         return {
             id: doc.id,
             ...doc.data(),
-            createdAt: doc.data().createdAt?.toDate?.()?.toISOString(),
-            updatedAt: doc.data().updatedAt?.toDate?.()?.toISOString(),
+            createdAt: doc.data().createdAt?.toDate ? doc.data().createdAt.toDate().toISOString() : doc.data().createdAt,
+            updatedAt: doc.data().updatedAt?.toDate ? doc.data().updatedAt.toDate().toISOString() : doc.data().updatedAt,
         };
     } catch (error) {
         console.error("Error fetching athlete routine:", error);
@@ -89,8 +89,8 @@ export async function getCoachRoutines() {
         const routines = snapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data(),
-            createdAt: doc.data().createdAt?.toDate?.()?.toISOString(),
-            updatedAt: doc.data().updatedAt?.toDate?.()?.toISOString(),
+            createdAt: doc.data().createdAt?.toDate ? doc.data().createdAt.toDate().toISOString() : doc.data().createdAt,
+            updatedAt: doc.data().updatedAt?.toDate ? doc.data().updatedAt.toDate().toISOString() : doc.data().updatedAt,
         }));
 
         return { success: true, routines };
@@ -167,7 +167,15 @@ export async function getRoutine(id: string) {
             return { success: false, error: "No autorizado" };
         }
 
-        return { success: true, routine: { id: docSnap.id, ...data } };
+        return {
+            success: true,
+            routine: {
+                id: docSnap.id,
+                ...data,
+                createdAt: data?.createdAt?.toDate ? data.createdAt.toDate().toISOString() : (data?.createdAt instanceof Date ? data.createdAt.toISOString() : data?.createdAt),
+                updatedAt: data?.updatedAt?.toDate ? data.updatedAt.toDate().toISOString() : (data?.updatedAt instanceof Date ? data.updatedAt.toISOString() : data?.updatedAt),
+            }
+        };
     } catch (error) {
         return { success: false, error: "Error al cargar rutina" };
     }
@@ -297,7 +305,7 @@ export async function generateRoutineWithAI(data: z.infer<typeof GenerateRoutine
         const groq = getGroqClient();
         const completion = await groq.chat.completions.create({
             messages: [{ role: "user", content: prompt }],
-            model: "llama3-70b-8192",
+            model: "llama-3.3-70b-versatile",
             temperature: 0.5,
             response_format: { type: "json_object" },
         });

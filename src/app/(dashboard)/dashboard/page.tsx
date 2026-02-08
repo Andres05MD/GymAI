@@ -59,12 +59,6 @@ async function CoachDashboard({ user }: { user: DashboardUser | undefined }) {
                         </Button>
                     </Link>
 
-                    {/* Notification & User Nav - Desktop Only for Dashboard */}
-                    <div className="hidden md:flex items-center gap-4">
-                        <div className="h-8 w-px bg-neutral-800 mx-2" />
-                        <NotificationBell role="coach" />
-                        <UserNav user={user} />
-                    </div>
                 </div>
             </div>
 

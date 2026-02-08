@@ -15,7 +15,7 @@ export function Header({ user }: HeaderProps) {
     const isDashboard = pathname === "/dashboard";
 
     return (
-        <header className={`flex h-16 items-center justify-between gap-4 px-6 md:px-10 py-3 bg-transparent w-full ${isDashboard ? 'md:hidden' : ''}`}>
+        <header className="flex h-16 items-center justify-between gap-4 px-6 md:px-10 py-3 bg-transparent w-full">
             {/* Logo for mobile only since Sidebar is hidden */}
             <div className="md:hidden flex items-center gap-2">
                 <div className="h-8 w-8 bg-white rounded-full flex items-center justify-center">
@@ -24,8 +24,8 @@ export function Header({ user }: HeaderProps) {
                 <span className="text-xl font-bold tracking-tighter text-white">GymIA</span>
             </div>
 
-            {/* Right Actions - Hide on Desktop if on Dashboard */}
-            <div className={`flex items-center gap-2 sm:gap-4 ${isDashboard ? 'md:hidden' : ''}`}>
+            {/* Right Actions */}
+            <div className="flex items-center gap-2 sm:gap-4 ml-auto md:ml-0">
                 <NotificationBell role={role} />
 
                 <div className="h-8 w-px bg-neutral-800 mx-2 hidden sm:block" />
