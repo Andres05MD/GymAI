@@ -66,6 +66,26 @@ export function ProfileForm({ user }: ProfileFormProps) {
         }
     }
 
+    const height = form.watch("height");
+    const weight = form.watch("weight");
+
+    const calculateBMI = (h?: string, w?: string) => {
+        const heightVal = parseFloat(h || "0");
+        const weightVal = parseFloat(w || "0");
+
+        if (!heightVal || !weightVal) return null;
+
+        const bmiVal = weightVal / ((heightVal / 100) * (heightVal / 100));
+        const rounded = bmiVal.toFixed(1);
+
+        if (bmiVal < 18.5) return { value: rounded, label: "Bajo Peso", color: "border-blue-500 text-blue-500" };
+        if (bmiVal < 25) return { value: rounded, label: "Peso Normal", color: "border-green-500 text-green-500" };
+        if (bmiVal < 30) return { value: rounded, label: "Sobrepeso", color: "border-yellow-500 text-yellow-500" };
+        return { value: rounded, label: "Obesidad", color: "border-red-500 text-red-500" };
+    };
+
+    const bmi = calculateBMI(height, weight);
+
     return (
         <div className="space-y-8">
             <div className="flex flex-col md:flex-row items-center md:items-start gap-6 pb-6 border-b border-neutral-800">
@@ -93,6 +113,14 @@ export function ProfileForm({ user }: ProfileFormProps) {
                         )}
                     </div>
                 </div>
+
+                {user.role !== 'coach' && bmi && (
+                    <div className={`md:ml-auto p-4 rounded-2xl border ${bmi.color.split(' ')[0]} bg-white/5 backdrop-blur-sm flex flex-col items-center justify-center min-w-[140px] shadow-lg`}>
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 mb-1">IMC Actual</span>
+                        <span className={`text-3xl font-black ${bmi.color.split(' ')[1]} leading-none mb-1`}>{bmi.value}</span>
+                        <span className="text-[10px] font-bold uppercase text-neutral-500 bg-black/40 px-2 py-0.5 rounded-full">{bmi.label}</span>
+                    </div>
+                )}
             </div>
 
             <Form {...form}>
@@ -144,9 +172,9 @@ export function ProfileForm({ user }: ProfileFormProps) {
                                             <FormLabel className="uppercase text-xs font-bold tracking-widest text-neutral-500 ml-1">Altura (cm)</FormLabel>
                                             <FormControl>
                                                 <Input
+                                                    {...field}
                                                     type="number"
                                                     placeholder="175"
-                                                    {...field}
                                                     className="bg-neutral-950/50 border-neutral-800 focus:border-red-500 transition-all h-12 rounded-xl text-white placeholder:text-neutral-600"
                                                 />
                                             </FormControl>
@@ -155,24 +183,26 @@ export function ProfileForm({ user }: ProfileFormProps) {
                                     )}
                                 />
 
-                                <FormField
-                                    control={form.control}
-                                    name="weight"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="uppercase text-xs font-bold tracking-widest text-neutral-500 ml-1">Peso (kg)</FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    type="number"
-                                                    placeholder="70"
-                                                    {...field}
-                                                    className="bg-neutral-950/50 border-neutral-800 focus:border-red-500 transition-all h-12 rounded-xl text-white placeholder:text-neutral-600"
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
+                                <div className="space-y-2">
+                                    <FormField
+                                        control={form.control}
+                                        name="weight"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel className="uppercase text-xs font-bold tracking-widest text-neutral-500 ml-1">Peso (kg)</FormLabel>
+                                                <FormControl>
+                                                    <Input
+                                                        {...field}
+                                                        type="number"
+                                                        placeholder="70"
+                                                        className="bg-neutral-950/50 border-neutral-800 focus:border-red-500 transition-all h-12 rounded-xl text-white placeholder:text-neutral-600"
+                                                    />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
                             </>
                         )}
                     </div>
@@ -187,6 +217,6 @@ export function ProfileForm({ user }: ProfileFormProps) {
                     </div>
                 </form>
             </Form>
-        </div>
+        </div >
     );
 }

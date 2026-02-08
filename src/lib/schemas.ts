@@ -101,11 +101,17 @@ export const OnboardingInputSchema = z.object({
         chest: z.coerce.number().optional(),
         waist: z.coerce.number().optional(),
         hips: z.coerce.number().optional(),
+        glutes: z.coerce.number().optional(), // Added glutes
         shoulders: z.coerce.number().optional(),
-        biceps: z.coerce.number().optional(),
-        forearms: z.coerce.number().optional(),
-        quads: z.coerce.number().optional(),
-        calves: z.coerce.number().optional(),
+
+        bicepsLeft: z.coerce.number().optional(),
+        bicepsRight: z.coerce.number().optional(),
+        forearmsLeft: z.coerce.number().optional(),
+        forearmsRight: z.coerce.number().optional(),
+        quadsLeft: z.coerce.number().optional(),
+        quadsRight: z.coerce.number().optional(),
+        calvesLeft: z.coerce.number().optional(),
+        calvesRight: z.coerce.number().optional(),
     }).optional(),
 
     // Seguridad: Contraseña para acceso correo/password (Requerido para usuarios Google)

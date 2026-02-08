@@ -353,12 +353,21 @@ export function OnboardingWizard() {
                                             {[
                                                 { id: "measurements.shoulders", label: "Hombros" },
                                                 { id: "measurements.chest", label: "Pecho" },
-                                                { id: "measurements.biceps", label: "Bíceps" },
-                                                { id: "measurements.forearms", label: "Antebrazos" },
                                                 { id: "measurements.waist", label: "Cintura" },
                                                 { id: "measurements.hips", label: "Cadera" },
-                                                { id: "measurements.quads", label: "Cuádriceps" },
-                                                { id: "measurements.calves", label: "Pantorrillas" },
+                                                { id: "measurements.glutes", label: "Glúteos" },
+
+                                                { id: "measurements.bicepsLeft", label: "Bíceps Izq." },
+                                                { id: "measurements.bicepsRight", label: "Bíceps Der." },
+
+                                                { id: "measurements.forearmsLeft", label: "Antebrazo Izq." },
+                                                { id: "measurements.forearmsRight", label: "Antebrazo Der." },
+
+                                                { id: "measurements.quadsLeft", label: "Cuádriceps Izq." },
+                                                { id: "measurements.quadsRight", label: "Cuádriceps Der." },
+
+                                                { id: "measurements.calvesLeft", label: "Pantorilla Izq." },
+                                                { id: "measurements.calvesRight", label: "Pantorilla Der." },
                                             ].map((m) => (
                                                 <div key={m.id} className="space-y-2">
                                                     <Label className="uppercase text-xs font-bold text-neutral-500">{m.label} (cm)</Label>
