@@ -107,6 +107,9 @@ export const OnboardingInputSchema = z.object({
         quads: z.coerce.number().optional(),
         calves: z.coerce.number().optional(),
     }).optional(),
+
+    // Seguridad: Contraseña para acceso correo/password (Requerido para usuarios Google)
+    password: z.string().min(6).optional().or(z.literal("")),
 });
 
 // Schema de Ejercicio

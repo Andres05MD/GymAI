@@ -71,7 +71,7 @@ export async function registerUser(data: z.infer<typeof RegisterInputSchemaServe
     }
 }
 
-import { adminDb } from "@/lib/firebase-admin";
+import { adminDb, adminAuth } from "@/lib/firebase-admin";
 
 /**
  * Completa el onboarding del usuario actual.
@@ -87,11 +87,25 @@ export async function completeOnboarding(data: z.infer<typeof OnboardingInputSch
         return { success: false, error: "Datos inválidos" };
     }
 
+    const { password, ...profileData } = validation.data;
+
     try {
+        // Si el usuario proporcionó una contraseña (para usuarios de Google), la actualizamos en Auth
+        if (password && password.length >= 6) {
+            try {
+                await adminAuth.updateUser(session.user.id, {
+                    password: password
+                });
+            } catch (authError) {
+                console.error("Error actualizando contraseña:", authError);
+                return { success: false, error: "Error al establecer la contraseña. Intenta otra." };
+            }
+        }
+
         // Usamos set con { merge: true } para crear el documento si no existe 
         // o actualizarlo si ya existe, evitando el error NOT_FOUND.
         await adminDb.collection("users").doc(session.user.id).set({
-            ...validation.data,
+            ...profileData,
             onboardingCompleted: true,
             updatedAt: new Date()
         }, { merge: true });

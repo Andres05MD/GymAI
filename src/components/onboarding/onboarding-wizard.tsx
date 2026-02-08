@@ -9,7 +9,7 @@ import { completeOnboarding } from "@/actions/auth-actions";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Loader2, ChevronRight, ChevronLeft, Check, Activity, HeartPulse, User, Ruler, Target } from "lucide-react";
+import { Loader2, ChevronRight, ChevronLeft, Check, Activity, HeartPulse, User, Ruler, Target, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -18,13 +18,14 @@ import { cn } from "@/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 
-type Step = "bio" | "goals" | "health" | "measurements";
+type Step = "bio" | "goals" | "health" | "measurements" | "security";
 
 const steps: { id: Step; label: string; icon: any }[] = [
     { id: "bio", label: "Biometría", icon: User },
     { id: "goals", label: "Objetivos", icon: Target },
     { id: "health", label: "Salud", icon: HeartPulse },
     { id: "measurements", label: "Medidas", icon: Ruler },
+    { id: "security", label: "Seguridad", icon: Lock },
 ];
 
 export function OnboardingWizard() {
@@ -47,6 +48,7 @@ export function OnboardingWizard() {
             injuries: [],
             medicalConditions: [],
             measurements: {},
+            password: "",
         },
     });
 
@@ -66,6 +68,9 @@ export function OnboardingWizard() {
         } else if (currentStep === "health") {
             isValid = await trigger(["injuries", "medicalConditions"]);
             if (isValid) setCurrentStep("measurements");
+        } else if (currentStep === "measurements") {
+            isValid = await trigger(["measurements"]);
+            if (isValid) setCurrentStep("security");
         }
     };
 
@@ -73,6 +78,7 @@ export function OnboardingWizard() {
         if (currentStep === "goals") setCurrentStep("bio");
         if (currentStep === "health") setCurrentStep("goals");
         if (currentStep === "measurements") setCurrentStep("health");
+        if (currentStep === "security") setCurrentStep("measurements");
     };
 
     const onSubmit = async (data: z.infer<typeof OnboardingInputSchema>) => {
@@ -137,7 +143,7 @@ export function OnboardingWizard() {
                 {/* Progress Line Background would go here if needed */}
             </div>
 
-            <Card className="bg-neutral-900/50 border-neutral-800 backdrop-blur-xl overflow-hidden rounded-[2rem]">
+            <Card className="bg-neutral-900/50 border-neutral-800 backdrop-blur-xl overflow-hidden rounded-4xl">
                 <form onSubmit={handleSubmit(onSubmit)}>
                     <CardContent className="p-8 md:p-12 min-h-[500px] flex flex-col">
                         <AnimatePresence mode="wait">
@@ -345,10 +351,12 @@ export function OnboardingWizard() {
 
                                         <div className="grid grid-cols-2 gap-4">
                                             {[
+                                                { id: "measurements.shoulders", label: "Hombros" },
                                                 { id: "measurements.chest", label: "Pecho" },
+                                                { id: "measurements.biceps", label: "Bíceps" },
+                                                { id: "measurements.forearms", label: "Antebrazos" },
                                                 { id: "measurements.waist", label: "Cintura" },
                                                 { id: "measurements.hips", label: "Cadera" },
-                                                { id: "measurements.biceps", label: "Bíceps" },
                                                 { id: "measurements.quads", label: "Cuádriceps" },
                                                 { id: "measurements.calves", label: "Pantorrillas" },
                                             ].map((m) => (
@@ -362,6 +370,37 @@ export function OnboardingWizard() {
                                                     />
                                                 </div>
                                             ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* STEP 5: SECURITY */}
+                                {currentStep === "security" && (
+                                    <div className="space-y-6">
+                                        <div className="text-center mb-8">
+                                            <h2 className="text-3xl font-black text-white mb-2">Seguridad de la Cuenta</h2>
+                                            <p className="text-neutral-400">
+                                                Si entraste con Google, crea una contraseña para poder acceder también con tu email.
+                                            </p>
+                                        </div>
+
+                                        <div className="space-y-4 max-w-md mx-auto">
+                                            <div className="space-y-2">
+                                                <Label className="uppercase text-xs font-bold text-neutral-500">Contraseña (Opcional)</Label>
+                                                <div className="relative">
+                                                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-neutral-500" />
+                                                    <Input
+                                                        type="password"
+                                                        {...register("password")}
+                                                        placeholder="Mínimo 6 caracteres"
+                                                        className="pl-10 bg-black/50 border-neutral-800 h-12 rounded-xl text-white focus:ring-red-500/50"
+                                                    />
+                                                </div>
+                                                {errors.password && <p className="text-red-500 text-xs">{errors.password.message}</p>}
+                                                <p className="text-[10px] text-neutral-500 mt-2">
+                                                    * Esto te permitirá iniciar sesión desde cualquier dispositivo usando tu email y esta contraseña, además del botón de Google.
+                                                </p>
+                                            </div>
                                         </div>
                                     </div>
                                 )}
@@ -383,7 +422,7 @@ export function OnboardingWizard() {
                                 <div></div> // Spacer
                             )}
 
-                            {currentStep === "measurements" ? (
+                            {currentStep === "security" ? (
                                 <Button
                                     type="submit"
                                     disabled={isSubmitting}
