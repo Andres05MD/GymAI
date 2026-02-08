@@ -1,66 +1,79 @@
 # GymIA
 
-Un asistente de entrenamiento inteligente potenciado por IA, construido con la última tecnología web.
+Un ecosistema de entrenamiento inteligente potenciado por IA, diseñado para conectar a entrenadores y atletas con herramientas de última generación. Optimizado para dispositivos móviles y construido con un enfoque en rendimiento, diseño y escalabilidad.
 
-## 🚀 Tech Stack
+## 🚀 Características Principales
 
-- **Framework:** [Next.js 16](https://nextjs.org/) (App Router)
-- **Lenguaje:** [TypeScript](https://www.typescriptlang.org/)
-- **Estilos:** [Tailwind CSS 4](https://tailwindcss.com/)
-- **UI Components:** [Radix UI](https://www.radix-ui.com/) + [Lucide Icons](https://lucide.dev/)
-- **Base de Datos & Auth:** [Firebase](https://firebase.google.com/)
-- **Autenticación:** [Auth.js (NextAuth)](https://authjs.dev/)
-- **IA:** [Groq SDK](https://groq.com/)
-- **Gestión de Estado:** [Zustand](https://zustand-demo.pmnd.rs/) + [React Query](https://tanstack.com/query/latest)
+### Para Entrenadores
+- **Dashboard Avanzado**: Visualización completa de métricas de atletas, rutinas activas y carga de trabajo.
+- **Gestión de Atletas**: Perfiles detallados, seguimiento de progreso y asignación de planes.
+- **Constructor de Rutinas con IA**: Generación automática de planes de entrenamiento personalizados basados en objetivos, nivel y equipamiento.
+- **Biblioteca de Ejercicios**: Gestión centralizada de ejercicios con categorización muscular detallada.
+
+### Para Atletas
+- **Modo Entreno (Live)**: Interfaz optimizada para el gimnasio con cronómetro de descanso, registro de series (RPE/Peso) y validación de PRs.
+- **Progreso Visual**: Gráficos interactivos de volumen, frecuencia y medidas corporales.
+- **Asistente IA en Tiempo Real**: 
+  - Generación de calentamientos específicos.
+  - Alternativas de ejercicios si el equipamiento está ocupado.
+  - Chat contextual sobre técnica y ejecución.
+- **Historial Completo**: Registro detallado de cada sesión y récord personal.
+
+## 🛠️ Tech Stack
+
+- **Framework:** [Next.js 15+](https://nextjs.org/) (App Router, Server Actions)
+- **Lenguaje:** [TypeScript](https://www.typescriptlang.org/) (Strict Mode)
+- **Estilos:** [Tailwind CSS](https://tailwindcss.com/) + [Radix UI](https://www.radix-ui.com/)
+- **Iconos:** [Lucide React](https://lucide.dev/)
+- **Base de Datos:** [Firebase Firestore](https://firebase.google.com/) (Admin SDK)
+- **Autenticación:** [Auth.js (NextAuth v5)](https://authjs.dev/)
+- **IA:** [Groq SDK](https://groq.com/) (Llama 3 / Mixtral)
+- **Gráficos:** [Recharts](https://recharts.org/)
+- **Gestión de Estado:** Server State (React Query / Server Components) + Client State (Hooks)
 - **Validación:** [Zod](https://zod.dev/) + [React Hook Form](https://react-hook-form.com/)
 
-## 🛠️ Configuración del Proyecto
+## 🏗️ Estado del Proyecto (Refactorización Reciente)
 
-### 1. Clonar el repositorio
+El proyecto ha pasado por una refactorización mayor para garantizar robustez y mantenibilidad:
+- **Tipado Estricto**: Eliminación del 95% de tipos `any`, implementando interfaces robustas (`Routine`, `Exercise`, `SetLog`, `Athlete`).
+- **Arquitectura de Componentes**: Separación clara de responsabilidades en componentes de UI (`warmup-generator`, `train-console`, `workout-session`).
+- **Mejoras de UI/UX**: Estandarización de estilos (bordes `rounded-4xl`, gradientes modernos), feedback visual mejorado y lazy loading de componentes pesados.
 
-```bash
-git clone <tu-repositorio-url>
-cd GymIA
-```
+## ⚙️ Configuración Local
 
-### 2. Instalar dependencias
+1. **Clonar el repositorio**
+   ```bash
+   git clone <tu-repositorio-url>
+   cd GymIA
+   ```
 
-```bash
-npm install
-```
+2. **Instalar dependencias**
+   ```bash
+   npm install
+   # o
+   pnpm install
+   ```
 
-### 3. Configurar variables de entorno
+3. **Variables de Entorno**
+   Crea un archivo `.env` en la raíz con:
+   ```env
+   # Auth
+   AUTH_SECRET="tu-secreto-generado"
+   AUTH_URL="http://localhost:3000"
 
-Copia el archivo de ejemplo y configura tus credenciales:
+   # Firebase Admin (Service Account Minificada)
+   FIREBASE_PROJECT_ID="tu-project-id"
+   FIREBASE_CLIENT_EMAIL="tu-email-service-account"
+   FIREBASE_PRIVATE_KEY="tu-private-key"
 
-```bash
-cp .env.example .env
-```
+   # IA
+   GROQ_API_KEY="tu-api-key-groq"
+   ```
 
-Asegúrate de llenar todas las variables en `.env`:
-
-- **Firebase Public Config**: Obtenlas de la consola de Firebase.
-- **Groq API Key**: Necesaria para las funciones de IA.
-- **Auth Secret**: Genera uno seguro con `openssl rand -base64 32`.
-- **Firebase Admin SDK**: Genera una nueva clave privada desde la consola de Firebase (Service Accounts) y pega el JSON minificado.
-
-### 4. Ejecutar el servidor de desarrollo
-
-```bash
-npm run dev
-```
-
-Abre [http://localhost:3000](http://localhost:3000) en tu navegador.
-
-## 📦 Despliegue en Vercel
-
-Este proyecto está optimizado para ser desplegado en [Vercel](https://vercel.com).
-
-1. Importa tu repositorio en Vercel.
-2. Configura las variables de entorno (Environment Variables) copiando los valores de tu `.env` local.
-   - **IMPORTANTE**: Genera un nuevo `AUTH_SECRET` para producción.
-   - Actualiza `AUTH_URL` con tu dominio de Vercel (ej. `https://tu-proyecto.vercel.app`).
-3. Despliega.
+4. **Ejecutar**
+   ```bash
+   npm run dev
+   ```
 
 ## 📄 Licencia
 
