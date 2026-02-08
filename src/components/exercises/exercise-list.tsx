@@ -54,10 +54,15 @@ export function ExerciseList({ exercises }: ExerciseListProps) {
         "pecho": "bg-red-500/10 text-red-500 border-red-500/20",
         "espalda": "bg-blue-500/10 text-blue-500 border-blue-500/20",
         "hombros": "bg-purple-500/10 text-purple-500 border-purple-500/20",
-        "brazos": "bg-orange-500/10 text-orange-500 border-orange-500/20",
-        "piernas": "bg-green-500/10 text-green-500 border-green-500/20",
-        "core": "bg-yellow-500/10 text-yellow-500 border-yellow-500/20",
-        "cardio": "bg-pink-500/10 text-pink-500 border-pink-500/20",
+        "bíceps": "bg-orange-500/10 text-orange-500 border-orange-500/20",
+        "tríceps": "bg-pink-500/10 text-pink-500 border-pink-500/20",
+        "cuádriceps": "bg-green-500/10 text-green-500 border-green-500/20",
+        "isquiotibiales": "bg-yellow-500/10 text-yellow-500 border-yellow-500/20",
+        "glúteos": "bg-rose-500/10 text-rose-500 border-rose-500/20",
+        "pantorrillas": "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
+        "abdominales": "bg-cyan-500/10 text-cyan-500 border-cyan-500/20",
+        "cardio": "bg-indigo-500/10 text-indigo-500 border-indigo-500/20",
+        "full body": "bg-white/10 text-white border-white/20",
     };
 
     const getGroupColor = (group: string) => {
@@ -120,84 +125,94 @@ export function ExerciseList({ exercises }: ExerciseListProps) {
                 {filteredExercises.map((exercise) => (
                     <div
                         key={exercise.id}
-                        className="group bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-[2rem] p-6 hover:border-red-500/30 transition-all duration-300 relative overflow-hidden"
+                        className="group flex flex-col bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-[2rem] p-5 hover:border-red-500/30 transition-all duration-300 relative overflow-hidden h-full"
                     >
                         {/* Gradient Blob */}
                         <div className="absolute top-0 right-0 w-32 h-32 bg-red-600/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none group-hover:bg-red-600/10 transition-colors"></div>
 
-                        {/* Header */}
-                        <div className="flex justify-between items-start mb-4 relative z-10">
-                            <div className="h-14 w-14 bg-neutral-900 rounded-2xl flex items-center justify-center text-red-500 group-hover:scale-110 transition-transform shadow-lg border border-neutral-800">
-                                <Dumbbell className="h-7 w-7" />
+                        {/* Content Wrapper to push footer down */}
+                        <div className="flex-1 flex flex-col">
+                            {/* Header */}
+                            <div className="flex justify-between items-start mb-3 relative z-10">
+                                <div className="h-12 w-12 bg-neutral-900 rounded-2xl flex items-center justify-center text-red-500 group-hover:scale-110 transition-transform shadow-lg border border-neutral-800">
+                                    <Dumbbell className="h-6 w-6" />
+                                </div>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-neutral-500 hover:text-white hover:bg-black/40">
+                                            <MoreVertical className="h-4 w-4" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end" className="bg-neutral-900/90 backdrop-blur-xl border-neutral-800 text-white rounded-xl shadow-xl">
+                                        <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="focus:bg-neutral-800 focus:text-white cursor-pointer p-2 rounded-lg">
+                                            <ExerciseFormDialog
+                                                exercise={exercise}
+                                                trigger={
+                                                    <div className="flex items-center w-full">
+                                                        <Edit className="h-4 w-4 mr-2" /> Editar
+                                                    </div>
+                                                }
+                                            />
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                            onClick={() => handleDelete(exercise.id)}
+                                            className="text-red-500 hover:text-red-400 focus:text-red-400 focus:bg-red-950/30 cursor-pointer p-2 rounded-lg mt-1"
+                                        >
+                                            <Trash className="h-4 w-4 mr-2" /> Eliminar
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
                             </div>
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full text-neutral-500 hover:text-white hover:bg-black/40">
-                                        <MoreVertical className="h-5 w-5" />
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="bg-neutral-900/90 backdrop-blur-xl border-neutral-800 text-white rounded-xl shadow-xl">
-                                    <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="focus:bg-neutral-800 focus:text-white cursor-pointer p-2 rounded-lg">
-                                        <ExerciseFormDialog
-                                            exercise={exercise}
-                                            trigger={
-                                                <div className="flex items-center w-full">
-                                                    <Edit className="h-4 w-4 mr-2" /> Editar
-                                                </div>
-                                            }
-                                        />
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                        onClick={() => handleDelete(exercise.id)}
-                                        className="text-red-500 hover:text-red-400 focus:text-red-400 focus:bg-red-950/30 cursor-pointer p-2 rounded-lg mt-1"
+
+                            {/* Title */}
+                            <div className="relative z-10 mb-3">
+                                <h3 className="font-bold text-white text-lg leading-tight group-hover:text-red-500 transition-colors tracking-tight line-clamp-2">
+                                    {exercise.name}
+                                </h3>
+                            </div>
+
+                            {/* Muscle Tags */}
+                            <div className="flex flex-wrap gap-1.5 mb-2 relative z-10 mt-auto">
+                                {exercise.muscleGroups?.slice(0, 3).map((g: string) => (
+                                    <span
+                                        key={g}
+                                        className={cn(
+                                            "text-[10px] uppercase font-bold tracking-widest px-2.5 py-1 rounded-lg border shadow-sm",
+                                            getGroupColor(g)
+                                        )}
                                     >
-                                        <Trash className="h-4 w-4 mr-2" /> Eliminar
-                                    </DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                        </div>
+                                        {g}
+                                    </span>
+                                ))}
+                                {(exercise.muscleGroups?.length || 0) > 3 && (
+                                    <span className="text-[10px] text-neutral-500 py-1 px-2 font-bold bg-neutral-900 rounded-lg border border-neutral-800">
+                                        +{exercise.muscleGroups.length - 3}
+                                    </span>
+                                )}
+                            </div>
 
-                        {/* Title & Description */}
-                        <div className="relative z-10 mb-4">
-                            <h3 className="font-bold text-white text-xl mb-1.5 line-clamp-1 group-hover:text-red-500 transition-colors tracking-tight">
-                                {exercise.name}
-                            </h3>
-
-
-                        </div>
-
-                        {/* Muscle Tags */}
-                        <div className="flex flex-wrap gap-2 mb-5 relative z-10">
-                            {exercise.muscleGroups?.slice(0, 3).map((g: string) => (
-                                <span
-                                    key={g}
-                                    className={cn(
-                                        "text-[9px] uppercase font-bold tracking-widest px-3 py-1.5 rounded-lg border shadow-sm",
-                                        getGroupColor(g)
-                                    )}
-                                >
-                                    {g}
-                                </span>
-                            ))}
-                            {(exercise.muscleGroups?.length || 0) > 3 && (
-                                <span className="text-[10px] text-neutral-500 py-1.5 px-2 font-bold bg-neutral-900 rounded-lg border border-neutral-800">
-                                    +{exercise.muscleGroups.length - 3}
-                                </span>
+                            {/* Specific Muscles (Small text) */}
+                            {exercise.specificMuscles && exercise.specificMuscles.length > 0 && (
+                                <p className="text-[11px] text-neutral-500 line-clamp-1 mb-4 relative z-10 font-medium">
+                                    {exercise.specificMuscles.join(", ")}
+                                </p>
                             )}
                         </div>
 
-                        {/* Video Modal */}
-                        <div className="relative z-10 w-full">
+                        {/* Video Button (Footer) */}
+                        <div className="relative z-10 w-full mt-4">
                             {exercise.videoUrl ? (
                                 <a
                                     href={exercise.videoUrl}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="flex items-center justify-center gap-2 text-xs text-white font-bold bg-neutral-800 hover:bg-red-600 px-4 py-3 rounded-xl transition-all w-full group/btn"
+                                    className="flex items-center justify-between text-xs text-white font-bold bg-neutral-800 hover:bg-red-600 px-4 py-3 rounded-xl transition-all w-full group/btn border border-white/5 hover:border-transparent"
                                 >
-                                    <PlayCircle className="h-4 w-4 text-red-500 group-hover/btn:text-white transition-colors" />
-                                    <span>Por ejemplo</span>
-                                    <ExternalLink className="h-3 w-3 opacity-30 group-hover/btn:opacity-100 transition-opacity ml-auto" />
+                                    <div className="flex items-center gap-2">
+                                        <PlayCircle className="h-4 w-4 text-red-500 group-hover/btn:text-white transition-colors" />
+                                        <span>Por ejemplo</span>
+                                    </div>
+                                    <ExternalLink className="h-3 w-3 opacity-30 group-hover/btn:opacity-100 transition-opacity" />
                                 </a>
                             ) : (
                                 <div className="flex items-center justify-center gap-2 text-xs text-neutral-600 font-bold bg-neutral-900/50 px-4 py-3 rounded-xl w-full border border-neutral-800 border-dashed cursor-not-allowed">
