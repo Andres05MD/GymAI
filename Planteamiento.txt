@@ -85,6 +85,6 @@ REFACTORIZACIÓN DE CÓDIGO (FEBRERO 2026)
 - [COMPLETADO] Lints y Estilos: Estandarización de clases CSS (ej. `rounded-4xl` en lugar de valores arbitrarios) y gradientes modernos.
 
 PENDIENTE (TODO)
-- IA para Coaches Avanzada: Implementar detección automática de estancamiento y sugerencias de progresión (Sobrecarga progresiva automática).
-- Notificaciones Push: Avisos en tiempo real para el atleta (ej. tiempo de descanso terminado fuera de la app).
-- Modo Offline: Persistencia local robusta para gimnasios sin señal.
+- Notificaciones: Sistema de avisos in-app y correo para atletas (ej. rutina actualizada).
+- Gamification: Logros, rachas y niveles para aumentar la retención.
+- Dashboard Global Coach: Métricas agregadas de todos los atletas.
