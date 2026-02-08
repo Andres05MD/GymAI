@@ -23,6 +23,7 @@ Sistema integral de gestión y optimización del entrenamiento físico mediante 
 
 AREAS COMUNES
 - [COMPLETADO] Portal de Acceso: Interfaz de autenticación y seguridad.
+- [COMPLETADO] Modo Offline: Sincronización automática de entrenamientos realizados sin conexión.
 - [COMPLETADO] Onboarding: Flujo paso a paso para la captura de datos iniciales (Salud, Biometría, Objetivos).
 - [COMPLETADO] Centro de Perfil y Progreso: Gestión de evolución corporal mediante el log de:
     - Peso y composición corporal.

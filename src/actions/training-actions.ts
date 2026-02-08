@@ -9,20 +9,21 @@ import { revalidateCacheTags, CACHE_TAGS } from "./cache-actions";
 
 // --- TIPOS LOCALES ---
 
-interface RoutineSet {
+export interface RoutineSet {
     reps?: number;
     weight?: number;
     rpe?: number;
     rest?: number;
+    completed?: boolean;
 }
 
-interface RoutineExercise {
+export interface RoutineExercise {
     exerciseId?: string;
     exerciseName?: string;
     sets: RoutineSet[];
 }
 
-interface WorkoutSessionData {
+export interface WorkoutSessionData {
     routineId?: string;
     routineName?: string;
     exercises?: RoutineExercise[];

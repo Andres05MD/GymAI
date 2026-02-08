@@ -7,12 +7,13 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Check, Clock, Save, ArrowLeft, Trophy, Info } from "lucide-react";
-import { logWorkoutSession } from "@/actions/training-actions";
+import { logWorkoutSession, WorkoutSessionData } from "@/actions/training-actions";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { AIAssistantDialog } from "@/components/training/ai-assistant-dialog";
 import { ProgressionTip } from "@/components/training/progression-tip";
+import { useOfflineSync } from "@/hooks/use-offline-sync";
 
 // --- INTERFACES ---
 
@@ -73,6 +74,7 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
     // Form state structure matching schema
     // We map the active day exercises to a local state for logging
     const [sessionLog, setSessionLog] = useState<SessionExercise[]>([]);
+    const { saveLogLocally, isOnline } = useOfflineSync();
 
     const activeDay = routine.schedule[activeDayIndex];
 
@@ -120,25 +122,26 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
         if (!confirm("¿Terminar entrenamiento? Asegúrate de haber completado las series.")) return;
 
         setIsSubmitting(true);
-        try {
-            // Transform data to fit Schema
-            const logData = {
-                routineId: routine.id,
-                dayId: activeDay.id || activeDay.name, // Fallback if no specific ID
-                durationMinutes: Math.round(elapsedTime / 60),
-                exercises: sessionLog.map(ex => ({
-                    exerciseName: ex.exerciseName,
-                    exerciseId: ex.exerciseId,
-                    feedback: ex.feedback,
-                    sets: ex.sets.filter((s: SessionSet) => s.completed || s.weight || s.reps).map((s: SessionSet) => ({
-                        weight: Number(s.weight) || 0,
-                        reps: Number(s.reps) || 0,
-                        rpe: Number(s.rpe) || undefined,
-                        completed: s.completed
-                    }))
-                }))
-            };
 
+        // Transform data to fit Schema
+        const logData = {
+            routineId: routine.id,
+            dayId: activeDay.id || activeDay.name, // Fallback if no specific ID
+            durationMinutes: Math.round(elapsedTime / 60),
+            exercises: sessionLog.map(ex => ({
+                exerciseName: ex.exerciseName,
+                exerciseId: ex.exerciseId,
+                feedback: ex.feedback,
+                sets: ex.sets.filter((s: SessionSet) => s.completed || s.weight || s.reps).map((s: SessionSet) => ({
+                    weight: Number(s.weight) || 0,
+                    reps: Number(s.reps) || 0,
+                    rpe: Number(s.rpe) || undefined,
+                    completed: s.completed
+                }))
+            }))
+        };
+
+        try {
             const res = await logWorkoutSession(logData);
             if (res.success) {
                 toast.success("¡Entrenamiento guardado!", {
@@ -149,7 +152,16 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
                 toast.error(res.error);
             }
         } catch (error) {
-            toast.error("Error al guardar");
+            console.error("Error al guardar", error);
+            const saved = saveLogLocally(logData as WorkoutSessionData);
+            if (saved) {
+                toast.warning("Guardado localmente (Offline)", {
+                    description: "Se sincronizará automáticamente cuando recuperes la conexión."
+                });
+                router.push("/");
+            } else {
+                toast.error("Error crítico: No se pudo guardar el entrenamiento.");
+            }
         } finally {
             setIsSubmitting(false);
         }
