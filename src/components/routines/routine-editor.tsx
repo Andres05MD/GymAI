@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { RoutineSafetyCheck } from "@/components/routines/routine-safety-check";
 
 // --- INTERFACES ---
 
@@ -191,9 +192,10 @@ interface RoutineEditorProps {
     isEditing?: boolean;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     availableExercises?: any[];
+    athleteId?: string;
 }
 
-export function RoutineEditor({ initialData, isEditing = false, availableExercises = [] }: RoutineEditorProps) {
+export function RoutineEditor({ initialData, isEditing = false, availableExercises = [], athleteId }: RoutineEditorProps) {
     const router = useRouter();
     const [isSaving, setIsSaving] = useState(false);
     const [activeDayIndex, setActiveDayIndex] = useState(0);
@@ -309,6 +311,9 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                     </div>
                 </div>
                 <div className="flex gap-3">
+                    {athleteId && (
+                        <RoutineSafetyCheck routine={watch()} athleteId={athleteId} />
+                    )}
                     <AIGenerator onGenerate={onAIResult} />
                     <Button onClick={handleSubmit(onSubmit)} disabled={isSaving} className="bg-white text-black hover:bg-neutral-200 font-bold rounded-full px-8 h-10 tracking-wide transition-all shadow-md hover:shadow-lg">
                         {isSaving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}

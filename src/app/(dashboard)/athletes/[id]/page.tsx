@@ -101,17 +101,26 @@ export default async function AthleteDetailsPage({ params }: PageProps) {
                     </div>
                 </div>
 
-                {/* Quick Info Pills */}
-                <div className="flex gap-3">
-                    {athlete.goal && (
-                        <div className="flex items-center gap-2 bg-red-500/10 text-red-500 px-4 py-2 rounded-full text-sm font-bold border border-red-500/20">
-                            <Target className="w-4 h-4" />
-                            {athlete.goal}
+                <div className="flex flex-col md:items-end gap-3">
+                    <Link href={`/athletes/${athlete.id}/routine`}>
+                        <Button className="bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl h-10 px-6 shadow-lg shadow-red-900/20 transition-all hover:scale-105">
+                            <Dumbbell className="w-4 h-4 mr-2" />
+                            Gestionar Rutina
+                        </Button>
+                    </Link>
+
+                    {/* Quick Info Pills */}
+                    <div className="flex gap-3">
+                        {athlete.goal && (
+                            <div className="flex items-center gap-2 bg-red-500/10 text-red-500 px-4 py-2 rounded-full text-sm font-bold border border-red-500/20">
+                                <Target className="w-4 h-4" />
+                                {athlete.goal}
+                            </div>
+                        )}
+                        <div className="flex items-center gap-2 bg-neutral-900 text-neutral-400 px-4 py-2 rounded-full text-sm font-bold border border-neutral-800">
+                            <Calendar className="w-4 h-4" />
+                            Desde {athlete.createdAt ? new Date(athlete.createdAt.toDate?.() || athlete.createdAt).toLocaleDateString('es', { month: 'short', year: 'numeric' }) : 'N/A'}
                         </div>
-                    )}
-                    <div className="flex items-center gap-2 bg-neutral-900 text-neutral-400 px-4 py-2 rounded-full text-sm font-bold border border-neutral-800">
-                        <Calendar className="w-4 h-4" />
-                        Desde {athlete.createdAt ? new Date(athlete.createdAt.toDate?.() || athlete.createdAt).toLocaleDateString('es', { month: 'short', year: 'numeric' }) : 'N/A'}
                     </div>
                 </div>
             </div>

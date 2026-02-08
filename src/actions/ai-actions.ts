@@ -192,3 +192,67 @@ export async function chatWithCoachAI(message: string, context?: { exerciseName?
         return { success: false, error: "Error al procesar tu mensaje" };
     }
 }
+
+export async function analyzeRoutineSafety(routineData: any, athleteId: string) {
+    const session = await auth();
+    // Verify coach role or self (if athlete wants to check their own routine safety? Maybe only coach feature for now)
+    if (!session?.user?.id) return { success: false, error: "No autorizado" };
+
+    try {
+        const groq = getGroqClient();
+
+        // Get athlete data for context (injuries, experience)
+        // Note: In real app, we should fetch athlete data from DB. 
+        // For now, let's assume routineData contains context or we fetch it here.
+        // Fetching athlete profile from DB:
+        const athleteDoc = await adminDb.collection("users").doc(athleteId).get();
+        const athlete = athleteDoc.exists ? athleteDoc.data() : {};
+
+        const injuries = athlete?.injuries || "Ninguna reportada";
+        const experience = athlete?.experience || "Intermedio";
+
+        const prompt = `
+            Actúa como un fisioterapeuta deportivo experto. Analiza la siguiente rutina de entrenamiento en busca de riesgos de seguridad graves, considerando el perfil del atleta.
+
+            PERFIL ATLETA:
+            - Nivel: ${experience}
+            - Lesiones/Condiciones: ${injuries}
+
+            RUTINA A ANALIZAR:
+            ${JSON.stringify(routineData, null, 2)}
+
+            TAREA:
+            Evalúa:
+            1. Volumen excesivo para el nivel/lesiones.
+            2. Selección de ejercicios peligrosos para las lesiones citadas.
+            3. Frecuencia inadecuada.
+
+            Responde ÚNICAMENTE en JSON:
+            {
+                "score": 85, // 0-100 (100 = muy seguro)
+                "riskLevel": "Bajo" | "Medio" | "Alto",
+                "warnings": [
+                    { "title": "Riesgo en Hombro", "description": "Demasiado press militar para lesión de manguito.", "severity": "high" }
+                ],
+                "goodPoints": ["Buen equilibrio de empuje/tracción"],
+                "recommendation": "Reducir volumen de hombro y añadir facepulls."
+            }
+        `;
+
+        const completion = await groq.chat.completions.create({
+            messages: [{ role: "user", content: prompt }],
+            model: "llama3-70b-8192",
+            temperature: 0.3,
+            response_format: { type: "json_object" },
+        });
+
+        const content = completion.choices[0]?.message?.content;
+        if (!content) return { success: false, error: "Error de análisis" };
+
+        return { success: true, analysis: JSON.parse(content) };
+
+    } catch (error) {
+        console.error("Safety Analysis Error:", error);
+        return { success: false, error: "Error al analizar seguridad" };
+    }
+}

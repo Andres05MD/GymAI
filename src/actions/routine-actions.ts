@@ -47,6 +47,33 @@ export async function getRoutines() {
     }
 }
 
+// Get Athlete's Active Routine (for Coach)
+export async function getAthleteRoutine(athleteId: string) {
+    const session = await auth();
+    if (!session?.user?.id || session.user.role !== "coach") return null;
+
+    try {
+        const snapshot = await adminDb.collection("routines")
+            .where("athleteId", "==", athleteId)
+            .where("active", "==", true)
+            .limit(1)
+            .get();
+
+        if (snapshot.empty) return null;
+
+        const doc = snapshot.docs[0];
+        return {
+            id: doc.id,
+            ...doc.data(),
+            createdAt: doc.data().createdAt?.toDate?.()?.toISOString(),
+            updatedAt: doc.data().updatedAt?.toDate?.()?.toISOString(),
+        };
+    } catch (error) {
+        console.error("Error fetching athlete routine:", error);
+        return null; // Return null instead of object error for simpler page handling
+    }
+}
+
 // Get Coach's Routines (for assigning to athletes)
 export async function getCoachRoutines() {
     const session = await auth();
