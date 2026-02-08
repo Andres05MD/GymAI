@@ -277,7 +277,11 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
 
             if (res.success) {
                 toast.success(isEditing ? "Rutina actualizada" : "Rutina creada");
-                router.push("/routines");
+                if (athleteId) {
+                    router.push(`/athletes/${athleteId}`);
+                } else {
+                    router.push("/routines");
+                }
                 router.refresh();
             } else {
                 toast.error(res.error);
@@ -393,7 +397,7 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                                         className={cn(
                                             "group relative p-4 rounded-2xl cursor-pointer flex justify-between items-center transition-all duration-300 border-2",
                                             activeDayIndex === index
-                                                ? "bg-neutral-900 border-red-600 shadow-[0_0_20px_-5px_theme(colors.red.900)]"
+                                                ? "bg-neutral-900 border-red-600 shadow-[0_0_20px_-5px_var(--color-red-900)]"
                                                 : "bg-neutral-900 border-transparent hover:border-neutral-800 hover:bg-neutral-800"
                                         )}
                                     >

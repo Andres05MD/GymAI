@@ -3,12 +3,13 @@ import { redirect } from "next/navigation";
 import { adminDb } from "@/lib/firebase-admin";
 import { getPersonalRecords, getWeeklyActivity, getWeeklyProgress } from "@/actions/analytics-actions";
 import { getTrainingLogs } from "@/actions/training-actions";
+import { getAthleteRoutine } from "@/actions/routine-actions";
 import { ActivityChart } from "@/components/dashboard/activity-chart";
 import { ProgressChart } from "@/components/dashboard/progress-chart";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { TrainingHistoryList } from "@/components/training/training-history-list";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Dumbbell, TrendingUp, Activity, Trophy, Target, Calendar, Flame } from "lucide-react";
+import { ArrowLeft, Dumbbell, TrendingUp, Activity, Trophy, Target, Calendar, Flame, Plus } from "lucide-react";
 import Link from "next/link";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CoachAIAnalysis } from "@/components/dashboard/coach-ai-analysis";
@@ -37,6 +38,12 @@ interface PersonalRecord {
 
 interface PageProps {
     params: Promise<{ id: string }>;
+}
+
+interface RoutineData {
+    id: string;
+    name?: string;
+    schedule?: any[];
 }
 
 export default async function AthleteDetailsPage({ params }: PageProps) {
@@ -71,6 +78,7 @@ export default async function AthleteDetailsPage({ params }: PageProps) {
     const { data: activityData } = await getWeeklyActivity(id);
     const { completed: weeklyCompleted, target: weeklyTarget } = await getWeeklyProgress(id);
     const { logs } = await getTrainingLogs(id);
+    const routine = (await getAthleteRoutine(id)) as unknown as RoutineData | null;
 
     // Calculate total volume from activity data
     const weeklyVolume = activityData?.reduce((acc: number, cur: ActivityData) => acc + cur.total, 0) || 0;
@@ -102,12 +110,34 @@ export default async function AthleteDetailsPage({ params }: PageProps) {
                 </div>
 
                 <div className="flex flex-col md:items-end gap-3">
-                    <Link href={`/athletes/${athlete.id}/routine`}>
-                        <Button className="bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl h-10 px-6 shadow-lg shadow-red-900/20 transition-all hover:scale-105">
-                            <Dumbbell className="w-4 h-4 mr-2" />
-                            Gestionar Rutina
-                        </Button>
-                    </Link>
+                    {routine ? (
+                        <Link href={`/athletes/${athlete.id}/routine`} className="group block">
+                            <div className="bg-neutral-900 border border-neutral-800 hover:border-red-500/50 rounded-2xl flex items-center pr-6 pl-3 py-2 gap-4 transition-all hover:bg-neutral-800 cursor-pointer shadow-lg hover:shadow-red-900/10 h-14">
+                                <div className="h-10 w-10 bg-red-600 rounded-xl flex items-center justify-center shrink-0 shadow-inner group-hover:scale-105 transition-transform bg-linear-to-br from-red-500 to-red-700">
+                                    <Dumbbell className="text-white w-5 h-5" />
+                                </div>
+                                <div className="text-left flex flex-col justify-center">
+                                    <p className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest leading-none mb-1.5">Rutina Activa</p>
+                                    <p className="text-white font-bold text-sm leading-none group-hover:text-red-400 transition-colors truncate max-w-[140px] md:max-w-[200px]">
+                                        {routine.name || "Sin Nombre"}
+                                    </p>
+                                </div>
+                                {routine.schedule && (
+                                    <div className="hidden md:flex flex-col items-center border-l border-neutral-800 pl-4 h-8 justify-center min-w-12">
+                                        <span className="text-[10px] text-neutral-500 font-bold uppercase leading-none mb-0.5">Días</span>
+                                        <span className="text-sm font-black text-white leading-none">{routine.schedule.length}</span>
+                                    </div>
+                                )}
+                            </div>
+                        </Link>
+                    ) : (
+                        <Link href={`/athletes/${athlete.id}/routine`}>
+                            <Button className="bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl h-10 px-6 shadow-lg shadow-red-900/20 transition-all hover:scale-105">
+                                <Plus className="w-4 h-4 mr-2" />
+                                Asignar Rutina
+                            </Button>
+                        </Link>
+                    )}
 
                     {/* Quick Info Pills */}
                     <div className="flex gap-3">
