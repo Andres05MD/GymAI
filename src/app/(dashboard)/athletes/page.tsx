@@ -3,10 +3,17 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ChevronRight, Search, Users, Target, Calendar, TrendingUp } from "lucide-react";
+import { auth } from "@/lib/auth";
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
 
 export default async function AthletesPage() {
+    const session = await auth();
+    if (!session?.user?.id || session.user.role !== "coach") {
+        redirect("/dashboard");
+    }
+
     const { athletes } = await getAllAthletes();
 
     return (
