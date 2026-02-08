@@ -20,14 +20,17 @@ export default async function ProfilePage() {
 
     const userData = {
         id: userDoc.id,
-        ...rawData,
-        createdAt: rawData.createdAt?.toDate?.()?.toISOString() || null,
-        updatedAt: rawData.updatedAt?.toDate?.()?.toISOString() || null,
-        measurements: rawData.measurements ? {
-            ...rawData.measurements,
-            updatedAt: rawData.measurements.updatedAt?.toDate?.()?.toISOString() || null
-        } : undefined
-    } as any;
+        name: rawData.name,
+        email: rawData.email,
+        image: rawData.image,
+        phone: rawData.phone,
+        height: rawData.height,
+        weight: rawData.weight,
+        role: rawData.role,
+        onboardingCompleted: rawData.onboardingCompleted,
+        // Explicitly converting dates if needed, though ProfileForm currently doesn't use them directly
+        emailVerified: rawData.emailVerified?.toDate?.()?.toISOString() || null,
+    };
 
     // Fetch measurement history if athlete
     let historyData: any[] = [];

@@ -50,8 +50,15 @@ async function getUserByEmail(email: string): Promise<AuthUser | null> {
         );
         const querySnapshot = await getDocs(q);
         if (querySnapshot.empty) return null;
-        const docData = querySnapshot.docs[0].data();
-        return { id: querySnapshot.docs[0].id, ...docData } as AuthUser;
+        const d = querySnapshot.docs[0].data();
+        return {
+            id: querySnapshot.docs[0].id,
+            name: d.name,
+            email: d.email,
+            image: d.image,
+            role: d.role,
+            onboardingCompleted: d.onboardingCompleted,
+        } as AuthUser;
     } catch (error) {
         console.error("Error obteniendo usuario por email:", error);
         return null;
@@ -65,8 +72,15 @@ async function getUserById(id: string): Promise<AuthUser | null> {
     try {
         const userDoc = await getDoc(doc(db, "users", id));
         if (!userDoc.exists()) return null;
-        const docData = userDoc.data();
-        return { id: userDoc.id, ...docData } as AuthUser;
+        const d = userDoc.data();
+        return {
+            id: userDoc.id,
+            name: d.name,
+            email: d.email,
+            image: d.image,
+            role: d.role,
+            onboardingCompleted: d.onboardingCompleted,
+        } as AuthUser;
     } catch (error) {
         console.error("Error obteniendo usuario por ID:", error);
         return null;

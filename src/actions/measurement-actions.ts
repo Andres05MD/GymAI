@@ -76,12 +76,30 @@ export async function getBodyMeasurementsHistory(userId?: string) {
             .orderBy("date", "asc")
             .get();
 
-        const data = snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data(),
-            date: doc.data().date.toDate(), // Convert Firestore Timestamp to Date
-            createdAt: doc.data().createdAt?.toDate()
-        }));
+        const data = snapshot.docs.map(doc => {
+            const d = doc.data();
+            return {
+                id: doc.id,
+                userId: d.userId,
+                date: d.date?.toDate ? d.date.toDate().toISOString() : new Date(d.date).toISOString(),
+                createdAt: d.createdAt?.toDate ? d.createdAt.toDate().toISOString() : new Date().toISOString(),
+                weight: d.weight,
+                chest: d.chest,
+                waist: d.waist,
+                hips: d.hips,
+                shoulders: d.shoulders,
+                glutes: d.glutes,
+                bicepsLeft: d.bicepsLeft,
+                bicepsRight: d.bicepsRight,
+                forearmsLeft: d.forearmsLeft,
+                forearmsRight: d.forearmsRight,
+                quadsLeft: d.quadsLeft,
+                quadsRight: d.quadsRight,
+                calvesLeft: d.calvesLeft,
+                calvesRight: d.calvesRight,
+                notes: d.notes
+            };
+        });
 
         return { success: true, data };
     } catch (error) {

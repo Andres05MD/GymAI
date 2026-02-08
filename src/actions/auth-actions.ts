@@ -110,6 +110,25 @@ export async function completeOnboarding(data: z.infer<typeof OnboardingInputSch
             updatedAt: new Date()
         }, { merge: true });
 
+        // UNIFICACIÓN: Registrar también las medidas iniciales en el historial `body_measurements`
+        // Esto permite que el gráfico del perfil tenga un punto inicial.
+        if (profileData.measurements && Object.keys(profileData.measurements).length > 0) {
+            try {
+                const initialLog = {
+                    userId: session.user.id,
+                    date: new Date(),
+                    createdAt: new Date(),
+                    ...profileData.measurements,
+                    weight: profileData.weight, // Incluir peso en el log
+                    // Nota: Height es más estático, pero weight es clave para el gráfico
+                };
+                await adminDb.collection("body_measurements").add(initialLog);
+            } catch (logError) {
+                console.error("Error guardando log inicial de medidas:", logError);
+                // No fallamos todo el onboarding si esto falla, es secundario
+            }
+        }
+
         return { success: true };
     } catch (error) {
         console.error("Error onboarding:", error);

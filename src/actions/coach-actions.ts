@@ -15,12 +15,17 @@ export async function getAllAthletes() {
             .where("role", "==", "athlete") // o "user", dependiendo de cómo guardes el rol por defecto
             .get();
 
-        const athletes = snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data(),
-            // Serializar fechas si existen
-            createdAt: doc.data().createdAt?.toDate ? doc.data().createdAt.toDate() : null,
-        }));
+        const athletes = snapshot.docs.map(doc => {
+            const d = doc.data();
+            return {
+                id: doc.id,
+                name: d.name || "Atleta",
+                email: d.email,
+                image: d.image || null,
+                role: d.role,
+                onboardingCompleted: d.onboardingCompleted || false,
+            };
+        });
 
         return { success: true, athletes };
     } catch (error) {

@@ -18,6 +18,15 @@ export default async function DashboardLayout({
     const session = await auth();
     const role = session?.user?.role;
 
+    // Sanitize user object for Client Components to avoid passing full session 
+    // which might contain non-serializable objects (like Firestore Timestamps)
+    const headerUser = session?.user ? {
+        name: session.user.name,
+        email: session.user.email,
+        image: session.user.image,
+        role: session.user.role,
+    } : undefined;
+
     return (
         <div className="flex min-h-screen w-full bg-black">
             {/* New Sidebar */}
@@ -28,7 +37,7 @@ export default async function DashboardLayout({
                 {/* Background effects */}
                 <div className="absolute top-0 right-0 -z-10 h-[500px] w-[500px] bg-red-600/5 blur-[120px] rounded-full pointer-events-none" />
 
-                <Header user={session?.user} />
+                <Header user={headerUser} />
 
                 <main className="flex-1 overflow-y-auto px-6 py-6 lg:px-10 lg:py-8 lg:pt-4 relative z-10 w-full max-w-7xl mx-auto scrollbar-thin scrollbar-thumb-neutral-800 scrollbar-track-transparent mb-20 md:mb-0 pb-32 md:pb-10">
                     {children}

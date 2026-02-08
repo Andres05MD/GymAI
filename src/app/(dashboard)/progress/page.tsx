@@ -28,11 +28,22 @@ async function getLatestBodyMetrics(userId: string) {
         const userDoc = await adminDb.collection("users").doc(userId).get();
         const userData = userDoc.data();
 
+        // Limpiar measurements para asegurar que solo pasamos números al cliente
+        // Evitamos pasar campos como 'updatedAt' si son de tipo Timestamp
+        const rawMeasurements = userData?.measurements || {};
+        const cleanMeasurements: Record<string, number> = {};
+
+        Object.entries(rawMeasurements).forEach(([key, value]) => {
+            if (typeof value === 'number') {
+                cleanMeasurements[key] = value;
+            }
+        });
+
         return {
             name: userData?.name || "Usuario",
             weight: userData?.weight || 0,
             bodyFat: userData?.bodyFat || 0,
-            measurements: userData?.measurements || {},
+            measurements: cleanMeasurements,
             startWeight: userData?.startWeight || userData?.weight || 0,
         };
     } catch (e) {

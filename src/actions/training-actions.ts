@@ -123,11 +123,20 @@ export async function getTrainingLogs(userId?: string) {
             .limit(20) // Increased limit for history
             .get();
 
-        const logs = snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data(),
-            date: doc.data().date?.toDate().toISOString(),
-        }));
+        const logs = snapshot.docs.map(doc => {
+            const d = doc.data();
+            return {
+                id: doc.id,
+                athleteId: d.athleteId,
+                routineId: d.routineId,
+                routineName: d.routineName,
+                dayName: d.dayName,
+                status: d.status,
+                durationMinutes: d.durationMinutes,
+                exercises: d.exercises,
+                date: d.date?.toDate ? d.date.toDate().toISOString() : new Date().toISOString(),
+            };
+        });
 
         return { success: true, logs };
     } catch (error) {
@@ -182,7 +191,14 @@ export async function getTrainingLog(logId: string) {
             success: true,
             log: {
                 id: docSnap.id,
-                ...data,
+                athleteId: data?.athleteId,
+                routineId: data?.routineId,
+                routineName: data?.routineName,
+                dayName: data?.dayName,
+                status: data?.status,
+                durationMinutes: data?.durationMinutes,
+                exercises: data?.exercises,
+                notes: data?.notes,
                 date: data?.date?.toDate?.()?.toISOString(),
                 startTime: data?.startTime?.toDate?.()?.toISOString(),
                 endTime: data?.endTime?.toDate?.()?.toISOString(),
@@ -236,12 +252,19 @@ export async function getAthleteRoutines() {
             .where("active", "==", true)
             .get();
 
-        const routines = snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data(),
-            createdAt: doc.data().createdAt?.toDate?.()?.toISOString(),
-            updatedAt: doc.data().updatedAt?.toDate?.()?.toISOString(),
-        }));
+        const routines = snapshot.docs.map(doc => {
+            const d = doc.data();
+            return {
+                id: doc.id,
+                name: d.name,
+                coachId: d.coachId,
+                athleteId: d.athleteId,
+                active: d.active,
+                schedule: d.schedule,
+                createdAt: d.createdAt?.toDate?.()?.toISOString(),
+                updatedAt: d.updatedAt?.toDate?.()?.toISOString(),
+            };
+        });
 
         return { success: true, routines };
     } catch (error) {
@@ -320,7 +343,13 @@ export async function getAthleteHistory() {
             const data = doc.data();
             return {
                 id: doc.id,
-                ...data,
+                athleteId: data.athleteId,
+                routineId: data.routineId,
+                routineName: data.routineName,
+                dayName: data.dayName,
+                status: data.status,
+                durationMinutes: data.durationMinutes,
+                exercises: data.exercises,
                 date: data.date?.toDate?.()?.toISOString(),
                 startTime: data.startTime?.toDate?.()?.toISOString(),
                 endTime: data.endTime?.toDate?.()?.toISOString(),
