@@ -23,8 +23,13 @@ import { Sparkles, Loader2 } from "lucide-react";
 import { generateRoutinePlan } from "@/actions/ai-actions";
 import { toast } from "sonner";
 
+interface GeneratedScheduleDay {
+    name: string;
+    exercises: unknown[];
+}
+
 interface AIGeneratorDialogProps {
-    onGenerate: (schedule: any[]) => void;
+    onGenerate: (schedule: GeneratedScheduleDay[]) => void;
 }
 
 export function AIGeneratorDialog({ onGenerate }: AIGeneratorDialogProps) {

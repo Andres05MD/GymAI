@@ -6,21 +6,47 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
-interface TrainingHistoryListProps {
-    logs: any[];
+// --- INTERFACES ---
+
+interface TrainingSet {
+    weight?: number;
+    reps?: number;
+    rpe?: number;
+    completed?: boolean;
 }
 
-function WorkoutLogItem({ log }: { log: any }) {
+interface TrainingExercise {
+    exerciseId?: string;
+    exerciseName: string;
+    sets: TrainingSet[];
+    feedback?: string;
+}
+
+interface TrainingLog {
+    id: string;
+    date: string;
+    routineId?: string;
+    routineName?: string;
+    durationMinutes?: number;
+    sessionFeedback?: string;
+    exercises?: TrainingExercise[];
+}
+
+interface TrainingHistoryListProps {
+    logs: TrainingLog[];
+}
+
+function WorkoutLogItem({ log }: { log: TrainingLog }) {
     const [expanded, setExpanded] = useState(false);
 
     // Calculate summary stats
-    const totalVolume = log.exercises?.reduce((acc: number, ex: any) => {
-        return acc + ex.sets.reduce((sAcc: number, s: any) => sAcc + (s.weight * s.reps || 0), 0);
+    const totalVolume = log.exercises?.reduce((acc: number, ex: TrainingExercise) => {
+        return acc + ex.sets.reduce((sAcc: number, s: TrainingSet) => sAcc + ((s.weight || 0) * (s.reps || 0)), 0);
     }, 0) || 0;
 
-    const totalSets = log.exercises?.reduce((acc: number, ex: any) => acc + ex.sets.length, 0) || 0;
-    const completedSets = log.exercises?.reduce((acc: number, ex: any) =>
-        acc + ex.sets.filter((s: any) => s.completed).length, 0) || 0;
+    const totalSets = log.exercises?.reduce((acc: number, ex: TrainingExercise) => acc + ex.sets.length, 0) || 0;
+    const completedSets = log.exercises?.reduce((acc: number, ex: TrainingExercise) =>
+        acc + ex.sets.filter((s: TrainingSet) => s.completed).length, 0) || 0;
 
     const completionRate = totalSets > 0 ? Math.round((completedSets / totalSets) * 100) : 0;
 
@@ -108,7 +134,7 @@ function WorkoutLogItem({ log }: { log: any }) {
 
                     {/* Exercises List */}
                     <div className="space-y-4">
-                        {log.exercises?.map((ex: any, i: number) => (
+                        {log.exercises?.map((ex: TrainingExercise, i: number) => (
                             <div key={i} className="bg-neutral-900/50 rounded-2xl p-4 border border-neutral-800/50">
                                 <div className="flex justify-between items-center mb-3">
                                     <div className="flex items-center gap-3">
@@ -122,7 +148,7 @@ function WorkoutLogItem({ log }: { log: any }) {
 
                                 {/* Sets Grid */}
                                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-                                    {ex.sets.map((set: any, j: number) => (
+                                    {ex.sets.map((set: TrainingSet, j: number) => (
                                         <div
                                             key={j}
                                             className={cn(

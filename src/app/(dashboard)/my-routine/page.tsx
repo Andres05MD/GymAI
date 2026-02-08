@@ -7,6 +7,26 @@ import { getRoutines } from "@/actions/routine-actions";
 import { differenceInCalendarWeeks } from "date-fns";
 import { redirect } from "next/navigation";
 
+// Interfaces para la rutina
+interface ScheduleExercise {
+    exerciseId?: string;
+    exerciseName: string;
+    sets: unknown[];
+}
+
+interface ScheduleDay {
+    name: string;
+    exercises?: ScheduleExercise[];
+}
+
+interface ActiveRoutine {
+    id: string;
+    name: string;
+    description?: string;
+    createdAt?: string;
+    schedule: ScheduleDay[];
+}
+
 export default async function MyRoutinePage() {
     const session = await auth();
 
@@ -17,7 +37,7 @@ export default async function MyRoutinePage() {
     const { success, routines } = await getRoutines();
 
     // Asumimos que la lógica de backend devuelve solo activas para atletas
-    const activeRoutine: any = routines && routines.length > 0 ? routines[0] : null;
+    const activeRoutine: ActiveRoutine | null = routines && routines.length > 0 ? (routines[0] as unknown as ActiveRoutine) : null;
 
     if (!activeRoutine) {
         return (
@@ -46,7 +66,7 @@ export default async function MyRoutinePage() {
     // Calcular métricas
     const schedule = activeRoutine.schedule || [];
     const frequency = schedule.length;
-    const totalExercises = schedule.reduce((acc: number, day: any) => acc + (day.exercises?.length || 0), 0);
+    const totalExercises = schedule.reduce((acc: number, day: ScheduleDay) => acc + (day.exercises?.length || 0), 0);
 
     // Calcular semanas activo (aproximado)
     const startDate = activeRoutine.createdAt ? new Date(activeRoutine.createdAt) : new Date();
@@ -117,7 +137,7 @@ export default async function MyRoutinePage() {
                 </div>
 
                 <div className="grid gap-4">
-                    {schedule.map((day: any, index: number) => (
+                    {schedule.map((day: ScheduleDay, index: number) => (
                         <div
                             key={index}
                             className="bg-neutral-900 border border-neutral-800 rounded-[1.5rem] p-6 flex flex-col md:flex-row items-start md:items-center justify-between hover:border-neutral-700 transition-all group relative overflow-hidden"
@@ -135,7 +155,7 @@ export default async function MyRoutinePage() {
                                             <Dumbbell className="h-3.5 w-3.5" /> {day.exercises?.length || 0} Ejercicios
                                         </span>
                                         <span className="flex items-center gap-1.5 bg-neutral-800/50 px-2 py-1 rounded-md">
-                                            <Clock className="h-3.5 w-3.5" /> {day.exercises?.length * 4} min
+                                            <Clock className="h-3.5 w-3.5" /> {(day.exercises?.length || 0) * 4} min
                                         </span>
                                     </div>
                                 </div>

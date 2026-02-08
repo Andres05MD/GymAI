@@ -217,9 +217,17 @@ export async function generateRoutineWithAI(data: z.infer<typeof GenerateRoutine
     }
 
     try {
-        // 1. Fetch available exercises from coach's library
-        const { exercises } = await getExercises();
-        const simplifiedExercises = exercises?.map((e: any) => `${e.name} (${e.muscleGroups.join(", ")})`).join("; ");
+        // 1. Obtener ejercicios disponibles de la biblioteca del coach
+        const exercisesResult = await getExercises();
+        const exercisesList = exercisesResult.exercises as Array<{
+            id: string;
+            name: string;
+            muscleGroups: string[];
+            createdAt: string;
+            updatedAt: string;
+        }> | undefined;
+
+        const simplifiedExercises = exercisesList?.map(e => `${e.name} (${e.muscleGroups.join(", ")})`).join("; ");
 
         // 2. Prepare Prompt
         const prompt = `

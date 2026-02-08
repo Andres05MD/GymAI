@@ -13,6 +13,28 @@ import { CheckCircle2, Timer, ChevronLeft, Save } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
+// Interfaces para el workout
+interface WorkoutSet {
+    reps?: string | number;
+    rpeTarget?: number;
+    actualWeight?: number;
+    actualReps?: string | number;
+    actualRPE?: number;
+    completed?: boolean;
+}
+
+interface WorkoutExercise {
+    exerciseId: string;
+    name: string;
+    sets: WorkoutSet[];
+}
+
+interface WorkoutData {
+    routineName: string;
+    dayName: string;
+    exercises: WorkoutExercise[];
+}
+
 export default function LiveWorkoutPage() {
     const params = useParams();
     const router = useRouter();
@@ -24,7 +46,7 @@ export default function LiveWorkoutPage() {
         refetchOnWindowFocus: false, // Evitar recargas accidentales
     });
 
-    const [workoutData, setWorkoutData] = useState<any>(null);
+    const [workoutData, setWorkoutData] = useState<WorkoutData | null>(null);
 
     useEffect(() => {
         if (logResult?.success && logResult.log) {
@@ -49,9 +71,9 @@ export default function LiveWorkoutPage() {
 
     if (isLoading || !workoutData) return <div className="p-6">Cargando sesión...</div>;
 
-    const handleSetChange = (exerciseIndex: number, setIndex: number, field: string, value: any) => {
+    const handleSetChange = (exerciseIndex: number, setIndex: number, field: keyof WorkoutSet, value: string | number | boolean) => {
         const newData = { ...workoutData };
-        newData.exercises[exerciseIndex].sets[setIndex][field] = value;
+        (newData.exercises[exerciseIndex].sets[setIndex] as unknown as Record<string, unknown>)[field] = value;
         setWorkoutData(newData);
     };
 
@@ -73,7 +95,7 @@ export default function LiveWorkoutPage() {
             </div>
 
             <div className="space-y-6">
-                {workoutData.exercises.map((exercise: any, exIdx: number) => (
+                {workoutData.exercises.map((exercise: WorkoutExercise, exIdx: number) => (
                     <Card key={exercise.exerciseId + exIdx} className="overflow-hidden border-white/5 bg-black/40">
                         <CardHeader className="bg-white/5 py-3 border-b border-white/5">
                             <CardTitle className="text-lg font-medium">{exercise.name}</CardTitle>
@@ -86,7 +108,7 @@ export default function LiveWorkoutPage() {
                                 <div className="col-span-2 text-center">RPE</div>
                                 <div className="col-span-2 text-center">Listo</div>
                             </div>
-                            {exercise.sets.map((set: any, setIdx: number) => (
+                            {exercise.sets.map((set: WorkoutSet, setIdx: number) => (
                                 <div
                                     key={setIdx}
                                     className={cn(
@@ -114,7 +136,7 @@ export default function LiveWorkoutPage() {
                                             type="number"
                                             inputMode="decimal"
                                             className="h-9 text-center bg-black/20 border-white/10"
-                                            placeholder={set.reps}
+                                            placeholder={String(set.reps ?? "")}
                                             value={set.actualReps || ""}
                                             onChange={(e) => handleSetChange(exIdx, setIdx, "actualReps", e.target.value)} // String para rango ej "10-12"
                                         />
@@ -124,7 +146,7 @@ export default function LiveWorkoutPage() {
                                             type="number"
                                             inputMode="numeric"
                                             className="h-9 text-center px-1 bg-black/20 border-white/10"
-                                            placeholder={set.rpeTarget}
+                                            placeholder={String(set.rpeTarget ?? "")}
                                             value={set.actualRPE || ""}
                                             onChange={(e) => handleSetChange(exIdx, setIdx, "actualRPE", Number(e.target.value))}
                                         />

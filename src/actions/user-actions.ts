@@ -90,12 +90,19 @@ export async function getCoachAthletes() {
     }
 }
 
-export async function updateProfile(data: any) {
+interface ProfileUpdateData {
+    name: string;
+    phone?: string;
+    height?: number | string;
+    weight?: number | string;
+}
+
+export async function updateProfile(data: ProfileUpdateData) {
     const session = await auth();
     if (!session?.user?.id) return { success: false, error: "No autorizado" };
 
     try {
-        // Basic validation
+        // Validación básica
         if (!data.name) return { success: false, error: "Nombre es requerido" };
 
         await adminDb.collection("users").doc(session.user.id).update({
@@ -109,7 +116,7 @@ export async function updateProfile(data: any) {
         revalidatePath("/profile");
         return { success: true };
     } catch (error) {
-        console.error("Error updating profile:", error);
+        console.error("Error actualizando perfil:", error);
         return { success: false, error: "Error al actualizar perfil" };
     }
 }

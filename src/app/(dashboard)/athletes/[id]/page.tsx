@@ -14,6 +14,27 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CoachAIAnalysis } from "@/components/dashboard/coach-ai-analysis";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
+interface Athlete {
+    id: string;
+    name?: string;
+    image?: string;
+    email?: string;
+    coachId?: string;
+    createdAt?: any; // Firestore Timestamp
+    goal?: string;
+}
+
+interface ActivityData {
+    total: number;
+    [key: string]: any;
+}
+
+interface PersonalRecord {
+    exercise: string;
+    weight: number;
+    date: string;
+}
+
 interface PageProps {
     params: Promise<{ id: string }>;
 }
@@ -43,7 +64,7 @@ export default async function AthleteDetailsPage({ params }: PageProps) {
         );
     }
 
-    const athlete = { id: userDoc.id, ...userDoc.data() } as any;
+    const athlete = { id: userDoc.id, ...userDoc.data() } as Athlete;
 
     // 2. Fetch Analytics
     const { prs } = await getPersonalRecords(id);
@@ -52,7 +73,7 @@ export default async function AthleteDetailsPage({ params }: PageProps) {
     const { logs } = await getTrainingLogs(id);
 
     // Calculate total volume from activity data
-    const weeklyVolume = activityData?.reduce((acc: number, cur: any) => acc + cur.total, 0) || 0;
+    const weeklyVolume = activityData?.reduce((acc: number, cur: ActivityData) => acc + cur.total, 0) || 0;
 
     return (
         <div className="space-y-8 pb-20">
@@ -181,7 +202,7 @@ export default async function AthleteDetailsPage({ params }: PageProps) {
                                 <h3 className="text-xl font-bold text-white">Records Personales</h3>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                {prs.slice(0, 3).map((pr: any, i: number) => (
+                                {prs.slice(0, 3).map((pr: PersonalRecord, i: number) => (
                                     <div key={i} className="bg-black/40 border border-yellow-500/10 rounded-2xl p-4 flex items-center justify-between hover:border-yellow-500/30 transition-colors">
                                         <div>
                                             <p className="font-bold text-white">{pr.exercise}</p>

@@ -6,6 +6,24 @@ import { AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
+// Tipo local para compatibilidad con WorkoutSession
+interface WorkoutRoutine {
+    id: string;
+    name: string;
+    schedule: Array<{
+        id?: string;
+        name: string;
+        exercises: Array<{
+            exerciseId?: string;
+            exerciseName: string;
+            sets: Array<{
+                reps?: number;
+                weight?: number;
+            }>;
+        }>;
+    }>;
+}
+
 export default async function TrainPage() {
     const session = await auth();
     if (!session?.user?.id) redirect("/login");
@@ -31,5 +49,5 @@ export default async function TrainPage() {
         );
     }
 
-    return <WorkoutSession routine={routine} />;
+    return <WorkoutSession routine={routine as unknown as WorkoutRoutine} />;
 }

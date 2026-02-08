@@ -17,10 +17,23 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 
+interface WarmupExercise {
+    name: string;
+    focus: string;
+    duration?: string;
+    sets?: string;
+    reason: string;
+}
+
+interface WarmupPlan {
+    summary: string;
+    exercises: WarmupExercise[];
+}
+
 export function WarmupGenerator() {
     const [isOpen, setIsOpen] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [plan, setPlan] = useState<any>(null);
+    const [plan, setPlan] = useState<WarmupPlan | null>(null);
 
     const handleGenerate = async () => {
         setLoading(true);
@@ -33,7 +46,7 @@ export function WarmupGenerator() {
 
             const result = await generateSmartWarmup(["General"]);
             if (result.success) {
-                setPlan(result.data);
+                setPlan(result.data as WarmupPlan);
             }
         } catch (error) {
             console.error(error);

@@ -1,5 +1,8 @@
 import type { NextAuthConfig } from "next-auth";
 
+// Tipo de rol de usuario
+type UserRole = "athlete" | "coach";
+
 export const authConfig = {
     pages: {
         signIn: "/",
@@ -30,7 +33,7 @@ export const authConfig = {
                 return true;
             }
 
-            // Dashboard protection
+            // Protección del dashboard
             if (isOnDashboard) {
                 if (isLoggedIn) {
                     // Si es atleta y no completó onboarding -> forzar onboarding
@@ -40,7 +43,7 @@ export const authConfig = {
                     }
                     return true;
                 }
-                return false; // Redirect unauthenticated users to login page
+                return false; // Redirige usuarios no autenticados al login
             }
 
             return true;
@@ -48,7 +51,7 @@ export const authConfig = {
         async session({ session, token }) {
             if (token.sub && session.user) {
                 session.user.id = token.sub;
-                session.user.role = token.role as any;
+                session.user.role = token.role as UserRole;
                 session.user.onboardingCompleted = token.onboardingCompleted as boolean;
             }
             return session;
@@ -56,7 +59,7 @@ export const authConfig = {
         async jwt({ token, user, trigger, session }) {
             if (user) {
                 token.sub = user.id;
-                token.role = user.role as any;
+                token.role = user.role as UserRole;
                 token.onboardingCompleted = user.onboardingCompleted as boolean;
             }
             if (trigger === "update" && session) {
@@ -68,3 +71,4 @@ export const authConfig = {
     providers: [], // Providers se añaden en auth.ts para Node runtime
     session: { strategy: "jwt" }
 } satisfies NextAuthConfig;
+

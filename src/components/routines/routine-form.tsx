@@ -1,6 +1,6 @@
 "use client";
 
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm, useFieldArray, Control, UseFormRegister, FieldValues } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { RoutineSchema } from "@/lib/schemas";
@@ -31,8 +31,19 @@ const FormSchema = RoutineSchema.omit({
 
 type FormValues = z.infer<typeof FormSchema>;
 
+// Tipos para los ejercicios del formulario
+interface ExerciseField {
+    id: string;
+    exerciseName: string;
+    exerciseId?: string;
+    order: number;
+    sets: Array<{ type: string; reps: string; rpeTarget?: number; restSeconds?: number }>;
+}
+
 // Subcomponente para manejar lógica de ejercicios dentro de un día
-function DayExercises({ dayIndex, control, register }: { dayIndex: number, control: any, register: any }) {
+// TODO: Tipar correctamente cuando se refactorice el formulario
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function DayExercises({ dayIndex, control, register }: { dayIndex: number; control: any; register: any }) {
     const { fields, append, remove } = useFieldArray({
         control,
         name: `schedule.${dayIndex}.exercises`
@@ -66,7 +77,7 @@ function DayExercises({ dayIndex, control, register }: { dayIndex: number, contr
                         <div className="flex items-center justify-between mb-2">
                             <div className="flex items-center gap-2">
                                 <Badge variant="secondary">{index + 1}</Badge>
-                                <span className="font-semibold">{(item as any).exerciseName}</span>
+                                <span className="font-semibold">{(item as ExerciseField).exerciseName}</span>
                             </div>
                             <Button variant="ghost" size="sm" onClick={() => remove(index)}>
                                 <Trash2 className="h-4 w-4 text-destructive" />
@@ -88,7 +99,8 @@ function DayExercises({ dayIndex, control, register }: { dayIndex: number, contr
     )
 }
 
-function ExerciseSets({ nestIndex, control, register }: { nestIndex: string, control: any, register: any }) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function ExerciseSets({ nestIndex, control, register }: { nestIndex: string; control: any; register: any }) {
     const { fields, append, remove } = useFieldArray({
         control,
         name: nestIndex
@@ -148,6 +160,7 @@ export function RoutineForm() {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const { register, control, handleSubmit, formState: { errors } } = useForm<FormValues>({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         resolver: zodResolver(FormSchema) as any,
         defaultValues: {
             name: "",
@@ -168,7 +181,7 @@ export function RoutineForm() {
     const onSubmit = async (data: FormValues) => {
         setIsSubmitting(true);
         try {
-            const result = await createRoutine(data as any);
+            const result = await createRoutine(data as unknown as Parameters<typeof createRoutine>[0]);
             if (result.success) {
                 toast.success("Rutina creada exitosamente");
                 router.push("/routines");
@@ -207,6 +220,7 @@ export function RoutineForm() {
                     <div className="flex gap-2">
                         <AIGeneratorDialog onGenerate={(schedule) => {
                             // Reemplazamos todos los fields con la data generada (con IDs nuevos para keys de react)
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
                             const scheduleWithIds = schedule.map((day: any) => ({
                                 ...day,
                                 id: crypto.randomUUID(),
@@ -248,7 +262,7 @@ export function RoutineForm() {
                                 </div>
                             </AccordionTrigger>
                             <AccordionContent className="p-4 border border-t-0 rounded-b-md">
-                                <DayExercises dayIndex={index} control={control} register={register} />
+                                <DayExercises dayIndex={index} control={control as Control<FormValues>} register={register} />
                             </AccordionContent>
                         </AccordionItem>
                     ))}

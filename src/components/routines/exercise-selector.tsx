@@ -25,6 +25,11 @@ interface ExerciseSelectorProps {
     onSelect: (exercise: { id: string; name: string }) => void;
 }
 
+interface ExerciseOption {
+    id: string;
+    name: string;
+}
+
 export function ExerciseSelector({ onSelect }: ExerciseSelectorProps) {
     const [open, setOpen] = React.useState(false);
 
@@ -33,7 +38,7 @@ export function ExerciseSelector({ onSelect }: ExerciseSelectorProps) {
         queryFn: async () => await getExercises(),
     });
 
-    const exercises = exercisesResult?.exercises || [];
+    const exercises = (exercisesResult?.exercises as unknown as ExerciseOption[]) || [];
 
     return (
         <Popover open={open} onOpenChange={setOpen}>
@@ -54,7 +59,7 @@ export function ExerciseSelector({ onSelect }: ExerciseSelectorProps) {
                     <CommandList>
                         <CommandEmpty>No encontrado.</CommandEmpty>
                         <CommandGroup>
-                            {exercises.map((exercise: any) => (
+                            {exercises.map((exercise: ExerciseOption) => (
                                 <CommandItem
                                     key={exercise.id}
                                     value={exercise.name}

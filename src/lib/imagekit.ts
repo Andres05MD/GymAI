@@ -5,18 +5,42 @@ import { upload, buildSrc } from "@imagekit/javascript";
 const urlEndpoint = process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT!;
 const publicKey = process.env.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY!;
 
+/**
+ * Opciones para el wrapper de upload (campos requeridos por el SDK v5 se añaden automáticamente)
+ */
+interface ImageKitUploadOptions {
+    file: string | Blob | File;
+    fileName: string;
+    token: string;
+    signature: string;
+    expire: number;
+    folder?: string;
+    tags?: string[];
+    useUniqueFileName?: boolean;
+    isPrivateFile?: boolean;
+    customMetadata?: Record<string, unknown>;
+}
+
+/**
+ * Opciones para el wrapper de URL
+ */
+interface ImageKitUrlOptions {
+    src: string;
+    path?: string;
+    transformation?: Array<Record<string, string | number>>;
+}
+
 // Cliente de ImageKit simulado para mantener compatibilidad con la estructura anterior
 export const imagekit = {
     // Wrapper para la función upload del SDK v5
-    upload: (options: any) => {
+    upload: (options: ImageKitUploadOptions) => {
         return upload({
-            urlEndpoint, // Aunque upload endpoints de IKit son fijos, a veces se pasa
             publicKey,
             ...options,
         });
     },
     // Wrapper para la función url del SDK v5 (usando buildSrc)
-    url: (options: any) => {
+    url: (options: ImageKitUrlOptions) => {
         return buildSrc({
             urlEndpoint,
             ...options

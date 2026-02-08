@@ -16,8 +16,50 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
+// --- INTERFACES ---
+
+interface ExerciseSet {
+    type?: string;
+    reps?: string | number;
+    rpeTarget?: number;
+    restSeconds?: number;
+}
+
+interface ScheduleExercise {
+    exerciseId?: string;
+    exerciseName: string;
+    notes?: string;
+    sets: ExerciseSet[];
+    order?: number;
+}
+
+interface ScheduleDay {
+    name: string;
+    exercises: ScheduleExercise[];
+}
+
+interface AIRoutine {
+    name: string;
+    description?: string;
+    type?: string;
+    schedule: ScheduleDay[];
+}
+
+interface RoutineFormData {
+    id?: string;
+    name: string;
+    description?: string;
+    type: string;
+    schedule: ScheduleDay[];
+}
+
+interface AvailableExercise {
+    id: string;
+    name: string;
+}
+
 // --- AI Generator Component ---
-function AIGenerator({ onGenerate }: { onGenerate: (routine: any) => void }) {
+function AIGenerator({ onGenerate }: { onGenerate: (routine: AIRoutine) => void }) {
     const [loading, setLoading] = useState(false);
     const [open, setOpen] = useState(false);
     const [criteria, setCriteria] = useState({
@@ -141,9 +183,13 @@ function AIGenerator({ onGenerate }: { onGenerate: (routine: any) => void }) {
 
 // --- Main Editor Component ---
 
+// Tipos para props - Usamos tipos amplios debido a la naturaleza dinámica del editor
+// TODO: Tipar estrictamente cuando se refactorice el manejo de formularios
 interface RoutineEditorProps {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     initialData?: any;
     isEditing?: boolean;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     availableExercises?: any[];
 }
 
@@ -193,7 +239,7 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
         setValue("schedule", updatedSchedule);
     };
 
-    const updateExerciseField = (dayIndex: number, exIndex: number, field: string, value: any) => {
+    const updateExerciseField = (dayIndex: number, exIndex: number, field: string, value: string | ExerciseSet[]) => {
         const updatedSchedule = [...schedule];
         // If updating name via Combobox, we might find the matching exercise ID
         if (field === 'exerciseName') {
@@ -210,7 +256,7 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
         setValue("schedule", updatedSchedule);
     };
 
-    const onAIResult = (aiRoutine: any) => {
+    const onAIResult = (aiRoutine: AIRoutine) => {
         reset({
             name: aiRoutine.name,
             description: aiRoutine.description,
@@ -220,12 +266,12 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
         toast.success("Rutina aplicada al editor");
     };
 
-    const onSubmit = async (data: any) => {
+    const onSubmit = async (data: RoutineFormData) => {
         setIsSaving(true);
         try {
-            const res = isEditing
-                ? await updateRoutine(initialData.id, data)
-                : await createRoutine(data);
+            const res = isEditing && initialData?.id
+                ? await updateRoutine(initialData.id, data as unknown as Parameters<typeof updateRoutine>[1])
+                : await createRoutine(data as unknown as Parameters<typeof createRoutine>[0]);
 
             if (res.success) {
                 toast.success(isEditing ? "Rutina actualizada" : "Rutina creada");
@@ -432,7 +478,7 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                                     </div>
                                 ) : (
                                     <div className="space-y-6">
-                                        {schedule[activeDayIndex].exercises?.map((exercise: any, exIndex: number) => (
+                                        {schedule[activeDayIndex].exercises?.map((exercise: ScheduleExercise, exIndex: number) => (
                                             <div key={exIndex} className="bg-neutral-950 rounded-2xl border border-neutral-800 overflow-hidden shadow-sm hover:border-neutral-700 transition-colors group">
                                                 {/* Exercise Header */}
                                                 <div className="p-4 bg-neutral-900/50 border-b border-neutral-800 flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
@@ -518,7 +564,7 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                                                         </div>
 
                                                         <div className="space-y-1">
-                                                            {exercise.sets?.map((set: any, setIndex: number) => (
+                                                            {exercise.sets?.map((set: ExerciseSet, setIndex: number) => (
                                                                 <div key={setIndex} className="grid grid-cols-12 gap-2 items-center px-2 py-1 rounded-lg hover:bg-neutral-800/50 transition-colors group/set">
                                                                     <div className="col-span-3">
                                                                         <Select

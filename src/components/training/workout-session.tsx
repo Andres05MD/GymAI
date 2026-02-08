@@ -13,8 +13,53 @@ import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { AIAssistantDialog } from "@/components/training/ai-assistant-dialog";
 
+// --- INTERFACES ---
+
+interface RoutineSet {
+    reps?: number;
+    weight?: number;
+    rpe?: number;
+    rpeTarget?: number;
+    type?: "warmup" | "working" | "failure";
+    rest?: number;
+}
+
+interface RoutineExercise {
+    exerciseId?: string;
+    exerciseName: string;
+    notes?: string;
+    sets: RoutineSet[];
+}
+
+interface RoutineDay {
+    id?: string;
+    name: string;
+    exercises: RoutineExercise[];
+}
+
+interface Routine {
+    id: string;
+    name: string;
+    schedule: RoutineDay[];
+}
+
+interface SessionSet {
+    reps: string;
+    weight: string;
+    rpe: string;
+    completed: boolean;
+    targetReps?: number;
+}
+
+interface SessionExercise {
+    exerciseId: string;
+    exerciseName: string;
+    sets: SessionSet[];
+    feedback: string;
+}
+
 interface WorkoutSessionProps {
-    routine: any;
+    routine: Routine;
 }
 
 export function WorkoutSession({ routine }: WorkoutSessionProps) {
@@ -26,17 +71,17 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
 
     // Form state structure matching schema
     // We map the active day exercises to a local state for logging
-    const [sessionLog, setSessionLog] = useState<any[]>([]);
+    const [sessionLog, setSessionLog] = useState<SessionExercise[]>([]);
 
     const activeDay = routine.schedule[activeDayIndex];
 
     useEffect(() => {
         // Initialize log state when day changes
         if (activeDay) {
-            setSessionLog(activeDay.exercises.map((ex: any) => ({
+            setSessionLog(activeDay.exercises.map((ex: RoutineExercise) => ({
                 exerciseId: ex.exerciseId || "temp-id",
                 exerciseName: ex.exerciseName,
-                sets: ex.sets.map((set: any) => ({
+                sets: ex.sets.map((set: RoutineSet) => ({
                     reps: "",
                     weight: "",
                     rpe: "",
@@ -59,9 +104,9 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
         return `${mins}:${secs.toString().padStart(2, '0')}`;
     };
 
-    const updateSet = (exerciseIndex: number, setIndex: number, field: string, value: any) => {
+    const updateSet = (exerciseIndex: number, setIndex: number, field: keyof SessionSet, value: string | boolean) => {
         const newLog = [...sessionLog];
-        newLog[exerciseIndex].sets[setIndex][field] = value;
+        (newLog[exerciseIndex].sets[setIndex] as unknown as Record<string, unknown>)[field] = value;
         setSessionLog(newLog);
     };
 
@@ -84,7 +129,7 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
                     exerciseName: ex.exerciseName,
                     exerciseId: ex.exerciseId,
                     feedback: ex.feedback,
-                    sets: ex.sets.filter((s: any) => s.completed || s.weight || s.reps).map((s: any) => ({
+                    sets: ex.sets.filter((s: SessionSet) => s.completed || s.weight || s.reps).map((s: SessionSet) => ({
                         weight: Number(s.weight) || 0,
                         reps: Number(s.reps) || 0,
                         rpe: Number(s.rpe) || undefined,
@@ -125,8 +170,8 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
                     </div>
                     <div className="flex gap-2">
                         <AIAssistantDialog
-                            muscleGroups={activeDay.exercises.map((e: any) => e.exerciseName)}
-                            availableExercises={activeDay.exercises.map((e: any) => e.exerciseName)}
+                            muscleGroups={activeDay.exercises.map((e: RoutineExercise) => e.exerciseName)}
+                            availableExercises={activeDay.exercises.map((e: RoutineExercise) => e.exerciseName)}
                         />
                         <Button
                             onClick={handleFinish}
@@ -141,7 +186,7 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
 
             {/* Exercises List */}
             <div className="space-y-6">
-                {activeDay.exercises.map((exercise: any, exIndex: number) => {
+                {activeDay.exercises.map((exercise: RoutineExercise, exIndex: number) => {
                     const logExercise = sessionLog[exIndex];
                     if (!logExercise) return null;
 
@@ -169,7 +214,7 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
                                 </div>
 
                                 <div className="space-y-2">
-                                    {exercise.sets.map((set: any, setIndex: number) => {
+                                    {exercise.sets.map((set: RoutineSet, setIndex: number) => {
                                         const logSet = logExercise.sets[setIndex];
                                         const isCompleted = logSet?.completed;
 

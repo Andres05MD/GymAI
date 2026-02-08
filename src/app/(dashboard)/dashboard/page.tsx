@@ -11,6 +11,13 @@ import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import dynamic from "next/dynamic";
 import { Skeleton } from "@/components/ui/skeleton";
+import type {
+    DashboardUser,
+    RecentActivity,
+    ActivityDataPoint,
+    PersonalRecord,
+    SerializedRoutine
+} from "@/types";
 
 // Lazy loading de gráficos pesados (Recharts ~200KB)
 const ActivityChart = dynamic(
@@ -23,7 +30,8 @@ const ProgressChart = dynamic(
     { loading: () => <Skeleton className="w-full h-[200px] rounded-xl bg-neutral-800" /> }
 );
 
-async function CoachDashboard({ user }: { user: any }) {
+
+async function CoachDashboard({ user }: { user: DashboardUser | undefined }) {
     const [statsResult, activityResult] = await Promise.all([
         getCoachStats(),
         getRecentActivity()
@@ -93,7 +101,7 @@ async function CoachDashboard({ user }: { user: any }) {
                 {/* Left Col: Charts & Activity */}
                 <div className="lg:col-span-2 space-y-6">
                     {/* Activity Chart */}
-                    <div className="bg-neutral-900 border border-neutral-800 rounded-[2rem] p-8">
+                    <div className="bg-neutral-900 border border-neutral-800 rounded-4xl p-8">
                         <div className="flex justify-between items-center mb-8">
                             <h3 className="text-xl font-bold text-white">Actividad de Atletas</h3>
                             <p className="text-sm text-neutral-500">Volumen combinado semanal</p>
@@ -102,7 +110,7 @@ async function CoachDashboard({ user }: { user: any }) {
                     </div>
 
                     {/* Recent Activity Feed */}
-                    <div className="bg-neutral-900 border border-neutral-800 rounded-[2rem] p-8">
+                    <div className="bg-neutral-900 border border-neutral-800 rounded-4xl p-8">
                         <div className="flex justify-between items-center mb-6">
                             <h3 className="text-xl font-bold text-white">Últimas Actividades</h3>
                             <Link href="/progress" className="text-sm font-bold text-red-500 hover:text-red-400 flex items-center">
@@ -112,11 +120,11 @@ async function CoachDashboard({ user }: { user: any }) {
 
                         <div className="space-y-4">
                             {activities.length > 0 ? (
-                                activities.map((activity: any) => (
+                                activities.map((activity: RecentActivity) => (
                                     <div key={activity.id} className="flex items-center justify-between p-4 bg-black/40 border border-white/5 rounded-2xl hover:bg-white/5 transition-colors group">
                                         <div className="flex items-center gap-4">
                                             <Avatar className="h-10 w-10 border border-white/10">
-                                                <AvatarImage src={activity.athleteImage} />
+                                                <AvatarImage src={activity.athleteImage ?? undefined} />
                                                 <AvatarFallback className="bg-neutral-800 text-neutral-400 font-bold">
                                                     {activity.athleteName?.[0]?.toUpperCase()}
                                                 </AvatarFallback>
@@ -149,7 +157,7 @@ async function CoachDashboard({ user }: { user: any }) {
                 {/* Right Col: Actions & Status */}
                 <div className="space-y-6">
                     {/* Quick Actions Card */}
-                    <div className="bg-neutral-900 border border-neutral-800 rounded-[2rem] p-6 shadow-xl relative overflow-hidden group">
+                    <div className="bg-neutral-900 border border-neutral-800 rounded-4xl p-6 shadow-xl relative overflow-hidden group">
                         <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                             <TrendingUp className="w-24 h-24 text-white" />
                         </div>
@@ -179,7 +187,7 @@ async function CoachDashboard({ user }: { user: any }) {
 
 
                     {/* Active Sessions Mini-List (Placeholder for MVP) */}
-                    <div className="bg-neutral-900 border border-neutral-800 rounded-[2rem] p-6">
+                    <div className="bg-neutral-900 border border-neutral-800 rounded-4xl p-6">
                         <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-4 text-neutral-400">En este momento</h3>
                         <div className="flex items-center gap-3 text-neutral-500 text-sm">
                             <span className="relative flex h-3 w-3">
@@ -195,11 +203,12 @@ async function CoachDashboard({ user }: { user: any }) {
     );
 }
 
-async function AthleteDashboard({ user }: { user: any }) {
-    const { prs } = await getPersonalRecords(user.id);
+async function AthleteDashboard({ user }: { user: DashboardUser | undefined }) {
+    const userId = user?.id ?? "";
+    const { prs } = await getPersonalRecords(userId);
     const { routine } = await getActiveRoutine();
-    const { data: activityData } = await getWeeklyActivity(user.id);
-    const { completed: weeklyCompleted, target: weeklyTarget } = await getWeeklyProgress(user.id);
+    const { data: activityData } = await getWeeklyActivity(userId);
+    const { completed: weeklyCompleted, target: weeklyTarget } = await getWeeklyProgress(userId);
 
     return (
         <div className="space-y-8 pb-24 md:pb-10">
@@ -235,7 +244,7 @@ async function AthleteDashboard({ user }: { user: any }) {
                 />
                 <StatCard
                     title="Volumen Semanal"
-                    value={`${Math.round((activityData?.reduce((acc: number, cur: any) => acc + cur.total, 0) || 0) / 1000)}k`}
+                    value={`${Math.round((activityData?.reduce((acc: number, cur: ActivityDataPoint) => acc + cur.total, 0) || 0) / 1000)}k`}
                     label="Kg levantados"
                     trend="neutral"
                     icon={TrendingUp}
@@ -261,7 +270,7 @@ async function AthleteDashboard({ user }: { user: any }) {
             {/* Charts Section */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Main Activity Chart */}
-                <div className="lg:col-span-2 bg-neutral-900 border border-neutral-800 rounded-[2rem] p-8 flex flex-col">
+                <div className="lg:col-span-2 bg-neutral-900 border border-neutral-800 rounded-4xl p-8 flex flex-col">
                     <div className="flex justify-between items-center mb-6">
                         <div>
                             <h3 className="text-xl font-bold text-white">Actividad Reciente</h3>
@@ -275,7 +284,7 @@ async function AthleteDashboard({ user }: { user: any }) {
 
                 {/* Next Routine / Progress */}
                 <div className="space-y-6">
-                    <div className="bg-neutral-900 border border-neutral-800 rounded-[2rem] p-8">
+                    <div className="bg-neutral-900 border border-neutral-800 rounded-4xl p-8">
                         <div className="mb-6">
                             <h3 className="text-xl font-bold text-white">Objetivo Semanal</h3>
                             <p className="text-sm text-neutral-400">Mantén tu constancia de entrenamiento.</p>
@@ -283,13 +292,13 @@ async function AthleteDashboard({ user }: { user: any }) {
                         <ProgressChart completed={weeklyCompleted} target={weeklyTarget} />
                     </div>
 
-                    <div className="bg-neutral-900 border border-neutral-800 rounded-[2rem] p-6 text-white relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300 shadow-xl">
+                    <div className="bg-neutral-900 border border-neutral-800 rounded-4xl p-6 text-white relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300 shadow-xl">
                         <div className="relative z-10">
                             <p className="text-xs font-bold uppercase tracking-widest text-neutral-500 mb-1">Próxima Sesión</p>
                             {routine ? (
                                 <>
-                                    <h3 className="text-2xl font-black mb-1">{(routine as any).name}</h3>
-                                    <p className="text-sm text-neutral-400 mb-4">{(routine as any).exercises?.length || 0} Ejercicios</p>
+                                    <h3 className="text-2xl font-black mb-1">{(routine as unknown as SerializedRoutine).name}</h3>
+                                    <p className="text-sm text-neutral-400 mb-4">{((routine as unknown as SerializedRoutine).schedule?.length) || 0} Ejercicios</p>
                                     <Link href="/train">
                                         <Button className="w-full rounded-full bg-white text-black hover:bg-neutral-200 font-bold">
                                             Iniciar Ahora
@@ -311,13 +320,13 @@ async function AthleteDashboard({ user }: { user: any }) {
             </div>
 
             {/* PRs Section */}
-            <div className="bg-neutral-900 border border-neutral-800 rounded-[2rem] p-8">
+            <div className="bg-neutral-900 border border-neutral-800 rounded-4xl p-8">
                 <div className="flex justify-between items-center mb-6">
                     <h3 className="text-xl font-bold text-white">Récords Personales (PRs)</h3>
                 </div>
                 {prs && prs.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        {prs.map((pr: any, i: number) => (
+                        {prs.map((pr: PersonalRecord, i: number) => (
                             <div key={i} className="flex items-center justify-between p-4 bg-black rounded-2xl border border-neutral-800">
                                 <div>
                                     <p className="text-white font-bold">{pr.exercise}</p>

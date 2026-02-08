@@ -12,8 +12,23 @@ import { WarmupGenerator } from "@/components/training/warmup-generator";
 import { AICoachChat } from "@/components/training/ai-coach-chat";
 import { ExerciseSwapDialog } from "@/components/training/exercise-swap-dialog";
 
+interface ConsoleExercise {
+    id?: string;
+    name: string;
+    sets?: number | any[];
+    reps?: string | number;
+    rpe?: number;
+    rest?: number;
+    notes?: string;
+}
+
+interface ConsoleRoutine {
+    name: string;
+    exercises?: ConsoleExercise[];
+}
+
 interface TrainConsoleProps {
-    routine: any;
+    routine: ConsoleRoutine;
 }
 
 export function TrainConsole({ routine }: TrainConsoleProps) {

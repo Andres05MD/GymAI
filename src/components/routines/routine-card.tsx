@@ -10,9 +10,29 @@ import { useRouter } from "next/navigation";
 import { AssignRoutineDialog } from "@/components/routines/assign-routine-dialog";
 import { useState } from "react";
 
+// Interfaces para la tarjeta de rutina
+interface RoutineScheduleDay {
+    name: string;
+    exercises?: unknown[];
+}
+
+interface Routine {
+    id: string;
+    name: string;
+    description?: string;
+    active?: boolean;
+    schedule?: RoutineScheduleDay[];
+}
+
+interface Athlete {
+    id: string;
+    name?: string;
+    email?: string;
+}
+
 interface RoutineCardProps {
-    routine: any;
-    athletes: any[];
+    routine: Routine;
+    athletes: Athlete[];
 }
 
 export function RoutineCard({ routine, athletes }: RoutineCardProps) {

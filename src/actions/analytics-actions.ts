@@ -4,6 +4,22 @@ import { adminDb } from "@/lib/firebase-admin";
 import { auth } from "@/lib/auth";
 import { unstable_cache } from "next/cache";
 
+// --- TIPOS LOCALES ---
+
+interface TrainingSet {
+    completed?: boolean;
+    weight?: number;
+    reps?: number;
+    rpe?: number;
+}
+
+interface TrainingExercise {
+    exerciseId?: string;
+    exerciseName: string;
+    sets: TrainingSet[];
+    feedback?: string;
+}
+
 // --- HELPERS ---
 
 function getStartOfWeek(date: Date) {
@@ -39,8 +55,8 @@ const getCachedWeeklyActivity = unstable_cache(
             if (date.getDay() === 0) dayName = "Dom";
 
             let sessionVolume = 0;
-            data.exercises?.forEach((ex: any) => {
-                ex.sets?.forEach((s: any) => {
+            data.exercises?.forEach((ex: TrainingExercise) => {
+                ex.sets?.forEach((s: TrainingSet) => {
                     if (s.completed && s.weight && s.reps) {
                         sessionVolume += (s.weight * s.reps);
                     }
@@ -136,10 +152,10 @@ export async function getPersonalRecords(userId?: string) {
             const dateStr = data.date.toDate().toLocaleDateString("es-ES", { day: 'numeric', month: 'short' });
 
             if (data.exercises) {
-                data.exercises.forEach((ex: any) => {
+                data.exercises.forEach((ex: TrainingExercise) => {
                     const name = ex.exerciseName;
-                    ex.sets.forEach((s: any) => {
-                        if (s.completed && s.weight > 0) {
+                    ex.sets.forEach((s: TrainingSet) => {
+                        if (s.completed && s.weight && s.weight > 0) {
                             const current = prsMap.get(name);
                             if (!current || s.weight > current.weight) {
                                 prsMap.set(name, { weight: s.weight, date: dateStr });
@@ -190,9 +206,9 @@ export async function analyzeAthleteProgress(userId: string) {
             const d = doc.data();
             return {
                 date: d.date.toDate().toISOString().split('T')[0],
-                exercises: d.exercises.map((e: any) => ({
+                exercises: d.exercises.map((e: TrainingExercise) => ({
                     name: e.exerciseName,
-                    topSet: e.sets.reduce((max: number, s: any) => s.completed ? Math.max(max, s.weight) : max, 0),
+                    topSet: e.sets.reduce((max: number, s: TrainingSet) => s.completed && s.weight ? Math.max(max, s.weight) : max, 0),
                     feedback: e.feedback
                 }))
             };

@@ -10,6 +10,26 @@ import { ChevronLeft, Calendar, User } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
+// Interfaces para el resumen
+interface SummarySet {
+    actualWeight?: number;
+    actualReps?: string | number;
+    actualRPE?: number;
+    completed?: boolean;
+}
+
+interface SummaryExercise {
+    name: string;
+    sets: SummarySet[];
+}
+
+interface TrainingLogSummary {
+    routineName: string;
+    dayName: string;
+    endTime?: Date | string;
+    exercises: SummaryExercise[];
+}
+
 export default function WorkoutSummaryPage() {
     const params = useParams();
     const router = useRouter();
@@ -23,7 +43,7 @@ export default function WorkoutSummaryPage() {
     if (isLoading) return <div className="p-6">Cargando resumen...</div>;
     if (!logResult?.success || !logResult.log) return <div className="p-6">No se encontró la sesión.</div>;
 
-    const log = logResult.log as any;
+    const log = logResult.log as unknown as TrainingLogSummary;
 
     return (
         <div className="max-w-3xl mx-auto space-y-6 pb-10">
@@ -44,7 +64,7 @@ export default function WorkoutSummaryPage() {
             </div>
 
             <div className="space-y-6">
-                {log.exercises.map((exercise: any, idx: number) => (
+                {log.exercises.map((exercise: SummaryExercise, idx: number) => (
                     <Card key={idx}>
                         <CardHeader className="bg-muted/30 py-3">
                             <CardTitle className="text-lg font-medium">{exercise.name}</CardTitle>
@@ -57,7 +77,7 @@ export default function WorkoutSummaryPage() {
                                 <div className="col-span-2 text-center">RPE</div>
                                 <div className="col-span-2 text-center">Estado</div>
                             </div>
-                            {exercise.sets.map((set: any, setIdx: number) => (
+                            {exercise.sets.map((set: SummarySet, setIdx: number) => (
                                 <div key={setIdx} className="grid grid-cols-12 gap-2 items-center p-3 border-b last:border-0">
                                     <div className="col-span-2 text-center">
                                         <Badge variant="outline" className="w-6 h-6 flex items-center justify-center p-0 rounded-full">

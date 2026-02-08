@@ -9,8 +9,15 @@ import { Sparkles, Loader2 } from "lucide-react";
 import { generateRoutinePlan } from "@/actions/ai-actions";
 import { toast } from "sonner";
 
+interface GeneratedExercise {
+    exerciseName: string;
+    sets: string | number;
+    reps: string;
+    description: string;
+}
+
 interface RoutineGeneratorProps {
-    onGenerated: (exercises: any[]) => void;
+    onGenerated: (exercises: GeneratedExercise[]) => void;
 }
 
 export function RoutineGeneratorDialog({ onGenerated }: RoutineGeneratorProps) {

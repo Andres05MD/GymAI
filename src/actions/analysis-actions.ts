@@ -5,6 +5,19 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/firebase";
 import { collection, query, where, getDocs, orderBy, limit } from "firebase/firestore";
 
+// --- TIPOS LOCALES ---
+
+interface TrainingSet {
+    completed?: boolean;
+    weight?: number;
+    reps?: number;
+}
+
+interface TrainingExercise {
+    exerciseName: string;
+    sets: TrainingSet[];
+}
+
 export async function analyzeAthleteProgress(athleteId: string) {
     const session = await auth();
     if (session?.user?.role !== "coach") {
@@ -32,9 +45,9 @@ export async function analyzeAthleteProgress(athleteId: string) {
                 date: data.endTime?.toDate().toISOString().split('T')[0],
                 routine: data.routineName,
                 feedback: data.sessionFeedback || "Sin feedback",
-                exercises: data.exercises.map((ex: any) => ({
+                exercises: data.exercises.map((ex: TrainingExercise) => ({
                     name: ex.exerciseName,
-                    sets_completed: ex.sets.filter((s: any) => s.completed).length,
+                    sets_completed: ex.sets.filter((s: TrainingSet) => s.completed).length,
                     best_set: ex.sets[0] ? `${ex.sets[0].weight}kg x ${ex.sets[0].reps}` : "N/A"
                 }))
             };
@@ -65,7 +78,7 @@ export async function analyzeAthleteProgress(athleteId: string) {
 
         return { success: true, analysis: completion.choices[0]?.message?.content };
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("Analysis Error:", error);
         return { success: false, error: "Error al generar análisis." };
     }

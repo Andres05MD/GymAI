@@ -6,6 +6,24 @@ import { ArrowLeft, Calendar, Dumbbell, Flame, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
+// Tipos locales para cálculos
+interface TrainingSet {
+    weight?: number;
+    reps?: number;
+    completed?: boolean;
+}
+
+interface TrainingExercise {
+    exerciseName: string;
+    sets?: TrainingSet[];
+}
+
+interface TrainingLog {
+    id: string;
+    date: string;
+    exercises?: TrainingExercise[];
+}
+
 export default async function HistoryPage() {
     const session = await auth();
     if (!session?.user?.id) redirect("/login");
@@ -13,14 +31,15 @@ export default async function HistoryPage() {
     const { logs, error } = await getTrainingLogs(session.user.id);
 
     // Calculate some stats for the header
-    const totalSessions = logs?.length || 0;
-    const totalVolume = logs?.reduce((acc: number, log: any) => {
-        return acc + (log.exercises?.reduce((exAcc: number, ex: any) => {
-            return exAcc + (ex.sets?.reduce((setAcc: number, s: any) => setAcc + ((s.weight || 0) * (s.reps || 0)), 0) || 0);
+    const typedLogs = logs as TrainingLog[] | undefined;
+    const totalSessions = typedLogs?.length || 0;
+    const totalVolume = typedLogs?.reduce((acc: number, log: TrainingLog) => {
+        return acc + (log.exercises?.reduce((exAcc: number, ex: TrainingExercise) => {
+            return exAcc + (ex.sets?.reduce((setAcc: number, s: TrainingSet) => setAcc + ((s.weight || 0) * (s.reps || 0)), 0) || 0);
         }, 0) || 0);
     }, 0) || 0;
 
-    const thisMonthLogs = logs?.filter((log: any) => {
+    const thisMonthLogs = typedLogs?.filter((log: TrainingLog) => {
         const logDate = new Date(log.date);
         const now = new Date();
         return logDate.getMonth() === now.getMonth() && logDate.getFullYear() === now.getFullYear();

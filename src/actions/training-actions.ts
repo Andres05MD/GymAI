@@ -7,6 +7,28 @@ import { TrainingLogSchema } from "@/lib/schemas";
 import { unstable_cache } from "next/cache";
 import { revalidateCacheTags, CACHE_TAGS } from "./cache-actions";
 
+// --- TIPOS LOCALES ---
+
+interface RoutineSet {
+    reps?: number;
+    weight?: number;
+    rpe?: number;
+    rest?: number;
+}
+
+interface RoutineExercise {
+    exerciseId?: string;
+    exerciseName?: string;
+    sets: RoutineSet[];
+}
+
+interface WorkoutSessionData {
+    routineId?: string;
+    routineName?: string;
+    exercises?: RoutineExercise[];
+    notes?: string;
+}
+
 // --- COACH ACTIONS ---
 
 // Assign Routine to Athlete
@@ -100,7 +122,7 @@ export async function getTrainingLogs(userId?: string) {
 }
 
 // Log a Workout Session
-export async function logWorkoutSession(data: any) {
+export async function logWorkoutSession(data: WorkoutSessionData) {
     const session = await auth();
     if (!session?.user?.id) return { success: false, error: "No autorizado" };
 
@@ -244,9 +266,9 @@ export async function startWorkout(routineId: string) {
             routineId: routineId,
             routineName: routineData?.name || "Rutina",
             dayName: firstDay.name,
-            exercises: firstDay.exercises.map((ex: any) => ({
+            exercises: firstDay.exercises.map((ex: RoutineExercise) => ({
                 ...ex,
-                sets: ex.sets.map((set: any) => ({
+                sets: ex.sets.map((set: RoutineSet) => ({
                     ...set,
                     actualWeight: null,
                     actualReps: null,

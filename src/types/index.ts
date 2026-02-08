@@ -20,3 +20,7 @@ export type TrainingLog = z.infer<typeof TrainingLogSchema>;
 // Tipos de Rol y Género para uso directo
 export type UserRole = "athlete" | "coach";
 export type Gender = "male" | "female" | "other";
+
+// Re-exportar tipos de API para uso centralizado
+export * from "./api";
+

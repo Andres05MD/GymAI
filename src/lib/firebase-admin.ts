@@ -31,8 +31,9 @@ const getAdminApp = () => {
             credential: admin.credential.cert(serviceAccount),
             projectId: serviceAccount.project_id
         });
-    } catch (error: any) {
-        console.error(">>> [Firebase Admin] ❌ Error parseando clave ADM:", error.message);
+    } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : "Error desconocido";
+        console.error(">>> [Firebase Admin] ❌ Error parseando clave ADM:", errorMessage);
         return admin.initializeApp({ projectId });
     }
 };

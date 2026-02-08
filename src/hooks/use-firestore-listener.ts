@@ -6,10 +6,12 @@ import {
     Query,
     DocumentReference,
     Unsubscribe,
-    DocumentData
+    DocumentData,
+    QuerySnapshot,
+    DocumentSnapshot
 } from "firebase/firestore";
 
-type SnapshotCallback<T> = (data: T) => void;
+type SnapshotCallback<T extends DocumentData> = (data: QuerySnapshot<T> | DocumentSnapshot<T>) => void;
 type ErrorCallback = (error: Error) => void;
 
 interface UseFirestoreOptions {
@@ -71,11 +73,11 @@ export function useFirestoreListener(options: UseFirestoreOptions = {}) {
 
     const subscribe = useCallback(<T extends DocumentData>(
         queryOrRef: Query<T> | DocumentReference<T>,
-        callback: SnapshotCallback<any>
+        callback: SnapshotCallback<T>
     ): Unsubscribe => {
         const unsubscribe = onSnapshot(
             queryOrRef as Query<T>,
-            (snapshot: any) => {
+            (snapshot: QuerySnapshot<T>) => {
                 if (isPausedRef.current) return;
                 callback(snapshot);
             },
@@ -112,7 +114,7 @@ export function useFirestoreListener(options: UseFirestoreOptions = {}) {
  */
 export function useFirestoreQuery<T extends DocumentData>(
     query: Query<T> | null,
-    callback: SnapshotCallback<any>,
+    callback: SnapshotCallback<T>,
     deps: React.DependencyList = []
 ) {
     const { subscribe } = useFirestoreListener();

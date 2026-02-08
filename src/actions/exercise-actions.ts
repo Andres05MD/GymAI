@@ -34,9 +34,11 @@ export async function getExercises() {
 
         const exercises = snapshot.docs.map(doc => {
             const data = doc.data();
-            const getDate = (field: any) => {
+            const getDate = (field: unknown): string => {
                 if (!field) return new Date().toISOString();
-                if (typeof field.toDate === 'function') return field.toDate().toISOString();
+                if (typeof field === 'object' && field !== null && 'toDate' in field && typeof (field as { toDate: () => Date }).toDate === 'function') {
+                    return (field as { toDate: () => Date }).toDate().toISOString();
+                }
                 if (field instanceof Date) return field.toISOString();
                 return String(field);
             };

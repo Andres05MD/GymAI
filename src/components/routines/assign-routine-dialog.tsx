@@ -8,7 +8,14 @@ import { assignRoutineToAthlete } from "@/actions/training-actions";
 import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-export function AssignRoutineDialog({ routineId, athletes }: { routineId: string, athletes: any[] }) {
+interface Athlete {
+    id: string;
+    name?: string;
+    email?: string;
+    // otros campos opcionales
+}
+
+export function AssignRoutineDialog({ routineId, athletes }: { routineId: string, athletes: Athlete[] }) {
     const [open, setOpen] = useState(false);
     const [selectedAthlete, setSelectedAthlete] = useState("");
     const [loading, setLoading] = useState(false);

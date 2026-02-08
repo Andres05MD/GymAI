@@ -3,14 +3,45 @@ import Credentials from "next-auth/providers/credentials";
 import { FirestoreAdapter } from "@auth/firebase-adapter";
 import { db, auth as firebaseAuth } from "@/lib/firebase";
 import { collection, query, where, getDocs, limit, doc, getDoc, setDoc, Timestamp } from "firebase/firestore";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, AuthError } from "firebase/auth";
 import { z } from "zod";
 import { authConfig } from "./auth.config";
 
 /**
+ * Tipo para la respuesta de usuario de Firebase Identity Toolkit API
+ */
+interface FirebaseIdentityUser {
+    localId: string;
+    displayName?: string;
+    email: string;
+    photoUrl?: string;
+}
+
+/**
+ * Tipo para la respuesta de Identity Toolkit API
+ */
+interface IdentityToolkitResponse {
+    users?: FirebaseIdentityUser[];
+    error?: { message: string };
+}
+
+/**
+ * Tipo de usuario para autenticación (compatible con NextAuth)
+ */
+interface AuthUser {
+    id: string;
+    email: string;
+    name: string;
+    image?: string | null;
+    role: "athlete" | "coach";
+    emailVerified?: Date | null;
+    onboardingCompleted: boolean;
+}
+
+/**
  * Obtiene un usuario de Firestore por email
  */
-async function getUserByEmail(email: string) {
+async function getUserByEmail(email: string): Promise<AuthUser | null> {
     try {
         const q = query(
             collection(db, "users"),
@@ -19,9 +50,10 @@ async function getUserByEmail(email: string) {
         );
         const querySnapshot = await getDocs(q);
         if (querySnapshot.empty) return null;
-        return { id: querySnapshot.docs[0].id, ...querySnapshot.docs[0].data() } as any;
+        const docData = querySnapshot.docs[0].data();
+        return { id: querySnapshot.docs[0].id, ...docData } as AuthUser;
     } catch (error) {
-        console.error("Error fetching user by email:", error);
+        console.error("Error obteniendo usuario por email:", error);
         return null;
     }
 }
@@ -29,17 +61,21 @@ async function getUserByEmail(email: string) {
 /**
  * Obtiene un usuario de Firestore por ID
  */
-async function getUserById(id: string) {
+async function getUserById(id: string): Promise<AuthUser | null> {
     try {
         const userDoc = await getDoc(doc(db, "users", id));
         if (!userDoc.exists()) return null;
-        return { id: userDoc.id, ...userDoc.data() } as any;
+        const docData = userDoc.data();
+        return { id: userDoc.id, ...docData } as AuthUser;
     } catch (error) {
-        console.error("Error fetching user by id:", error);
+        console.error("Error obteniendo usuario por ID:", error);
         return null;
     }
 }
 
+// NOTE: FirestoreAdapter tiene problemas de tipos conocidos con NextAuth v5 y Firebase SDK cliente.
+// Se usa "as any" intencionalmente para compatibilidad. Ver: https://github.com/nextauthjs/next-auth/issues
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const { handlers, auth, signIn, signOut } = NextAuth({
     ...authConfig,
     adapter: FirestoreAdapter(db as any) as any,
@@ -67,7 +103,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                             }
                         );
 
-                        const data = await res.json();
+                        const data: IdentityToolkitResponse = await res.json();
 
                         if (!res.ok || !data.users || data.users.length === 0) {
                             console.error("Error validando token de Firebase:", data);
@@ -78,11 +114,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                         const userId = firebaseUser.localId;
 
                         // Buscar usuario en Firestore por su UID
-                        let user = await getUserById(userId);
+                        const user = await getUserById(userId);
 
                         if (!user) {
                             // Si no existe, lo creamos automáticamente en Firestore
-                            const newUser = {
+                            const newUser: AuthUser = {
                                 id: userId,
                                 name: firebaseUser.displayName || "Usuario",
                                 email: firebaseUser.email,
@@ -90,26 +126,20 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                                 role: "athlete",
                                 emailVerified: new Date(),
                                 onboardingCompleted: false,
-                                createdAt: Timestamp.now(),
-                                updatedAt: Timestamp.now(),
                             };
 
                             try {
-                                await setDoc(doc(db, "users", userId), newUser);
+                                await setDoc(doc(db, "users", userId), {
+                                    ...newUser,
+                                    createdAt: Timestamp.now(),
+                                    updatedAt: Timestamp.now(),
+                                });
                                 return newUser;
                             } catch (createError) {
                                 console.error("Error creando usuario en Firestore:", createError);
                                 // Si falla la creación, retornamos el objeto básico para permitir login
                                 // aunque no se haya guardado en BD (fallback)
-                                return {
-                                    id: userId,
-                                    name: newUser.name,
-                                    email: newUser.email,
-                                    image: newUser.image,
-                                    emailVerified: newUser.emailVerified,
-                                    role: newUser.role,
-                                    onboardingCompleted: newUser.onboardingCompleted
-                                };
+                                return newUser;
                             }
                         }
 
@@ -149,18 +179,20 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                     }
 
                     // Si no hay datos en Firestore, retornamos datos básicos de Firebase Auth
-                    return {
+                    const fallbackUser: AuthUser = {
                         id: firebaseUser.uid,
-                        email: firebaseUser.email,
+                        email: firebaseUser.email || email,
                         name: firebaseUser.displayName || email,
                         image: firebaseUser.photoURL,
                         emailVerified: firebaseUser.emailVerified ? new Date() : null,
                         role: "athlete",
                         onboardingCompleted: false
                     };
+                    return fallbackUser;
 
-                } catch (error: any) {
-                    console.error("Error en login con email/password:", error.code, error.message);
+                } catch (error) {
+                    const authError = error as AuthError;
+                    console.error("Error en login con email/password:", authError.code, authError.message);
                     return null;
                 }
             },

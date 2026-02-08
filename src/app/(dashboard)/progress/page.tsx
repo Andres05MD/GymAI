@@ -8,6 +8,21 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
+interface PersonalRecord {
+    exercise: string;
+    weight: number;
+    date: string;
+    reps?: number;
+}
+
+interface Athlete {
+    id: string;
+    name?: string;
+    image?: string;
+    email?: string;
+    [key: string]: unknown;
+}
+
 async function getLatestBodyMetrics(userId: string) {
     try {
         const userDoc = await adminDb.collection("users").doc(userId).get();
@@ -35,12 +50,12 @@ export default async function ProgressPage({ searchParams }: ProgressPageProps) 
 
     const isCoach = session.user.role === "coach";
     let targetUserId = session.user.id;
-    let athletes: any[] = [];
+    let athletes: Athlete[] = [];
 
     // Coach Logic: Determine target user
     if (isCoach) {
         const result = await getAllAthletes();
-        athletes = result.athletes || [];
+        athletes = (result.athletes as unknown as Athlete[]) || [];
 
         const params = await searchParams;
         const requestedId = params?.athleteId as string;
@@ -127,7 +142,7 @@ export default async function ProgressPage({ searchParams }: ProgressPageProps) 
 
             {/* Metrics Grid */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-[2rem] p-6 relative overflow-hidden group hover:border-blue-500/30 transition-all">
+                <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-4xl p-6 relative overflow-hidden group hover:border-blue-500/30 transition-all">
                     <div className="absolute top-0 right-0 w-20 h-20 bg-blue-600/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none group-hover:bg-blue-600/20 transition-colors"></div>
                     <div className="flex flex-col items-center text-center relative z-10">
                         <div className="w-14 h-14 bg-neutral-900 rounded-2xl flex items-center justify-center mb-4 shadow-lg border border-neutral-800 group-hover:scale-105 transition-transform duration-300">
@@ -144,7 +159,7 @@ export default async function ProgressPage({ searchParams }: ProgressPageProps) 
                     </div>
                 </div>
 
-                <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-[2rem] p-6 relative overflow-hidden group hover:border-orange-500/30 transition-all">
+                <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-4xl p-6 relative overflow-hidden group hover:border-orange-500/30 transition-all">
                     <div className="absolute top-0 right-0 w-20 h-20 bg-orange-600/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none group-hover:bg-orange-600/20 transition-colors"></div>
                     <div className="flex flex-col items-center text-center relative z-10">
                         <div className="w-14 h-14 bg-neutral-900 rounded-2xl flex items-center justify-center mb-4 shadow-lg border border-neutral-800 group-hover:scale-105 transition-transform duration-300">
@@ -156,7 +171,7 @@ export default async function ProgressPage({ searchParams }: ProgressPageProps) 
                     </div>
                 </div>
 
-                <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-[2rem] p-6 relative overflow-hidden group hover:border-yellow-500/30 transition-all">
+                <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-4xl p-6 relative overflow-hidden group hover:border-yellow-500/30 transition-all">
                     <div className="absolute top-0 right-0 w-20 h-20 bg-yellow-600/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none group-hover:bg-yellow-600/20 transition-colors"></div>
                     <div className="flex flex-col items-center text-center relative z-10">
                         <div className="w-14 h-14 bg-neutral-900 rounded-2xl flex items-center justify-center mb-4 shadow-lg border border-neutral-800 group-hover:scale-105 transition-transform duration-300">
@@ -168,7 +183,7 @@ export default async function ProgressPage({ searchParams }: ProgressPageProps) 
                     </div>
                 </div>
 
-                <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-[2rem] p-6 relative overflow-hidden group hover:border-green-500/30 transition-all">
+                <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-4xl p-6 relative overflow-hidden group hover:border-green-500/30 transition-all">
                     <div className="absolute top-0 right-0 w-20 h-20 bg-green-600/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none group-hover:bg-green-600/20 transition-colors"></div>
                     <div className="flex flex-col items-center text-center relative z-10">
                         <div className="w-14 h-14 bg-neutral-900 rounded-2xl flex items-center justify-center mb-4 shadow-lg border border-neutral-800 group-hover:scale-105 transition-transform duration-300">
@@ -182,7 +197,7 @@ export default async function ProgressPage({ searchParams }: ProgressPageProps) 
             </div>
 
             {/* Body Measurements */}
-            <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-[2rem] overflow-hidden">
+            <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-4xl overflow-hidden">
                 <div className="border-b border-neutral-800/50 p-6 flex items-center gap-4 bg-black/20">
                     <div className="w-12 h-12 bg-red-900/20 rounded-2xl flex items-center justify-center border border-red-500/10 shadow-[0_0_15px_rgba(220,38,38,0.1)]">
                         <Ruler className="h-6 w-6 text-red-500" />
@@ -225,7 +240,7 @@ export default async function ProgressPage({ searchParams }: ProgressPageProps) 
             </div>
 
             {/* Personal Records */}
-            <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-[2rem] overflow-hidden">
+            <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-4xl overflow-hidden">
                 <div className="border-b border-neutral-800/50 p-6 flex items-center gap-4 bg-black/20">
                     <div className="w-12 h-12 bg-yellow-900/20 rounded-2xl flex items-center justify-center border border-yellow-500/10 shadow-[0_0_15px_rgba(234,179,8,0.1)]">
                         <Trophy className="h-6 w-6 text-yellow-500" />
@@ -238,7 +253,7 @@ export default async function ProgressPage({ searchParams }: ProgressPageProps) 
 
                 {prs && prs.length > 0 ? (
                     <div className="divide-y divide-neutral-800">
-                        {prs.map((pr: any, i: number) => (
+                        {prs.map((pr: PersonalRecord, i: number) => (
                             <div key={i} className="p-6 flex items-center justify-between hover:bg-neutral-800/30 transition-colors group">
                                 <div className="flex items-center gap-5">
                                     <div className="h-14 w-14 bg-yellow-500/5 rounded-2xl flex items-center justify-center border border-yellow-500/10 group-hover:border-yellow-500/30 transition-colors">

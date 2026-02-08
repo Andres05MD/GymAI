@@ -4,6 +4,19 @@ import { adminDb } from "@/lib/firebase-admin";
 import { auth } from "@/lib/auth";
 import { unstable_cache } from "next/cache";
 
+// --- TIPOS LOCALES ---
+
+interface TrainingSet {
+    completed?: boolean;
+    weight?: number;
+    reps?: number;
+}
+
+interface TrainingExercise {
+    exerciseName?: string;
+    sets?: TrainingSet[];
+}
+
 // Caché para estadísticas del coach (revalida cada 60 segundos)
 const getCachedCoachStats = unstable_cache(
     async (coachId: string) => {
@@ -48,8 +61,8 @@ const getCachedCoachStats = unstable_cache(
             const data = doc.data();
             let sessionVol = 0;
 
-            data.exercises?.forEach((ex: any) => {
-                ex.sets?.forEach((s: any) => {
+            data.exercises?.forEach((ex: TrainingExercise) => {
+                ex.sets?.forEach((s: TrainingSet) => {
                     if (s.completed && s.weight && s.reps) {
                         sessionVol += (s.weight * s.reps);
                         weeklyVolume += (s.weight * s.reps);
@@ -138,8 +151,8 @@ const getCachedRecentActivity = unstable_cache(
             const user = userMap.get(uid) || { name: "Atleta Desconocido", image: null };
 
             let sessionVol = 0;
-            data.exercises?.forEach((ex: any) => {
-                ex.sets?.forEach((s: any) => {
+            data.exercises?.forEach((ex: TrainingExercise) => {
+                ex.sets?.forEach((s: TrainingSet) => {
                     if (s.completed && s.weight && s.reps) sessionVol += (s.weight * s.reps);
                 });
             });
