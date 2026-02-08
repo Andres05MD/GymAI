@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Brain, AlertCircle, Lightbulb, Loader2 } from "lucide-react";
+import { Brain, AlertCircle, Lightbulb, Loader2, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { analyzeAthleteProgress } from "@/actions/analytics-actions";
 import { cn } from "@/lib/utils";
 
@@ -11,16 +11,30 @@ interface CoachAIAnalysisProps {
     athleteId: string;
 }
 
+interface AlertItem {
+    type: string;
+    message: string;
+    severity: "high" | "medium" | "low";
+}
+
+interface AnalysisResult {
+    alerts: AlertItem[];
+    suggestions: string[];
+}
+
 export function CoachAIAnalysis({ athleteId }: CoachAIAnalysisProps) {
     const [loading, setLoading] = useState(false);
-    const [analysis, setAnalysis] = useState<{ alerts: any[], suggestions: string[] } | null>(null);
+    const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
 
     const runAnalysis = async () => {
         setLoading(true);
         try {
             const res = await analyzeAthleteProgress(athleteId);
             if (res.success) {
-                setAnalysis({ alerts: res.alerts, suggestions: res.suggestions });
+                // Validación básica de tipos al recibir respuesta
+                const alerts = (res.alerts || []) as AlertItem[];
+                const suggestions = (res.suggestions || []) as string[];
+                setAnalysis({ alerts, suggestions });
             }
         } finally {
             setLoading(false);
@@ -38,9 +52,9 @@ export function CoachAIAnalysis({ athleteId }: CoachAIAnalysisProps) {
                     </div>
                 </div>
                 {!analysis && (
-                    <Button onClick={runAnalysis} disabled={loading} className="bg-purple-600 hover:bg-purple-700 text-white">
+                    <Button onClick={runAnalysis} disabled={loading} className="bg-purple-600 hover:bg-purple-700 text-white transition-all shadow-lg shadow-purple-900/20">
                         {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                        Analizar Progreso
+                        {loading ? "Analizando..." : "Analizar Progreso"}
                     </Button>
                 )}
             </CardHeader>
@@ -53,18 +67,26 @@ export function CoachAIAnalysis({ athleteId }: CoachAIAnalysisProps) {
                             <AlertCircle className="w-4 h-4" /> Alertas
                         </h4>
                         {analysis.alerts.length === 0 ? (
-                            <p className="text-sm text-neutral-500 italic">No se detectaron problemas críticos.</p>
+                            <div className="flex items-center gap-2 text-green-400 bg-green-900/10 p-4 rounded-xl border border-green-900/20">
+                                <CheckCircle2 className="w-5 h-5" />
+                                <span className="text-sm font-medium">Todo en orden. No se detectan estancamientos críticos.</span>
+                            </div>
                         ) : (
                             <div className="grid gap-3">
                                 {analysis.alerts.map((alert, i) => (
                                     <div key={i} className={cn(
-                                        "p-4 rounded-xl border flex items-start gap-4",
-                                        alert.severity === 'high' ? "bg-red-900/20 border-red-900/50 text-red-200" : "bg-yellow-900/20 border-yellow-900/50 text-yellow-200"
+                                        "p-4 rounded-xl border flex items-start gap-4 transition-all hover:scale-[1.01]",
+                                        alert.severity === 'high' ? "bg-red-950/30 border-red-500/30 text-red-200 shadow-md shadow-red-900/10" : "bg-yellow-950/30 border-yellow-500/30 text-yellow-200"
                                     )}>
-                                        <div className={cn("w-2 h-2 rounded-full mt-2 shrink-0",
-                                            alert.severity === 'high' ? "bg-red-500" : "bg-yellow-500"
-                                        )} />
-                                        <span>{alert.message}</span>
+                                        <div className={cn("mt-1 shrink-0 p-1 rounded-full",
+                                            alert.severity === 'high' ? "bg-red-500/20 text-red-500" : "bg-yellow-500/20 text-yellow-500"
+                                        )}>
+                                            <AlertTriangle className="w-4 h-4" />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <p className="font-bold text-sm leading-none">{alert.type === 'stagnation' ? 'Estancamiento Detectado' : 'Alerta'}</p>
+                                            <p className="text-xs opacity-90 leading-relaxed">{alert.message}</p>
+                                        </div>
                                     </div>
                                 ))}
                             </div>
