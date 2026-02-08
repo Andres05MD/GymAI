@@ -15,7 +15,7 @@ export function Header({ user }: HeaderProps) {
     const isDashboard = pathname === "/dashboard";
 
     return (
-        <header className={`flex h-20 items-center justify-between gap-4 px-6 py-4 bg-transparent w-full ${isDashboard ? 'md:hidden' : ''}`}>
+        <header className={`flex h-16 items-center justify-between gap-4 px-6 md:px-10 py-3 bg-transparent w-full ${isDashboard ? 'md:hidden' : ''}`}>
             {/* Logo for mobile only since Sidebar is hidden */}
             <div className="md:hidden flex items-center gap-2">
                 <div className="h-8 w-8 bg-white rounded-full flex items-center justify-center">

@@ -30,7 +30,7 @@ export default async function DashboardLayout({
 
                 <Header user={session?.user} />
 
-                <main className="flex-1 overflow-y-auto p-6 lg:p-10 relative z-10 w-full max-w-7xl mx-auto scrollbar-thin scrollbar-thumb-neutral-800 scrollbar-track-transparent pb-32 md:pb-10">
+                <main className="flex-1 overflow-y-auto px-6 py-6 lg:px-10 lg:py-8 lg:pt-4 relative z-10 w-full max-w-7xl mx-auto scrollbar-thin scrollbar-thumb-neutral-800 scrollbar-track-transparent mb-20 md:mb-0 pb-32 md:pb-10">
                     {children}
                     <Chatbot />
                 </main>
