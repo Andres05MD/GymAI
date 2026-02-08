@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import {
     Form,
     FormControl,
-    FormDescription,
     FormField,
     FormItem,
     FormLabel,
@@ -29,7 +28,20 @@ const profileSchema = z.object({
     weight: z.string().optional(),
 });
 
-export function ProfileForm({ user }: { user: any }) {
+interface ProfileFormProps {
+    user: {
+        name?: string;
+        email?: string;
+        image?: string;
+        phone?: string;
+        height?: number;
+        weight?: number;
+        role?: string;
+        onboardingCompleted?: boolean;
+    };
+}
+
+export function ProfileForm({ user }: ProfileFormProps) {
     const router = useRouter();
 
     // 1. Define your form.
@@ -58,7 +70,7 @@ export function ProfileForm({ user }: { user: any }) {
         <div className="space-y-8">
             <div className="flex flex-col md:flex-row items-center md:items-start gap-6 pb-6 border-b border-neutral-800">
                 <div className="relative group">
-                    <div className="absolute -inset-0.5 bg-gradient-to-r from-red-600 to-red-900 rounded-full blur opacity-20 group-hover:opacity-40 transition duration-500"></div>
+                    <div className="absolute -inset-0.5 bg-linear-to-r from-red-600 to-red-900 rounded-full blur opacity-20 group-hover:opacity-40 transition duration-500"></div>
                     <Avatar className="h-28 w-28 border-4 border-black relative z-10">
                         <AvatarImage src={user.image} className="object-cover" />
                         <AvatarFallback className="text-3xl font-black bg-neutral-900 text-neutral-400">

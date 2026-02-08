@@ -120,7 +120,7 @@ export default async function ProgressPage({ searchParams }: ProgressPageProps) 
                                     key={athlete.id}
                                     href={`/progress?athleteId=${athlete.id}`}
                                     className={cn(
-                                        "flex items-center gap-2 px-2 pr-4 py-1.5 rounded-full transition-all flex-shrink-0 border",
+                                        "flex items-center gap-2 px-2 pr-4 py-1.5 rounded-full transition-all shrink-0 border",
                                         isActive
                                             ? "bg-red-600 border-red-500 text-white shadow-lg shadow-red-900/20"
                                             : "bg-neutral-900 border-neutral-800 text-neutral-400 hover:bg-neutral-800 hover:text-white"

@@ -142,7 +142,7 @@ export default async function MyRoutinePage() {
                             key={index}
                             className="bg-neutral-900 border border-neutral-800 rounded-[1.5rem] p-6 flex flex-col md:flex-row items-start md:items-center justify-between hover:border-neutral-700 transition-all group relative overflow-hidden"
                         >
-                            <div className="absolute inset-0 bg-gradient-to-r from-white/0 to-white/[0.02] opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                            <div className="absolute inset-0 bg-linear-to-r from-white/0 to-white/[0.02] opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
 
                             <div className="flex items-center gap-6 relative z-10 w-full md:w-auto">
                                 <div className="h-16 w-16 bg-black border border-neutral-800 rounded-2xl flex items-center justify-center font-black text-2xl text-neutral-600 group-hover:text-white group-hover:border-red-900/50 group-hover:bg-red-900/10 transition-all">

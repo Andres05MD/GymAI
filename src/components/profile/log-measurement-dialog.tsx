@@ -97,7 +97,7 @@ export function LogMeasurementDialog({ onLogSuccess }: { onLogSuccess?: () => vo
                     {/* Torso */}
                     <div className="space-y-5">
                         <div className="flex items-center gap-3 pb-2 border-b border-neutral-800">
-                            <div className="w-1 h-5 bg-gradient-to-b from-red-500 to-red-800 rounded-full"></div>
+                            <div className="w-1 h-5 bg-linear-to-b from-red-500 to-red-800 rounded-full"></div>
                             <h4 className="text-base font-bold text-white uppercase tracking-wider">Torso</h4>
                             <span className="text-xs text-neutral-500 font-normal ml-auto">En centímetros</span>
                         </div>
@@ -128,7 +128,7 @@ export function LogMeasurementDialog({ onLogSuccess }: { onLogSuccess?: () => vo
                     {/* Extremidades */}
                     <div className="space-y-5">
                         <div className="flex items-center gap-3 pb-2 border-b border-neutral-800">
-                            <div className="w-1 h-5 bg-gradient-to-b from-red-500 to-red-800 rounded-full"></div>
+                            <div className="w-1 h-5 bg-linear-to-b from-red-500 to-red-800 rounded-full"></div>
                             <h4 className="text-base font-bold text-white uppercase tracking-wider">Extremidades</h4>
                             <span className="text-xs text-neutral-500 font-normal ml-auto">Izq / Der (cm)</span>
                         </div>

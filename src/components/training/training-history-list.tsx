@@ -1,7 +1,6 @@
 "use client";
 
-import { formatDate } from "@/lib/utils";
-import { ChevronDown, ChevronUp, Clock, Dumbbell, Flame, Trophy, MessageSquare } from "lucide-react";
+import { ChevronDown, ChevronUp, Clock, Dumbbell, Flame, MessageSquare } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -59,7 +58,7 @@ function WorkoutLogItem({ log }: { log: TrainingLog }) {
             >
                 <div className="flex items-center gap-4 sm:gap-6">
                     {/* Date Circle */}
-                    <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-red-600 to-red-900 text-white flex flex-col items-center justify-center shadow-lg shadow-red-900/30 border border-white/10 shrink-0">
+                    <div className="h-16 w-16 rounded-2xl bg-linear-to-br from-red-600 to-red-900 text-white flex flex-col items-center justify-center shadow-lg shadow-red-900/30 border border-white/10 shrink-0">
                         <span className="text-xl font-black leading-none tracking-tight">
                             {new Date(log.date).getDate()}
                         </span>
@@ -74,7 +73,7 @@ function WorkoutLogItem({ log }: { log: TrainingLog }) {
                                 {log.routineName || "Sesión de Entrenamiento"}
                             </h4>
                             {log.routineId && (
-                                <span className="bg-gradient-to-r from-red-500/10 to-transparent text-red-400 text-[10px] px-2 py-0.5 rounded-full uppercase font-bold tracking-wider border border-red-500/20">
+                                <span className="bg-linear-to-r from-red-500/10 to-transparent text-red-400 text-[10px] px-2 py-0.5 rounded-full uppercase font-bold tracking-wider border border-red-500/20">
                                     Rutina
                                 </span>
                             )}
@@ -128,7 +127,7 @@ function WorkoutLogItem({ log }: { log: TrainingLog }) {
                     {log.sessionFeedback && (
                         <div className="flex gap-3 bg-neutral-900 p-4 rounded-2xl border border-neutral-800">
                             <MessageSquare className="w-5 h-5 text-neutral-500 shrink-0 mt-0.5" />
-                            <p className="text-sm text-neutral-300 italic">"{log.sessionFeedback}"</p>
+                            <p className="text-sm text-neutral-300 italic">&quot;{log.sessionFeedback}&quot;</p>
                         </div>
                     )}
 

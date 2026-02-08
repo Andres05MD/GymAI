@@ -196,7 +196,7 @@ export function MediaUpload({
                             </div>
                             <div className="h-2 bg-neutral-800 rounded-full overflow-hidden">
                                 <div
-                                    className="h-full bg-gradient-to-r from-red-600 to-red-500 transition-all duration-300"
+                                    className="h-full bg-linear-to-r from-red-600 to-red-500 transition-all duration-300"
                                     style={{ width: `${progress}%` }}
                                 />
                             </div>
@@ -208,7 +208,7 @@ export function MediaUpload({
                 {(status === "success" || value) && status !== "uploading" && (
                     <div className="flex items-center gap-4">
                         {/* Preview del archivo */}
-                        <div className="relative h-20 w-20 rounded-xl overflow-hidden bg-neutral-800 flex-shrink-0">
+                        <div className="relative h-20 w-20 rounded-xl overflow-hidden bg-neutral-800 shrink-0">
                             {currentMediaType === "video" ? (
                                 <div className="h-full w-full flex items-center justify-center">
                                     <FileVideo className="h-8 w-8 text-red-500" />
@@ -230,7 +230,7 @@ export function MediaUpload({
                         {/* Info del archivo */}
                         <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 text-green-500">
-                                <CheckCircle2 className="h-4 w-4 flex-shrink-0" />
+                                <CheckCircle2 className="h-4 w-4 shrink-0" />
                                 <span className="text-sm font-medium">Archivo cargado</span>
                             </div>
                             {previewInfo && (

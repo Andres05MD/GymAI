@@ -256,3 +256,42 @@ export async function analyzeRoutineSafety(routineData: any, athleteId: string) 
         return { success: false, error: "Error al analizar seguridad" };
     }
 }
+
+export async function generateExerciseDetails(exerciseName: string) {
+    const session = await auth();
+    if (!session?.user?.id) return { success: false, error: "No autorizado" };
+
+    try {
+        const prompt = `
+            Actúa como un experto en biomecánica. Dado el nombre del ejercicio "${exerciseName}", identifica los grupos musculares principales y los músculos específicos trabajados.
+
+            LISTA DE GRUPOS IMPORANTES (Usa estos nombres exactos si aplican):
+            "Pecho", "Espalda", "Hombros", "Bíceps", "Tríceps", "Cuádriceps", "Isquiotibiales", "Glúteos", "Pantorrillas", "Abdominales", "Cardio", "Full Body"
+
+            Respuesta JSON estricta:
+            {
+                "muscleGroups": ["Pecho", "Tríceps"], // Array de strings
+                "specificMuscles": ["Pectoral Mayor", "Tríceps Braquial"] // Array de strings con músculos anatómicos específicos
+            }
+        `;
+
+        const groq = getGroqClient();
+        const completion = await groq.chat.completions.create({
+            messages: [{ role: "user", content: prompt }],
+            model: "llama3-70b-8192",
+            temperature: 0.1,
+            response_format: { type: "json_object" },
+        });
+
+        const content = completion.choices[0]?.message?.content;
+        if (!content) return { success: false, error: "Error de IA" };
+
+        const result = JSON.parse(content);
+        return { success: true, data: result };
+
+    } catch (error) {
+        console.error("Exercise Details Gen Error:", error);
+        return { success: false, error: "Error al generar detalles del ejercicio" };
+    }
+}
+

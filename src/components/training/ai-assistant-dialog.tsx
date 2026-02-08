@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Sparkles, Brain, Loader2, Dumbbell, AlertTriangle, ArrowRight, HeartPulse } from "lucide-react";
 import { generateWarmup, suggestSubstitute } from "@/actions/ai-actions";
@@ -14,15 +13,22 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 export function AIAssistantDialog({
     muscleGroups = ["General"],
-    availableExercises = []
+    availableExercises = [],
+    open: externalOpen,
+    onOpenChange: setExternalOpen
 }: {
     muscleGroups?: string[],
-    availableExercises?: string[] // Names of exercises in current routine to pick for substitution
+    availableExercises?: string[],
+    open?: boolean,
+    onOpenChange?: (open: boolean) => void
 }) {
-    const [open, setOpen] = useState(false);
+    const [internalOpen, setInternalOpen] = useState(false);
+    const open = externalOpen !== undefined ? externalOpen : internalOpen;
+    const setOpen = setExternalOpen !== undefined ? setExternalOpen : setInternalOpen;
+
     const [loading, setLoading] = useState(false);
-    const [warmupRoutine, setWarmupRoutine] = useState<any[] | null>(null);
-    const [substituteResult, setSubstituteResult] = useState<any[] | null>(null);
+    const [warmupRoutine, setWarmupRoutine] = useState<{ name: string, duration: string, notes: string }[] | null>(null);
+    const [substituteResult, setSubstituteResult] = useState<{ name: string, why: string }[] | null>(null);
 
     // Substitution Form
     const [subExercise, setSubExercise] = useState<string>("");
@@ -37,7 +43,7 @@ export function AIAssistantDialog({
             } else {
                 toast.error(res.error);
             }
-        } catch (error) {
+        } catch (_error) {
             toast.error("Error generating warmup");
         } finally {
             setLoading(false);
@@ -54,7 +60,7 @@ export function AIAssistantDialog({
             } else {
                 toast.error(res.error);
             }
-        } catch (error) {
+        } catch (_error) {
             toast.error("Error finding substitutes");
         } finally {
             setLoading(false);
@@ -63,11 +69,13 @@ export function AIAssistantDialog({
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-                <Button variant="outline" className="border-red-600/30 text-red-500 hover:bg-red-950/30 hover:text-red-400 gap-2">
-                    <Sparkles className="w-4 h-4" /> Asistente IA
-                </Button>
-            </DialogTrigger>
+            {!externalOpen && (
+                <DialogTrigger asChild>
+                    <Button variant="outline" className="border-red-600/30 text-red-500 hover:bg-red-950/30 hover:text-red-400 gap-2">
+                        <Sparkles className="w-4 h-4" /> Asistente IA
+                    </Button>
+                </DialogTrigger>
+            )}
             <DialogContent className="bg-neutral-950 border-neutral-800 text-white sm:max-w-[500px]">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">

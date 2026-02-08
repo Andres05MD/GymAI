@@ -111,7 +111,7 @@ export function RoutineGeneratorDialog({ onGenerated }: RoutineGeneratorProps) {
                 <Button
                     onClick={handleGenerate}
                     disabled={isLoading}
-                    className="w-full bg-gradient-to-r from-primary to-orange-500 text-black font-bold hover:opacity-90"
+                    className="w-full bg-linear-to-r from-primary to-orange-500 text-black font-bold hover:opacity-90"
                 >
                     {isLoading ? (
                         <>

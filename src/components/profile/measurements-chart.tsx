@@ -16,21 +16,9 @@ interface MeasurementsChartProps {
 }
 
 export function MeasurementsChart({ data, unit, title, color = "#ef4444" }: MeasurementsChartProps) {
-    // Si no hay datos suficientes
-    if (!data || data.length < 2) {
-        return (
-            <Card className="glass-card border-white/10 opacity-50">
-                <CardHeader>
-                    <CardTitle className="text-sm text-zinc-400 uppercase tracking-wider">{title}</CardTitle>
-                </CardHeader>
-                <CardContent className="h-32 flex items-center justify-center text-xs text-zinc-600">
-                    Necesitas al menos 2 registros para ver la tendencia.
-                </CardContent>
-            </Card>
-        );
-    }
-
     const { points, min, max } = useMemo(() => {
+        if (!data || data.length < 2) return { points: [], min: 0, max: 0 };
+
         const values = data.map(d => d.value);
         const minVal = Math.min(...values);
         const maxVal = Math.max(...values);
@@ -45,6 +33,20 @@ export function MeasurementsChart({ data, unit, title, color = "#ef4444" }: Meas
 
         return { points: normalizedPoints, min: minVal, max: maxVal };
     }, [data]);
+
+    // Si no hay datos suficientes
+    if (!data || data.length < 2) {
+        return (
+            <Card className="glass-card border-white/10 opacity-50">
+                <CardHeader>
+                    <CardTitle className="text-sm text-zinc-400 uppercase tracking-wider">{title}</CardTitle>
+                </CardHeader>
+                <CardContent className="h-32 flex items-center justify-center text-xs text-zinc-600">
+                    Necesitas al menos 2 registros para ver la tendencia.
+                </CardContent>
+            </Card>
+        );
+    }
 
     // Generar path SVG
     const svgPath = points.map((p, i) =>

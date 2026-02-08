@@ -6,13 +6,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { ExerciseSchema } from "@/lib/schemas";
 import { createExercise, updateExercise } from "@/actions/exercise-actions";
+import { generateExerciseDetails } from "@/actions/ai-actions";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { MediaUpload } from "@/components/ui/media-upload";
-import { Loader2, Dumbbell, Tag, ImagePlay } from "lucide-react";
+import { Loader2, Dumbbell, Tag, ImagePlay, Search } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -57,6 +58,7 @@ interface ExerciseFormDialogProps {
 export function ExerciseFormDialog({ exercise, trigger, open, onOpenChange }: ExerciseFormDialogProps) {
     const [isInternalOpen, setIsInternalOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isSearching, setIsSearching] = useState(false);
     const router = useRouter();
 
     // Controlado externa o internamente
@@ -78,7 +80,7 @@ export function ExerciseFormDialog({ exercise, trigger, open, onOpenChange }: Ex
         },
     });
 
-    const { register, handleSubmit, setValue, watch, reset, formState: { errors } } = form;
+    const { register, handleSubmit, setValue, watch, getValues, reset, formState: { errors } } = form;
     const selectedGroups = watch("muscleGroups");
 
     const onSubmit = async (data: FormInput) => {
@@ -115,6 +117,35 @@ export function ExerciseFormDialog({ exercise, trigger, open, onOpenChange }: Ex
         }
     };
 
+    const handleSearch = async () => {
+        const name = getValues("name");
+        if (!name || name.trim().length < 3) {
+            toast.error("Ingresa un nombre de ejercicio válido para buscar");
+            return;
+        }
+
+        setIsSearching(true);
+        try {
+            const result = await generateExerciseDetails(name);
+            if (result.success && result.data) {
+                // Actualizar campos
+                if (result.data.muscleGroups && Array.isArray(result.data.muscleGroups)) {
+                    setValue("muscleGroups", result.data.muscleGroups);
+                }
+                if (result.data.specificMuscles && Array.isArray(result.data.specificMuscles)) {
+                    setValue("specificMuscles", result.data.specificMuscles);
+                }
+                toast.success("Datos cargados con IA");
+            } else {
+                toast.error("No se pudieron encontrar detalles para este ejercicio");
+            }
+        } catch (error) {
+            toast.error("Error al buscar detalles");
+        } finally {
+            setIsSearching(false);
+        }
+    };
+
     return (
         <Dialog open={isOpen} onOpenChange={setOpen}>
             {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
@@ -141,11 +172,21 @@ export function ExerciseFormDialog({ exercise, trigger, open, onOpenChange }: Ex
                             {/* Nombre */}
                             <div className="space-y-3">
                                 <Label className="text-xs font-bold uppercase tracking-widest text-neutral-500 ml-1">Nombre Técnico</Label>
-                                <Input
-                                    {...register("name")}
-                                    placeholder="Ej: Press de Banca Plano con Barra"
-                                    className="bg-neutral-900/50 border-neutral-800 text-white h-14 rounded-xl px-4 text-lg font-bold focus-visible:ring-red-600/50 focus-visible:border-red-600 transition-all placeholder:text-neutral-600"
-                                />
+                                <div className="flex gap-2">
+                                    <Input
+                                        {...register("name")}
+                                        placeholder="Ej: Press de Banca Plano con Barra"
+                                        className="bg-neutral-900/50 border-neutral-800 text-white h-14 rounded-xl px-4 text-lg font-bold focus-visible:ring-red-600/50 focus-visible:border-red-600 transition-all placeholder:text-neutral-600 flex-1"
+                                    />
+                                    <Button
+                                        type="button"
+                                        onClick={handleSearch}
+                                        disabled={isSearching || isSubmitting}
+                                        className="h-14 w-14 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-white border border-neutral-700 hover:border-neutral-600 transition-all"
+                                    >
+                                        {isSearching ? <Loader2 className="w-5 h-5 animate-spin" /> : <Search className="w-5 h-5" />}
+                                    </Button>
+                                </div>
                                 {errors.name && <p className="text-red-500 text-xs font-medium ml-1">{errors.name.message}</p>}
                             </div>
 

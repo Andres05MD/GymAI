@@ -1,12 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Check, Clock, Save, ArrowLeft, Trophy, Info, Loader2 } from "lucide-react";
+import { Check, Clock, Trophy, Info, Loader2 } from "lucide-react";
 import { logWorkoutSession, WorkoutSessionData } from "@/actions/training-actions";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -67,18 +64,17 @@ interface WorkoutSessionProps {
 
 export function WorkoutSession({ routine }: WorkoutSessionProps) {
     const router = useRouter();
-    const [activeDayIndex, setActiveDayIndex] = useState(0); // Default to first day or determine by logic
-    const [startTime] = useState(new Date());
     const [elapsedTime, setElapsedTime] = useState(0);
+    const [showAI, setShowAI] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Form state structure matching schema
     // We map the active day exercises to a local state for logging
     const [sessionLog, setSessionLog] = useState<SessionExercise[]>([]);
     const [showFeedback, setShowFeedback] = useState(false);
-    const { saveLogLocally, isOnline } = useOfflineSync();
+    const { saveLogLocally } = useOfflineSync();
 
-    const activeDay = routine.schedule[activeDayIndex];
+    const activeDay = routine.schedule[0]; // TODO: Logic to select day if multiple are available
 
     useEffect(() => {
         // Initialize log state when day changes
@@ -355,7 +351,12 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
                 </Button>
             </div>
 
-            <AIAssistantDialog open={showAI} onOpenChange={setShowAI} />
+            <AIAssistantDialog
+                open={showAI}
+                onOpenChange={setShowAI}
+                muscleGroups={activeDay.exercises.map((e: RoutineExercise) => e.exerciseName)}
+                availableExercises={activeDay.exercises.map((e: RoutineExercise) => e.exerciseName)}
+            />
             <SessionFeedbackDialog
                 open={showFeedback}
                 onOpenChange={setShowFeedback}
