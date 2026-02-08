@@ -22,7 +22,8 @@ const FormSchema = ExerciseSchema.omit({
     id: true,
     coachId: true,
     createdAt: true,
-    updatedAt: true
+    updatedAt: true,
+    description: true
 });
 
 type FormInput = z.infer<typeof FormSchema>;
@@ -30,6 +31,21 @@ type FormInput = z.infer<typeof FormSchema>;
 const MUSCLE_GROUPS = [
     "Pecho", "Espalda", "Hombros", "Bíceps", "Tríceps", "Cuádriceps", "Isquiotibiales", "Glúteos", "Pantorrillas", "Abdominales", "Cardio", "Full Body"
 ];
+
+const SPECIFIC_MUSCLES_BY_GROUP: Record<string, string[]> = {
+    "Pecho": ["Pectoral Mayor", "Pectoral Menor", "Serrato Anterior"],
+    "Espalda": ["Dorsal Ancho", "Trapecio", "Romboides", "Redondo Mayor", "Redondo Menor", "Erector de la Columna", "Lumbar"],
+    "Hombros": ["Deltoides Anterior", "Deltoides Medio", "Deltoides Posterior", "Manguito Rotador"],
+    "Bíceps": ["Bíceps Braquial", "Braquial", "Braquiorradial"],
+    "Tríceps": ["Tríceps Braquial (Cabeza Larga)", "Tríceps Braquial (Cabeza Lateral)", "Tríceps Braquial (Cabeza Medial)"],
+    "Cuádriceps": ["Recto Femoral", "Vasto Lateral", "Vasto Medial", "Vasto Intermedio"],
+    "Isquiotibiales": ["Bíceps Femoral", "Semitendinoso", "Semimembranoso"],
+    "Glúteos": ["Glúteo Mayor", "Glúteo Medio", "Glúteo Menor"],
+    "Pantorrillas": ["Gastrocnemio", "Sóleo"],
+    "Abdominales": ["Recto Abdominal", "Oblicuos", "Transverso del Abdomen"],
+    "Cardio": ["Corazón", "Resistencia General"],
+    "Full Body": ["Cuerpo Completo"]
+};
 
 interface ExerciseFormDialogProps {
     exercise?: any; // If present, edit mode
@@ -51,13 +67,11 @@ export function ExerciseFormDialog({ exercise, trigger, open, onOpenChange }: Ex
         resolver: zodResolver(FormSchema),
         defaultValues: exercise ? {
             name: exercise.name,
-            description: exercise.description,
             muscleGroups: exercise.muscleGroups || [],
             specificMuscles: exercise.specificMuscles || [],
             videoUrl: exercise.videoUrl
         } : {
             name: "",
-            description: "",
             muscleGroups: [],
             specificMuscles: [],
             videoUrl: ""
@@ -107,7 +121,7 @@ export function ExerciseFormDialog({ exercise, trigger, open, onOpenChange }: Ex
             <DialogContent className="sm:max-w-[650px] bg-neutral-950 border-neutral-800 text-white p-0 gap-0 rounded-3xl shadow-2xl shadow-black/50 max-h-[95vh] flex flex-col">
 
                 {/* Header Estilizado */}
-                <div className="bg-gradient-to-br from-neutral-900 to-neutral-950 p-8 border-b border-white/5">
+                <div className="bg-linear-to-br from-neutral-900 to-neutral-950 p-8 border-b border-white/5">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-3 text-2xl font-black uppercase tracking-tight text-white">
                             <div className="h-10 w-10 rounded-full bg-red-600/10 flex items-center justify-center border border-red-600/20">
@@ -135,15 +149,7 @@ export function ExerciseFormDialog({ exercise, trigger, open, onOpenChange }: Ex
                                 {errors.name && <p className="text-red-500 text-xs font-medium ml-1">{errors.name.message}</p>}
                             </div>
 
-                            {/* Descripción */}
-                            <div className="space-y-3">
-                                <Label className="text-xs font-bold uppercase tracking-widest text-neutral-500 ml-1">Técnica de Ejecución</Label>
-                                <Textarea
-                                    {...register("description")}
-                                    placeholder="Describe los puntos clave de la ejecución, respiración y postura..."
-                                    className="bg-neutral-900/50 border-neutral-800 min-h-[120px] text-white rounded-xl p-4 text-base focus-visible:ring-red-600/50 focus-visible:border-red-600 transition-all placeholder:text-neutral-600 resize-none"
-                                />
-                            </div>
+
 
                             {/* Tags Muscles */}
                             <div className="space-y-3">
@@ -175,15 +181,41 @@ export function ExerciseFormDialog({ exercise, trigger, open, onOpenChange }: Ex
                             {/* Músculos Específicos */}
                             <div className="space-y-3">
                                 <Label className="text-xs font-bold uppercase tracking-widest text-neutral-500 ml-1">Músculos Específicos</Label>
-                                <Input
-                                    placeholder="Ej: Pectoral mayor, Tríceps..."
-                                    className="bg-neutral-900/50 border-neutral-800 text-white h-12 rounded-xl px-4 focus-visible:ring-red-600/50 focus-visible:border-red-600 transition-all placeholder:text-neutral-600"
-                                    onChange={(e) => {
-                                        const val = e.target.value;
-                                        setValue("specificMuscles", val.split(",").map(s => s.trim()).filter(Boolean));
-                                    }}
-                                    defaultValue={exercise?.specificMuscles?.join(", ")}
-                                />
+                                {selectedGroups && selectedGroups.length > 0 ? (
+                                    <div className="flex flex-wrap gap-2 p-4 bg-neutral-900/30 rounded-2xl border border-white/5">
+                                        {Array.from(new Set(selectedGroups.flatMap(group => SPECIFIC_MUSCLES_BY_GROUP[group] || []))).map(muscle => {
+                                            const isSelected = watch("specificMuscles")?.includes(muscle);
+                                            return (
+                                                <div
+                                                    key={muscle}
+                                                    onClick={() => {
+                                                        const current = watch("specificMuscles") || [];
+                                                        if (current.includes(muscle)) {
+                                                            setValue("specificMuscles", current.filter(m => m !== muscle));
+                                                        } else {
+                                                            setValue("specificMuscles", [...current, muscle]);
+                                                        }
+                                                    }}
+                                                    className={cn(
+                                                        "px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition-all border select-none",
+                                                        isSelected
+                                                            ? "bg-red-600/20 text-red-500 border-red-500/50"
+                                                            : "bg-neutral-800 border-transparent text-neutral-400 hover:bg-neutral-700 hover:text-white"
+                                                    )}
+                                                >
+                                                    {muscle}
+                                                </div>
+                                            );
+                                        })}
+                                        {Array.from(new Set(selectedGroups.flatMap(group => SPECIFIC_MUSCLES_BY_GROUP[group] || []))).length === 0 && (
+                                            <p className="text-neutral-500 text-sm">No hay músculos específicos definidos para los grupos seleccionados.</p>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <div className="p-4 bg-neutral-900/10 rounded-2xl border border-white/5 border-dashed flex items-center justify-center text-neutral-600 text-sm">
+                                        Selecciona un grupo muscular para ver los músculos específicos.
+                                    </div>
+                                )}
                             </div>
 
                             {/* Multimedia - Subida de archivos */}

@@ -163,15 +163,7 @@ export function ExerciseList({ exercises }: ExerciseListProps) {
                                 {exercise.name}
                             </h3>
 
-                            {exercise.description ? (
-                                <p className="text-sm text-neutral-400 line-clamp-2 min-h-[40px] leading-relaxed">
-                                    {exercise.description}
-                                </p>
-                            ) : (
-                                <p className="text-sm text-neutral-600 italic min-h-[40px] flex items-center">
-                                    Sin descripción disponible.
-                                </p>
-                            )}
+
                         </div>
 
                         {/* Muscle Tags */}
