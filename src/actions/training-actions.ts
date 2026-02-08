@@ -29,6 +29,16 @@ interface WorkoutSessionData {
     notes?: string;
 }
 
+export interface ProgressionSuggestion {
+    exerciseId: string;
+    suggestedWeight: number;
+    reason: string;
+    lastDate?: string;
+    lastWeight?: number;
+    lastReps?: number;
+    lastRpe?: number;
+}
+
 // --- COACH ACTIONS ---
 
 // Assign Routine to Athlete
@@ -391,5 +401,93 @@ export async function finishWorkoutSession(
     } catch (error) {
         console.error("Error finishing session:", error);
         return { success: false, error: "Error al finalizar entrenamiento" };
+    }
+}
+
+// --- INTELLIGENT PROGRESSION ---
+
+export async function getProgressionSuggestion(exerciseId: string): Promise<{ success: boolean; suggestion?: ProgressionSuggestion; error?: string }> {
+    const session = await auth();
+    if (!session?.user?.id) return { success: false, error: "No autorizado" };
+
+    try {
+        // Obtener historial reciente de sets para este ejercicio
+        const setsSnapshot = await adminDb.collection("workout_sets")
+            .where("exerciseId", "==", exerciseId)
+            .where("athleteId", "==", session.user.id)
+            .orderBy("createdAt", "desc")
+            .limit(20)
+            .get();
+
+        if (setsSnapshot.empty) {
+            return { success: true, suggestion: undefined };
+        }
+
+        // Agrupar sets por sesión para encontrar la "última sesión completa"
+        const sets: any[] = setsSnapshot.docs.map(doc => ({ ...doc.data(), createdAt: doc.data().createdAt.toDate() }));
+
+        // Identificar ID de la última sesión
+        const lastSessionId = sets[0].sessionId;
+
+        // Filtrar sets de esa última sesión
+        const lastSessionSets = sets.filter((s: any) => s.sessionId === lastSessionId);
+
+        if (lastSessionSets.length === 0) return { success: true };
+
+        // Encontrar el "Top Set" (Mejor rendimiento: Mayor peso, y a igualdad de peso, más reps)
+        // Ordenar por Peso DESC, Reps DESC
+        lastSessionSets.sort((a: any, b: any) => {
+            if (b.weight !== a.weight) return b.weight - a.weight;
+            return b.reps - a.reps;
+        });
+
+        const topSet = lastSessionSets[0];
+        const { weight, reps, rpe, createdAt } = topSet;
+
+        // Reglas de Sobrecarga Progresiva (Algoritmo Básico)
+        let suggestedWeight = weight;
+        let reason = "Mantenimiento";
+
+        const RPE_THRESHOLD_LOW = 7;
+        const RPE_THRESHOLD_HIGH = 9;
+
+        if (rpe <= RPE_THRESHOLD_LOW) {
+            // RPE Bajo: Fácil -> Subir Peso
+            // Redondear a múltiplos de 2.5 (discos estándar)
+            suggestedWeight = weight + 2.5;
+            reason = `RPE bajo (${rpe}) en última sesión. ¡Sube la carga!`;
+        } else if (rpe > RPE_THRESHOLD_HIGH) {
+            // RPE Alto: Muy difícil -> Mantener o descargar si falló (pero no sabemos si falló, asumimos RPE 10 es límite)
+            suggestedWeight = weight;
+            reason = `RPE alto (${rpe}). Consolida este peso.`;
+        } else {
+            // RPE Normal (7-9): Zona óptima -> Intentar pequeña subida si se siente bien, o mantener.
+            // Para ser conservadores, sugerimos mantener pero indicando que busque reps.
+            suggestedWeight = weight;
+            reason = `Zona de buen esfuerzo. Intenta superar las repeticiones.`;
+        }
+
+        // Si el peso es 0 (ej. peso corporal), no subir kg salvo que use lastre, pero mostramos mensaje.
+        if (weight === 0) {
+            reason = "Ejercicio de peso corporal. Intenta agregar reps o lastre.";
+            suggestedWeight = 0;
+        }
+
+        return {
+            success: true,
+            suggestion: {
+                exerciseId,
+                suggestedWeight,
+                reason,
+                lastDate: createdAt.toISOString(),
+                lastWeight: weight,
+                lastReps: reps,
+                lastRpe: rpe
+            }
+        };
+
+    } catch (error) {
+        console.error("Error calculating progression:", error);
+        return { success: false, error: "Error al calcular progresión" };
     }
 }

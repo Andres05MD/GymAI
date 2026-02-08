@@ -67,7 +67,7 @@ FUNCIONES DE INTELIGENCIA ARTIFICIAL
     - Sustitución por "Máquina Ocupada": Sugerencia instantánea de ejercicios equivalentes (mismo patrón de movimiento) si el equipo no está disponible, respetando lesiones y perfil.
 - [EN PROCESO] IA para Coaches (Full): Motor de ingeniería deportiva para:
     - Generación de rutinas "Perfil-Aware" y análisis de seguridad.
-    - Sugerencia de Sobrecarga Progresiva: Propuesta automática de aumento de carga (2-5%) o reps para la siguiente sesión basada en el RPE y rendimiento previo.
+    - [COMPLETADO] Sugerencia de Sobrecarga Progresiva: Propuesta automática de aumento de carga (2-5%) o reps para la siguiente sesión basada en el RPE y rendimiento previo.
     - Alertas de Estancamiento: Notificaciones automáticas al coach si un atleta no mejora marcas en 3 sesiones o si el volumen decae (detección de sobreentrenamiento).
     - Ajustes inteligentes según el feedback del atleta.
 

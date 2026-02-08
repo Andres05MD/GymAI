@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { AIAssistantDialog } from "@/components/training/ai-assistant-dialog";
+import { ProgressionTip } from "@/components/training/progression-tip";
 
 // --- INTERFACES ---
 
@@ -191,7 +192,7 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
                     if (!logExercise) return null;
 
                     return (
-                        <div key={exIndex} className="bg-neutral-900 rounded-[2rem] border border-neutral-800 overflow-hidden shadow-xl">
+                        <div key={exIndex} className="bg-neutral-900 rounded-4xl border border-neutral-800 overflow-hidden shadow-xl">
                             <div className="bg-neutral-900 border-b border-neutral-800/50 p-5 flex flex-col gap-1">
                                 <div className="flex justify-between items-start">
                                     <h3 className="text-xl font-bold text-white">{exercise.exerciseName}</h3>
@@ -201,6 +202,7 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
                                         </div>
                                     )}
                                 </div>
+                                <ProgressionTip exerciseId={exercise.exerciseId || ""} />
                                 {exercise.notes && <p className="text-sm text-neutral-400 line-clamp-2">{exercise.notes}</p>}
                             </div>
 
