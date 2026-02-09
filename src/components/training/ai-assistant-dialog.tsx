@@ -71,8 +71,9 @@ export function AIAssistantDialog({
         <Dialog open={open} onOpenChange={setOpen}>
             {!externalOpen && (
                 <DialogTrigger asChild>
-                    <Button variant="outline" className="border-red-600/30 text-red-500 hover:bg-red-950/30 hover:text-red-400 gap-2">
-                        <Sparkles className="w-4 h-4" /> Asistente IA
+                    <Button variant="outline" className="border-red-600/30 text-red-500 hover:bg-red-950/30 hover:text-red-400 gap-2 px-3 sm:px-4">
+                        <Sparkles className="w-4 h-4" />
+                        <span className="hidden sm:inline">Asistente IA</span>
                     </Button>
                 </DialogTrigger>
             )}

@@ -240,3 +240,28 @@ export async function getAthleteAssignments(athleteId: string, start: string, en
         return { success: false, error: "Error al cargar calendario" };
     }
 }
+
+export async function getTodayAssignment(athleteId: string, date: string) {
+    try {
+        const snapshot = await adminDb.collection("users").doc(athleteId)
+            .collection("assignments")
+            .where("date", "==", date)
+            .limit(1)
+            .get();
+
+        if (snapshot.empty) {
+            return { success: true, assignment: null };
+        }
+
+        const doc = snapshot.docs[0];
+        const assignment = {
+            id: doc.id,
+            ...doc.data()
+        };
+
+        return { success: true, assignment };
+    } catch (error) {
+        console.error("Error checking today assignment:", error);
+        return { success: false, error: "Error verificando sesión de hoy" };
+    }
+}

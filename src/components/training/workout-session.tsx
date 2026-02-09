@@ -181,15 +181,15 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
         <div className="max-w-3xl mx-auto pb-24 space-y-6">
             {/* Header Sticky */}
             <div className="sticky top-0 z-30 bg-black/90 backdrop-blur-xl border-b border-white/5 py-4 px-4 -mx-4 md:rounded-b-3xl md:mx-0 shadow-2xl shadow-black/50">
-                <div className="flex justify-between items-center max-w-3xl mx-auto">
-                    <div>
-                        <h2 className="text-lg font-black text-white tracking-tight">{activeDay.name}</h2>
-                        <div className="flex items-center text-red-500 font-mono text-sm font-bold tracking-widest bg-red-500/10 px-2 py-0.5 rounded-md w-fit mt-1">
-                            <Clock className="w-3.5 h-3.5 mr-1.5" />
+                <div className="flex justify-between items-center max-w-3xl mx-auto gap-4">
+                    <div className="flex-1 min-w-0">
+                        <h2 className="text-base sm:text-lg font-black text-white tracking-tight truncate">{activeDay.name}</h2>
+                        <div className="flex items-center text-red-500 font-mono text-xs sm:text-sm font-bold tracking-widest bg-red-500/10 px-2 py-0.5 rounded-md w-fit mt-1">
+                            <Clock className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1.5" />
                             {formatTime(elapsedTime)}
                         </div>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 items-center flex-shrink-0">
                         <AIAssistantDialog
                             muscleGroups={activeDay.exercises.map((e: RoutineExercise) => e.exerciseName)}
                             availableExercises={activeDay.exercises.map((e: RoutineExercise) => e.exerciseName)}
@@ -197,7 +197,7 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
                         <Button
                             onClick={handleFinishClick}
                             disabled={isSubmitting}
-                            className="rounded-full bg-white text-black font-bold hover:bg-neutral-200 shadow-[0_0_20px_rgba(255,255,255,0.3)] transition-all hover:scale-105 active:scale-95"
+                            className="hidden lg:flex rounded-full bg-white text-black font-bold hover:bg-neutral-200 shadow-[0_0_20px_rgba(255,255,255,0.3)] transition-all hover:scale-105 active:scale-95"
                         >
                             {isSubmitting ? "Guardando..." : "Terminar"}
                         </Button>
@@ -227,12 +227,13 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
                             </div>
 
                             <div className="p-2 md:p-4">
-                                <div className="grid grid-cols-12 gap-2 mb-2 px-2 text-[10px] md:text-xs font-bold text-neutral-500 text-center uppercase tracking-widest">
-                                    <div className="col-span-1">#</div>
-                                    <div className="col-span-3">Meta</div>
-                                    <div className="col-span-3">Kg</div>
-                                    <div className="col-span-3">Reps</div>
-                                    <div className="col-span-2">Ok</div>
+                                <div className="grid grid-cols-12 gap-1 md:gap-2 mb-2 px-2 text-[10px] md:text-xs font-bold text-neutral-500 text-center uppercase tracking-widest">
+                                    <div className="hidden md:block md:col-span-1">#</div>
+                                    <div className="col-span-2 md:col-span-3">Meta</div>
+                                    <div className="col-span-3 md:col-span-2">Kg</div>
+                                    <div className="col-span-3 md:col-span-2">Reps</div>
+                                    <div className="col-span-2">RPE</div>
+                                    <div className="col-span-2 md:col-span-2">Ok</div>
                                 </div>
 
                                 <div className="space-y-2">
@@ -244,11 +245,11 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
                                             <div
                                                 key={setIndex}
                                                 className={cn(
-                                                    "grid grid-cols-12 gap-2 p-2 rounded-xl items-center transition-all duration-300",
+                                                    "grid grid-cols-12 gap-1 md:gap-2 p-1 md:p-2 rounded-xl items-center transition-all duration-300",
                                                     isCompleted ? "bg-green-500/10 border border-green-500/20" : "bg-black/20 border border-transparent"
                                                 )}
                                             >
-                                                <div className="col-span-1 flex justify-center">
+                                                <div className="hidden md:flex md:col-span-1 justify-center">
                                                     <span className={cn(
                                                         "text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center",
                                                         set.type === 'warmup' ? "text-yellow-500 bg-yellow-500/10" :
@@ -258,11 +259,11 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
                                                         {setIndex + 1}
                                                     </span>
                                                 </div>
-                                                <div className="col-span-3 text-center">
-                                                    <div className="text-white font-medium text-sm">{set.reps}</div>
-                                                    {set.rpeTarget && <div className="text-[10px] text-neutral-500">RPE {set.rpeTarget}</div>}
+                                                <div className="col-span-2 md:col-span-3 text-center">
+                                                    <div className="text-white font-medium text-xs md:text-sm">{set.reps}</div>
+                                                    {set.rpeTarget && <div className="text-[10px] text-neutral-500 leading-tight">RPE {set.rpeTarget}</div>}
                                                 </div>
-                                                <div className="col-span-3">
+                                                <div className="col-span-3 md:col-span-2">
                                                     <Input
                                                         type="number"
                                                         inputMode="decimal"
@@ -270,12 +271,12 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
                                                         value={logSet?.weight}
                                                         onChange={(e) => updateSet(exIndex, setIndex, "weight", e.target.value)}
                                                         className={cn(
-                                                            "h-12 text-center text-lg font-bold border-0 bg-neutral-800/50 rounded-lg focus:ring-1 focus:ring-red-500 transition-all placeholder:text-neutral-700 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
+                                                            "h-10 md:h-12 px-0 text-center text-base md:text-lg font-bold border-0 bg-neutral-800/50 rounded-lg focus:ring-1 focus:ring-red-500 transition-all placeholder:text-neutral-700 text-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
                                                             isCompleted && "text-green-500 bg-green-500/5"
                                                         )}
                                                     />
                                                 </div>
-                                                <div className="col-span-3">
+                                                <div className="col-span-3 md:col-span-2">
                                                     <Input
                                                         type="number"
                                                         inputMode="decimal"
@@ -283,24 +284,37 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
                                                         value={logSet?.reps}
                                                         onChange={(e) => updateSet(exIndex, setIndex, "reps", e.target.value)}
                                                         className={cn(
-                                                            "h-12 text-center text-lg font-bold border-0 bg-neutral-800/50 rounded-lg focus:ring-1 focus:ring-red-500 transition-all placeholder:text-neutral-700 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
+                                                            "h-10 md:h-12 px-0 text-center text-base md:text-lg font-bold border-0 bg-neutral-800/50 rounded-lg focus:ring-1 focus:ring-red-500 transition-all placeholder:text-neutral-700 text-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
                                                             isCompleted && "text-green-500 bg-green-500/5"
                                                         )}
                                                     />
                                                 </div>
-                                                <div className="col-span-2 flex justify-center">
+                                                <div className="col-span-2">
+                                                    <Input
+                                                        type="number"
+                                                        inputMode="decimal"
+                                                        placeholder="-"
+                                                        value={logSet?.rpe}
+                                                        onChange={(e) => updateSet(exIndex, setIndex, "rpe", e.target.value)}
+                                                        className={cn(
+                                                            "h-10 md:h-12 px-0 text-center text-base md:text-lg font-bold border-0 bg-neutral-800/50 rounded-lg focus:ring-1 focus:ring-red-500 transition-all placeholder:text-neutral-700 text-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
+                                                            isCompleted && "text-green-500 bg-green-500/5"
+                                                        )}
+                                                    />
+                                                </div>
+                                                <div className="col-span-2 md:col-span-2 flex justify-center">
                                                     <Button
                                                         variant="ghost"
                                                         size="icon"
                                                         onClick={() => toggleSetComplete(exIndex, setIndex)}
                                                         className={cn(
-                                                            "h-12 w-12 rounded-xl transition-all duration-300",
+                                                            "h-10 w-10 md:h-12 md:w-12 rounded-xl transition-all duration-300",
                                                             isCompleted
                                                                 ? "bg-green-500 text-black hover:bg-green-400 shadow-[0_0_15px_rgba(34,197,94,0.4)]"
                                                                 : "bg-neutral-800 text-neutral-600 hover:bg-neutral-700 hover:text-neutral-400"
                                                         )}
                                                     >
-                                                        <Check className={cn("w-6 h-6 transition-transform", isCompleted ? "scale-110" : "scale-100")} />
+                                                        <Check className={cn("w-5 h-5 md:w-6 md:h-6 transition-transform", isCompleted ? "scale-110" : "scale-100")} />
                                                     </Button>
                                                 </div>
                                             </div>

@@ -59,10 +59,8 @@ export function AssignRoutineModal({ athleteId, athleteName, routines = [], clas
 
     const handleSelectRoutine = (routine: Routine) => {
         setSelectedRoutine(routine);
-        // Default to first day if available
-        if (routine.schedule && routine.schedule.length > 0) {
-            setSelectedDayId(routine.schedule[0].id);
-        }
+        // We will now force the coach to select the specific day
+        setSelectedDayId("");
         setStep(2);
         setConflictData(null);
     };
@@ -278,7 +276,7 @@ export function AssignRoutineModal({ athleteId, athleteName, routines = [], clas
                         <div className="mt-6 flex justify-end">
                             <Button
                                 onClick={() => handleAssign(false)}
-                                disabled={loading || !date}
+                                disabled={loading || !date || (mode === "daily" && !selectedDayId)}
                                 className="bg-red-600 hover:bg-red-700 text-white font-bold w-full"
                             >
                                 {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}

@@ -89,7 +89,8 @@ export default async function AthleteDetailsPage({ params }: PageProps) {
     const routine = (await getAthleteRoutine(id)) as unknown as RoutineData | null;
 
     // Fetch library routines for assignment model
-    const { routines: coachRoutines } = await getCoachRoutines();
+    const { routines: coachRoutinesRaw } = await getCoachRoutines();
+    const coachRoutines = Array.from(new Map((coachRoutinesRaw || []).map(r => [r.id, r])).values());
 
     // Calculate total volume from activity data
     const weeklyVolume = activityData?.reduce((acc: number, cur: ActivityData) => acc + cur.total, 0) || 0;

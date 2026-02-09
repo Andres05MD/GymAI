@@ -30,7 +30,10 @@ export function ScheduleCalendar({ athleteId }: { athleteId: string }) {
 
             const res = await getAthleteAssignments(athleteId, start, end);
             if (res.success) {
-                setAssignments(res.assignments as Assignment[]);
+                const rawAssignments = res.assignments as Assignment[];
+                // Deduplicate by ID to avoid React key errors
+                const uniqueAssignments = Array.from(new Map(rawAssignments.map(a => [a.id, a])).values());
+                setAssignments(uniqueAssignments);
             }
             setLoading(false);
         };

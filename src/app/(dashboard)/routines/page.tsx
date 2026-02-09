@@ -20,8 +20,12 @@ export default async function RoutinesPage() {
         getAllAthletes()
     ]);
 
-    const routines = routinesRes.success ? routinesRes.routines || [] : [];
-    const athletes = athletesRes.success ? athletesRes.athletes || [] : [];
+    const routinesRaw = routinesRes.success ? routinesRes.routines || [] : [];
+    const athletesRaw = athletesRes.success ? athletesRes.athletes || [] : [];
+
+    // Asegurar que no haya duplicados por ID (evita error de keys de React)
+    const routines = Array.from(new Map(routinesRaw.map(r => [r.id, r])).values());
+    const athletes = Array.from(new Map(athletesRaw.map(a => [a.id, a])).values());
 
     return (
         <div className="space-y-8">
