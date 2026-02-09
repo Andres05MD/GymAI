@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Check, Clock, Trophy, Info, Loader2 } from "lucide-react";
+import { Check, Clock, Trophy, Info, Loader2, Play, Dumbbell, ChevronLeft, ChevronRight, Save } from "lucide-react";
 import { logWorkoutSession, WorkoutSessionData } from "@/actions/training-actions";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -65,8 +65,9 @@ interface WorkoutSessionProps {
 export function WorkoutSession({ routine }: WorkoutSessionProps) {
     const router = useRouter();
     const [elapsedTime, setElapsedTime] = useState(0);
-    const [showAI, setShowAI] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isStarted, setIsStarted] = useState(false);
+    const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0);
 
     // Form state structure matching schema
     // We map the active day exercises to a local state for logging
@@ -76,28 +77,72 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
 
     const activeDay = routine.schedule[0]; // TODO: Logic to select day if multiple are available
 
+    // Translate/Clean names for UI
+    const cleanRoutineName = routine.name.replace(/\(assigned\)/i, '').trim();
+    const cleanDayName = activeDay
+        ? new Date().toLocaleDateString('es-ES', { weekday: 'long' })
+        : "";
+
+    // 1. Initialize State (Load from Storage or Create New)
     useEffect(() => {
-        // Initialize log state when day changes
-        if (activeDay) {
-            setSessionLog(activeDay.exercises.map((ex: RoutineExercise) => ({
-                exerciseId: ex.exerciseId || "temp-id",
-                exerciseName: ex.exerciseName,
-                sets: ex.sets.map((set: RoutineSet) => ({
-                    reps: "",
-                    weight: "",
-                    rpe: "",
-                    completed: false,
-                    targetReps: set.reps, // Keep reference to target
-                })),
-                feedback: ""
-            })));
+        if (!activeDay) return;
+
+        const storageKey = `gymia_session_${routine.id}_${activeDay.name}`;
+        const stored = localStorage.getItem(storageKey);
+
+        if (stored) {
+            try {
+                const data = JSON.parse(stored);
+                // Validate if stored data matches current routine structure length roughly
+                if (data.sessionLog && data.sessionLog.length === activeDay.exercises.length) {
+                    setSessionLog(data.sessionLog);
+                    setElapsedTime(data.elapsedTime || 0);
+                    setIsStarted(data.isStarted || false);
+                    setCurrentExerciseIndex(data.currentExerciseIndex || 0);
+                    // Optional: Resume timer if started? The other effect covers it.
+                    return;
+                }
+            } catch (e) {
+                console.error("Error loading session:", e);
+                localStorage.removeItem(storageKey);
+            }
         }
-    }, [activeDay]);
+
+        // Default Initialization
+        setSessionLog(activeDay.exercises.map((ex: RoutineExercise) => ({
+            exerciseId: ex.exerciseId || "temp-id",
+            exerciseName: ex.exerciseName,
+            sets: ex.sets.map((set: RoutineSet) => ({
+                reps: "",
+                weight: "",
+                rpe: "",
+                completed: false,
+                targetReps: set.reps, // Keep reference to target
+            })),
+            feedback: ""
+        })));
+    }, [activeDay, routine.id]);
+
+    // 2. Persistence Effect (Save on Change)
+    useEffect(() => {
+        if (!activeDay || sessionLog.length === 0) return;
+
+        const storageKey = `gymia_session_${routine.id}_${activeDay.name}`;
+        const state = {
+            sessionLog,
+            elapsedTime,
+            isStarted,
+            currentExerciseIndex,
+            timestamp: Date.now()
+        };
+        localStorage.setItem(storageKey, JSON.stringify(state));
+    }, [sessionLog, elapsedTime, isStarted, currentExerciseIndex, routine.id, activeDay]);
 
     useEffect(() => {
+        if (!isStarted) return;
         const timer = setInterval(() => setElapsedTime(prev => prev + 1), 1000);
         return () => clearInterval(timer);
-    }, []);
+    }, [isStarted]);
 
     const formatTime = (seconds: number) => {
         const mins = Math.floor(seconds / 60);
@@ -117,11 +162,6 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
     };
 
     const handleFinishClick = () => {
-        // Opcional: Validar si hay series sin completar y avisar
-        const incomplete = sessionLog.some(ex => ex.sets.some((s: SessionSet) => !s.completed));
-        if (incomplete) {
-            if (!confirm("Hay series sin marcar como completadas. ¿Deseas terminar igual?")) return;
-        }
         setShowFeedback(true);
     };
 
@@ -154,7 +194,9 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
                 toast.success("¡Entrenamiento guardado!", {
                     description: "Gran trabajo. Sigue así."
                 });
-                router.push("/");
+                // Clear storage on success
+                localStorage.removeItem(`gymia_session_${routine.id}_${activeDay.name}`);
+                router.push("/dashboard");
             } else {
                 toast.error(res.error);
             }
@@ -165,7 +207,9 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
                 toast.warning("Guardado localmente (Offline)", {
                     description: "Se sincronizará automáticamente cuando recuperes la conexión."
                 });
-                router.push("/");
+                // Clear storage as it is now in offline queue
+                localStorage.removeItem(`gymia_session_${routine.id}_${activeDay.name}`);
+                router.push("/dashboard");
             } else {
                 toast.error("Error crítico: No se pudo guardar el entrenamiento.");
             }
@@ -175,7 +219,78 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
         }
     };
 
+    const handleNextExercise = () => {
+        if (currentExerciseIndex < activeDay.exercises.length - 1) {
+            setCurrentExerciseIndex(prev => prev + 1);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+            handleFinishClick();
+        }
+    };
+
+    const handlePrevExercise = () => {
+        if (currentExerciseIndex > 0) {
+            setCurrentExerciseIndex(prev => prev - 1);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    };
+
     if (!activeDay) return <div className="p-10 text-center">No hay día activo seleccionado.</div>;
+
+    if (!isStarted) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[80vh] px-4 space-y-8 animate-in fade-in duration-500">
+                <div className="text-center space-y-2">
+                    <h1 className="text-3xl md:text-5xl font-black text-white tracking-tighter uppercase italic">
+                        {cleanRoutineName}
+                    </h1>
+                    <p className="text-xl md:text-2xl font-bold text-red-500 uppercase tracking-widest">
+                        {cleanDayName}
+                    </p>
+                </div>
+
+                <div className="w-full max-w-md bg-neutral-900/50 border border-neutral-800 rounded-3xl p-6 space-y-4 backdrop-blur-sm">
+                    <div className="flex items-center gap-2 text-neutral-400 text-sm font-bold uppercase tracking-wider mb-2">
+                        <Dumbbell className="w-4 h-4" />
+                        Resumen de la Sesión
+                    </div>
+                    <div className="space-y-3">
+                        {activeDay.exercises.map((ex, i) => (
+                            <div key={i} className="flex items-start gap-3">
+                                <span className="bg-neutral-800 text-neutral-500 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
+                                    {i + 1}
+                                </span>
+                                <span className="text-neutral-300 font-medium text-sm leading-tight">
+                                    {ex.exerciseName}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="w-full max-w-md pt-4">
+                    <Button
+                        onClick={() => setIsStarted(true)}
+                        className="w-full h-16 text-xl font-black italic bg-white text-black hover:bg-neutral-200 rounded-2xl shadow-[0_0_30px_rgba(255,255,255,0.2)] hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
+                    >
+                        <Play className="w-6 h-6 mr-2 fill-black" />
+                        INICIAR
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        onClick={() => router.push('/dashboard')}
+                        className="w-full mt-4 text-neutral-500 hover:text-white cursor-pointer"
+                    >
+                        Volver
+                    </Button>
+                </div>
+            </div>
+        );
+    }
+
+    // Get current exercise data
+    const currentExercise = activeDay.exercises[currentExerciseIndex];
+    const currentLogExercise = sessionLog[currentExerciseIndex];
 
     return (
         <div className="max-w-3xl mx-auto pb-24 space-y-6">
@@ -183,194 +298,206 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
             <div className="sticky top-0 z-30 bg-black/90 backdrop-blur-xl border-b border-white/5 py-4 px-4 -mx-4 md:rounded-b-3xl md:mx-0 shadow-2xl shadow-black/50">
                 <div className="flex justify-between items-center max-w-3xl mx-auto gap-4">
                     <div className="flex-1 min-w-0">
-                        <h2 className="text-base sm:text-lg font-black text-white tracking-tight truncate">{activeDay.name}</h2>
+                        <h2 className="text-base sm:text-lg font-black text-white tracking-tight truncate">
+                            Ej. {currentExerciseIndex + 1}/{activeDay.exercises.length}
+                        </h2>
                         <div className="flex items-center text-red-500 font-mono text-xs sm:text-sm font-bold tracking-widest bg-red-500/10 px-2 py-0.5 rounded-md w-fit mt-1">
                             <Clock className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1.5" />
                             {formatTime(elapsedTime)}
                         </div>
                     </div>
-                    <div className="flex gap-2 items-center flex-shrink-0">
+                    <div className="flex gap-2 items-center shrink-0">
                         <AIAssistantDialog
-                            muscleGroups={activeDay.exercises.map((e: RoutineExercise) => e.exerciseName)}
-                            availableExercises={activeDay.exercises.map((e: RoutineExercise) => e.exerciseName)}
+                            muscleGroups={[currentExercise?.exerciseName || "General"]}
+                            availableExercises={[currentExercise?.exerciseName]}
                         />
                         <Button
                             onClick={handleFinishClick}
                             disabled={isSubmitting}
-                            className="hidden lg:flex rounded-full bg-white text-black font-bold hover:bg-neutral-200 shadow-[0_0_20px_rgba(255,255,255,0.3)] transition-all hover:scale-105 active:scale-95"
+                            variant="ghost"
+                            className="hidden lg:flex rounded-full text-white font-bold hover:bg-neutral-800"
                         >
-                            {isSubmitting ? "Guardando..." : "Terminar"}
+                            Terminar
                         </Button>
                     </div>
                 </div>
+                {/* Progress Bar */}
+                <div className="absolute bottom-0 left-0 right-0 h-1 bg-neutral-800">
+                    <div
+                        className="h-full bg-red-600 transition-all duration-300"
+                        style={{ width: `${((currentExerciseIndex + 1) / activeDay.exercises.length) * 100}%` }}
+                    />
+                </div>
             </div>
 
-            {/* Exercises List */}
-            <div className="space-y-6">
-                {activeDay.exercises.map((exercise: RoutineExercise, exIndex: number) => {
-                    const logExercise = sessionLog[exIndex];
-                    if (!logExercise) return null;
+            {/* Current Exercise Card */}
+            <div className="space-y-6 min-h-[50vh]">
+                {currentExercise && currentLogExercise && (
+                    <div className="bg-neutral-900 rounded-4xl border border-neutral-800 overflow-hidden shadow-xl animate-in slide-in-from-right-8 duration-300 key={currentExerciseIndex}">
+                        <div className="bg-neutral-900 border-b border-neutral-800/50 p-5 flex flex-col gap-1">
+                            <div className="flex justify-between items-start">
+                                <h3 className="text-xl font-bold text-white">{currentExercise.exerciseName}</h3>
+                                {currentExercise.notes && (
+                                    <div className="text-neutral-500 hover:text-white transition-colors cursor-help" title={currentExercise.notes}>
+                                        <Info className="w-5 h-5" />
+                                    </div>
+                                )}
+                            </div>
+                            <ProgressionTip exerciseId={currentExercise.exerciseId || ""} />
+                            {currentExercise.notes && <p className="text-sm text-neutral-400 line-clamp-2">{currentExercise.notes}</p>}
+                        </div>
 
-                    return (
-                        <div key={exIndex} className="bg-neutral-900 rounded-4xl border border-neutral-800 overflow-hidden shadow-xl">
-                            <div className="bg-neutral-900 border-b border-neutral-800/50 p-5 flex flex-col gap-1">
-                                <div className="flex justify-between items-start">
-                                    <h3 className="text-xl font-bold text-white">{exercise.exerciseName}</h3>
-                                    {exercise.notes && (
-                                        <div className="text-neutral-500 hover:text-white transition-colors cursor-help" title={exercise.notes}>
-                                            <Info className="w-5 h-5" />
-                                        </div>
-                                    )}
-                                </div>
-                                <ProgressionTip exerciseId={exercise.exerciseId || ""} />
-                                {exercise.notes && <p className="text-sm text-neutral-400 line-clamp-2">{exercise.notes}</p>}
+                        <div className="p-2 md:p-4">
+                            <div className="grid grid-cols-12 gap-1 md:gap-2 mb-2 px-2 text-[10px] md:text-xs font-bold text-neutral-500 text-center uppercase tracking-widest">
+                                <div className="hidden md:block md:col-span-1">#</div>
+                                <div className="col-span-2 md:col-span-3">Meta</div>
+                                <div className="col-span-3 md:col-span-2">Kg</div>
+                                <div className="col-span-3 md:col-span-2">Reps</div>
+                                <div className="col-span-2">RPE</div>
+                                <div className="col-span-2 md:col-span-2">Ok</div>
                             </div>
 
-                            <div className="p-2 md:p-4">
-                                <div className="grid grid-cols-12 gap-1 md:gap-2 mb-2 px-2 text-[10px] md:text-xs font-bold text-neutral-500 text-center uppercase tracking-widest">
-                                    <div className="hidden md:block md:col-span-1">#</div>
-                                    <div className="col-span-2 md:col-span-3">Meta</div>
-                                    <div className="col-span-3 md:col-span-2">Kg</div>
-                                    <div className="col-span-3 md:col-span-2">Reps</div>
-                                    <div className="col-span-2">RPE</div>
-                                    <div className="col-span-2 md:col-span-2">Ok</div>
-                                </div>
+                            <div className="space-y-2">
+                                {currentExercise.sets.map((set: RoutineSet, setIndex: number) => {
+                                    const logSet = currentLogExercise.sets[setIndex];
+                                    const isCompleted = logSet?.completed;
 
-                                <div className="space-y-2">
-                                    {exercise.sets.map((set: RoutineSet, setIndex: number) => {
-                                        const logSet = logExercise.sets[setIndex];
-                                        const isCompleted = logSet?.completed;
-
-                                        return (
-                                            <div
-                                                key={setIndex}
-                                                className={cn(
-                                                    "grid grid-cols-12 gap-1 md:gap-2 p-1 md:p-2 rounded-xl items-center transition-all duration-300",
-                                                    isCompleted ? "bg-green-500/10 border border-green-500/20" : "bg-black/20 border border-transparent"
-                                                )}
-                                            >
-                                                <div className="hidden md:flex md:col-span-1 justify-center">
-                                                    <span className={cn(
-                                                        "text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center",
-                                                        set.type === 'warmup' ? "text-yellow-500 bg-yellow-500/10" :
-                                                            set.type === 'failure' ? "text-red-500 bg-red-500/10" :
-                                                                "text-neutral-500 bg-neutral-800"
-                                                    )}>
-                                                        {setIndex + 1}
-                                                    </span>
-                                                </div>
-                                                <div className="col-span-2 md:col-span-3 text-center">
-                                                    <div className="text-white font-medium text-xs md:text-sm">{set.reps}</div>
-                                                    {set.rpeTarget && <div className="text-[10px] text-neutral-500 leading-tight">RPE {set.rpeTarget}</div>}
-                                                </div>
-                                                <div className="col-span-3 md:col-span-2">
-                                                    <Input
-                                                        type="number"
-                                                        inputMode="decimal"
-                                                        placeholder="-"
-                                                        value={logSet?.weight}
-                                                        onChange={(e) => updateSet(exIndex, setIndex, "weight", e.target.value)}
-                                                        className={cn(
-                                                            "h-10 md:h-12 px-0 text-center text-base md:text-lg font-bold border-0 bg-neutral-800/50 rounded-lg focus:ring-1 focus:ring-red-500 transition-all placeholder:text-neutral-700 text-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
-                                                            isCompleted && "text-green-500 bg-green-500/5"
-                                                        )}
-                                                    />
-                                                </div>
-                                                <div className="col-span-3 md:col-span-2">
-                                                    <Input
-                                                        type="number"
-                                                        inputMode="decimal"
-                                                        placeholder="-"
-                                                        value={logSet?.reps}
-                                                        onChange={(e) => updateSet(exIndex, setIndex, "reps", e.target.value)}
-                                                        className={cn(
-                                                            "h-10 md:h-12 px-0 text-center text-base md:text-lg font-bold border-0 bg-neutral-800/50 rounded-lg focus:ring-1 focus:ring-red-500 transition-all placeholder:text-neutral-700 text-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
-                                                            isCompleted && "text-green-500 bg-green-500/5"
-                                                        )}
-                                                    />
-                                                </div>
-                                                <div className="col-span-2">
-                                                    <Input
-                                                        type="number"
-                                                        inputMode="decimal"
-                                                        placeholder="-"
-                                                        value={logSet?.rpe}
-                                                        onChange={(e) => updateSet(exIndex, setIndex, "rpe", e.target.value)}
-                                                        className={cn(
-                                                            "h-10 md:h-12 px-0 text-center text-base md:text-lg font-bold border-0 bg-neutral-800/50 rounded-lg focus:ring-1 focus:ring-red-500 transition-all placeholder:text-neutral-700 text-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
-                                                            isCompleted && "text-green-500 bg-green-500/5"
-                                                        )}
-                                                    />
-                                                </div>
-                                                <div className="col-span-2 md:col-span-2 flex justify-center">
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        onClick={() => toggleSetComplete(exIndex, setIndex)}
-                                                        className={cn(
-                                                            "h-10 w-10 md:h-12 md:w-12 rounded-xl transition-all duration-300",
-                                                            isCompleted
-                                                                ? "bg-green-500 text-black hover:bg-green-400 shadow-[0_0_15px_rgba(34,197,94,0.4)]"
-                                                                : "bg-neutral-800 text-neutral-600 hover:bg-neutral-700 hover:text-neutral-400"
-                                                        )}
-                                                    >
-                                                        <Check className={cn("w-5 h-5 md:w-6 md:h-6 transition-transform", isCompleted ? "scale-110" : "scale-100")} />
-                                                    </Button>
-                                                </div>
+                                    return (
+                                        <div
+                                            key={setIndex}
+                                            className={cn(
+                                                "grid grid-cols-12 gap-1 md:gap-2 p-1 md:p-2 rounded-xl items-center transition-all duration-300",
+                                                isCompleted ? "bg-green-500/10 border border-green-500/20" : "bg-black/20 border border-transparent"
+                                            )}
+                                        >
+                                            <div className="hidden md:flex md:col-span-1 justify-center">
+                                                <span className={cn(
+                                                    "text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center",
+                                                    set.type === 'warmup' ? "text-yellow-500 bg-yellow-500/10" :
+                                                        set.type === 'failure' ? "text-red-500 bg-red-500/10" :
+                                                            "text-neutral-500 bg-neutral-800"
+                                                )}>
+                                                    {setIndex + 1}
+                                                </span>
                                             </div>
-                                        );
-                                    })}
-                                </div>
+                                            <div className="col-span-2 md:col-span-3 text-center">
+                                                <div className="text-white font-medium text-xs md:text-sm">{set.reps}</div>
+                                                {set.rpeTarget && <div className="text-[10px] text-neutral-500 leading-tight">RPE {set.rpeTarget}</div>}
+                                            </div>
+                                            <div className="col-span-3 md:col-span-2">
+                                                <Input
+                                                    type="number"
+                                                    inputMode="decimal"
+                                                    placeholder="-"
+                                                    value={logSet?.weight}
+                                                    onChange={(e) => updateSet(currentExerciseIndex, setIndex, "weight", e.target.value)}
+                                                    className={cn(
+                                                        "h-10 md:h-12 px-0 text-center text-base md:text-lg font-bold border-0 bg-neutral-800/50 rounded-lg focus:ring-1 focus:ring-red-500 transition-all placeholder:text-neutral-700 text-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
+                                                        isCompleted && "text-green-500 bg-green-500/5"
+                                                    )}
+                                                />
+                                            </div>
+                                            <div className="col-span-3 md:col-span-2">
+                                                <Input
+                                                    type="number"
+                                                    inputMode="decimal"
+                                                    placeholder="-"
+                                                    value={logSet?.reps}
+                                                    onChange={(e) => updateSet(currentExerciseIndex, setIndex, "reps", e.target.value)}
+                                                    className={cn(
+                                                        "h-10 md:h-12 px-0 text-center text-base md:text-lg font-bold border-0 bg-neutral-800/50 rounded-lg focus:ring-1 focus:ring-red-500 transition-all placeholder:text-neutral-700 text-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
+                                                        isCompleted && "text-green-500 bg-green-500/5"
+                                                    )}
+                                                />
+                                            </div>
+                                            <div className="col-span-2">
+                                                <Input
+                                                    type="number"
+                                                    inputMode="decimal"
+                                                    placeholder="-"
+                                                    value={logSet?.rpe}
+                                                    onChange={(e) => updateSet(currentExerciseIndex, setIndex, "rpe", e.target.value)}
+                                                    className={cn(
+                                                        "h-10 md:h-12 px-0 text-center text-base md:text-lg font-bold border-0 bg-neutral-800/50 rounded-lg focus:ring-1 focus:ring-red-500 transition-all placeholder:text-neutral-700 text-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
+                                                        isCompleted && "text-green-500 bg-green-500/5"
+                                                    )}
+                                                />
+                                            </div>
+                                            <div className="col-span-2 md:col-span-2 flex justify-center">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    onClick={() => toggleSetComplete(currentExerciseIndex, setIndex)}
+                                                    className={cn(
+                                                        "h-10 w-10 md:h-12 md:w-12 rounded-xl transition-all duration-300",
+                                                        isCompleted
+                                                            ? "bg-green-500 text-black hover:bg-green-400 shadow-[0_0_15px_rgba(34,197,94,0.4)]"
+                                                            : "bg-neutral-800 text-neutral-600 hover:bg-neutral-700 hover:text-neutral-400"
+                                                    )}
+                                                >
+                                                    <Check className={cn("w-5 h-5 md:w-6 md:h-6 transition-transform", isCompleted ? "scale-110" : "scale-100")} />
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
 
-                                <div className="mt-4 px-1">
-                                    <Input
-                                        placeholder="Notas de la serie..."
-                                        value={logExercise.feedback}
-                                        onChange={(e) => {
-                                            const newLog = [...sessionLog];
-                                            newLog[exIndex].feedback = e.target.value;
-                                            setSessionLog(newLog);
-                                        }}
-                                        className="bg-transparent border-0 border-b border-neutral-800 rounded-none px-0 text-sm text-neutral-300 focus-visible:ring-0 focus-visible:border-neutral-500 placeholder:text-neutral-600 transition-colors"
-                                    />
-                                </div>
+                            <div className="mt-4 px-1">
+                                <Input
+                                    placeholder="Notas de la serie..."
+                                    value={currentLogExercise.feedback}
+                                    onChange={(e) => {
+                                        const newLog = [...sessionLog];
+                                        newLog[currentExerciseIndex].feedback = e.target.value;
+                                        setSessionLog(newLog);
+                                    }}
+                                    className="bg-transparent border-0 border-b border-neutral-800 rounded-none px-0 text-sm text-neutral-300 focus-visible:ring-0 focus-visible:border-neutral-500 placeholder:text-neutral-600 transition-colors"
+                                />
                             </div>
                         </div>
-                    );
-                })}
+                    </div>
+                )}
             </div>
 
-            <div className="text-center pt-8 pb-32 text-neutral-500 text-sm">
-                <Trophy className="w-8 h-8 mx-auto mb-2 opacity-20" />
-                <p>Termina fuerte. Cada repetición cuenta.</p>
+            {/* Navigation Footer */}
+            <div className="fixed bottom-0 left-0 right-0 p-4 bg-black/90 backdrop-blur-xl border-t border-white/10 flex justify-between items-center gap-4 z-50">
+                <Button
+                    variant="ghost"
+                    onClick={handlePrevExercise}
+                    disabled={currentExerciseIndex === 0}
+                    className="flex-1 h-14 rounded-2xl text-neutral-400 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent"
+                >
+                    <ChevronLeft className="w-8 h-8" />
+                </Button>
+
+                <div className="flex-1 flex justify-center">
+                    <span className="text-sm font-bold text-neutral-500 uppercase tracking-widest">
+                        {currentExerciseIndex + 1} / {activeDay.exercises.length}
+                    </span>
+                </div>
+
+                <Button
+                    onClick={handleNextExercise}
+                    className={cn(
+                        "flex-1 h-14 rounded-2xl font-black text-lg transition-all",
+                        currentExerciseIndex === activeDay.exercises.length - 1
+                            ? "bg-white text-black hover:bg-neutral-200 shadow-[0_0_20px_rgba(255,255,255,0.3)]"
+                            : "bg-blue-600 text-white hover:bg-blue-500 shadow-lg shadow-blue-900/20"
+                    )}
+                >
+                    {currentExerciseIndex === activeDay.exercises.length - 1 ? (
+                        <>
+                            <Trophy className="w-5 h-5 mr-2" />
+                            FIN
+                        </>
+                    ) : (
+                        <ChevronRight className="w-8 h-8" />
+                    )}
+                </Button>
             </div>
 
-            {/* Footer Buttons */}
-            <div className="fixed bottom-0 left-0 right-0 p-4 bg-neutral-900 border-t border-neutral-800 flex justify-between items-center gap-4 z-50 lg:hidden">
-                <Button variant="outline" onClick={() => router.back()} disabled={isSubmitting} className="rounded-xl h-12 px-6 border-neutral-700 bg-neutral-800 text-white hover:bg-neutral-700">
-                    Cancelar
-                </Button>
-                <Button onClick={handleFinishClick} disabled={isSubmitting} className="flex-1 rounded-xl h-12 bg-white text-black font-bold text-lg hover:bg-neutral-200 shadow-[0_0_20px_-5px_rgba(255,255,255,0.3)] transition-all">
-                    {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : "Terminar"}
-                </Button>
-            </div>
 
-            {/* Desktop Footer (Hidden on mobile) */}
-            <div className="hidden lg:flex p-4 bg-neutral-900 border-t border-neutral-800 justify-between items-center gap-4 mt-8">
-                <Button variant="outline" onClick={() => router.back()} disabled={isSubmitting} className="rounded-xl h-12 px-6 border-neutral-700 bg-neutral-800 text-white hover:bg-neutral-700">
-                    Cancelar
-                </Button>
-                <Button onClick={handleFinishClick} disabled={isSubmitting} className="flex-1 rounded-xl h-12 bg-white text-black font-bold text-lg hover:bg-neutral-200 shadow-[0_0_20px_-5px_rgba(255,255,255,0.3)] transition-all">
-                    {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : "Terminar Entrenamiento"}
-                </Button>
-            </div>
-
-            <AIAssistantDialog
-                open={showAI}
-                onOpenChange={setShowAI}
-                muscleGroups={activeDay.exercises.map((e: RoutineExercise) => e.exerciseName)}
-                availableExercises={activeDay.exercises.map((e: RoutineExercise) => e.exerciseName)}
-            />
             <SessionFeedbackDialog
                 open={showFeedback}
                 onOpenChange={setShowFeedback}
