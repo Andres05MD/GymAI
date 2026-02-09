@@ -63,8 +63,8 @@ export default async function HistoryPage() {
             </div>
 
             {/* Quick Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-[2rem] p-6 relative overflow-hidden group">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+                <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-4xl p-6 relative overflow-hidden group">
                     <div className="absolute top-0 right-0 w-20 h-20 bg-red-600/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none group-hover:bg-red-600/20 transition-colors"></div>
                     <div className="flex flex-col items-center text-center relative z-10">
                         <div className="w-12 h-12 bg-neutral-900 rounded-2xl flex items-center justify-center mb-3 shadow-lg border border-neutral-800 group-hover:scale-110 transition-transform duration-300">
@@ -74,7 +74,7 @@ export default async function HistoryPage() {
                         <p className="text-[10px] text-neutral-500 uppercase tracking-widest font-bold">Total Sesiones</p>
                     </div>
                 </div>
-                <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-[2rem] p-6 relative overflow-hidden group">
+                <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-4xl p-6 relative overflow-hidden group">
                     <div className="absolute top-0 right-0 w-20 h-20 bg-orange-600/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none group-hover:bg-orange-600/20 transition-colors"></div>
                     <div className="flex flex-col items-center text-center relative z-10">
                         <div className="w-12 h-12 bg-neutral-900 rounded-2xl flex items-center justify-center mb-3 shadow-lg border border-neutral-800 group-hover:scale-110 transition-transform duration-300">
@@ -84,7 +84,7 @@ export default async function HistoryPage() {
                         <p className="text-[10px] text-neutral-500 uppercase tracking-widest font-bold">Kg Totales</p>
                     </div>
                 </div>
-                <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-[2rem] p-6 relative overflow-hidden group">
+                <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-4xl p-6 relative overflow-hidden group">
                     <div className="absolute top-0 right-0 w-20 h-20 bg-emerald-600/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none group-hover:bg-emerald-600/20 transition-colors"></div>
                     <div className="flex flex-col items-center text-center relative z-10">
                         <div className="w-12 h-12 bg-neutral-900 rounded-2xl flex items-center justify-center mb-3 shadow-lg border border-neutral-800 group-hover:scale-110 transition-transform duration-300">

@@ -61,42 +61,58 @@ export function MeasurementChart({ data, metrics, title }: MeasurementChartProps
     }
 
     return (
-        <Card className="bg-neutral-900 border-neutral-800">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-white text-lg font-medium">{title}</CardTitle>
-                <div className="flex gap-2">
+        <Card className="bg-neutral-900/50 backdrop-blur-sm border-neutral-800 rounded-4xl shadow-xl overflow-hidden">
+            <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 px-6 pt-6">
+                <CardTitle className="text-white text-xl font-black uppercase tracking-tight">{title}</CardTitle>
+                <div className="flex flex-wrap gap-2">
                     {metrics.map(m => (
-                        <Badge key={m.key} style={{ backgroundColor: m.color + "20", color: m.color }} variant="outline" className="border-0">
+                        <Badge
+                            key={m.key}
+                            style={{ backgroundColor: m.color + "15", color: m.color, borderColor: m.color + "30" }}
+                            variant="outline"
+                            className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md border"
+                        >
+                            <span className="w-1.5 h-1.5 rounded-full mr-1.5" style={{ backgroundColor: m.color }}></span>
                             {m.label}
                         </Badge>
                     ))}
                 </div>
             </CardHeader>
-            <CardContent>
-                <div className="h-[300px] w-full">
-                    <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
-                        <LineChart data={formattedData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
+            <CardContent className="px-2 sm:px-4 pb-6">
+                <div className="h-[280px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={formattedData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#262626" vertical={false} />
                             <XAxis
                                 dataKey="formattedDate"
-                                stroke="#666"
-                                fontSize={12}
+                                stroke="#525252"
+                                fontSize={11}
+                                fontWeight={600}
                                 tickLine={false}
                                 axisLine={false}
                                 dy={10}
                             />
                             <YAxis
-                                stroke="#666"
-                                fontSize={12}
+                                stroke="#525252"
+                                fontSize={11}
+                                fontWeight={600}
                                 tickLine={false}
                                 axisLine={false}
-                                dx={-10}
+                                dx={-5}
+                                domain={['auto', 'auto']}
+                                hide={false}
                             />
                             <Tooltip
-                                contentStyle={{ backgroundColor: "#000", border: "1px solid #333", borderRadius: "8px" }}
-                                itemStyle={{ color: "#fff" }}
+                                contentStyle={{
+                                    backgroundColor: "rgba(10, 10, 10, 0.9)",
+                                    border: "1px solid rgba(255, 255, 255, 0.1)",
+                                    borderRadius: "16px",
+                                    backdropFilter: "blur(10px)",
+                                    boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.5)"
+                                }}
+                                itemStyle={{ fontSize: "12px", fontWeight: "700" }}
+                                labelStyle={{ color: "#737373", fontSize: "10px", fontWeight: "800", textTransform: "uppercase", marginBottom: "4px" }}
                             />
-                            <Legend />
                             {metrics.map(m => (
                                 <Line
                                     key={m.key}
@@ -104,9 +120,10 @@ export function MeasurementChart({ data, metrics, title }: MeasurementChartProps
                                     dataKey={m.key}
                                     stroke={m.color}
                                     strokeWidth={3}
-                                    dot={{ r: 4, fill: "#000", strokeWidth: 2 }}
-                                    activeDot={{ r: 6 }}
+                                    dot={{ r: 4, fill: m.color, stroke: "#0a0a0a", strokeWidth: 2 }}
+                                    activeDot={{ r: 6, fill: m.color, stroke: "#fff", strokeWidth: 2 }}
                                     name={m.label}
+                                    animationDuration={1500}
                                 />
                             ))}
                         </LineChart>

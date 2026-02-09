@@ -67,7 +67,7 @@ export function LogMeasurementDialog({ onLogSuccess }: { onLogSuccess?: () => vo
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button className="bg-red-600 hover:bg-red-700 text-white gap-2">
+                <Button className="bg-red-600 hover:bg-red-700 text-white gap-2 w-full md:w-auto">
                     <Plus className="w-4 h-4" /> Registrar Medidas
                 </Button>
             </DialogTrigger>

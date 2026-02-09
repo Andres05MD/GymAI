@@ -63,7 +63,7 @@ async function CoachDashboard({ user }: { user: DashboardUser | undefined }) {
             </div>
 
             {/* KPI Row */}
-            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                 <StatCard
                     title="Atletas Totales"
                     value={stats?.totalAthletes?.toString() || "0"}
@@ -151,7 +151,7 @@ async function CoachDashboard({ user }: { user: DashboardUser | undefined }) {
                 {/* Right Col: Actions & Status */}
                 <div className="space-y-6">
                     {/* Quick Actions Card */}
-                    <div className="bg-neutral-900 border border-neutral-800 rounded-4xl p-6 shadow-xl relative overflow-hidden group">
+                    <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-4xl p-6 shadow-xl shadow-black/20 relative overflow-hidden group">
                         <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                             <TrendingUp className="w-24 h-24 text-white" />
                         </div>
@@ -182,7 +182,7 @@ async function CoachDashboard({ user }: { user: DashboardUser | undefined }) {
 
                     {/* Active Sessions Mini-List (Placeholder for MVP) */}
                     <div className="bg-neutral-900 border border-neutral-800 rounded-4xl p-6">
-                        <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-4 text-neutral-400">En este momento</h3>
+                        <h3 className="text-sm font-bold text-neutral-400 uppercase tracking-wider mb-4">En este momento</h3>
                         <div className="flex items-center gap-3 text-neutral-500 text-sm">
                             <span className="relative flex h-3 w-3">
                                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
@@ -211,14 +211,14 @@ async function AthleteDashboard({ user }: { user: DashboardUser | undefined }) {
                     <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight">Dashboard</h2>
                     <p className="text-neutral-400">Bienvenido de nuevo, {user?.name?.split(' ')[0]}</p>
                 </div>
-                <div className="flex gap-3 w-full md:w-auto">
-                    <Link href="/history" className="flex-1 md:flex-none">
-                        <Button variant="outline" className="w-full md:w-auto rounded-full border-neutral-700 hover:bg-neutral-800 text-white h-12 px-6">
+                <div className="grid grid-cols-2 gap-4 w-full md:w-auto md:flex md:gap-3">
+                    <Link href="/history" className="w-full md:w-auto">
+                        <Button variant="outline" className="w-full rounded-full border-neutral-700 hover:bg-neutral-800 text-white h-12 px-6">
                             Ver Historial
                         </Button>
                     </Link>
-                    <Link href="/train" className="flex-1 md:flex-none">
-                        <Button className="w-full md:w-auto rounded-full bg-red-600 hover:bg-red-700 text-white font-bold h-12 px-8 shadow-lg shadow-red-900/20">
+                    <Link href="/train" className="w-full md:w-auto">
+                        <Button className="w-full rounded-full bg-red-600 hover:bg-red-700 text-white font-bold h-12 px-8 shadow-lg shadow-red-900/20">
                             <PlayCircle className="w-5 h-5 mr-2" />
                             Entrenar
                         </Button>
@@ -286,12 +286,12 @@ async function AthleteDashboard({ user }: { user: DashboardUser | undefined }) {
                         <ProgressChart completed={weeklyCompleted} target={weeklyTarget} />
                     </div>
 
-                    <div className="bg-neutral-900 border border-neutral-800 rounded-4xl p-6 text-white relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300 shadow-xl">
-                        <div className="relative z-10">
+                    <div className="bg-neutral-900 border border-neutral-800 rounded-4xl overflow-hidden group hover:border-red-500/30 transition-all hover:-translate-y-1 duration-300 shadow-xl">
+                        <div className="relative z-10 p-6">
                             <p className="text-xs font-bold uppercase tracking-widest text-neutral-500 mb-1">Próxima Sesión</p>
                             {routine ? (
                                 <>
-                                    <h3 className="text-2xl font-black mb-1">{(routine as unknown as SerializedRoutine).name}</h3>
+                                    <h3 className="text-2xl font-black mb-1 text-white">{(routine as unknown as SerializedRoutine).name}</h3>
                                     <p className="text-sm text-neutral-400 mb-4">{((routine as unknown as SerializedRoutine).schedule?.length) || 0} Ejercicios</p>
                                     <Link href="/train">
                                         <Button className="w-full rounded-full bg-white text-black hover:bg-neutral-200 font-bold">

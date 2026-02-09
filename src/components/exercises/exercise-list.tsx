@@ -184,7 +184,7 @@ export function ExerciseList({ exercises }: ExerciseListProps) {
                                     {groupExercises.map(exercise => (
                                         <div
                                             key={`${group}-${exercise.id}`}
-                                            className="group flex flex-col bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-[2rem] p-5 hover:border-red-500/30 transition-all duration-300 relative overflow-hidden h-full"
+                                            className="group flex flex-col bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-4xl p-5 hover:border-red-500/30 transition-all duration-300 relative overflow-hidden h-full"
                                         >
                                             {/* Gradient Blob */}
                                             <div className="absolute top-0 right-0 w-32 h-32 bg-red-600/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none group-hover:bg-red-600/10 transition-colors"></div>

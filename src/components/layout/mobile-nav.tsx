@@ -17,6 +17,7 @@ interface MobileNavProps {
 
 export function MobileNav({ role }: MobileNavProps) {
     const pathname = usePathname();
+    if (pathname === "/train") return null;
 
     const commonItems = [
         { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },

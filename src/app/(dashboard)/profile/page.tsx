@@ -68,19 +68,21 @@ export default async function ProfilePage() {
                 </TabsList>
 
                 <TabsContent value="details">
-                    <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-[2rem] p-6 shadow-xl shadow-black/20">
+                    <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-4xl p-6 shadow-xl shadow-black/20">
                         <ProfileForm user={userData} />
                     </div>
                 </TabsContent>
 
                 {!isCoach && (
                     <TabsContent value="measurements" className="space-y-6">
-                        <div className="flex justify-between items-center bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-[2rem] p-6 shadow-xl shadow-black/20">
+                        <div className="flex flex-col md:flex-row md:justify-between md:items-center bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-4xl p-6 shadow-xl shadow-black/20 gap-4">
                             <div>
                                 <h2 className="text-xl font-black text-white uppercase tracking-tight">Historial de Medidas</h2>
                                 <p className="text-neutral-400 text-sm">Registro de tu evolución corporal en el tiempo.</p>
                             </div>
-                            <LogMeasurementDialog />
+                            <div className="w-full md:w-auto">
+                                <LogMeasurementDialog />
+                            </div>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
