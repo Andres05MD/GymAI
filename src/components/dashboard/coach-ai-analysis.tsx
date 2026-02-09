@@ -43,16 +43,16 @@ export function CoachAIAnalysis({ athleteId }: CoachAIAnalysisProps) {
 
     return (
         <Card className="bg-neutral-900 border-neutral-800 lg:col-span-3 overflow-hidden text-white">
-            <CardHeader className="flex flex-row items-center justify-between bg-neutral-950/50 pb-4">
+            <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between bg-neutral-950/50 pb-4 gap-4">
                 <div className="flex items-center gap-2">
-                    <Brain className="w-6 h-6 text-purple-500" />
+                    <Brain className="w-6 h-6 text-purple-500 shrink-0" />
                     <div>
                         <CardTitle className="text-white">Análisis Inteligente</CardTitle>
                         <p className="text-sm text-neutral-400">Motor de detección de patrones y estancamiento.</p>
                     </div>
                 </div>
                 {!analysis && (
-                    <Button onClick={runAnalysis} disabled={loading} className="bg-purple-600 hover:bg-purple-700 text-white transition-all shadow-lg shadow-purple-900/20">
+                    <Button onClick={runAnalysis} disabled={loading} className="w-full md:w-auto bg-purple-600 hover:bg-purple-700 text-white transition-all shadow-lg shadow-purple-900/20">
                         {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                         {loading ? "Analizando..." : "Analizar Progreso"}
                     </Button>

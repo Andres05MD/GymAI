@@ -75,11 +75,11 @@ async function getUserById(id: string): Promise<AuthUser | null> {
         const d = userDoc.data();
         return {
             id: userDoc.id,
-            name: d.name,
+            name: d.name || "Usuario",
             email: d.email,
-            image: d.image,
-            role: d.role,
-            onboardingCompleted: d.onboardingCompleted,
+            image: d.image || null,
+            role: d.role || "athlete",
+            onboardingCompleted: d.onboardingCompleted || false,
         } as AuthUser;
     } catch (error) {
         console.error("Error obteniendo usuario por ID:", error);
@@ -106,8 +106,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                     try {
                         const idToken = credentials.idToken as string;
 
-                        // Verificar el token con la API REST de Google Identity Toolkit (método seguro server-side)
-                        // Alternativamente, se puede usar firebase-admin si se prefiere no usar REST directo
+                        // Verificar el token con la API REST de Google Identity Toolkit
                         const res = await fetch(
                             `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${process.env.NEXT_PUBLIC_FIREBASE_API_KEY}`,
                             {
@@ -126,39 +125,51 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
                         const firebaseUser = data.users[0];
                         const userId = firebaseUser.localId;
+                        const userEmail = firebaseUser.email;
+                        const userName = firebaseUser.displayName || "Usuario";
+                        const userImage = firebaseUser.photoUrl || "";
 
-                        // Buscar usuario en Firestore por su UID
-                        const user = await getUserById(userId);
+                        // Buscar usuario en Firestore
+                        const existingUser = await getUserById(userId);
 
-                        if (!user) {
-                            // Si no existe, lo creamos automáticamente en Firestore
+                        if (existingUser) {
+                            // Usuario existe: Actualizamos datos básicos para mantener sincronía
+                            // PERO mantenemos el rol existente y el estado de onboarding
+                            const updatedData = {
+                                name: userName,
+                                email: userEmail,
+                                image: userImage,
+                                updatedAt: Timestamp.now()
+                            };
+
+                            await setDoc(doc(db, "users", userId), updatedData, { merge: true });
+
+                            return {
+                                ...existingUser,
+                                name: userName,
+                                email: userEmail,
+                                image: userImage
+                            };
+                        } else {
+                            // Usuario nuevo: Lo creamos con todos los campos necesarios
                             const newUser: AuthUser = {
                                 id: userId,
-                                name: firebaseUser.displayName || "Usuario",
-                                email: firebaseUser.email,
-                                image: firebaseUser.photoUrl || "",
-                                role: "athlete",
+                                name: userName,
+                                email: userEmail,
+                                image: userImage,
+                                role: "athlete", // Por defecto
                                 emailVerified: new Date(),
                                 onboardingCompleted: false,
                             };
 
-                            try {
-                                await setDoc(doc(db, "users", userId), {
-                                    ...newUser,
-                                    createdAt: Timestamp.now(),
-                                    updatedAt: Timestamp.now(),
-                                });
-                                return newUser;
-                            } catch (createError) {
-                                console.error("Error creando usuario en Firestore:", createError);
-                                // Si falla la creación, retornamos el objeto básico para permitir login
-                                // aunque no se haya guardado en BD (fallback)
-                                return newUser;
-                            }
+                            await setDoc(doc(db, "users", userId), {
+                                ...newUser,
+                                createdAt: Timestamp.now(),
+                                updatedAt: Timestamp.now(),
+                            });
+
+                            return newUser;
                         }
-
-                        return user;
-
                     } catch (error) {
                         console.error("Error en autenticación con token:", error);
                         return null;

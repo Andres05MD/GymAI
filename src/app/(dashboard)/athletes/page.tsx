@@ -82,7 +82,16 @@ export default async function AthletesPage() {
                                         <Target className="w-4 h-4 text-red-500 mx-auto mb-1" />
                                         <p className="text-[10px] text-neutral-500 uppercase tracking-wider font-bold">Objetivo</p>
                                         <p className="text-xs text-white font-bold truncate">
-                                            {athlete.goal || "—"}
+                                            {(() => {
+                                                const map: Record<string, string> = {
+                                                    hypertrophy: "Hipertrofia",
+                                                    strength: "Fuerza",
+                                                    weight_loss: "Pérdida de Peso",
+                                                    endurance: "Resistencia",
+                                                    maintenance: "Mantenimiento"
+                                                };
+                                                return map[athlete.goal] || athlete.goal || "—";
+                                            })()}
                                         </p>
                                     </div>
                                     <div className="bg-black/40 rounded-2xl p-3 text-center border border-white/5">

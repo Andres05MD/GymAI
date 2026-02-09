@@ -11,21 +11,24 @@ export async function getAllAthletes() {
     }
 
     try {
-        const snapshot = await adminDb.collection("users")
-            .where("role", "==", "athlete") // o "user", dependiendo de cómo guardes el rol por defecto
-            .get();
+        const snapshot = await adminDb.collection("users").get();
 
-        const athletes = snapshot.docs.map(doc => {
-            const d = doc.data();
-            return {
-                id: doc.id,
-                name: d.name || "Atleta",
-                email: d.email,
-                image: d.image || null,
-                role: d.role,
-                onboardingCompleted: d.onboardingCompleted || false,
-            };
-        });
+        const athletes = snapshot.docs
+            .map(doc => {
+                const d = doc.data();
+                return {
+                    id: doc.id,
+                    name: d.name || "Atleta",
+                    email: d.email,
+                    image: d.image || null,
+                    role: d.role || "athlete", // Default to athlete if missing
+                    onboardingCompleted: d.onboardingCompleted || false,
+                    goal: d.goal || null,
+                    createdAt: d.createdAt?.toDate ? d.createdAt.toDate().toISOString() : (d.createdAt || null),
+                };
+            })
+            // Exclude coaches from the list
+            .filter(user => user.role !== "coach");
 
         return { success: true, athletes };
     } catch (error) {

@@ -62,23 +62,44 @@ const getCachedAthleteNotifications = unstable_cache(
         const notifications = [];
         const now = new Date();
 
-        // 1. Verificación de medidas (Cada 30 días)
-        const lastMeasurementDate = userData?.measurements?.updatedAt?.toDate();
+        // 1. Verificación de medidas (Cada 30 días o si nunca se ha medido tras un tiempo)
+        const measurements = userData?.measurements || {};
+        // Filtramos 'updatedAt' si existe para ver si hay datos reales
+        const hasMeasurements = Object.keys(measurements).filter(k => k !== 'updatedAt').length > 0;
+
+        const createdAt = userData?.createdAt?.toDate() || new Date();
+
+        // Intentar obtener la fecha de la última medida
+        // Si no tiene fecha específica de medidas pero tiene datos, usamos la fecha de actualización del perfil (onboarding)
+        let lastMeasurementDate = measurements.updatedAt?.toDate();
+        if (!lastMeasurementDate && hasMeasurements) {
+            lastMeasurementDate = userData?.updatedAt?.toDate() || createdAt;
+        }
 
         let needsUpdate = false;
-        if (!userData?.measurements || !lastMeasurementDate) {
-            needsUpdate = true;
-        } else {
+        let notifMessage = "Ha pasado un mes desde tu último registro. ¡Actualiza tus medidas para ver tu progreso!";
+
+        if (lastMeasurementDate) {
             const diffTime = Math.abs(now.getTime() - lastMeasurementDate.getTime());
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
             if (diffDays > 30) needsUpdate = true;
+        } else {
+            // Si realmente NO tiene medidas, verificamos antigüedad de la cuenta
+            const diffSinceCreation = Math.abs(now.getTime() - createdAt.getTime());
+            const daysSinceCreation = Math.ceil(diffSinceCreation / (1000 * 60 * 60 * 24));
+
+            // Solo molestamos si ya pasaron 3 días desde el registro y no hay medidas
+            if (daysSinceCreation > 3) {
+                needsUpdate = true;
+                notifMessage = "Aún no has registrado tus medidas corporales. ¡Hazlo para empezar a medir tu progreso!";
+            }
         }
 
         if (needsUpdate) {
             notifications.push({
                 id: "measurements-update-needed",
-                title: "Actualizar Medidas",
-                message: "Ha pasado un mes desde tu último registro. ¡Actualiza tus medidas para ver tu progreso!",
+                title: lastMeasurementDate ? "Actualizar Medidas" : "Registra tus Medidas",
+                message: notifMessage,
                 time: new Date().toISOString(),
                 type: "alert",
                 read: false,
