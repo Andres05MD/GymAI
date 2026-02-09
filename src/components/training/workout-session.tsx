@@ -239,7 +239,7 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
 
     if (!isStarted) {
         return (
-            <div className="flex flex-col items-center justify-center min-h-[80vh] px-4 space-y-8 animate-in fade-in duration-500">
+            <div className="flex flex-col items-center justify-center min-h-[85vh] px-4 space-y-8 pb-24 animate-in fade-in duration-500">
                 <div className="text-center space-y-2">
                     <h1 className="text-3xl md:text-5xl font-black text-white tracking-tighter uppercase italic">
                         {cleanRoutineName}
@@ -466,7 +466,7 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
             </div>
 
             {/* Navigation Footer */}
-            <div className="fixed bottom-0 left-0 right-0 p-4 bg-black/80 backdrop-blur-xl border-t border-white/10 flex justify-between items-center gap-4 z-50 animate-in slide-in-from-bottom-full duration-500">
+            <div className="fixed bottom-0 left-0 right-0 p-4 bg-black/80 backdrop-blur-xl border-t border-white/10 flex justify-between items-center gap-4 z-[60] animate-in slide-in-from-bottom-full duration-500">
                 <Button
                     onClick={handlePrevExercise}
                     disabled={currentExerciseIndex === 0}
