@@ -348,7 +348,7 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
                         </div>
 
                         <div className="p-2 md:p-4">
-                            <div className="grid grid-cols-12 gap-1 md:gap-2 mb-2 px-2 text-[10px] md:text-xs font-bold text-neutral-500 text-center uppercase tracking-widest">
+                            <div className="grid grid-cols-12 gap-1 md:gap-2 mb-3 px-2 text-[10px] md:text-xs font-bold text-neutral-500 text-center uppercase tracking-widest bg-neutral-900/50 py-2 rounded-lg">
                                 <div className="hidden md:block md:col-span-1">#</div>
                                 <div className="col-span-2 md:col-span-3">Meta</div>
                                 <div className="col-span-3 md:col-span-2">Kg</div>
@@ -357,7 +357,7 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
                                 <div className="col-span-2 md:col-span-2">Ok</div>
                             </div>
 
-                            <div className="space-y-2">
+                            <div className="space-y-3">
                                 {currentExercise.sets.map((set: RoutineSet, setIndex: number) => {
                                     const logSet = currentLogExercise.sets[setIndex];
                                     const isCompleted = logSet?.completed;
@@ -366,25 +366,30 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
                                         <div
                                             key={setIndex}
                                             className={cn(
-                                                "grid grid-cols-12 gap-1 md:gap-2 p-1 md:p-2 rounded-xl items-center transition-all duration-300",
-                                                isCompleted ? "bg-green-500/10 border border-green-500/20" : "bg-black/20 border border-transparent"
+                                                "grid grid-cols-12 gap-1 md:gap-2 p-1.5 md:p-2 rounded-xl items-center transition-all duration-300 relative overflow-hidden group",
+                                                isCompleted
+                                                    ? "bg-green-500/10 border border-green-500/20 shadow-[0_0_20px_-10px_rgba(34,197,94,0.3)]"
+                                                    : "bg-neutral-900 border border-neutral-800 hover:border-neutral-700"
                                             )}
                                         >
-                                            <div className="hidden md:flex md:col-span-1 justify-center">
+                                            {/* Background decoration for completed */}
+                                            {isCompleted && <div className="absolute inset-0 bg-gradient-to-r from-green-500/5 to-transparent pointer-events-none" />}
+
+                                            <div className="hidden md:flex md:col-span-1 justify-center z-10">
                                                 <span className={cn(
-                                                    "text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center",
-                                                    set.type === 'warmup' ? "text-yellow-500 bg-yellow-500/10" :
-                                                        set.type === 'failure' ? "text-red-500 bg-red-500/10" :
-                                                            "text-neutral-500 bg-neutral-800"
+                                                    "text-xs font-bold w-7 h-7 rounded-full flex items-center justify-center border",
+                                                    set.type === 'warmup' ? "text-yellow-500 bg-yellow-500/10 border-yellow-500/20" :
+                                                        set.type === 'failure' ? "text-red-500 bg-red-500/10 border-red-500/20" :
+                                                            "text-neutral-400 bg-neutral-800 border-neutral-700"
                                                 )}>
                                                     {setIndex + 1}
                                                 </span>
                                             </div>
-                                            <div className="col-span-2 md:col-span-3 text-center">
-                                                <div className="text-white font-medium text-xs md:text-sm">{set.reps}</div>
-                                                {set.rpeTarget && <div className="text-[10px] text-neutral-500 leading-tight">RPE {set.rpeTarget}</div>}
+                                            <div className="col-span-2 md:col-span-3 text-center z-10">
+                                                <div className="text-white font-bold text-sm md:text-base">{set.reps}</div>
+                                                {set.rpeTarget && <div className="text-[10px] text-neutral-500 font-mono">RPE {set.rpeTarget}</div>}
                                             </div>
-                                            <div className="col-span-3 md:col-span-2">
+                                            <div className="col-span-3 md:col-span-2 relative z-10">
                                                 <Input
                                                     type="number"
                                                     inputMode="decimal"
@@ -392,12 +397,12 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
                                                     value={logSet?.weight}
                                                     onChange={(e) => updateSet(currentExerciseIndex, setIndex, "weight", e.target.value)}
                                                     className={cn(
-                                                        "h-10 md:h-12 px-0 text-center text-base md:text-lg font-bold border-0 bg-neutral-800/50 rounded-lg focus:ring-1 focus:ring-red-500 transition-all placeholder:text-neutral-700 text-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
-                                                        isCompleted && "text-green-500 bg-green-500/5"
+                                                        "h-12 md:h-14 px-0 text-center text-lg md:text-xl font-black border-0 bg-neutral-800 rounded-xl focus:ring-2 focus:ring-white/20 transition-all placeholder:text-neutral-700 text-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
+                                                        isCompleted && "text-green-400 bg-green-900/20 ring-1 ring-green-500/30"
                                                     )}
                                                 />
                                             </div>
-                                            <div className="col-span-3 md:col-span-2">
+                                            <div className="col-span-3 md:col-span-2 relative z-10">
                                                 <Input
                                                     type="number"
                                                     inputMode="decimal"
@@ -405,12 +410,12 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
                                                     value={logSet?.reps}
                                                     onChange={(e) => updateSet(currentExerciseIndex, setIndex, "reps", e.target.value)}
                                                     className={cn(
-                                                        "h-10 md:h-12 px-0 text-center text-base md:text-lg font-bold border-0 bg-neutral-800/50 rounded-lg focus:ring-1 focus:ring-red-500 transition-all placeholder:text-neutral-700 text-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
-                                                        isCompleted && "text-green-500 bg-green-500/5"
+                                                        "h-12 md:h-14 px-0 text-center text-lg md:text-xl font-black border-0 bg-neutral-800 rounded-xl focus:ring-2 focus:ring-white/20 transition-all placeholder:text-neutral-700 text-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
+                                                        isCompleted && "text-green-400 bg-green-900/20 ring-1 ring-green-500/30"
                                                     )}
                                                 />
                                             </div>
-                                            <div className="col-span-2">
+                                            <div className="col-span-2 relative z-10">
                                                 <Input
                                                     type="number"
                                                     inputMode="decimal"
@@ -418,24 +423,24 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
                                                     value={logSet?.rpe}
                                                     onChange={(e) => updateSet(currentExerciseIndex, setIndex, "rpe", e.target.value)}
                                                     className={cn(
-                                                        "h-10 md:h-12 px-0 text-center text-base md:text-lg font-bold border-0 bg-neutral-800/50 rounded-lg focus:ring-1 focus:ring-red-500 transition-all placeholder:text-neutral-700 text-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
-                                                        isCompleted && "text-green-500 bg-green-500/5"
+                                                        "h-12 md:h-14 px-0 text-center text-lg md:text-xl font-black border-0 bg-neutral-800 rounded-xl focus:ring-2 focus:ring-white/20 transition-all placeholder:text-neutral-700 text-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
+                                                        isCompleted && "text-green-400 bg-green-900/20 ring-1 ring-green-500/30"
                                                     )}
                                                 />
                                             </div>
-                                            <div className="col-span-2 md:col-span-2 flex justify-center">
+                                            <div className="col-span-2 md:col-span-2 flex justify-center z-10">
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
                                                     onClick={() => toggleSetComplete(currentExerciseIndex, setIndex)}
                                                     className={cn(
-                                                        "h-10 w-10 md:h-12 md:w-12 rounded-xl transition-all duration-300",
+                                                        "h-12 w-12 md:h-14 md:w-14 rounded-xl transition-all duration-300",
                                                         isCompleted
-                                                            ? "bg-green-500 text-black hover:bg-green-400 shadow-[0_0_15px_rgba(34,197,94,0.4)]"
-                                                            : "bg-neutral-800 text-neutral-600 hover:bg-neutral-700 hover:text-neutral-400"
+                                                            ? "bg-green-500 text-black hover:bg-green-400 shadow-[0_0_20px_rgba(34,197,94,0.5)] scale-105"
+                                                            : "bg-neutral-800 text-neutral-600 hover:bg-neutral-700 hover:text-white"
                                                     )}
                                                 >
-                                                    <Check className={cn("w-5 h-5 md:w-6 md:h-6 transition-transform", isCompleted ? "scale-110" : "scale-100")} />
+                                                    <Check className={cn("w-6 h-6 md:w-7 md:h-7 transition-transform", isCompleted ? "scale-110" : "scale-100")} />
                                                 </Button>
                                             </div>
                                         </div>
@@ -443,16 +448,16 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
                                 })}
                             </div>
 
-                            <div className="mt-4 px-1">
+                            <div className="mt-6 px-2">
                                 <Input
-                                    placeholder="Notas de la serie..."
+                                    placeholder="Notas de la serie (opcional)..."
                                     value={currentLogExercise.feedback}
                                     onChange={(e) => {
                                         const newLog = [...sessionLog];
                                         newLog[currentExerciseIndex].feedback = e.target.value;
                                         setSessionLog(newLog);
                                     }}
-                                    className="bg-transparent border-0 border-b border-neutral-800 rounded-none px-0 text-sm text-neutral-300 focus-visible:ring-0 focus-visible:border-neutral-500 placeholder:text-neutral-600 transition-colors"
+                                    className="bg-transparent border-0 border-b border-neutral-800 rounded-none px-0 text-sm text-neutral-400 focus-visible:ring-0 focus-visible:border-neutral-500 placeholder:text-neutral-700 transition-colors py-2"
                                 />
                             </div>
                         </div>
@@ -461,36 +466,33 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
             </div>
 
             {/* Navigation Footer */}
-            <div className="fixed bottom-0 left-0 right-0 p-4 bg-black/90 backdrop-blur-xl border-t border-white/10 flex justify-between items-center gap-4 z-50">
+            <div className="fixed bottom-0 left-0 right-0 p-4 bg-black/80 backdrop-blur-xl border-t border-white/10 flex justify-between items-center gap-4 z-50 animate-in slide-in-from-bottom-full duration-500">
                 <Button
-                    variant="ghost"
                     onClick={handlePrevExercise}
                     disabled={currentExerciseIndex === 0}
-                    className="flex-1 h-14 rounded-2xl text-neutral-400 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent"
+                    className="h-14 w-20 rounded-2xl bg-neutral-900 border border-neutral-800 text-white hover:bg-neutral-800 disabled:opacity-30 disabled:hover:bg-neutral-900 shadow-lg"
                 >
                     <ChevronLeft className="w-8 h-8" />
                 </Button>
 
-                <div className="flex-1 flex justify-center">
-                    <span className="text-sm font-bold text-neutral-500 uppercase tracking-widest">
-                        {currentExerciseIndex + 1} / {activeDay.exercises.length}
+                <div className="flex-1 flex flex-col items-center justify-center gap-0.5">
+                    <span className="text-[10px] uppercase font-bold text-neutral-500 tracking-[0.2em]">Ejercicio</span>
+                    <span className="text-xl font-black text-white tracking-widest leading-none">
+                        <span className="text-red-500">{currentExerciseIndex + 1}</span> / {activeDay.exercises.length}
                     </span>
                 </div>
 
                 <Button
                     onClick={handleNextExercise}
                     className={cn(
-                        "flex-1 h-14 rounded-2xl font-black text-lg transition-all",
+                        "h-14 w-24 rounded-2xl font-black text-lg transition-all shadow-lg hover:scale-105 active:scale-95",
                         currentExerciseIndex === activeDay.exercises.length - 1
-                            ? "bg-white text-black hover:bg-neutral-200 shadow-[0_0_20px_rgba(255,255,255,0.3)]"
-                            : "bg-blue-600 text-white hover:bg-blue-500 shadow-lg shadow-blue-900/20"
+                            ? "bg-red-600 text-white hover:bg-red-500 shadow-red-900/30"
+                            : "bg-white text-black hover:bg-neutral-200 shadow-white/10"
                     )}
                 >
                     {currentExerciseIndex === activeDay.exercises.length - 1 ? (
-                        <>
-                            <Trophy className="w-5 h-5 mr-2" />
-                            FIN
-                        </>
+                        <Trophy className="w-6 h-6" />
                     ) : (
                         <ChevronRight className="w-8 h-8" />
                     )}
