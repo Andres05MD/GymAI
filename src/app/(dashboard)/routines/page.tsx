@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth";
 import { getRoutines } from "@/actions/routine-actions";
-import { getCoachAthletes } from "@/actions/user-actions";
+import { getAllAthletes } from "@/actions/coach-actions";
 import { Button } from "@/components/ui/button";
 import { Plus, ClipboardList } from "lucide-react";
 import Link from "next/link";
@@ -17,7 +17,7 @@ export default async function RoutinesPage() {
     // Cargar datos en paralelo desde el servidor (más rápido que useEffect)
     const [routinesRes, athletesRes] = await Promise.all([
         getRoutines(),
-        getCoachAthletes()
+        getAllAthletes()
     ]);
 
     const routines = routinesRes.success ? routinesRes.routines || [] : [];

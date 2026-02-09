@@ -11,6 +11,7 @@ import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import dynamic from "next/dynamic";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ScheduleCalendar } from "@/components/dashboard/schedule-calendar";
 import type {
     DashboardUser,
     RecentActivity,
@@ -260,6 +261,9 @@ async function AthleteDashboard({ user }: { user: DashboardUser | undefined }) {
                     color="blue"
                 />
             </div>
+
+            {/* Schedule Section */}
+            <ScheduleCalendar athleteId={userId} />
 
             {/* Charts Section */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

@@ -81,8 +81,14 @@ export function AuthLoginForm() {
 
         } catch (error: any) {
             console.error("Google Login Error:", error);
-            if (error.code === 'auth/popup-closed-by-user') {
-                return; // No mostrar error si el usuario cerró la ventana
+            // Ignore common popup errors that are not critical failures
+            if (
+                error.code === 'auth/popup-closed-by-user' ||
+                error.code === 'auth/popup-blocked' ||
+                error.code === 'auth/cancelled-popup-request'
+            ) {
+                setLoading(false);
+                return;
             }
             toast.error("Error al iniciar sesión con Google: " + error.message);
         } finally {

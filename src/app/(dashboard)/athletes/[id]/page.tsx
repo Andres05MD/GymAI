@@ -3,17 +3,19 @@ import { redirect } from "next/navigation";
 import { adminDb } from "@/lib/firebase-admin";
 import { getPersonalRecords, getWeeklyActivity, getWeeklyProgress } from "@/actions/analytics-actions";
 import { getTrainingLogs } from "@/actions/training-actions";
-import { getAthleteRoutine } from "@/actions/routine-actions";
+import { getAthleteRoutine, getCoachRoutines } from "@/actions/routine-actions";
 import { ActivityChart } from "@/components/dashboard/activity-chart";
 import { ProgressChart } from "@/components/dashboard/progress-chart";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { TrainingHistoryList } from "@/components/training/training-history-list";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Dumbbell, TrendingUp, Activity, Trophy, Target, Calendar, Flame, Plus } from "lucide-react";
+import { ArrowLeft, Dumbbell, TrendingUp, Trophy, Target, Calendar, Flame } from "lucide-react";
 import Link from "next/link";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CoachAIAnalysis } from "@/components/dashboard/coach-ai-analysis";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { AssignRoutineModal } from "@/components/routines/assign-routine-modal";
+import { ScheduleCalendar } from "@/components/dashboard/schedule-calendar";
 
 interface Athlete {
     id: string;
@@ -21,12 +23,14 @@ interface Athlete {
     image?: string;
     email?: string;
     coachId?: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     createdAt?: any; // Firestore Timestamp
     goal?: string;
 }
 
 interface ActivityData {
     total: number;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [key: string]: any;
 }
 
@@ -43,6 +47,7 @@ interface PageProps {
 interface RoutineData {
     id: string;
     name?: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     schedule?: any[];
 }
 
@@ -82,6 +87,9 @@ export default async function AthleteDetailsPage({ params }: PageProps) {
     const { completed: weeklyCompleted, target: weeklyTarget } = await getWeeklyProgress(id);
     const { logs } = await getTrainingLogs(id);
     const routine = (await getAthleteRoutine(id)) as unknown as RoutineData | null;
+
+    // Fetch library routines for assignment model
+    const { routines: coachRoutines } = await getCoachRoutines();
 
     // Calculate total volume from activity data
     const weeklyVolume = activityData?.reduce((acc: number, cur: ActivityData) => acc + cur.total, 0) || 0;
@@ -141,12 +149,11 @@ export default async function AthleteDetailsPage({ params }: PageProps) {
                             </div>
                         </Link>
                     ) : (
-                        <Link href={`/athletes/${athlete.id}/routine`}>
-                            <Button className="bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl h-10 px-6 shadow-lg shadow-red-900/20 transition-all hover:scale-105">
-                                <Plus className="w-4 h-4 mr-2" />
-                                Asignar Rutina
-                            </Button>
-                        </Link>
+                        <AssignRoutineModal
+                            athleteId={athlete.id}
+                            athleteName={athlete.name || "Atleta"}
+                            routines={coachRoutines || []}
+                        />
                     )}
 
                     {/* Quick Info Pills */}
@@ -175,16 +182,22 @@ export default async function AthleteDetailsPage({ params }: PageProps) {
             </div>
 
             <Tabs defaultValue="overview" className="space-y-6">
-                <TabsList className="bg-neutral-900 border border-neutral-800 p-1 rounded-2xl">
+                <TabsList className="bg-neutral-900 border border-neutral-800 p-1 rounded-2xl w-full sm:w-auto">
                     <TabsTrigger
                         value="overview"
-                        className="rounded-xl data-[state=active]:bg-red-600 data-[state=active]:text-white data-[state=active]:shadow-lg px-6"
+                        className="flex-1 sm:flex-none rounded-xl data-[state=active]:bg-red-600 data-[state=active]:text-white data-[state=active]:shadow-lg px-6"
                     >
                         Visión General
                     </TabsTrigger>
                     <TabsTrigger
+                        value="schedule"
+                        className="flex-1 sm:flex-none rounded-xl data-[state=active]:bg-red-600 data-[state=active]:text-white data-[state=active]:shadow-lg px-6"
+                    >
+                        Calendario
+                    </TabsTrigger>
+                    <TabsTrigger
                         value="history"
-                        className="rounded-xl data-[state=active]:bg-red-600 data-[state=active]:text-white data-[state=active]:shadow-lg px-6"
+                        className="flex-1 sm:flex-none rounded-xl data-[state=active]:bg-red-600 data-[state=active]:text-white data-[state=active]:shadow-lg px-6"
                     >
                         Historial
                     </TabsTrigger>
@@ -275,6 +288,10 @@ export default async function AthleteDetailsPage({ params }: PageProps) {
                             </div>
                         </div>
                     )}
+                </TabsContent>
+
+                <TabsContent value="schedule">
+                    <ScheduleCalendar athleteId={athlete.id} />
                 </TabsContent>
 
                 <TabsContent value="history">

@@ -1,8 +1,7 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import { FirestoreAdapter } from "@auth/firebase-adapter";
-import { db, auth as firebaseAuth } from "@/lib/firebase";
-import { collection, query, where, getDocs, limit, doc, getDoc, setDoc, Timestamp } from "firebase/firestore";
+import { auth as firebaseAuth } from "@/lib/firebase"; // Client Auth for password checking
+import { adminDb } from "@/lib/firebase-admin"; // Admin Firestore for data
 import { signInWithEmailAndPassword, AuthError } from "firebase/auth";
 import { z } from "zod";
 import { authConfig } from "./auth.config";
@@ -39,20 +38,20 @@ interface AuthUser {
 }
 
 /**
- * Obtiene un usuario de Firestore por email
+ * Obtiene un usuario de Firestore por email (Admin SDK)
  */
 async function getUserByEmail(email: string): Promise<AuthUser | null> {
     try {
-        const q = query(
-            collection(db, "users"),
-            where("email", "==", email),
-            limit(1)
-        );
-        const querySnapshot = await getDocs(q);
+        const querySnapshot = await adminDb.collection("users")
+            .where("email", "==", email)
+            .limit(1)
+            .get();
+
         if (querySnapshot.empty) return null;
-        const d = querySnapshot.docs[0].data();
+        const doc = querySnapshot.docs[0];
+        const d = doc.data();
         return {
-            id: querySnapshot.docs[0].id,
+            id: doc.id,
             name: d.name,
             email: d.email,
             image: d.image,
@@ -66,13 +65,15 @@ async function getUserByEmail(email: string): Promise<AuthUser | null> {
 }
 
 /**
- * Obtiene un usuario de Firestore por ID
+ * Obtiene un usuario de Firestore por ID (Admin SDK)
  */
 async function getUserById(id: string): Promise<AuthUser | null> {
     try {
-        const userDoc = await getDoc(doc(db, "users", id));
-        if (!userDoc.exists()) return null;
+        const userDoc = await adminDb.collection("users").doc(id).get();
+        if (!userDoc.exists) return null;
         const d = userDoc.data();
+        if (!d) return null;
+
         return {
             id: userDoc.id,
             name: d.name || "Usuario",
@@ -87,12 +88,10 @@ async function getUserById(id: string): Promise<AuthUser | null> {
     }
 }
 
-// NOTE: FirestoreAdapter tiene problemas de tipos conocidos con NextAuth v5 y Firebase SDK cliente.
-// Se usa "as any" intencionalmente para compatibilidad. Ver: https://github.com/nextauthjs/next-auth/issues
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const { handlers, auth, signIn, signOut } = NextAuth({
     ...authConfig,
-    adapter: FirestoreAdapter(db as any) as any,
+    // Eliminamos el adapter de cliente para evitar errores de permisos y tipos.
+    // Manejamos la persistencia manualmente en `authorize` usando el Admin SDK.
     providers: [
         Credentials({
             credentials: {
@@ -139,10 +138,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                                 name: userName,
                                 email: userEmail,
                                 image: userImage,
-                                updatedAt: Timestamp.now()
+                                updatedAt: new Date() // Admin SDK acepta Date
                             };
 
-                            await setDoc(doc(db, "users", userId), updatedData, { merge: true });
+                            await adminDb.collection("users").doc(userId).set(updatedData, { merge: true });
 
                             return {
                                 ...existingUser,
@@ -162,10 +161,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                                 onboardingCompleted: false,
                             };
 
-                            await setDoc(doc(db, "users", userId), {
+                            await adminDb.collection("users").doc(userId).set({
                                 ...newUser,
-                                createdAt: Timestamp.now(),
-                                updatedAt: Timestamp.now(),
+                                createdAt: new Date(),
+                                updatedAt: new Date(),
                             });
 
                             return newUser;
@@ -189,11 +188,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 const { email, password } = parsedCredentials.data;
 
                 try {
-                    // Autenticar con Firebase Auth
+                    // Autenticar con Firebase Client SDK (para validar password)
                     const userCredential = await signInWithEmailAndPassword(firebaseAuth, email, password);
                     const firebaseUser = userCredential.user;
 
-                    // Buscar datos adicionales del usuario en Firestore
+                    // Buscar datos adicionales del usuario en Firestore (usando Admin SDK)
                     const userData = await getUserById(firebaseUser.uid);
 
                     // Cerrar sesión de Firebase Auth (NextAuth maneja la sesión)

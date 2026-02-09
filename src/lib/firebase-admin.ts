@@ -18,9 +18,20 @@ const getAdminApp = () => {
     }
 
     try {
-        const cleanedKey = key.trim().replace(/^'|'$/g, '').replace(/^"|"$/g, '');
+        let cleanedKey = key.trim();
+        // Remove enclosing single quotes
+        if (cleanedKey.startsWith("'") && cleanedKey.endsWith("'")) {
+            cleanedKey = cleanedKey.slice(1, -1);
+        }
+        // Remove enclosing double quotes
+        else if (cleanedKey.startsWith('"') && cleanedKey.endsWith('"')) {
+            cleanedKey = cleanedKey.slice(1, -1);
+        }
+
+        // Try to parse
         const serviceAccount = JSON.parse(cleanedKey);
 
+        // Fix private_key newlines if needed (Firebase expects \n, usually present as literal \\n string in JSON)
         if (serviceAccount.private_key) {
             serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
         }
@@ -33,8 +44,9 @@ const getAdminApp = () => {
         });
     } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : "Error desconocido";
-        console.error(">>> [Firebase Admin] ❌ Error parseando clave ADM:", errorMessage);
-        return admin.initializeApp({ projectId });
+        console.error(">>> [Firebase Admin] ❌ CRITICAL ERROR parsing service account key:", errorMessage);
+        // Do not fallback to unauthenticated app; throw to stop execution and force fix.
+        throw new Error("Failed to initialize Firebase Admin: " + errorMessage);
     }
 };
 
