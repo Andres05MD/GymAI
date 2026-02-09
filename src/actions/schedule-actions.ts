@@ -133,7 +133,7 @@ export async function assignRoutineDay(data: AssignmentInput, confirmReplace: bo
 
         if (conflictCheck.conflict && confirmReplace) {
             // Delete existing
-            await assignmentsRef.doc(conflictCheck.existingAssignment.id).delete();
+            await assignmentsRef.doc(conflictCheck.existingAssignment!.id).delete();
         }
 
         // Fetch routine details for denormalization (optional, but good for calendar display)
@@ -190,7 +190,7 @@ export async function assignRoutineWeek(data: BatchAssignmentInput, confirmRepla
         // If replacing, delete conflicts
         if (conflictCheck.hasConflicts && confirmReplace) {
             for (const conflict of conflictCheck.conflicts) {
-                batch.delete(assignmentsRef.doc(conflict.id));
+                batch.delete(assignmentsRef.doc(conflict.id!));
             }
         }
 
