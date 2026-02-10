@@ -1,6 +1,6 @@
 "use client";
 
-import { useForm, useFieldArray, Control, UseFormRegister, FieldValues } from "react-hook-form";
+import { useForm, useFieldArray, Control, UseFormRegister, FieldValues, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { RoutineSchema } from "@/lib/schemas";
@@ -19,6 +19,7 @@ import { ExerciseSelector } from "./exercise-selector";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { AIGeneratorDialog } from "@/components/routines/ai-generator-dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 // Modificar schema para formulario local si es necesario, 
 // o usar RoutineSchema.omit(...) como base.
@@ -139,7 +140,27 @@ function ExerciseSets({ nestIndex, control, register }: { nestIndex: string; con
                         <Input {...register(`${nestIndex}.${k}.reps`)} className="h-7 text-xs" placeholder="10" />
                     </div>
                     <div className="col-span-3">
-                        <Input {...register(`${nestIndex}.${k}.rpeTarget`, { valueAsNumber: true })} className="h-7 text-xs" placeholder="8" type="number" />
+                        <Controller
+                            control={control}
+                            name={`${nestIndex}.${k}.rpeTarget`}
+                            render={({ field }) => (
+                                <Select
+                                    onValueChange={(val) => field.onChange(Number(val))}
+                                    value={field.value?.toString()}
+                                >
+                                    <SelectTrigger className="h-7 text-xs w-full [&>svg]:hidden px-1 justify-center text-center">
+                                        <SelectValue placeholder="8" />
+                                    </SelectTrigger>
+                                    <SelectContent className="bg-neutral-900 border-neutral-800 text-white min-w-[60px]">
+                                        {[10, 9, 8, 7, 6, 5].map((val) => (
+                                            <SelectItem key={val} value={val.toString()} className="justify-center focus:bg-neutral-800 focus:text-white">
+                                                {val}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            )}
+                        />
                     </div>
                     <div className="col-span-2">
                         <Input {...register(`${nestIndex}.${k}.restSeconds`, { valueAsNumber: true })} className="h-7 text-xs" placeholder="60" type="number" />

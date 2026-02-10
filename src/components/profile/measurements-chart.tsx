@@ -39,9 +39,9 @@ export function MeasurementsChart({ data, unit, title, color = "#ef4444" }: Meas
         return (
             <Card className="glass-card border-white/10 opacity-50">
                 <CardHeader>
-                    <CardTitle className="text-sm text-zinc-400 uppercase tracking-wider">{title}</CardTitle>
+                    <CardTitle className="text-sm text-neutral-400 uppercase tracking-wider">{title}</CardTitle>
                 </CardHeader>
-                <CardContent className="h-32 flex items-center justify-center text-xs text-zinc-600">
+                <CardContent className="h-32 flex items-center justify-center text-xs text-neutral-600">
                     Necesitas al menos 2 registros para ver la tendencia.
                 </CardContent>
             </Card>
@@ -60,9 +60,9 @@ export function MeasurementsChart({ data, unit, title, color = "#ef4444" }: Meas
         <Card className="glass-card border-white/10 overflow-hidden">
             <CardHeader className="pb-2">
                 <div className="flex justify-between items-end">
-                    <CardTitle className="text-sm text-zinc-400 uppercase tracking-wider font-bold">{title}</CardTitle>
+                    <CardTitle className="text-sm text-neutral-400 uppercase tracking-wider font-bold">{title}</CardTitle>
                     <span className="text-2xl font-black text-white">
-                        {data[data.length - 1].value} <span className="text-xs text-zinc-500 font-normal">{unit}</span>
+                        {data[data.length - 1].value} <span className="text-xs text-neutral-500 font-normal">{unit}</span>
                     </span>
                 </div>
             </CardHeader>
@@ -94,8 +94,8 @@ export function MeasurementsChart({ data, unit, title, color = "#ef4444" }: Meas
                 </svg>
 
                 {/* Labels Min/Max superpuestos discretamente */}
-                <div className="absolute top-2 left-2 text-[10px] text-zinc-600 font-mono bg-black/50 px-1 rounded">Max: {max}</div>
-                <div className="absolute bottom-2 left-2 text-[10px] text-zinc-600 font-mono bg-black/50 px-1 rounded">Min: {min}</div>
+                <div className="absolute top-2 left-2 text-[10px] text-neutral-600 font-mono bg-black/50 px-1 rounded">Max: {max}</div>
+                <div className="absolute bottom-2 left-2 text-[10px] text-neutral-600 font-mono bg-black/50 px-1 rounded">Min: {min}</div>
             </CardContent>
         </Card>
     );

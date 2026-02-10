@@ -34,18 +34,18 @@ export function PersonalRecordsCard({ prs }: PersonalRecordsCardProps) {
             </CardHeader>
             <CardContent className="space-y-3">
                 {prs.map((pr, idx) => (
-                    <div key={idx} className="flex items-center justify-between p-2 rounded-lg bg-zinc-900/50 border border-white/5 hover:border-primary/20 transition-colors">
+                    <div key={idx} className="flex items-center justify-between p-2 rounded-lg bg-neutral-900/50 border border-white/5 hover:border-primary/20 transition-colors">
                         <div className="flex items-center gap-3">
                             <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                                 <Dumbbell className="h-4 w-4" />
                             </div>
                             <div>
                                 <p className="text-sm font-bold text-white leading-none">{pr.exercise}</p>
-                                <p className="text-[10px] text-zinc-500 mt-1">{pr.date}</p>
+                                <p className="text-[10px] text-neutral-500 mt-1">{pr.date}</p>
                             </div>
                         </div>
                         <div className="text-right">
-                            <p className="text-lg font-black text-primary leading-none">{pr.weight} <span className="text-[10px] font-normal text-zinc-400">kg</span></p>
+                            <p className="text-lg font-black text-primary leading-none">{pr.weight} <span className="text-[10px] font-normal text-neutral-400">kg</span></p>
                         </div>
                     </div>
                 ))}

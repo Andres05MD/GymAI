@@ -52,7 +52,7 @@ export function EditProfileDialog({ user }: { user: UserProfile }) {
                     <Pencil className="mr-2 h-4 w-4" /> Editar Perfil
                 </Button>
             </DialogTrigger>
-            <DialogContent className="bg-zinc-950 border-white/10 text-white sm:max-w-md">
+            <DialogContent className="bg-neutral-950 border-white/10 text-white sm:max-w-md">
                 <DialogHeader>
                     <DialogTitle>Editar Perfil</DialogTitle>
                 </DialogHeader>
@@ -62,7 +62,7 @@ export function EditProfileDialog({ user }: { user: UserProfile }) {
                         <Input
                             value={name}
                             onChange={(e) => setName(e.target.value)}
-                            className="bg-zinc-900 border-zinc-800"
+                            className="bg-neutral-900 border-neutral-800"
                         />
                     </div>
                     <div className="space-y-2">
@@ -71,16 +71,16 @@ export function EditProfileDialog({ user }: { user: UserProfile }) {
                             value={image}
                             onChange={(e) => setImage(e.target.value)}
                             placeholder="https://..."
-                            className="bg-zinc-900 border-zinc-800"
+                            className="bg-neutral-900 border-neutral-800"
                         />
                     </div>
                     <div className="space-y-2">
                         <Label>Objetivo Principal</Label>
                         <Select value={goal} onValueChange={setGoal}>
-                            <SelectTrigger className="bg-zinc-900 border-zinc-800">
+                            <SelectTrigger className="bg-neutral-900 border-neutral-800">
                                 <SelectValue />
                             </SelectTrigger>
-                            <SelectContent className="bg-zinc-900 border-zinc-800 text-white">
+                            <SelectContent className="bg-neutral-900 border-neutral-800 text-white">
                                 <SelectItem value="Hipertrofia">Hipertrofia</SelectItem>
                                 <SelectItem value="Fuerza">Fuerza</SelectItem>
                                 <SelectItem value="Resistencia">Resistencia</SelectItem>

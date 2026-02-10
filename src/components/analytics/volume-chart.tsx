@@ -14,10 +14,10 @@ export function VolumeChart({ data }: VolumeChartProps) {
                 <CardHeader>
                     <div className="flex items-center gap-2">
                         <BarChart3 className="h-4 w-4 text-primary" />
-                        <CardTitle className="text-sm text-zinc-400 uppercase tracking-wider">Volumen Semanal</CardTitle>
+                        <CardTitle className="text-sm text-neutral-400 uppercase tracking-wider">Volumen Semanal</CardTitle>
                     </div>
                 </CardHeader>
-                <CardContent className="h-32 flex items-center justify-center text-xs text-zinc-600">
+                <CardContent className="h-32 flex items-center justify-center text-xs text-neutral-600">
                     No hay suficientes datos recientes.
                 </CardContent>
             </Card>
@@ -31,7 +31,7 @@ export function VolumeChart({ data }: VolumeChartProps) {
             <CardHeader className="pb-2">
                 <div className="flex items-center gap-2">
                     <BarChart3 className="h-4 w-4 text-primary" />
-                    <CardTitle className="text-sm text-zinc-400 uppercase tracking-wider font-bold">Volumen Semanal (Sets)</CardTitle>
+                    <CardTitle className="text-sm text-neutral-400 uppercase tracking-wider font-bold">Volumen Semanal (Sets)</CardTitle>
                 </div>
             </CardHeader>
             <CardContent className="space-y-3 pt-2">
@@ -39,9 +39,9 @@ export function VolumeChart({ data }: VolumeChartProps) {
                     <div key={idx} className="group">
                         <div className="flex justify-between text-xs mb-1">
                             <span className="text-white font-medium">{item.name}</span>
-                            <span className="text-zinc-500">{item.value} sets</span>
+                            <span className="text-neutral-500">{item.value} sets</span>
                         </div>
-                        <div className="h-2 w-full bg-zinc-900 rounded-full overflow-hidden">
+                        <div className="h-2 w-full bg-neutral-900 rounded-full overflow-hidden">
                             <div
                                 className="h-full bg-primary rounded-full transition-all duration-500 group-hover:bg-red-400"
                                 style={{ width: `${(item.value / max) * 100}%` }}

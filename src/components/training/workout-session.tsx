@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Check, Clock, Trophy, Info, Loader2, Play, Dumbbell, ChevronLeft, ChevronRight, Save } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { logWorkoutSession, getLastSessionExerciseData, WorkoutSessionData } from "@/actions/training-actions";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -398,7 +399,7 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
                                             )}
                                         >
                                             {/* Background decoration for completed */}
-                                            {isCompleted && <div className="absolute inset-0 bg-gradient-to-r from-green-500/5 to-transparent pointer-events-none" />}
+                                            {isCompleted && <div className="absolute inset-0 bg-linear-to-r from-green-500/5 to-transparent pointer-events-none" />}
 
                                             <div className="hidden md:flex md:col-span-1 justify-center z-10">
                                                 <span className={cn(
@@ -441,17 +442,30 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
                                                 />
                                             </div>
                                             <div className="col-span-2 relative z-10">
-                                                <Input
-                                                    type="number"
-                                                    inputMode="decimal"
-                                                    placeholder={historySet ? `${historySet.rpe}` : "-"}
-                                                    value={logSet?.rpe}
-                                                    onChange={(e) => updateSet(currentExerciseIndex, setIndex, "rpe", e.target.value)}
-                                                    className={cn(
-                                                        "h-12 md:h-14 px-0 text-center text-lg md:text-xl font-black border-0 bg-neutral-800 rounded-xl focus:ring-2 focus:ring-white/20 transition-all placeholder:text-neutral-700 text-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
-                                                        isCompleted && "text-green-400 bg-green-900/20 ring-1 ring-green-500/30"
-                                                    )}
-                                                />
+                                                <Select
+                                                    value={logSet?.rpe?.toString() || ""}
+                                                    onValueChange={(val) => updateSet(currentExerciseIndex, setIndex, "rpe", val)}
+                                                >
+                                                    <SelectTrigger
+                                                        className={cn(
+                                                            "h-12 md:h-14 w-full px-0 justify-center text-center text-lg md:text-xl font-black border-0 bg-neutral-800 rounded-xl focus:ring-2 focus:ring-white/20 transition-all text-white [&>svg]:hidden", // Hide chevron for clean look like input
+                                                            isCompleted && "text-green-400 bg-green-900/20 ring-1 ring-green-500/30"
+                                                        )}
+                                                    >
+                                                        <SelectValue placeholder={historySet ? `${historySet.rpe}` : "-"} />
+                                                    </SelectTrigger>
+                                                    <SelectContent className="bg-neutral-900 border-neutral-800 text-white min-w-[60px]">
+                                                        {[10, 9, 8, 7, 6, 5].map((val) => (
+                                                            <SelectItem
+                                                                key={val}
+                                                                value={val.toString()}
+                                                                className="justify-center focus:bg-neutral-800 focus:text-white"
+                                                            >
+                                                                {val}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
                                             </div>
                                             <div className="col-span-2 md:col-span-2 flex justify-center z-10">
                                                 <Button
@@ -491,7 +505,7 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
             </div>
 
             {/* Navigation Footer */}
-            <div className="fixed bottom-0 left-0 right-0 p-4 bg-black/80 backdrop-blur-xl border-t border-white/10 flex justify-between items-center gap-4 z-[60] animate-in slide-in-from-bottom-full duration-500">
+            <div className="fixed bottom-0 left-0 right-0 p-4 bg-black/80 backdrop-blur-xl border-t border-white/10 flex justify-between items-center gap-4 z-60 animate-in slide-in-from-bottom-full duration-500">
                 <Button
                     onClick={handlePrevExercise}
                     disabled={currentExerciseIndex === 0}

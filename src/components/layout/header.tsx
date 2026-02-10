@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Target } from "lucide-react";
 import { NotificationBell } from "@/components/notifications/notification-bell";
 import { UserNav } from "@/components/layout/user-nav";
@@ -17,12 +18,12 @@ export function Header({ user }: HeaderProps) {
     return (
         <header className="flex h-16 items-center justify-between gap-4 px-6 md:px-10 py-3 bg-transparent w-full">
             {/* Logo for mobile only since Sidebar is hidden */}
-            <div className="md:hidden flex items-center gap-2">
+            <Link href="/dashboard" className="md:hidden flex items-center gap-2 hover:opacity-80 transition-opacity">
                 <div className="h-8 w-8 bg-white rounded-full flex items-center justify-center">
                     <Target className="h-5 w-5 text-black" />
                 </div>
                 <span className="text-xl font-bold tracking-tighter text-white">GymIA</span>
-            </div>
+            </Link>
 
             {/* Right Actions */}
             <div className="flex items-center gap-2 sm:gap-4 ml-auto md:ml-0">

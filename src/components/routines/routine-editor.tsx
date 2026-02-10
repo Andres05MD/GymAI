@@ -553,13 +553,13 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                                                             {/* Exercise Selector Trigger */}
                                                             <Button
                                                                 variant="ghost"
-                                                                className="w-full justify-between items-center text-left text-base sm:text-lg font-bold text-white hover:bg-neutral-800 hover:text-white px-2 h-auto py-2 whitespace-normal break-words"
+                                                                className="w-full justify-between items-center text-left text-base sm:text-lg font-bold text-white hover:bg-neutral-800 hover:text-white px-2 h-auto py-2 whitespace-normal wrap-break-word"
                                                                 onClick={() => openExerciseSelector(activeDayIndex, exIndex)}
                                                             >
                                                                 <span className="mr-2 leading-tight">
                                                                     {exercise.exerciseName || "Seleccionar ejercicio..."}
                                                                 </span>
-                                                                <ChevronsUpDown className="ml-auto h-4 w-4 shrink-0 opacity-50 flex-shrink-0" />
+                                                                <ChevronsUpDown className="ml-auto h-4 w-4 shrink-0 opacity-50" />
                                                             </Button>
                                                         </div>
                                                     </div>
@@ -679,17 +679,27 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                                                                             <div className="md:hidden flex justify-center">
                                                                                 <span className="text-[9px] uppercase font-bold text-neutral-600 tracking-wider">RPE</span>
                                                                             </div>
-                                                                            <Input
-                                                                                type="number"
-                                                                                value={set.rpeTarget}
-                                                                                onChange={(e) => {
+                                                                            <Select
+                                                                                value={set.rpeTarget?.toString() || ""}
+                                                                                onValueChange={(val) => {
                                                                                     const newSets = [...exercise.sets];
-                                                                                    newSets[setIndex].rpeTarget = Number(e.target.value);
+                                                                                    newSets[setIndex].rpeTarget = Number(val);
                                                                                     updateExerciseField(activeDayIndex, exIndex, "sets", newSets);
                                                                                 }}
-                                                                                className="h-10 md:h-8 text-sm md:text-xs bg-neutral-950 md:bg-neutral-800 border border-neutral-800 md:border-transparent text-center text-white font-bold focus:ring-1 focus:ring-white/20 rounded-xl md:rounded-md shadow-sm"
-                                                                                placeholder="8"
-                                                                            />
+                                                                            >
+                                                                                <SelectTrigger
+                                                                                    className="h-10 md:h-8 w-full justify-center text-center text-sm md:text-xs bg-neutral-950 md:bg-neutral-800 border border-neutral-800 md:border-transparent text-white font-bold focus:ring-1 focus:ring-white/20 rounded-xl md:rounded-md shadow-sm px-0 [&>svg]:hidden transition-all"
+                                                                                >
+                                                                                    <SelectValue placeholder="8" />
+                                                                                </SelectTrigger>
+                                                                                <SelectContent className="bg-neutral-900 border-neutral-800 text-white min-w-[60px]">
+                                                                                    {[10, 9, 8, 7, 6, 5].map((val) => (
+                                                                                        <SelectItem key={val} value={val.toString()} className="justify-center focus:bg-neutral-800 focus:text-white">
+                                                                                            {val}
+                                                                                        </SelectItem>
+                                                                                    ))}
+                                                                                </SelectContent>
+                                                                            </Select>
                                                                         </div>
                                                                         <div className="col-span-1 md:col-span-3 space-y-1">
                                                                             <div className="md:hidden flex justify-center">

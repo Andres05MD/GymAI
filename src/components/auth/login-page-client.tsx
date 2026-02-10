@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { AuthLoginForm } from "@/components/forms/auth-login-form";
 import { AuthRegisterForm } from "@/components/forms/auth-register-form";
 import { Dumbbell } from "lucide-react";
@@ -23,12 +24,14 @@ export function LoginPageClient() {
                 "md:min-h-screen md:w-1/2 md:p-12 transition-all duration-500"
             )}>
 
-                <motion.div
-                    layout
-                    className="bg-white p-3 rounded-2xl shadow-lg shadow-white/10 mb-2 md:mb-0 md:scale-150 transition-transform"
-                >
-                    <Dumbbell className="w-8 h-8 md:w-12 md:h-12 text-black" />
-                </motion.div>
+                <Link href="/dashboard">
+                    <motion.div
+                        layout
+                        className="bg-white p-3 rounded-2xl shadow-lg shadow-white/10 mb-2 md:mb-0 md:scale-150 transition-transform cursor-pointer hover:scale-105 active:scale-95"
+                    >
+                        <Dumbbell className="w-8 h-8 md:w-12 md:h-12 text-black" />
+                    </motion.div>
+                </Link>
 
                 {/* Desktop Welcome Text with transitions */}
                 <div className="hidden md:flex flex-col items-center mt-12 text-white text-center space-y-4 max-w-lg h-32">
@@ -44,7 +47,7 @@ export function LoginPageClient() {
                             <h2 className="text-4xl font-bold tracking-tight">
                                 {isLogin ? "Bienvenido a GymIA" : "Únete al Club"}
                             </h2>
-                            <p className="text-gray-400 text-lg mx-auto max-w-md">
+                            <p className="text-neutral-400 text-lg mx-auto max-w-md">
                                 {isLogin
                                     ? "Tu entrenador personal inteligente. Gestiona rutinas, seguimiento y más."
                                     : "Comienza tu viaje fitness hoy mismo. Registra tus progresos y alcanza tus metas."}
@@ -76,14 +79,14 @@ export function LoginPageClient() {
                                 <h1 className="text-3xl font-bold text-black md:text-5xl">
                                     {isLogin ? "Iniciar Sesión" : "Regístrate"}
                                 </h1>
-                                <p className="text-gray-500 font-medium">
+                                <p className="text-neutral-500 font-medium">
                                     {isLogin ? "Bienvenido de nuevo, ingresa tus datos." : "Crea tu cuenta en segundos."}
                                 </p>
                             </div>
 
                             {isLogin ? <AuthLoginForm /> : <AuthRegisterForm />}
 
-                            <div className="pt-2 text-center text-sm font-medium text-gray-500">
+                            <div className="pt-2 text-center text-sm font-medium text-neutral-500">
                                 <p>
                                     {isLogin ? "¿No tienes cuenta? " : "¿Ya tienes cuenta? "}
                                     <button

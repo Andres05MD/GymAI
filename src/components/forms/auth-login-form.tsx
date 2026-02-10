@@ -140,17 +140,17 @@ export function AuthLoginForm() {
 
             <div className="relative my-6">
                 <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t border-gray-200" />
+                    <span className="w-full border-t border-neutral-200" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-white px-2 text-gray-400">O continúa con</span>
+                    <span className="bg-white px-2 text-neutral-400">O continúa con</span>
                 </div>
             </div>
 
             <Button
                 variant="outline"
                 type="button"
-                className="w-full h-14 rounded-2xl border-2 border-gray-100 bg-black text-white hover:bg-black hover:text-white md:bg-white md:text-black md:hover:bg-black md:hover:text-white font-medium transition-colors"
+                className="w-full h-14 rounded-2xl border-2 border-neutral-100 bg-black text-white hover:bg-black hover:text-white md:bg-white md:text-black md:hover:bg-black md:hover:text-white font-medium transition-colors"
                 disabled={loading}
                 onClick={handleGoogleLogin}
             >

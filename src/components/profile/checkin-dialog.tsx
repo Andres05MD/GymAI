@@ -58,7 +58,7 @@ export function CheckinDialog() {
                     <Plus className="mr-2 h-4 w-4" /> Check-in Semanal
                 </Button>
             </DialogTrigger>
-            <DialogContent className="bg-zinc-950 border-white/10 text-white sm:max-w-md">
+            <DialogContent className="bg-neutral-950 border-white/10 text-white sm:max-w-md">
                 <DialogHeader>
                     <DialogTitle>Registro de Progreso</DialogTitle>
                 </DialogHeader>
@@ -66,10 +66,10 @@ export function CheckinDialog() {
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label className="text-right">Peso (kg)</Label>
                         <div className="col-span-3 relative">
-                            <Scale className="absolute left-3 top-2.5 h-4 w-4 text-zinc-500" />
+                            <Scale className="absolute left-3 top-2.5 h-4 w-4 text-neutral-500" />
                             <Input
                                 type="number" step="0.1"
-                                className="pl-9 bg-zinc-900 border-zinc-800"
+                                className="pl-9 bg-neutral-900 border-neutral-800"
                                 value={weight}
                                 onChange={e => setWeight(e.target.value)}
                             />
@@ -78,10 +78,10 @@ export function CheckinDialog() {
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label className="text-right">Cintura (cm)</Label>
                         <div className="col-span-3 relative">
-                            <Ruler className="absolute left-3 top-2.5 h-4 w-4 text-zinc-500" />
+                            <Ruler className="absolute left-3 top-2.5 h-4 w-4 text-neutral-500" />
                             <Input
                                 type="number"
-                                className="pl-9 bg-zinc-900 border-zinc-800"
+                                className="pl-9 bg-neutral-900 border-neutral-800"
                                 value={waist}
                                 onChange={e => setWaist(e.target.value)}
                                 placeholder="Opcional"
@@ -91,10 +91,10 @@ export function CheckinDialog() {
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label className="text-right">Bíceps (cm)</Label>
                         <div className="col-span-3 relative">
-                            <Ruler className="absolute left-3 top-2.5 h-4 w-4 text-zinc-500" />
+                            <Ruler className="absolute left-3 top-2.5 h-4 w-4 text-neutral-500" />
                             <Input
                                 type="number"
-                                className="pl-9 bg-zinc-900 border-zinc-800"
+                                className="pl-9 bg-neutral-900 border-neutral-800"
                                 value={biceps}
                                 onChange={e => setBiceps(e.target.value)}
                                 placeholder="Opcional"

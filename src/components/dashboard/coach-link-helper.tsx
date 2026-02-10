@@ -64,14 +64,14 @@ export function CoachLinkHelper({ currentCoachId, currentCoachName }: CoachLinkH
                     </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    <div className="flex items-center justify-between p-4 bg-zinc-900/50 rounded-xl border border-white/5">
+                    <div className="flex items-center justify-between p-4 bg-neutral-900/50 rounded-xl border border-white/5">
                         <div className="flex items-center gap-3">
                             <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold">
                                 {currentCoachName?.charAt(0) || "C"}
                             </div>
                             <div>
                                 <p className="font-bold text-white">{currentCoachName || "Coach"}</p>
-                                <p className="text-xs text-zinc-500">Coach Asignado</p>
+                                <p className="text-xs text-neutral-500">Coach Asignado</p>
                             </div>
                         </div>
                         <Badge variant="outline" className="border-green-500/50 text-green-500 bg-green-500/10">Activo</Badge>
@@ -95,12 +95,12 @@ export function CoachLinkHelper({ currentCoachId, currentCoachName }: CoachLinkH
         <Card className="glass-card border-white/10">
             <CardHeader>
                 <div className="flex items-center gap-2">
-                    <Link className="h-5 w-5 text-zinc-400" />
+                    <Link className="h-5 w-5 text-neutral-400" />
                     <CardTitle className="text-lg font-bold text-white">Vincular Coach</CardTitle>
                 </div>
             </CardHeader>
             <CardContent className="space-y-4">
-                <p className="text-sm text-zinc-400">
+                <p className="text-sm text-neutral-400">
                     Ingresa el código único proporcionado por tu entrenador para conectar tu cuenta y recibir rutinas.
                 </p>
                 <div className="flex gap-2">
@@ -108,7 +108,7 @@ export function CoachLinkHelper({ currentCoachId, currentCoachName }: CoachLinkH
                         placeholder="Ingresa el Código del Coach"
                         value={coachCode}
                         onChange={(e) => setCoachCode(e.target.value)}
-                        className="bg-zinc-950 border-white/10"
+                        className="bg-neutral-950 border-white/10"
                     />
                     <Button onClick={handleLink} disabled={isLoading || !coachCode}>
                         {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Vincular"}

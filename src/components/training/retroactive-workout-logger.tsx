@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
     Plus,
     Trash2,
@@ -61,7 +62,9 @@ export function RetroactiveWorkoutLogger({ routineDay, routineId, routineName: i
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Formulario global
-    const [routineNameState, setRoutineNameState] = useState(initialRoutineName || "");
+    const [routineNameState, setRoutineNameState] = useState(() => {
+        return (initialRoutineName || "").replace(/\s*\(Assigned\)/gi, "").trim();
+    });
     const [date, setDate] = useState(() => {
         const now = new Date();
         return now.toISOString().split("T")[0];
@@ -256,8 +259,9 @@ export function RetroactiveWorkoutLogger({ routineDay, routineId, routineName: i
                             <Input
                                 value={routineNameState}
                                 onChange={(e) => setRoutineNameState(e.target.value)}
+                                disabled={!!routineDay}
                                 placeholder="Ej: Push Day, Torso Pesado..."
-                                className="bg-neutral-950 border-neutral-800 text-white font-semibold rounded-xl focus:ring-1 focus:ring-white/20 h-12 pl-10 placeholder:text-neutral-700"
+                                className="bg-neutral-950 border-neutral-800 text-white font-semibold rounded-xl focus:ring-1 focus:ring-white/20 h-12 pl-10 placeholder:text-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed"
                             />
                         </div>
                     </div>
@@ -308,15 +312,17 @@ export function RetroactiveWorkoutLogger({ routineDay, routineId, routineName: i
                         <Dumbbell className="w-3.5 h-3.5" />
                         Ejercicios ({exercises.length})
                     </div>
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={addExercise}
-                        className="text-red-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg text-xs font-bold"
-                    >
-                        <Plus className="w-3.5 h-3.5 mr-1" />
-                        Añadir
-                    </Button>
+                    {!routineDay && (
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={addExercise}
+                            className="text-red-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg text-xs font-bold"
+                        >
+                            <Plus className="w-3.5 h-3.5 mr-1" />
+                            Añadir
+                        </Button>
+                    )}
                 </div>
 
                 {exercises.map((exercise, exIndex) => (
@@ -386,14 +392,23 @@ export function RetroactiveWorkoutLogger({ routineDay, routineId, routineName: i
                                         placeholder={set.targetReps || "-"}
                                         className="h-9 sm:h-11 text-center text-sm sm:text-base font-bold bg-neutral-900 border-neutral-800 focus:border-neutral-700 text-white rounded-lg sm:rounded-xl focus:ring-1 focus:ring-white/20 px-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none placeholder:text-neutral-600 transition-all placeholder:font-normal"
                                     />
-                                    <Input
-                                        type="number"
-                                        inputMode="decimal"
-                                        value={set.rpe}
-                                        onChange={(e) => updateSet(exIndex, setIndex, "rpe", e.target.value)}
-                                        placeholder={set.targetRpe || "-"}
-                                        className="h-9 sm:h-11 text-center text-sm sm:text-base font-bold bg-neutral-900 border-neutral-800 focus:border-neutral-700 text-white rounded-lg sm:rounded-xl focus:ring-1 focus:ring-white/20 px-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none placeholder:text-neutral-600 transition-all placeholder:font-normal"
-                                    />
+                                    <Select
+                                        value={set.rpe || ""}
+                                        onValueChange={(val) => updateSet(exIndex, setIndex, "rpe", val)}
+                                    >
+                                        <SelectTrigger
+                                            className="h-9 sm:h-11 w-full justify-center text-center text-sm sm:text-base font-bold bg-neutral-900 border-neutral-800 focus:border-neutral-700 text-white rounded-lg sm:rounded-xl focus:ring-1 focus:ring-white/20 px-0 [&>svg]:hidden transition-all"
+                                        >
+                                            <SelectValue placeholder={set.targetRpe || "-"} />
+                                        </SelectTrigger>
+                                        <SelectContent className="bg-neutral-900 border-neutral-800 text-white min-w-[60px]">
+                                            {[10, 9, 8, 7, 6, 5].map((val) => (
+                                                <SelectItem key={val} value={val.toString()} className="justify-center focus:bg-neutral-800 focus:text-white">
+                                                    {val}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
                                     <div className="flex justify-center">
                                         {exercise.sets.length > 1 ? (
                                             <Button
@@ -412,15 +427,17 @@ export function RetroactiveWorkoutLogger({ routineDay, routineId, routineName: i
                             ))}
 
                             {/* Añadir serie */}
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => addSet(exIndex)}
-                                className="w-full text-xs text-neutral-500 hover:text-white hover:bg-neutral-800 h-8 rounded-lg"
-                            >
-                                <Plus className="w-3 h-3 mr-1" />
-                                AÑADIR SERIE
-                            </Button>
+                            {!routineDay && (
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => addSet(exIndex)}
+                                    className="w-full text-xs text-neutral-500 hover:text-white hover:bg-neutral-800 h-8 rounded-lg"
+                                >
+                                    <Plus className="w-3 h-3 mr-1" />
+                                    AÑADIR SERIE
+                                </Button>
+                            )}
 
                             {/* Notas del ejercicio */}
                             <Input
@@ -434,14 +451,16 @@ export function RetroactiveWorkoutLogger({ routineDay, routineId, routineName: i
                 ))}
 
                 {/* Botón añadir ejercicio al final */}
-                <Button
-                    variant="outline"
-                    onClick={addExercise}
-                    className="w-full h-12 border border-dashed border-neutral-800 bg-neutral-900/30 text-neutral-500 hover:text-white hover:bg-neutral-800 hover:border-neutral-700 rounded-xl transition-all group"
-                >
-                    <Plus className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />
-                    <span className="text-xs font-bold uppercase tracking-widest">Añadir Ejercicio</span>
-                </Button>
+                {!routineDay && (
+                    <Button
+                        variant="outline"
+                        onClick={addExercise}
+                        className="w-full h-12 border border-dashed border-neutral-800 bg-neutral-900/30 text-neutral-500 hover:text-white hover:bg-neutral-800 hover:border-neutral-700 rounded-xl transition-all group"
+                    >
+                        <Plus className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />
+                        <span className="text-xs font-bold uppercase tracking-widest">Añadir Ejercicio</span>
+                    </Button>
+                )}
             </div>
 
             {/* Feedback de sesión */}

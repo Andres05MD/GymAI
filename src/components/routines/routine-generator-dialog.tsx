@@ -54,7 +54,7 @@ export function RoutineGeneratorDialog({ onGenerated }: RoutineGeneratorProps) {
                     <Sparkles className="mr-2 h-4 w-4" /> Generar con IA
                 </Button>
             </DialogTrigger>
-            <DialogContent className="bg-zinc-950 border-white/10 text-white sm:max-w-md">
+            <DialogContent className="bg-neutral-950 border-white/10 text-white sm:max-w-md">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
                         <Sparkles className="h-5 w-5 text-primary" />
@@ -66,10 +66,10 @@ export function RoutineGeneratorDialog({ onGenerated }: RoutineGeneratorProps) {
                     <div className="space-y-2">
                         <Label>Objetivo Principal</Label>
                         <Select value={goal} onValueChange={setGoal}>
-                            <SelectTrigger className="bg-zinc-900 border-zinc-800">
+                            <SelectTrigger className="bg-neutral-900 border-neutral-800">
                                 <SelectValue />
                             </SelectTrigger>
-                            <SelectContent className="bg-zinc-900 border-zinc-800 text-white">
+                            <SelectContent className="bg-neutral-900 border-neutral-800 text-white">
                                 <SelectItem value="Hipertrofia">Hipertrofia (Masa Muscular)</SelectItem>
                                 <SelectItem value="Fuerza">Fuerza Máxima</SelectItem>
                                 <SelectItem value="Resistencia">Resistencia / Pérdida de Grasa</SelectItem>
@@ -80,10 +80,10 @@ export function RoutineGeneratorDialog({ onGenerated }: RoutineGeneratorProps) {
                     <div className="space-y-2">
                         <Label>Nivel del Atleta</Label>
                         <Select value={level} onValueChange={setLevel}>
-                            <SelectTrigger className="bg-zinc-900 border-zinc-800">
+                            <SelectTrigger className="bg-neutral-900 border-neutral-800">
                                 <SelectValue />
                             </SelectTrigger>
-                            <SelectContent className="bg-zinc-900 border-zinc-800 text-white">
+                            <SelectContent className="bg-neutral-900 border-neutral-800 text-white">
                                 <SelectItem value="Principiante">Principiante</SelectItem>
                                 <SelectItem value="Intermedio">Intermedio</SelectItem>
                                 <SelectItem value="Avanzado">Avanzado</SelectItem>
@@ -94,10 +94,10 @@ export function RoutineGeneratorDialog({ onGenerated }: RoutineGeneratorProps) {
                     <div className="space-y-2">
                         <Label>Tipo de Sesión (Split)</Label>
                         <Select value={split} onValueChange={setSplit}>
-                            <SelectTrigger className="bg-zinc-900 border-zinc-800">
+                            <SelectTrigger className="bg-neutral-900 border-neutral-800">
                                 <SelectValue />
                             </SelectTrigger>
-                            <SelectContent className="bg-zinc-900 border-zinc-800 text-white">
+                            <SelectContent className="bg-neutral-900 border-neutral-800 text-white">
                                 <SelectItem value="Full Body">Full Body</SelectItem>
                                 <SelectItem value="Torso">Torso (Empuje/Tracción)</SelectItem>
                                 <SelectItem value="Pierna">Pierna</SelectItem>
