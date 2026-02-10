@@ -7,7 +7,7 @@ import { ShieldAlert, ShieldCheck, Loader2, AlertTriangle, Info, CheckCircle2, A
 import { analyzeRoutineSafety } from "@/actions/ai-actions";
 import { cn } from "@/lib/utils";
 
-export function RoutineSafetyCheck({ routine, athleteId }: { routine: any, athleteId: string }) {
+export function RoutineSafetyCheck({ routine, athleteId }: { routine: any, athleteId?: string }) {
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [analysis, setAnalysis] = useState<any>(null);
@@ -15,7 +15,7 @@ export function RoutineSafetyCheck({ routine, athleteId }: { routine: any, athle
     const handleAnalyze = async () => {
         setLoading(true);
         try {
-            const res = await analyzeRoutineSafety(routine, athleteId);
+            const res = await analyzeRoutineSafety(routine, athleteId || "");
             if (res.success) {
                 setAnalysis(res.analysis);
             }
@@ -27,9 +27,10 @@ export function RoutineSafetyCheck({ routine, athleteId }: { routine: any, athle
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button variant="outline" className="h-10 border-neutral-800 bg-neutral-900/50 hover:bg-neutral-800 text-neutral-400 hover:text-white gap-2 transition-all group">
-                    <ShieldCheck className="w-4 h-4 text-emerald-500 group-hover:drop-shadow-[0_0_8px_rgba(16,185,129,0.5)] transition-all" />
-                    <span className="text-xs font-bold uppercase tracking-wider">Audit AI</span>
+                <Button variant="outline" className="h-10 sm:h-12 border-neutral-800 bg-neutral-900/50 hover:bg-neutral-800 text-neutral-400 hover:text-white gap-1 sm:gap-2 transition-all group px-3 sm:px-4 rounded-full">
+                    <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-500 group-hover:drop-shadow-[0_0_8px_rgba(16,185,129,0.5)] transition-all" />
+                    <span className="hidden sm:inline text-xs font-bold uppercase tracking-wider">AUDITORÍA IA</span>
+                    <span className="sm:hidden text-[10px] font-bold uppercase tracking-wider">IA</span>
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-md bg-neutral-950 border-neutral-800 text-white w-[95vw] rounded-3xl p-0 overflow-hidden shadow-2xl shadow-black/50">

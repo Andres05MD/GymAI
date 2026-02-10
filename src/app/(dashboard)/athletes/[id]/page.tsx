@@ -77,7 +77,7 @@ export default async function AthleteDetailsPage({ params }: PageProps) {
     }
 
     // Check if assigned
-    const isAssignedToMe = userDoc.data()?.coachId === session.user.id;
+
 
     const athlete = { id: userDoc.id, ...userDoc.data() } as Athlete;
 
@@ -118,11 +118,7 @@ export default async function AthleteDetailsPage({ params }: PageProps) {
                             <h1 className="text-2xl md:text-3xl font-black text-white uppercase tracking-tight break-words">
                                 {athlete.name}
                             </h1>
-                            {!isAssignedToMe && (
-                                <div className="px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-500 text-[10px] font-bold uppercase tracking-wider border border-yellow-500/20 whitespace-nowrap">
-                                    No Asignado
-                                </div>
-                            )}
+
                         </div>
                         <p className="text-neutral-500 text-sm">{athlete.email}</p>
                     </div>

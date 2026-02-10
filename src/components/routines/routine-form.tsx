@@ -49,19 +49,29 @@ function DayExercises({ dayIndex, control, register }: { dayIndex: number; contr
         name: `schedule.${dayIndex}.exercises`
     });
 
+    const [selectorOpen, setSelectorOpen] = useState(false);
+
     return (
         <div className="space-y-4 mt-4">
             <div className="flex items-center justify-between">
                 <h4 className="text-sm font-medium">Ejercicios del día</h4>
                 <div className="w-[250px]">
-                    <ExerciseSelector onSelect={(exercise) => {
-                        append({
-                            exerciseId: exercise.id,
-                            exerciseName: exercise.name,
-                            order: fields.length,
-                            sets: [{ type: "working", reps: "10", restSeconds: 60 }]
-                        })
-                    }} />
+                    <Button type="button" variant="secondary" size="sm" onClick={() => setSelectorOpen(true)}>
+                        <Plus className="mr-2 h-4 w-4" /> Añadir Ejercicio
+                    </Button>
+                    <ExerciseSelector
+                        open={selectorOpen}
+                        onOpenChange={setSelectorOpen}
+                        availableExercises={[]}
+                        onSelect={(exercise) => {
+                            append({
+                                exerciseId: exercise.id,
+                                exerciseName: exercise.name,
+                                order: fields.length,
+                                sets: [{ type: "working", reps: "10", restSeconds: 60 }]
+                            });
+                        }}
+                    />
                 </div>
             </div>
 

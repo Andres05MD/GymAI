@@ -8,6 +8,7 @@ Un ecosistema de entrenamiento inteligente potenciado por IA, diseñado para con
 - **Dashboard Avanzado**: Visualización completa de métricas de atletas, rutinas activas y carga de trabajo.
 - **Gestión de Atletas**: Perfiles detallados, seguimiento de progreso y asignación de planes.
 - **Constructor de Rutinas con IA**: Generación automática de planes de entrenamiento personalizados basados en objetivos, nivel y equipamiento.
+- **Asignación Flexible**: Asignación directa de rutinas a atletas con validaciones de seguridad.
 - **Biblioteca de Ejercicios**: Gestión centralizada de ejercicios con categorización muscular detallada.
 
 ### Para Atletas
@@ -18,6 +19,7 @@ Un ecosistema de entrenamiento inteligente potenciado por IA, diseñado para con
   - Alternativas de ejercicios si el equipamiento está ocupado.
   - Chat contextual sobre técnica y ejecución.
 - **Historial Completo**: Registro detallado de cada sesión y récord personal.
+- **Registro Retroactivo**: Posibilidad de registrar entrenamientos pasados con detalle de series, carga y RPE.
 
 ## 🛠️ Tech Stack
 

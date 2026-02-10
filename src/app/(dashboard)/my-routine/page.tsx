@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CalendarDays, Clock, Dumbbell, Play, AlertCircle } from "lucide-react";
+import { CalendarDays, Clock, Dumbbell, Play, AlertCircle, ClipboardList } from "lucide-react";
 import Link from "next/link";
 import { getRoutines } from "@/actions/routine-actions";
 import { differenceInCalendarWeeks } from "date-fns";
@@ -52,13 +52,21 @@ export default async function MyRoutinePage() {
                         Contacta con él o espera a que se actualice tu perfil.
                     </p>
                 </div>
-                {session.user.role === "coach" && (
-                    <Link href="/routines">
-                        <Button variant="outline" className="border-red-600 text-red-500 hover:bg-red-600/10">
-                            Ir a Mis Rutinas
+                <div className="flex flex-col sm:flex-row gap-3">
+                    {session.user.role === "coach" && (
+                        <Link href="/routines">
+                            <Button variant="outline" className="border-red-600 text-red-500 hover:bg-red-600/10">
+                                Ir a Mis Rutinas
+                            </Button>
+                        </Link>
+                    )}
+                    <Link href="/train/log">
+                        <Button variant="outline" className="border-neutral-700 text-neutral-300 hover:bg-neutral-800 rounded-full gap-2">
+                            <ClipboardList className="h-4 w-4" />
+                            Registrar Sesión Pasada
                         </Button>
                     </Link>
-                )}
+                </div>
             </div>
         );
     }
@@ -80,12 +88,20 @@ export default async function MyRoutinePage() {
                     <h2 className="text-3xl font-bold text-white tracking-tight">Mi Rutina Actual</h2>
                     <p className="text-neutral-400">Plan de entrenamiento asignado.</p>
                 </div>
-                <Link href="/train">
-                    <Button className="rounded-full bg-red-600 hover:bg-red-700 text-white font-bold h-12 px-8 shadow-lg shadow-red-900/20 gap-2">
-                        <Play className="h-5 w-5 fill-current" />
-                        Iniciar Sesión Hoy
-                    </Button>
-                </Link>
+                <div className="flex flex-col sm:flex-row gap-3">
+                    <Link href="/train/log">
+                        <Button variant="outline" className="w-full sm:w-auto rounded-full border-neutral-700 text-neutral-300 hover:bg-neutral-800 font-bold h-12 px-6 gap-2">
+                            <ClipboardList className="h-4 w-4" />
+                            Registrar Sesión Pasada
+                        </Button>
+                    </Link>
+                    <Link href="/train">
+                        <Button className="w-full sm:w-auto rounded-full bg-red-600 hover:bg-red-700 text-white font-bold h-12 px-8 shadow-lg shadow-red-900/20 gap-2">
+                            <Play className="h-5 w-5 fill-current" />
+                            Iniciar Sesión Hoy
+                        </Button>
+                    </Link>
+                </div>
             </div>
 
             {/* Info Metrics */}

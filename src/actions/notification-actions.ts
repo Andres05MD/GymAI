@@ -16,14 +16,32 @@ const getCachedCoachNotifications = unstable_cache(
             return [];
         }
 
+        // Recopilar athleteIds únicos para buscar nombres
+        const athleteIds = [...new Set(logsSnapshot.docs.map(doc => doc.data().athleteId).filter(Boolean))];
+
+        // Buscar nombres de atletas en la colección users
+        const athleteNames = new Map<string, string>();
+        for (const athleteId of athleteIds) {
+            try {
+                const userDoc = await adminDb.collection("users").doc(athleteId).get();
+                if (userDoc.exists) {
+                    athleteNames.set(athleteId, userDoc.data()?.name || "Sin nombre");
+                }
+            } catch {
+                // Si falla, se usará el fallback
+            }
+        }
+
         const notifications = logsSnapshot.docs.map(doc => {
             const data = doc.data();
             const date = data.date.toDate();
+            const athleteName = athleteNames.get(data.athleteId) || data.athleteName || "Sin nombre";
+            const routineName = data.routineName || "Rutina";
 
             return {
                 id: doc.id,
                 title: "Análisis de Sesión",
-                message: `IA: El atleta ${data.athleteName || 'Anónimo'} ha completado su rutina. Se detectó una mejora del 5% en volumen total.`,
+                message: `IA: El atleta ${athleteName} ha completado "${routineName}". Se detectó una mejora del 5% en volumen total.`,
                 time: date.toISOString(),
                 type: "ia_analysis",
                 read: false,
@@ -45,7 +63,18 @@ export async function getCoachNotifications() {
 
     try {
         const notifications = await getCachedCoachNotifications();
-        return { success: true, notifications };
+
+        // Obtener fecha de última lectura del coach
+        const userDoc = await adminDb.collection("users").doc(session.user.id).get();
+        const lastRead = userDoc.data()?.lastReadNotificationsAt?.toDate() || new Date(0);
+
+        // Procesar estado de lectura
+        const processedNotifications = notifications.map(n => ({
+            ...n,
+            read: new Date(n.time) <= lastRead
+        }));
+
+        return { success: true, notifications: processedNotifications };
     } catch (error) {
         console.error("Error fetching notifications:", error);
         return { success: false, error: "Error al cargar notificaciones" };
@@ -102,7 +131,7 @@ const getCachedAthleteNotifications = unstable_cache(
                 message: notifMessage,
                 time: new Date().toISOString(),
                 type: "alert",
-                read: false,
+                read: false, // Se actualizará fuera del cache
                 link: "/profile"
             });
         }
@@ -121,9 +150,35 @@ export async function getAthleteNotifications() {
 
     try {
         const notifications = await getCachedAthleteNotifications(session.user.id);
-        return { success: true, notifications };
+
+        // Obtener fecha de última lectura
+        const userDoc = await adminDb.collection("users").doc(session.user.id).get();
+        const lastRead = userDoc.data()?.lastReadNotificationsAt?.toDate() || new Date(0);
+
+        // Procesar estado de lectura
+        const processedNotifications = notifications.map(n => ({
+            ...n,
+            read: new Date(n.time) <= lastRead
+        }));
+
+        return { success: true, notifications: processedNotifications };
     } catch (error) {
         console.error("Error fetching athlete notifications:", error);
         return { success: false, error: "Error al cargar notificaciones" };
+    }
+}
+
+export async function markAllNotificationsAsRead() {
+    const session = await auth();
+    if (!session?.user?.id) return { success: false, error: "No autorizado" };
+
+    try {
+        await adminDb.collection("users").doc(session.user.id).update({
+            lastReadNotificationsAt: new Date()
+        });
+        return { success: true };
+    } catch (error) {
+        console.error("Error marking notifications as read:", error);
+        return { success: false, error: "Error al actualizar" };
     }
 }

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Check, Clock, Trophy, Info, Loader2, Play, Dumbbell, ChevronLeft, ChevronRight, Save } from "lucide-react";
-import { logWorkoutSession, WorkoutSessionData } from "@/actions/training-actions";
+import { logWorkoutSession, getLastSessionExerciseData, WorkoutSessionData } from "@/actions/training-actions";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -76,6 +76,10 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
     const { saveLogLocally } = useOfflineSync();
 
     const activeDay = routine.schedule[0]; // TODO: Logic to select day if multiple are available
+    // Estado para guardar el historial de la última sesión
+    const [historySets, setHistorySets] = useState<any[]>([]);
+
+    // Translate/Clean names for UI
 
     // Translate/Clean names for UI
     const cleanRoutineName = routine.name.replace(/\(assigned\)/i, '').trim();
@@ -137,6 +141,24 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
         };
         localStorage.setItem(storageKey, JSON.stringify(state));
     }, [sessionLog, elapsedTime, isStarted, currentExerciseIndex, routine.id, activeDay]);
+
+    // 3. Effect: Load history for current exercise when index changes
+    useEffect(() => {
+        const currentEx = activeDay?.exercises[currentExerciseIndex];
+        if (currentEx?.exerciseId && currentEx.exerciseId !== "temp-id") {
+            getLastSessionExerciseData(currentEx.exerciseId)
+                .then(res => {
+                    if (res.success && res.sets) {
+                        setHistorySets(res.sets);
+                    } else {
+                        setHistorySets([]);
+                    }
+                })
+                .catch(() => setHistorySets([]));
+        } else {
+            setHistorySets([]);
+        }
+    }, [currentExerciseIndex, activeDay]);
 
     useEffect(() => {
         if (!isStarted) return;
@@ -361,6 +383,9 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
                                 {currentExercise.sets.map((set: RoutineSet, setIndex: number) => {
                                     const logSet = currentLogExercise.sets[setIndex];
                                     const isCompleted = logSet?.completed;
+                                    // Buscar set correspondiente en el historial (asumimos orden secuencial por index)
+                                    // Si hay más sets en historial que en rutina actual, se mostrarán hasta donde coincidan
+                                    const historySet = historySets[setIndex];
 
                                     return (
                                         <div
@@ -393,7 +418,7 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
                                                 <Input
                                                     type="number"
                                                     inputMode="decimal"
-                                                    placeholder="-"
+                                                    placeholder={historySet ? `${historySet.weight}` : "-"}
                                                     value={logSet?.weight}
                                                     onChange={(e) => updateSet(currentExerciseIndex, setIndex, "weight", e.target.value)}
                                                     className={cn(
@@ -406,7 +431,7 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
                                                 <Input
                                                     type="number"
                                                     inputMode="decimal"
-                                                    placeholder="-"
+                                                    placeholder={historySet ? `${historySet.reps}` : "-"}
                                                     value={logSet?.reps}
                                                     onChange={(e) => updateSet(currentExerciseIndex, setIndex, "reps", e.target.value)}
                                                     className={cn(
@@ -419,7 +444,7 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
                                                 <Input
                                                     type="number"
                                                     inputMode="decimal"
-                                                    placeholder="-"
+                                                    placeholder={historySet ? `${historySet.rpe}` : "-"}
                                                     value={logSet?.rpe}
                                                     onChange={(e) => updateSet(currentExerciseIndex, setIndex, "rpe", e.target.value)}
                                                     className={cn(

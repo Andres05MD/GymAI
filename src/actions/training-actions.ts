@@ -4,8 +4,7 @@ import { adminDb } from "@/lib/firebase-admin";
 import { auth } from "@/lib/auth";
 import { z } from "zod";
 import { TrainingLogSchema } from "@/lib/schemas";
-import { unstable_cache } from "next/cache";
-import { revalidateCacheTags, CACHE_TAGS } from "./cache-actions";
+import { unstable_cache, revalidateTag } from "next/cache";
 
 // --- TIPOS LOCALES ---
 
@@ -47,7 +46,7 @@ export interface ProgressionSuggestion {
 // --- COACH ACTIONS ---
 
 // Assign Routine to Athlete
-export async function assignRoutineToAthlete(routineId: string, athleteId: string) {
+export async function assignRoutineToAthlete(routineId: string, athleteId: string, startDate?: Date) {
     const session = await auth();
     if (!session?.user?.id || session.user.role !== "coach") {
         return { success: false, error: "No autorizado" };
@@ -61,8 +60,7 @@ export async function assignRoutineToAthlete(routineId: string, athleteId: strin
             return { success: false, error: "Rutina no encontrada o sin permisos" };
         }
 
-        // 2. Deactivate previous active routines for this athlete
-        // (Assuming 1 active routine per athlete for simplicity, or we can just add a new one)
+        // 2. Deactivate previous routines
         const batch = adminDb.batch();
         const oldRoutines = await adminDb.collection("routines")
             .where("athleteId", "==", athleteId)
@@ -73,14 +71,11 @@ export async function assignRoutineToAthlete(routineId: string, athleteId: strin
             batch.update(doc.ref, { active: false });
         });
 
-        // 3. Create a COPY of the routine assigned to the athlete
-        // Better to copy so editing the template doesn't break the athlete's in-progress version immediately
-        // OR we can just link it. For now, let's LINK it by updating the athleteId on the routine if it was a template
-        // But if it's a template we want to reuse, we should duplicate.
-        // Let's assume we DUPLICATE the template for the athlete to allow specific customization.
-
+        // 3. Duplicate routine and link athlete to coach
         const templateData = routineSnap.data();
         const newRoutineRef = adminDb.collection("routines").doc();
+        const userRef = adminDb.collection("users").doc(athleteId);
+        const assignmentDate = startDate || new Date();
 
         batch.set(newRoutineRef, {
             ...templateData,
@@ -89,9 +84,13 @@ export async function assignRoutineToAthlete(routineId: string, athleteId: strin
             athleteId: athleteId,
             active: true,
             originalRoutineId: routineId,
+            startDate: assignmentDate,
             createdAt: new Date(),
             updatedAt: new Date()
         });
+
+        // 4. Update the athlete's doc to set the coachId if not already set or updated
+        batch.update(userRef, { coachId: session.user.id });
 
         await batch.commit();
 
@@ -110,7 +109,6 @@ export async function getTrainingLogs(userId?: string) {
     const session = await auth();
     if (!session?.user?.id) return { success: false, error: "No autorizado" };
 
-    // If requesting other user, check if coach
     const targetId = userId || session.user.id;
     if (targetId !== session.user.id && session.user.role !== "coach") {
         return { success: false, error: "No autorizado" };
@@ -120,7 +118,7 @@ export async function getTrainingLogs(userId?: string) {
         const snapshot = await adminDb.collection("training_logs")
             .where("athleteId", "==", targetId)
             .orderBy("date", "desc")
-            .limit(20) // Increased limit for history
+            .limit(20)
             .get();
 
         const logs = snapshot.docs.map(doc => {
@@ -151,9 +149,6 @@ export async function logWorkoutSession(data: WorkoutSessionData) {
     if (!session?.user?.id) return { success: false, error: "No autorizado" };
 
     try {
-        // Validate with rudimentary check or full Zod if strictly typed input
-        // data.athleteId = session.user.id;
-
         await adminDb.collection("training_logs").add({
             ...data,
             athleteId: session.user.id,
@@ -182,7 +177,6 @@ export async function getTrainingLog(logId: string) {
         }
 
         const data = docSnap.data();
-        // Check ownership or coach access
         if (data?.athleteId !== session.user.id && session.user.role !== "coach") {
             return { success: false, error: "No autorizado" };
         }
@@ -191,14 +185,7 @@ export async function getTrainingLog(logId: string) {
             success: true,
             log: {
                 id: docSnap.id,
-                athleteId: data?.athleteId,
-                routineId: data?.routineId,
-                routineName: data?.routineName,
-                dayName: data?.dayName,
-                status: data?.status,
-                durationMinutes: data?.durationMinutes,
-                exercises: data?.exercises,
-                notes: data?.notes,
+                ...data,
                 date: data?.date?.toDate?.()?.toISOString(),
                 startTime: data?.startTime?.toDate?.()?.toISOString(),
                 endTime: data?.endTime?.toDate?.()?.toISOString(),
@@ -217,23 +204,11 @@ export async function completeWorkout(logId: string) {
 
     try {
         const docRef = adminDb.collection("training_logs").doc(logId);
-        const docSnap = await docRef.get();
-
-        if (!docSnap.exists) {
-            return { success: false, error: "Log no encontrado" };
-        }
-
-        const data = docSnap.data();
-        if (data?.athleteId !== session.user.id) {
-            return { success: false, error: "No autorizado" };
-        }
-
         await docRef.update({
             status: "completed",
             endTime: new Date(),
             updatedAt: new Date()
         });
-
         return { success: true };
     } catch (error) {
         console.error("Error completing workout:", error);
@@ -256,11 +231,7 @@ export async function getAthleteRoutines() {
             const d = doc.data();
             return {
                 id: doc.id,
-                name: d.name,
-                coachId: d.coachId,
-                athleteId: d.athleteId,
-                active: d.active,
-                schedule: d.schedule,
+                ...d,
                 createdAt: d.createdAt?.toDate?.()?.toISOString(),
                 updatedAt: d.updatedAt?.toDate?.()?.toISOString(),
             };
@@ -279,26 +250,14 @@ export async function startWorkout(routineId: string) {
     if (!session?.user?.id) return { success: false, error: "No autorizado" };
 
     try {
-        // Get the routine
         const routineRef = adminDb.collection("routines").doc(routineId);
         const routineSnap = await routineRef.get();
-
-        if (!routineSnap.exists) {
-            return { success: false, error: "Rutina no encontrada" };
-        }
+        if (!routineSnap.exists) return { success: false, error: "Rutina no encontrada" };
 
         const routineData = routineSnap.data();
-
-        // Verify access
-        if (routineData?.athleteId !== session.user.id) {
-            return { success: false, error: "No autorizado" };
-        }
-
-        // Get first day of schedule for default (or could ask user to select)
         const schedule = routineData?.schedule || [];
         const firstDay = schedule[0] || { name: "Día 1", exercises: [] };
 
-        // Create workout log
         const workoutRef = await adminDb.collection("training_logs").add({
             athleteId: session.user.id,
             routineId: routineId,
@@ -308,9 +267,6 @@ export async function startWorkout(routineId: string) {
                 ...ex,
                 sets: ex.sets.map((set: RoutineSet) => ({
                     ...set,
-                    actualWeight: null,
-                    actualReps: null,
-                    actualRPE: null,
                     completed: false
                 }))
             })),
@@ -343,13 +299,7 @@ export async function getAthleteHistory() {
             const data = doc.data();
             return {
                 id: doc.id,
-                athleteId: data.athleteId,
-                routineId: data.routineId,
-                routineName: data.routineName,
-                dayName: data.dayName,
-                status: data.status,
-                durationMinutes: data.durationMinutes,
-                exercises: data.exercises,
+                ...data,
                 date: data.date?.toDate?.()?.toISOString(),
                 startTime: data.startTime?.toDate?.()?.toISOString(),
                 endTime: data.endTime?.toDate?.()?.toISOString(),
@@ -363,7 +313,7 @@ export async function getAthleteHistory() {
     }
 }
 
-// Log a single set during a workout session
+// Log a single set
 export async function logSet(data: {
     exerciseId: string;
     exerciseName: string;
@@ -382,7 +332,6 @@ export async function logSet(data: {
             athleteId: session.user.id,
             createdAt: new Date(),
         });
-
         return { success: true };
     } catch (error) {
         console.error("Error logging set:", error);
@@ -401,19 +350,15 @@ export async function finishWorkoutSession(
     if (!session?.user?.id) return { success: false, error: "No autorizado" };
 
     try {
-        // Get all sets for this session to calculate totals
         const setsSnapshot = await adminDb.collection("workout_sets")
             .where("sessionId", "==", sessionId)
             .where("athleteId", "==", session.user.id)
             .get();
 
         const sets = setsSnapshot.docs.map(doc => doc.data());
-
-        // Calculate actual volume and sets
         const calculatedVolume = sets.reduce((acc, set) => acc + (set.weight * set.reps), 0);
         const actualSets = sets.length;
 
-        // Create training log entry
         await adminDb.collection("training_logs").add({
             athleteId: session.user.id,
             sessionId: sessionId,
@@ -440,12 +385,12 @@ export async function finishWorkoutSession(
 
 // --- INTELLIGENT PROGRESSION ---
 
-export async function getProgressionSuggestion(exerciseId: string): Promise<{ success: boolean; suggestion?: ProgressionSuggestion; error?: string }> {
+export async function getLastSessionExerciseData(exerciseId: string) {
     const session = await auth();
     if (!session?.user?.id) return { success: false, error: "No autorizado" };
 
     try {
-        // Obtener historial reciente de sets para este ejercicio
+        // Obtener historial reciente
         const setsSnapshot = await adminDb.collection("workout_sets")
             .where("exerciseId", "==", exerciseId)
             .where("athleteId", "==", session.user.id)
@@ -453,23 +398,48 @@ export async function getProgressionSuggestion(exerciseId: string): Promise<{ su
             .limit(20)
             .get();
 
-        if (setsSnapshot.empty) {
-            return { success: true, suggestion: undefined };
-        }
+        if (setsSnapshot.empty) return { success: true, sets: [] };
 
-        // Agrupar sets por sesión para encontrar la "última sesión completa"
         const sets: any[] = setsSnapshot.docs.map(doc => ({ ...doc.data(), createdAt: doc.data().createdAt.toDate() }));
 
-        // Identificar ID de la última sesión
+        // La última sesión es la del primer set devuelto (están ordenados por fecha desc)
         const lastSessionId = sets[0].sessionId;
 
-        // Filtrar sets de esa última sesión
+        // Filtrar solo los sets de esa última sesión
+        // Invertimos el orden para que coincida con Set 1, Set 2, Set 3... (cronológico dentro de la sesión)
+        // Aunque createdAt desc significa que el último set hecho aparece primero. 
+        // Normalmente queremos mostrarlos en orden de ejecución (ascendente).
+        const lastSessionSets = sets
+            .filter((s: any) => s.sessionId === lastSessionId)
+            .sort((a: any, b: any) => a.timestamp - b.timestamp); // Ordenar cronólogicamente
+
+        return { success: true, sets: lastSessionSets };
+    } catch (error) {
+        console.error("Error fetching last session data:", error);
+        return { success: false, error: "Error al obtener historial" };
+    }
+}
+
+export async function getProgressionSuggestion(exerciseId: string): Promise<{ success: boolean; suggestion?: ProgressionSuggestion; error?: string }> {
+    const session = await auth();
+    if (!session?.user?.id) return { success: false, error: "No autorizado" };
+
+    try {
+        const setsSnapshot = await adminDb.collection("workout_sets")
+            .where("exerciseId", "==", exerciseId)
+            .where("athleteId", "==", session.user.id)
+            .orderBy("createdAt", "desc")
+            .limit(20)
+            .get();
+
+        if (setsSnapshot.empty) return { success: true, suggestion: undefined };
+
+        const sets: any[] = setsSnapshot.docs.map(doc => ({ ...doc.data(), createdAt: doc.data().createdAt.toDate() }));
+        const lastSessionId = sets[0].sessionId;
         const lastSessionSets = sets.filter((s: any) => s.sessionId === lastSessionId);
 
         if (lastSessionSets.length === 0) return { success: true };
 
-        // Encontrar el "Top Set" (Mejor rendimiento: Mayor peso, y a igualdad de peso, más reps)
-        // Ordenar por Peso DESC, Reps DESC
         lastSessionSets.sort((a: any, b: any) => {
             if (b.weight !== a.weight) return b.weight - a.weight;
             return b.reps - a.reps;
@@ -478,30 +448,22 @@ export async function getProgressionSuggestion(exerciseId: string): Promise<{ su
         const topSet = lastSessionSets[0];
         const { weight, reps, rpe, createdAt } = topSet;
 
-        // Reglas de Sobrecarga Progresiva (Algoritmo Básico)
         let suggestedWeight = weight;
         let reason = "Mantenimiento";
-
         const RPE_THRESHOLD_LOW = 7;
         const RPE_THRESHOLD_HIGH = 9;
 
         if (rpe <= RPE_THRESHOLD_LOW) {
-            // RPE Bajo: Fácil -> Subir Peso
-            // Redondear a múltiplos de 2.5 (discos estándar)
             suggestedWeight = weight + 2.5;
             reason = `RPE bajo (${rpe}) en última sesión. ¡Sube la carga!`;
         } else if (rpe > RPE_THRESHOLD_HIGH) {
-            // RPE Alto: Muy difícil -> Mantener o descargar si falló (pero no sabemos si falló, asumimos RPE 10 es límite)
             suggestedWeight = weight;
             reason = `RPE alto (${rpe}). Consolida este peso.`;
         } else {
-            // RPE Normal (7-9): Zona óptima -> Intentar pequeña subida si se siente bien, o mantener.
-            // Para ser conservadores, sugerimos mantener pero indicando que busque reps.
             suggestedWeight = weight;
             reason = `Zona de buen esfuerzo. Intenta superar las repeticiones.`;
         }
 
-        // Si el peso es 0 (ej. peso corporal), no subir kg salvo que use lastre, pero mostramos mensaje.
         if (weight === 0) {
             reason = "Ejercicio de peso corporal. Intenta agregar reps o lastre.";
             suggestedWeight = 0;
@@ -523,5 +485,113 @@ export async function getProgressionSuggestion(exerciseId: string): Promise<{ su
     } catch (error) {
         console.error("Error calculating progression:", error);
         return { success: false, error: "Error al calcular progresión" };
+    }
+}
+
+// --- REGISTRO RETROACTIVO ---
+
+// Schema de validación para entrenamiento retroactivo
+const RetroactiveSetSchema = z.object({
+    weight: z.coerce.number().min(0, "El peso no puede ser negativo"),
+    reps: z.coerce.number().min(0, "Las reps no pueden ser negativas"),
+    rpe: z.coerce.number().min(1).max(10).optional(),
+    completed: z.boolean().default(true),
+});
+
+const RetroactiveExerciseSchema = z.object({
+    exerciseId: z.string().optional(),
+    exerciseName: z.string().min(1, "El nombre del ejercicio es obligatorio"),
+    feedback: z.string().optional(),
+    sets: z.array(RetroactiveSetSchema).min(1, "Se requiere al menos una serie"),
+});
+
+const RetroactiveWorkoutSchema = z.object({
+    routineId: z.string().optional(),
+    routineName: z.string().optional(),
+    dayId: z.string().optional(),
+    date: z.string().min(1, "La fecha es obligatoria"),
+    durationMinutes: z.coerce.number().min(1, "La duración debe ser al menos 1 minuto"),
+    sessionRpe: z.coerce.number().min(1).max(10),
+    sessionNotes: z.string().optional(),
+    exercises: z.array(RetroactiveExerciseSchema).min(1, "Se requiere al menos un ejercicio"),
+});
+
+export type RetroactiveWorkoutData = z.infer<typeof RetroactiveWorkoutSchema>;
+
+export async function logRetroactiveWorkout(data: RetroactiveWorkoutData) {
+    const session = await auth();
+    if (!session?.user?.id) return { success: false, error: "No autorizado" };
+
+    const validation = RetroactiveWorkoutSchema.safeParse(data);
+    if (!validation.success) {
+        const firstError = validation.error.issues[0]?.message || "Datos inválidos";
+        return { success: false, error: firstError };
+    }
+
+    const validated = validation.data;
+
+    try {
+        const workoutDate = new Date(validated.date);
+
+        // Guardar el log de entrenamiento
+        await adminDb.collection("training_logs").add({
+            athleteId: session.user.id,
+            routineId: validated.routineId || null,
+            dayId: validated.dayId || null,
+            routineName: validated.routineName || "Registro Manual",
+            date: workoutDate,
+            durationMinutes: validated.durationMinutes,
+            sessionRpe: validated.sessionRpe,
+            sessionNotes: validated.sessionNotes || "",
+            status: "completed",
+            isRetroactive: true, // Marca para distinguir de sesiones en tiempo real
+            startTime: workoutDate,
+            endTime: new Date(workoutDate.getTime() + validated.durationMinutes * 60000),
+            exercises: validated.exercises.map(ex => ({
+                exerciseId: ex.exerciseId || "",
+                exerciseName: ex.exerciseName,
+                feedback: ex.feedback || "",
+                sets: ex.sets.map(s => ({
+                    weight: s.weight,
+                    reps: s.reps,
+                    rpe: s.rpe || undefined,
+                    completed: s.completed,
+                })),
+            })),
+            createdAt: new Date(),
+        });
+
+        // También guardar sets individuales para que funcione el historial de progresión
+        const sessionId = `retro_${Date.now()}_${session.user.id.slice(0, 6)}`;
+        const batch = adminDb.batch();
+
+        for (const exercise of validated.exercises) {
+            for (const set of exercise.sets) {
+                if (set.weight > 0 || set.reps > 0) {
+                    const setRef = adminDb.collection("workout_sets").doc();
+                    batch.set(setRef, {
+                        exerciseId: exercise.exerciseId || "",
+                        exerciseName: exercise.exerciseName,
+                        weight: set.weight,
+                        reps: set.reps,
+                        rpe: set.rpe || null,
+                        sessionId,
+                        athleteId: session.user.id,
+                        timestamp: workoutDate.getTime(),
+                        createdAt: workoutDate,
+                    });
+                }
+            }
+        }
+
+        await batch.commit();
+
+        // Invalidar cache de historial
+        revalidateTag("training-logs", "default");
+
+        return { success: true };
+    } catch (error) {
+        console.error("Error al registrar entrenamiento retroactivo:", error);
+        return { success: false, error: "Error al guardar el entrenamiento" };
     }
 }
