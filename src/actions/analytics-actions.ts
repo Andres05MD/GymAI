@@ -179,6 +179,77 @@ export async function getPersonalRecords(userId?: string) {
     }
 }
 
+export async function getStrengthProgress(userId?: string) {
+    const session = await auth();
+    if (!session?.user?.id) return { success: false, error: "No autorizado" };
+    const targetUserId = userId || session.user.id;
+
+    try {
+        // Obtenemos los últimos 20 logs para tener suficiente data de comparación
+        const logsSnapshot = await adminDb.collection("training_logs")
+            .where("athleteId", "==", targetUserId)
+            .orderBy("date", "desc")
+            .limit(20)
+            .get();
+
+        if (logsSnapshot.empty || logsSnapshot.size < 2) {
+            return { success: true, progress: 0 };
+        }
+
+        const logs = logsSnapshot.docs.map(doc => doc.data());
+
+        // Dividir en dos mitades: Reciente (0-9) vs Anterior (10-19)
+        // Como están ordenados desc (más nuevo primero), los primeros son los recientes.
+        const half = Math.ceil(logs.length / 2);
+        const recentLogs = logs.slice(0, half);
+        const olderLogs = logs.slice(half);
+
+        const calculateAverageE1RM = (periodLogs: any[]) => {
+            let totalE1RM = 0;
+            let count = 0;
+
+            periodLogs.forEach(log => {
+                if (log.exercises) {
+                    log.exercises.forEach((ex: TrainingExercise) => {
+                        // Calcular Max E1RM de este ejercicio en esta sesión
+                        let maxSessionE1RM = 0;
+                        ex.sets.forEach((s: TrainingSet) => {
+                            if (s.completed && s.weight && s.reps) {
+                                // Fórmula E1RM con RPE: Weight * (1 + (Reps + (10 - RPE)) / 30)
+                                // Si no hay RPE, asumimos RIR 2 (RPE 8) como estándar seguro
+                                const rpe = s.rpe || 8;
+                                const e1rm = s.weight * (1 + (s.reps + (10 - rpe)) / 30);
+                                if (e1rm > maxSessionE1RM) maxSessionE1RM = e1rm;
+                            }
+                        });
+                        if (maxSessionE1RM > 0) {
+                            totalE1RM += maxSessionE1RM;
+                            count++;
+                        }
+                    });
+                }
+            });
+            return count > 0 ? totalE1RM / count : 0;
+        };
+
+        const recentAvg = calculateAverageE1RM(recentLogs);
+        const olderAvg = calculateAverageE1RM(olderLogs);
+
+        let percentageChange = 0;
+        if (olderAvg > 0) {
+            percentageChange = ((recentAvg - olderAvg) / olderAvg) * 100;
+        } else if (recentAvg > 0) {
+            percentageChange = 100; // Si antes era 0 y ahora hay algo, es 100% de mejora (o infinito, ponemos 100 por UI)
+        }
+
+        return { success: true, progress: parseFloat(percentageChange.toFixed(1)) };
+
+    } catch (error) {
+        console.error("Error calculating strength progress:", error);
+        return { success: false, error: "Error al calcular progreso" };
+    }
+}
+
 import { getGroqClient } from "@/lib/ai";
 
 export async function analyzeAthleteProgress(userId: string) {

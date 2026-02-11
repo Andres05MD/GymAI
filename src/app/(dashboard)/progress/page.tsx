@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth";
-import { Activity, Flame, Scale, TrendingUp, Trophy, Ruler, Users, ArrowLeft } from "lucide-react";
-import { getPersonalRecords } from "@/actions/analytics-actions";
+import { Activity, Flame, Scale, TrendingUp, Trophy, Ruler, Users, ArrowLeft, Dumbbell } from "lucide-react";
+import { getPersonalRecords, getStrengthProgress } from "@/actions/analytics-actions";
 import { adminDb } from "@/lib/firebase-admin";
 import { getAllAthletes } from "@/actions/coach-actions";
 import Link from "next/link";
@@ -94,12 +94,15 @@ export default async function ProgressPage({ searchParams }: ProgressPageProps) 
         );
     }
 
-    const [prsResult, metrics] = await Promise.all([
+    const [prsResult, metrics, strengthResult] = await Promise.all([
         getPersonalRecords(targetUserId),
-        getLatestBodyMetrics(targetUserId)
+        getLatestBodyMetrics(targetUserId),
+        getStrengthProgress(targetUserId)
     ]);
 
     const prs = prsResult.success ? prsResult.prs : [];
+    const strengthProgress = strengthResult.success && strengthResult.progress ? strengthResult.progress : 0;
+    const isStrengthPositive = strengthProgress >= 0;
     const weightChange = metrics ? (metrics.weight - metrics.startWeight).toFixed(1) : "0";
     const isWeightLoss = parseFloat(weightChange) < 0;
 
@@ -166,13 +169,7 @@ export default async function ProgressPage({ searchParams }: ProgressPageProps) 
                                 <Scale className="h-5 w-5 md:h-6 md:w-6 text-blue-500" />
                             </div>
                             <p className="text-2xl md:text-3xl font-black text-white tracking-tighter mb-1">{metrics?.weight || "—"}</p>
-                            <p className="text-[9px] md:text-[10px] text-neutral-500 uppercase tracking-widest font-bold mb-2">Peso (kg)</p>
-                            <span className={cn(
-                                "px-2 py-0.5 rounded-md text-[9px] md:text-[10px] font-bold border shrink-0",
-                                isWeightLoss ? 'bg-green-500/10 text-green-500 border-green-500/20' : 'bg-neutral-800 text-neutral-500 border-neutral-700'
-                            )}>
-                                {parseFloat(weightChange) > 0 ? '+' : ''}{weightChange} kg
-                            </span>
+                            <p className="text-[9px] md:text-[10px] text-neutral-500 uppercase tracking-widest font-bold">Peso (kg)</p>
                         </div>
                     </div>
                 </LogMeasurementDialog>
@@ -190,14 +187,16 @@ export default async function ProgressPage({ searchParams }: ProgressPageProps) 
                 </Link>
 
                 <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-3xl md:rounded-4xl p-4 md:p-6 relative overflow-hidden group hover:border-green-500/30 transition-all h-full flex flex-col items-center justify-center text-center col-span-2 md:col-span-1">
-                    <div className="absolute top-0 right-0 w-20 h-20 bg-green-600/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none group-hover:bg-green-600/20 transition-colors"></div>
+                    <div className="absolute top-0 right-0 w-20 h-20 bg-purple-600/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none group-hover:bg-purple-600/20 transition-colors"></div>
                     <div className="relative z-10 flex flex-col items-center">
                         <div className="w-12 h-12 md:w-14 md:h-14 bg-neutral-900 rounded-2xl flex items-center justify-center mb-3 shadow-lg border border-neutral-800 group-hover:scale-105 transition-transform duration-300">
-                            <TrendingUp className="h-5 w-5 md:h-6 md:w-6 text-green-500" />
+                            <TrendingUp className="h-5 w-5 md:h-6 md:w-6 text-purple-500" />
                         </div>
-                        <p className="text-2xl md:text-3xl font-black text-white tracking-tighter mb-1">—</p>
-                        <p className="text-[9px] md:text-[10px] text-neutral-500 uppercase tracking-widest font-bold mb-2">Volumen</p>
-                        <p className="text-[10px] md:text-xs text-neutral-600 font-medium italic shrink-0">Próximamente</p>
+                        <p className="text-2xl md:text-3xl font-black text-white tracking-tighter mb-1 flex items-center gap-1">
+                            {isStrengthPositive ? "+" : ""}{strengthProgress}%
+                        </p>
+                        <p className="text-[9px] md:text-[10px] text-neutral-500 uppercase tracking-widest font-bold mb-2">Progreso Fuerza</p>
+                        <p className="text-[10px] md:text-xs text-neutral-600 font-medium shrink-0">vs Entrenos prev.</p>
                     </div>
                 </div>
             </div>
