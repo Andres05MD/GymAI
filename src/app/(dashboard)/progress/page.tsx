@@ -308,18 +308,20 @@ export default async function ProgressPage({ searchParams }: ProgressPageProps) 
                     <div className="divide-y divide-neutral-800">
                         {prs.map((pr: PersonalRecord, i: number) => (
                             <div key={i} className="p-6 flex items-center justify-between hover:bg-neutral-800/30 transition-colors group">
-                                <div className="flex items-center gap-5">
-                                    <div className="h-14 w-14 bg-red-500/5 rounded-2xl flex items-center justify-center border border-neutral-800 group-hover:border-red-500/30 transition-colors">
+                                <div className="flex items-center gap-5 flex-1 min-w-0">
+                                    <div className="h-14 w-14 bg-red-500/5 rounded-2xl shrink-0 flex items-center justify-center border border-neutral-800 group-hover:border-red-500/30 transition-colors">
                                         <Dumbbell className="h-6 w-6 text-neutral-600 group-hover:text-red-500 transition-colors" />
                                     </div>
-                                    <div>
-                                        <h4 className="font-bold text-white text-lg mb-0.5">{pr.exercise}</h4>
+                                    <div className="min-w-0">
+                                        <h4 className="font-bold text-white text-lg mb-0.5 truncate md:whitespace-normal md:line-clamp-2">{pr.exercise}</h4>
                                         <p className="text-xs text-neutral-500 font-medium font-mono">{pr.date}</p>
                                     </div>
                                 </div>
-                                <div className="text-right">
-                                    <p className="font-black text-3xl text-white tracking-tighter">{pr.weight} <span className="text-base font-bold text-neutral-600">kg</span></p>
-                                    <p className="text-[9px] uppercase tracking-widest text-red-500/70 font-bold">Máximo Peso</p>
+                                <div className="text-right shrink-0 ml-4">
+                                    <p className="font-black text-3xl text-white tracking-tighter whitespace-nowrap">
+                                        {pr.weight} <span className="text-base font-bold text-neutral-600">kg</span>
+                                    </p>
+                                    <p className="text-[9px] uppercase tracking-widest text-red-500/70 font-bold whitespace-nowrap">Máximo Peso</p>
                                 </div>
                             </div>
                         ))}
