@@ -19,6 +19,7 @@ const LogSchema = z.object({
     waist: z.coerce.number().optional(),
     hips: z.coerce.number().optional(),
     shoulders: z.coerce.number().optional(),
+    neck: z.coerce.number().optional(),
     glutes: z.coerce.number().optional(),
 
     bicepsLeft: z.coerce.number().optional(),
@@ -125,6 +126,10 @@ export function LogMeasurementDialog({ onLogSuccess, children, initialData, init
                             <span className="text-xs text-neutral-500 font-normal ml-auto">En centímetros</span>
                         </div>
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-5">
+                            <div className="space-y-2">
+                                <Label className="text-xs font-medium text-neutral-400 pl-1 uppercase">Cuello</Label>
+                                <Input type="number" step="0.1" {...form.register("neck")} className="bg-neutral-950 border-neutral-800 focus:border-red-500 h-11 text-white placeholder:text-neutral-500" placeholder="0" />
+                            </div>
                             <div className="space-y-2">
                                 <Label className="text-xs font-medium text-neutral-400 pl-1 uppercase">Pecho / Espalda</Label>
                                 <Input type="number" step="0.1" {...form.register("chest")} className="bg-neutral-950 border-neutral-800 focus:border-red-500 h-11 text-white placeholder:text-neutral-500" placeholder="0" />

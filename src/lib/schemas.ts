@@ -34,6 +34,8 @@ export const BodyMeasurementsSchema = z.object({
     hips: z.number().optional(),
     shoulders: z.number().optional(),
     glutes: z.number().optional(),
+    neck: z.number().optional(),
+    bodyFat: z.number().optional(),
 
     // Extremidades
     bicepsLeft: z.number().optional(),
@@ -62,6 +64,7 @@ export const UserSchema = z.object({
     age: z.number().min(10).max(100).optional(),
     weight: z.number().optional(),
     height: z.number().optional(),
+    bodyFat: z.number().optional(),
     gender: GenderEnum.optional(),
     experienceLevel: z.enum(["beginner", "intermediate", "advanced"]).optional(),
     goal: z.string().optional(),
@@ -103,6 +106,7 @@ export const OnboardingInputSchema = z.object({
         hips: z.coerce.number().optional(),
         glutes: z.coerce.number().optional(), // Added glutes
         shoulders: z.coerce.number().optional(),
+        neck: z.coerce.number().optional(),
 
         bicepsLeft: z.coerce.number().optional(),
         bicepsRight: z.coerce.number().optional(),
@@ -212,6 +216,8 @@ export const BodyMeasurementLogSchema = z.object({
     hips: z.number().optional(),
     shoulders: z.number().optional(),
     glutes: z.number().optional(),
+    neck: z.number().optional(),
+    bodyFat: z.number().optional(),
 
     bicepsLeft: z.number().optional(),
     bicepsRight: z.number().optional(),

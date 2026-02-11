@@ -22,10 +22,43 @@ export async function logBodyMeasurements(data: z.infer<typeof MeasurementInput>
     }
 
     try {
+        // Fetch user data for height and gender needed for body fat calc
+        const userSnapshot = await adminDb.collection("users").doc(session.user.id).get();
+        const userData = userSnapshot.data();
+        const height = userData?.height; // cms
+        const gender = userData?.gender || "male";
+
+        // Calculate Body Fat if possible (US Navy Method)
+        let calculatedBodyFat: number | undefined = undefined;
+
+        if (height && data.waist && data.neck) {
+            const h = height;
+            const w = data.waist;
+            const n = data.neck;
+
+            if (gender === "male") {
+                // BF = 86.010 * log10(abdomen - neck) - 70.041 * log10(height) + 36.76
+                if (w - n > 0) {
+                    calculatedBodyFat = 86.010 * Math.log10(w - n) - 70.041 * Math.log10(h) + 36.76;
+                }
+            } else if (gender === "female" && data.hips) {
+                // BF = 163.205 * log10(waist + hip - neck) - 97.684 * log10(height) - 78.387
+                const hip = data.hips;
+                if (w + hip - n > 0) {
+                    calculatedBodyFat = 163.205 * Math.log10(w + hip - n) - 97.684 * Math.log10(h) - 78.387;
+                }
+            }
+        }
+
+        if (calculatedBodyFat) {
+            calculatedBodyFat = parseFloat(calculatedBodyFat.toFixed(1));
+        }
+
         const logData = {
             userId: session.user.id,
             date: data.date ? new Date(data.date) : new Date(),
             createdAt: new Date(),
+            bodyFat: calculatedBodyFat,
             ...data
         };
 
@@ -37,17 +70,25 @@ export async function logBodyMeasurements(data: z.infer<typeof MeasurementInput>
         const docRef = await adminDb.collection("body_measurements").add(logData);
 
         // Also update the user's latest measurements in their profile for quick access
-        await adminDb.collection("users").doc(session.user.id).update({
+        const updateData: any = {
             measurements: {
                 ...data,
                 weight: data.weight,
                 updatedAt: new Date()
             },
             weight: data.weight // Update main weight field too if present
-        });
+        };
+
+        if (calculatedBodyFat) {
+            updateData.bodyFat = calculatedBodyFat;
+            updateData.measurements.bodyFat = calculatedBodyFat;
+        }
+
+        await adminDb.collection("users").doc(session.user.id).update(updateData);
 
         revalidatePath("/profile");
         revalidatePath("/analytics");
+        revalidatePath("/progress");
 
         return { success: true, id: docRef.id };
     } catch (error) {
@@ -84,6 +125,8 @@ export async function getBodyMeasurementsHistory(userId?: string) {
                 date: d.date?.toDate ? d.date.toDate().toISOString() : new Date(d.date).toISOString(),
                 createdAt: d.createdAt?.toDate ? d.createdAt.toDate().toISOString() : new Date().toISOString(),
                 weight: d.weight,
+                bodyFat: d.bodyFat,
+                neck: d.neck,
                 chest: d.chest,
                 waist: d.waist,
                 hips: d.hips,
