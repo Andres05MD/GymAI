@@ -634,18 +634,34 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                                                                                 </SelectContent>
                                                                             </Select>
                                                                         </div>
-                                                                        <Button
-                                                                            variant="ghost"
-                                                                            size="icon"
-                                                                            className="h-6 w-6 text-neutral-600 hover:text-red-500 hover:bg-red-500/10 -mr-1"
-                                                                            onClick={() => {
-                                                                                const newSets = [...exercise.sets];
-                                                                                newSets.splice(setIndex, 1);
-                                                                                updateExerciseField(activeDayIndex, exIndex, "sets", newSets);
-                                                                            }}
-                                                                        >
-                                                                            <Trash2 className="w-3.5 h-3.5" />
-                                                                        </Button>
+                                                                        <div className="flex items-center gap-0.5">
+                                                                            <Button
+                                                                                type="button"
+                                                                                variant="ghost"
+                                                                                size="icon"
+                                                                                className="h-7 w-7 text-neutral-600 hover:text-white"
+                                                                                onClick={() => {
+                                                                                    const newSets = [...exercise.sets];
+                                                                                    newSets.splice(setIndex + 1, 0, { ...set });
+                                                                                    updateExerciseField(activeDayIndex, exIndex, "sets", newSets);
+                                                                                }}
+                                                                            >
+                                                                                <Copy className="w-3.5 h-3.5" />
+                                                                            </Button>
+                                                                            <Button
+                                                                                type="button"
+                                                                                variant="ghost"
+                                                                                size="icon"
+                                                                                className="h-7 w-7 text-neutral-600 hover:text-red-500 hover:bg-red-500/10 -mr-1"
+                                                                                onClick={() => {
+                                                                                    const newSets = [...exercise.sets];
+                                                                                    newSets.splice(setIndex, 1);
+                                                                                    updateExerciseField(activeDayIndex, exIndex, "sets", newSets);
+                                                                                }}
+                                                                            >
+                                                                                <Trash2 className="w-3.5 h-3.5" />
+                                                                            </Button>
+                                                                        </div>
                                                                     </div>
 
                                                                     {/* Desktop Type Selector */}

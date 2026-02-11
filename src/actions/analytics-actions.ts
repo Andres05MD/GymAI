@@ -257,7 +257,16 @@ export async function analyzeAthleteProgress(userId: string) {
     if (!session?.user?.id || session.user.role !== "coach") return { success: false, error: "No autorizado" };
 
     try {
-        // Fetch last 10 training logs to give context to AI
+        // 1. Obtener perfil del atleta para contexto de salud
+        const userDoc = await adminDb.collection("users").doc(userId).get();
+        const userData = userDoc.data();
+        const healthProfile = {
+            goal: userData?.goal || "No definido",
+            injuries: userData?.injuries || [],
+            medicalConditions: userData?.medicalConditions || []
+        };
+
+        // 2. Obtener últimos 10 entrenamientos
         const logsSnapshot = await adminDb.collection("training_logs")
             .where("athleteId", "==", userId)
             .orderBy("date", "desc")
@@ -272,7 +281,7 @@ export async function analyzeAthleteProgress(userId: string) {
             };
         }
 
-        // Simplify logs for AI context to save tokens
+        // Simplificar logs para contexto de IA
         const workoutHistory = logsSnapshot.docs.map(doc => {
             const d = doc.data();
             return {
@@ -286,22 +295,30 @@ export async function analyzeAthleteProgress(userId: string) {
         });
 
         const prompt = `
-            Analiza los siguientes últimos 10 entrenamientos de un atleta y detecta patrones.
+            Actúa como un Entrenador Experto y Fisioterapeuta. Analiza el progreso y salud de este atleta.
             
-            Historial JSON:
+            PERFIL DE SALUD Y OBJETIVO:
+            - Objetivo: ${healthProfile.goal}
+            - Lesiones/Molestias: ${healthProfile.injuries.length > 0 ? healthProfile.injuries.join(", ") : "Ninguna"}
+            - Condiciones Médicas: ${healthProfile.medicalConditions.length > 0 ? healthProfile.medicalConditions.join(", ") : "Ninguna"}
+
+            HISTORIAL DE ENTRENAMIENTO (Últimos 10):
             ${JSON.stringify(workoutHistory)}
 
-            Tu tarea es identificar:
-            1. ESTANCAMIENTO: Ejercicios donde el peso (topSet) no ha aumentado en las últimas 3 sesiones.
-            2. RECOMENDACIONES: Sugerencia breve de sobrecarga progresiva (ej: "Subir 2.5kg en Banca").
+            TAREAS:
+            1. ESTANCAMIENTO: Detecta ejercicios donde el topSet no ha subido en 3 sesiones.
+            2. RECOMENDACIONES: Sugiere sobrecarga progresiva O ajustes de seguridad.
+            
+            REGLA CRÍTICA DE SEGURIDAD: 
+            Si el atleta tiene una lesión (ej: "Espalda Baja"), NO sugieras aumentar peso en ejercicios que la comprometan (ej: Peso Muerto, Sentadilla Pesada). En su lugar, sugiere precaución o variantes más seguras.
 
-            Responde ÚNICAMENTE con este JSON exacto:
+            Responde ÚNICAMENTE con este JSON en ESPAÑOL:
             {
                 "alerts": [
-                    { "type": "stagnation", "message": "Estancado en [Ejercicio] desde hace 3 sesiones", "severity": "high" }
+                    { "type": "stagnation" | "health_warning", "message": "...", "severity": "low" | "medium" | "high" }
                 ],
                 "suggestions": [
-                    "Sugerencia 1..."
+                    "Sugerencia clara y accionable..."
                 ]
             }
         `;

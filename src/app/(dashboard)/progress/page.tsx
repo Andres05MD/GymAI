@@ -299,8 +299,8 @@ export default async function ProgressPage({ searchParams }: ProgressPageProps) 
                         <Dumbbell className="h-6 w-6 text-red-500" />
                     </div>
                     <div>
-                        <h3 className="text-xl font-black text-white uppercase tracking-tight">Peso de Ejercicios</h3>
-                        <p className="text-xs text-neutral-500 font-medium">Máximos pesos registrados por ejercicio</p>
+                        <h3 className="text-xl font-black text-white uppercase tracking-tight">Pesos por Ejercicio</h3>
+                        <p className="text-xs text-neutral-500 font-medium">Máximos pesos registrados por cada ejercicio</p>
                     </div>
                 </div>
 
@@ -313,7 +313,7 @@ export default async function ProgressPage({ searchParams }: ProgressPageProps) 
                                         <Dumbbell className="h-6 w-6 text-neutral-600 group-hover:text-red-500 transition-colors" />
                                     </div>
                                     <div className="min-w-0">
-                                        <h4 className="font-bold text-white text-lg mb-0.5 truncate md:whitespace-normal md:line-clamp-2">{pr.exercise}</h4>
+                                        <h4 className="font-bold text-white text-lg mb-0.5">{pr.exercise}</h4>
                                         <p className="text-xs text-neutral-500 font-medium font-mono">{pr.date}</p>
                                     </div>
                                 </div>

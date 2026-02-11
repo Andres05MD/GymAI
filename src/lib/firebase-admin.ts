@@ -54,3 +54,26 @@ const app = getAdminApp();
 export const adminDb = admin.firestore(app);
 export const adminAuth = admin.auth(app);
 export { app };
+
+/**
+ * REGLA .cursorrules: Firestore Converter para Server SDK (admin)
+ */
+export const createAdminConverter = <T extends Record<string, any>>() => ({
+    toFirestore: (data: T): admin.firestore.DocumentData => {
+        // Eliminar undefined para que Firestore no proteste
+        const clean: any = {};
+        Object.entries(data).forEach(([key, value]) => {
+            if (value !== undefined) clean[key] = value;
+        });
+        return clean;
+    },
+    fromFirestore: (snapshot: admin.firestore.QueryDocumentSnapshot): T => {
+        const data = snapshot.data();
+        return {
+            ...data,
+            id: snapshot.id,
+            createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : data.createdAt,
+            updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : data.updatedAt,
+        } as unknown as T;
+    }
+});

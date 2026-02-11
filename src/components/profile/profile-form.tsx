@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { updateProfile } from "@/actions/user-actions";
+import { updateProfile } from "@/actions/profile-actions";
 import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { User } from "lucide-react";
@@ -57,7 +57,11 @@ export function ProfileForm({ user }: ProfileFormProps) {
 
     // 2. Define a submit handler.
     async function onSubmit(values: z.infer<typeof profileSchema>) {
-        const res = await updateProfile(values);
+        const res = await updateProfile({
+            ...values,
+            height: values.height ? Number(values.height) : undefined,
+            weight: values.weight ? Number(values.weight) : undefined,
+        } as any); // Use any temporarily to avoid complex Zod/TS intersection issues if they persist
         if (res.success) {
             toast.success("Perfil actualizado");
             router.refresh();

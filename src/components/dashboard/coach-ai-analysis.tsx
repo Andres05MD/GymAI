@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Brain, AlertCircle, Lightbulb, Loader2, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { Brain, AlertCircle, Lightbulb, Loader2, AlertTriangle, CheckCircle2, Activity } from "lucide-react";
 import { analyzeAthleteProgress } from "@/actions/analytics-actions";
 import { cn } from "@/lib/utils";
 
@@ -79,12 +79,16 @@ export function CoachAIAnalysis({ athleteId }: CoachAIAnalysisProps) {
                                         alert.severity === 'high' ? "bg-red-950/30 border-red-500/30 text-red-200 shadow-md shadow-red-900/10" : "bg-yellow-950/30 border-yellow-500/30 text-yellow-200"
                                     )}>
                                         <div className={cn("mt-1 shrink-0 p-1 rounded-full",
-                                            alert.severity === 'high' ? "bg-red-500/20 text-red-500" : "bg-yellow-500/20 text-yellow-500"
+                                            alert.type === 'health_warning' ? "bg-red-500/20 text-red-500" :
+                                                alert.severity === 'high' ? "bg-red-500/20 text-red-500" : "bg-yellow-500/20 text-yellow-500"
                                         )}>
-                                            <AlertTriangle className="w-4 h-4" />
+                                            {alert.type === 'health_warning' ? <Activity className="w-4 h-4" /> : <AlertTriangle className="w-4 h-4" />}
                                         </div>
                                         <div className="space-y-1">
-                                            <p className="font-bold text-sm leading-none">{alert.type === 'stagnation' ? 'Estancamiento Detectado' : 'Alerta'}</p>
+                                            <p className="font-bold text-sm leading-none">
+                                                {alert.type === 'stagnation' ? 'Estancamiento Detectado' :
+                                                    alert.type === 'health_warning' ? 'Advertencia de Salud' : 'Alerta'}
+                                            </p>
                                             <p className="text-xs opacity-90 leading-relaxed">{alert.message}</p>
                                         </div>
                                     </div>

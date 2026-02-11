@@ -18,39 +18,40 @@ export function ExerciseSelector({ open, onOpenChange, onSelect, availableExerci
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="p-0 gap-0 bg-neutral-950 border-neutral-800 text-white sm:max-w-[500px] w-full max-h-[90vh] flex flex-col overflow-hidden">
-                <DialogHeader className="px-4 py-3 border-b border-neutral-800 bg-neutral-900">
+            <DialogContent className="p-0 gap-0 bg-neutral-950 border-neutral-800 text-white sm:max-w-[500px] w-full h-dvh sm:h-auto sm:max-h-[90vh] flex flex-col overflow-hidden rounded-none sm:rounded-2xl border-none sm:border">
+                <DialogHeader className="px-4 py-4 border-b border-neutral-800 bg-neutral-900 shrink-0">
                     <DialogTitle className="text-sm font-bold uppercase tracking-widest flex items-center gap-2 text-neutral-400">
                         <Search className="w-4 h-4" />
                         Seleccionar Ejercicio
                     </DialogTitle>
                 </DialogHeader>
 
-                <Command className="bg-transparent flex-1 overflow-hidden" shouldFilter={true}>
-                    <div className="p-2">
+                <Command className="bg-transparent flex-1 overflow-hidden flex flex-col" shouldFilter={true}>
+                    <div className="p-3 shrink-0">
                         <CommandInput
                             placeholder="Buscar ejercicios..."
-                            className="bg-neutral-900 border-none rounded-lg h-12 text-base"
+                            className="bg-neutral-900 border-none rounded-xl h-14 text-base focus:ring-1 focus:ring-red-500/20"
                             value={searchValue}
                             onValueChange={setSearchValue}
                         />
                     </div>
 
-                    <CommandList className="flex-1 overflow-y-auto p-2 scrollbar-thin scrollbar-thumb-neutral-700">
-                        <CommandEmpty className="py-10 text-center text-sm text-neutral-500 flex flex-col items-center gap-3">
-                            <Dumbbell className="w-10 h-10 opacity-20" />
-                            <p>No encontramos "{searchValue}"</p>
+                    <CommandList className="flex-1 overflow-y-auto px-2 pb-10 sm:pb-2 scrollbar-hide">
+                        <CommandEmpty className="py-20 text-center text-sm text-neutral-500 flex flex-col items-center gap-4">
+                            <div className="w-16 h-16 bg-neutral-900 rounded-full flex items-center justify-center border border-neutral-800">
+                                <Dumbbell className="w-8 h-8 opacity-20" />
+                            </div>
+                            <p className="font-medium text-neutral-400">No encontramos "{searchValue}"</p>
                             <Button
                                 variant="outline"
-                                size="sm"
-                                className="mt-2 border-dashed border-neutral-700 bg-neutral-900/50 hover:bg-neutral-800 hover:text-white"
+                                className="mt-2 border-red-500/30 bg-red-500/5 text-red-500 hover:bg-red-500 hover:text-white rounded-xl h-12 px-6 transition-all font-bold"
                                 onClick={() => {
                                     onSelect({ name: searchValue });
                                     onOpenChange(false);
                                 }}
                             >
-                                <Plus className="w-3 h-3 mr-2" />
-                                Crear archivo para "{searchValue}"
+                                <Plus className="w-4 h-4 mr-2" />
+                                Crear personalizado
                             </Button>
                         </CommandEmpty>
 

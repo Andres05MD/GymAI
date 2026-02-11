@@ -1,6 +1,9 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { adminDb } from "@/lib/firebase-admin";
+
+export const dynamic = "force-dynamic";
+
 import { getPersonalRecords, getWeeklyActivity, getWeeklyProgress } from "@/actions/analytics-actions";
 import { getTrainingLogs } from "@/actions/training-actions";
 import { getAthleteRoutine, getCoachRoutines } from "@/actions/routine-actions";
@@ -9,13 +12,14 @@ import { ProgressChart } from "@/components/dashboard/progress-chart";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { TrainingHistoryList } from "@/components/training/training-history-list";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Dumbbell, TrendingUp, Trophy, Target, Calendar, Flame } from "lucide-react";
+import { ArrowLeft, Dumbbell, TrendingUp, Trophy, Target, Calendar, Flame, Activity } from "lucide-react";
 import Link from "next/link";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CoachAIAnalysis } from "@/components/dashboard/coach-ai-analysis";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { AssignRoutineModal } from "@/components/routines/assign-routine-modal";
 import { ScheduleCalendar } from "@/components/dashboard/schedule-calendar";
+import { EditHealthDialog } from "@/components/dashboard/edit-health-dialog";
 
 interface Athlete {
     id: string;
@@ -26,6 +30,8 @@ interface Athlete {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     createdAt?: any; // Firestore Timestamp
     goal?: string;
+    injuries?: string[];
+    medicalConditions?: string[];
 }
 
 interface ActivityData {
@@ -116,7 +122,7 @@ export default async function AthleteDetailsPage({ params }: PageProps) {
 
                     <div>
                         <div className="flex flex-wrap items-center gap-2 md:gap-3">
-                            <h1 className="text-2xl md:text-3xl font-black text-white uppercase tracking-tight break-words">
+                            <h1 className="text-2xl md:text-3xl font-black text-white uppercase tracking-tight wrap-break-word">
                                 {athlete.name}
                             </h1>
 
@@ -259,6 +265,61 @@ export default async function AthleteDetailsPage({ params }: PageProps) {
                             <p className="text-sm text-neutral-500 mb-6">Meta semanal de sesiones</p>
                             <div className="flex-1 flex items-center justify-center">
                                 <ProgressChart completed={weeklyCompleted} target={weeklyTarget} />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Salud y Lesiones */}
+                    <div className="bg-neutral-900 border border-neutral-800 rounded-3xl p-6 md:p-8">
+                        <div className="flex items-center justify-between mb-6">
+                            <div className="flex items-center gap-3">
+                                <Activity className="w-5 h-5 text-red-500" />
+                                <h3 className="text-xl font-bold text-white">Salud y Lesiones</h3>
+                            </div>
+                            <EditHealthDialog
+                                athlete={{
+                                    id: athlete.id,
+                                    name: athlete.name || "Atleta",
+                                    injuries: athlete.injuries,
+                                    medicalConditions: athlete.medicalConditions
+                                }}
+                            />
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            {/* Lesiones */}
+                            <div>
+                                <h4 className="text-xs font-bold uppercase tracking-widest text-neutral-500 mb-4 flex items-center gap-2">
+                                    <Flame className="w-3 h-3" /> Lesiones / Molestias
+                                </h4>
+                                {athlete.injuries && athlete.injuries.length > 0 ? (
+                                    <div className="flex flex-wrap gap-2">
+                                        {athlete.injuries.map((injury, i) => (
+                                            <span key={i} className="bg-red-500/10 text-red-500 px-4 py-1.5 rounded-full text-sm font-bold border border-red-500/20">
+                                                {injury}
+                                            </span>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <p className="text-neutral-500 text-sm italic">Sin lesiones reportadas</p>
+                                )}
+                            </div>
+
+                            {/* Condiciones Médicas */}
+                            <div>
+                                <h4 className="text-xs font-bold uppercase tracking-widest text-neutral-500 mb-4 flex items-center gap-2">
+                                    <Target className="w-3 h-3" /> Condiciones Médicas
+                                </h4>
+                                {athlete.medicalConditions && athlete.medicalConditions.length > 0 ? (
+                                    <div className="flex flex-wrap gap-2">
+                                        {athlete.medicalConditions.map((condition, i) => (
+                                            <span key={i} className="bg-blue-500/10 text-blue-400 px-4 py-1.5 rounded-full text-sm font-bold border border-blue-500/20">
+                                                {condition}
+                                            </span>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <p className="text-neutral-500 text-sm italic">Sin condiciones médicas reportadas</p>
+                                )}
                             </div>
                         </div>
                     </div>

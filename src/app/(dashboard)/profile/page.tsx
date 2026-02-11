@@ -3,12 +3,13 @@ import { adminDb } from "@/lib/firebase-admin";
 import { ProfileForm } from "@/components/profile/profile-form";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Ruler, User } from "lucide-react";
+import { ArrowLeft, Ruler, User, Activity, Pencil, Flame, HeartPulse } from "lucide-react";
 import Link from "next/link";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MeasurementChart } from "@/components/profile/measurement-chart";
 import { LogMeasurementDialog } from "@/components/profile/log-measurement-dialog";
 import { getBodyMeasurementsHistory } from "@/actions/measurement-actions";
+import { EditHealthDialog } from "@/components/dashboard/edit-health-dialog";
 
 export default async function ProfilePage() {
     const session = await auth();
@@ -28,6 +29,8 @@ export default async function ProfilePage() {
         weight: rawData.weight,
         role: rawData.role,
         onboardingCompleted: rawData.onboardingCompleted,
+        injuries: rawData.injuries,
+        medicalConditions: rawData.medicalConditions,
         // Explicitly converting dates if needed, though ProfileForm currently doesn't use them directly
         emailVerified: rawData.emailVerified?.toDate?.()?.toISOString() || null,
     };
@@ -61,9 +64,14 @@ export default async function ProfilePage() {
                         <User className="w-4 h-4 mr-2" /> Datos Personales
                     </TabsTrigger>
                     {!isCoach && (
-                        <TabsTrigger value="measurements" className="rounded-full data-[state=active]:bg-red-600 data-[state=active]:text-white transition-all text-neutral-400">
-                            <Ruler className="w-4 h-4 mr-2" /> Progreso Corporal
-                        </TabsTrigger>
+                        <>
+                            <TabsTrigger value="measurements" className="rounded-full data-[state=active]:bg-red-600 data-[state=active]:text-white transition-all text-neutral-400">
+                                <Ruler className="w-4 h-4 mr-2" /> Progreso Corporal
+                            </TabsTrigger>
+                            <TabsTrigger value="health" className="rounded-full data-[state=active]:bg-red-600 data-[state=active]:text-white transition-all text-neutral-400">
+                                <Activity className="w-4 h-4 mr-2" /> Salud
+                            </TabsTrigger>
+                        </>
                     )}
                 </TabsList>
 
@@ -122,6 +130,68 @@ export default async function ProfilePage() {
                                     { key: "calvesRight", label: "Pantorilla (D)", color: "#ea580c" }
                                 ]}
                             />
+                        </div>
+                    </TabsContent>
+                )}
+
+                {!isCoach && (
+                    <TabsContent value="health" className="space-y-6">
+                        <div className="bg-neutral-900 border border-neutral-800 rounded-4xl p-6 md:p-8 space-y-8">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <Activity className="w-6 h-6 text-red-500" />
+                                    <h2 className="text-xl font-black text-white uppercase tracking-tight">Salud y Lesiones</h2>
+                                </div>
+                                <EditHealthDialog
+                                    athlete={{
+                                        id: userData.id,
+                                        name: userData.name || "Mi Perfil",
+                                        injuries: userData.injuries,
+                                        medicalConditions: userData.medicalConditions
+                                    }}
+                                    trigger={
+                                        <Button className="bg-neutral-800 hover:bg-neutral-700 text-white rounded-xl font-bold">
+                                            <Pencil className="w-4 h-4 mr-2" /> Editar
+                                        </Button>
+                                    }
+                                />
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4">
+                                <div>
+                                    <h4 className="text-xs font-bold uppercase tracking-widest text-neutral-500 mb-4 flex items-center gap-2">
+                                        <Flame className="w-3 h-3" /> Lesiones / Molestias
+                                    </h4>
+                                    {userData.injuries && userData.injuries.length > 0 ? (
+                                        <div className="flex flex-wrap gap-2">
+                                            {userData.injuries.map((injury: string, i: number) => (
+                                                <span key={i} className="bg-red-500/10 text-red-500 px-4 py-1.5 rounded-full text-sm font-bold border border-red-500/20">
+                                                    {injury}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <p className="text-neutral-500 text-sm italic">Sin datos registrados</p>
+                                    )}
+                                </div>
+
+                                <div>
+                                    <h4 className="text-xs font-bold uppercase tracking-widest text-neutral-500 mb-4 flex items-center gap-2">
+                                        <HeartPulse className="w-3 h-3" /> Condiciones Médicas
+                                    </h4>
+                                    {userData.medicalConditions && userData.medicalConditions.length > 0 ? (
+                                        <div className="flex flex-wrap gap-2">
+                                            {userData.medicalConditions.map((condition: string, i: number) => (
+                                                <span key={i} className="bg-blue-500/10 text-blue-400 px-4 py-1.5 rounded-full text-sm font-bold border border-blue-500/20">
+                                                    {condition}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <p className="text-neutral-500 text-sm italic">Sin datos registrados</p>
+                                    )}
+                                </div>
+                            </div>
                         </div>
                     </TabsContent>
                 )}
