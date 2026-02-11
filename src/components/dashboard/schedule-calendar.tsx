@@ -57,7 +57,7 @@ export function ScheduleCalendar({ athleteId }: { athleteId: string }) {
                     </h3>
                     {loading && <Loader2 className="w-4 h-4 animate-spin text-neutral-500" />}
                 </div>
-                <div className="flex justify-center bg-neutral-950/50 rounded-2xl p-2 sm:p-4">
+                <div className="bg-neutral-950/50 rounded-2xl p-0.5 sm:p-4">
                     <Calendar
                         mode="single"
                         selected={date}
@@ -69,13 +69,12 @@ export function ScheduleCalendar({ athleteId }: { athleteId: string }) {
                             assigned: "bg-red-500/10 text-red-500 font-bold hover:bg-red-500/20"
                         }}
                         locale={es}
-                        className="w-full max-w-none"
+                        className="w-full"
                         classNames={{
-                            month: "space-y-4 w-full",
                             month_grid: "w-full border-collapse",
-                            weekday: "text-neutral-500 rounded-md w-full font-normal text-[0.8rem] text-center",
-                            day: "h-10 sm:h-12 w-full text-center text-sm p-0 m-0 relative flex items-center justify-center",
-                            day_button: "h-9 w-9 sm:h-10 sm:w-10 p-0 font-normal aria-selected:opacity-100 hover:bg-neutral-800 rounded-xl transition-all flex items-center justify-center",
+                            weekday: "text-neutral-500 rounded-md w-full font-normal text-[0.7rem] text-center",
+                            day: "h-9 sm:h-12 w-full text-center text-sm p-0 m-0 relative flex items-center justify-center",
+                            day_button: "h-8 w-8 sm:h-10 sm:w-10 p-0 font-normal aria-selected:opacity-100 hover:bg-neutral-800 rounded-xl transition-all flex items-center justify-center",
                             selected: "bg-white !text-black hover:bg-neutral-200 hover:!text-black shadow-lg",
                             today: "bg-red-500/10 text-red-500 border border-red-500/20 font-bold",
                         }}

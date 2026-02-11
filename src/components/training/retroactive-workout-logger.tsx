@@ -346,7 +346,7 @@ export function RetroactiveWorkoutLogger({ routineDay, routineId, routineName: i
                                 rows={1}
                                 style={{ fieldSizing: "content" } as React.CSSProperties}
                             />
-                            {exercises.length > 1 && (
+                            {!routineDay && exercises.length > 1 && (
                                 <Button
                                     variant="ghost"
                                     size="icon"
@@ -413,7 +413,7 @@ export function RetroactiveWorkoutLogger({ routineDay, routineId, routineName: i
                                         </SelectContent>
                                     </Select>
                                     <div className="flex justify-center">
-                                        {exercise.sets.length > 1 ? (
+                                        {!routineDay && exercise.sets.length > 1 ? (
                                             <Button
                                                 variant="ghost"
                                                 size="icon"

@@ -18,20 +18,20 @@ function Calendar({
     return (
         <DayPicker
             showOutsideDays={showOutsideDays}
-            className={cn("p-3", className)}
+            className={cn("p-3 relative", className)}
             classNames={{
-                months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
-                month: "space-y-4 w-full",
-                month_caption: "flex justify-center pt-1 relative items-center mb-4",
+                months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0 relative",
+                month: "space-y-0 w-full relative",
+                month_caption: "flex justify-center pt-1 relative items-center mb-8",
                 caption_label: "text-sm font-medium text-white",
-                nav: "space-x-1 flex items-center",
+                nav: "flex items-center",
                 button_previous: cn(
                     buttonVariants({ variant: "outline" }),
-                    "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 text-white border-neutral-800 hover:bg-neutral-800 absolute left-1 z-10"
+                    "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 text-white border-neutral-800 hover:bg-neutral-800 absolute left-1 top-0 z-20"
                 ),
                 button_next: cn(
                     buttonVariants({ variant: "outline" }),
-                    "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 text-white border-neutral-800 hover:bg-neutral-800 absolute right-1 z-10"
+                    "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 text-white border-neutral-800 hover:bg-neutral-800 absolute right-1 top-0 z-20"
                 ),
                 month_grid: "w-full border-collapse",
                 weekdays: "grid grid-cols-7 mb-2",
@@ -52,11 +52,9 @@ function Calendar({
                 ...classNames,
             }}
             components={{
-                Chevron: ({ ...props }) => {
-                    if (props.orientation === "left") {
-                        return <ChevronLeft className="h-4 w-4" />
-                    }
-                    return <ChevronRight className="h-4 w-4" />
+                Chevron: ({ orientation, className, ...props }) => {
+                    const Icon = orientation === "left" ? ChevronLeft : ChevronRight;
+                    return <Icon className={cn("h-4 w-4", className)} {...props} />;
                 }
             }}
             {...props}
