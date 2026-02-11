@@ -8,6 +8,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { AssignRoutineDialog } from "@/components/routines/assign-routine-dialog";
+import { AssignedAthletesDialog } from "@/components/routines/assigned-athletes-dialog";
 import { useState } from "react";
 
 // Interfaces para la tarjeta de rutina
@@ -58,6 +59,10 @@ export function RoutineCard({ routine, athletes }: RoutineCardProps) {
     const dayCount = routine.schedule?.length || 0;
     const isDaily = (routine as any).type === 'daily';
 
+    // Limpiar el nombre de la rutina y detectar si estaba asignada
+    const hasAssignedText = routine.name.toUpperCase().includes("(ASSIGNED)");
+    const cleanName = routine.name.replace(/\(ASSIGNED\)/gi, "").trim();
+
 
     return (
         <Card className="group relative bg-neutral-900 border-neutral-800 hover:border-red-600/50 transition-all duration-300 rounded-2xl md:rounded-3xl overflow-hidden hover:shadow-[0_0_30px_-10px_rgba(220,38,38,0.2)] flex flex-col h-full">
@@ -81,6 +86,9 @@ export function RoutineCard({ routine, athletes }: RoutineCardProps) {
                                 Activa
                             </span>
                         )}
+                        {hasAssignedText && (
+                            <AssignedAthletesDialog routineId={routine.id} routineName={cleanName} />
+                        )}
                     </div>
 
                     <Button
@@ -95,7 +103,7 @@ export function RoutineCard({ routine, athletes }: RoutineCardProps) {
                 </div>
 
                 <CardTitle className="text-lg md:text-xl font-black text-white leading-tight uppercase tracking-tight group-hover:text-red-500 transition-colors">
-                    {routine.name}
+                    {cleanName}
                 </CardTitle>
                 <p className="text-xs md:text-sm text-neutral-500 line-clamp-2 mt-2 font-medium">
                     {routine.description || "Sin descripción definida."}

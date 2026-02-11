@@ -168,6 +168,45 @@ export async function assignRoutineToAthlete(athleteId: string, routineId: strin
     }
 }
 
+// Get athletes assigned to a routine template
+export async function getAssignedAthletes(routineId: string) {
+    const session = await auth();
+    if (!session?.user?.id || session.user.role !== "coach") {
+        return { success: false, error: "No autorizado" };
+    }
+
+    try {
+        // 1. Encontrar todas las rutinas activas que provienen de esta plantilla
+        const activeAssignments = await adminDb.collection("routines")
+            .where("originalRoutineId", "==", routineId)
+            .where("active", "==", true)
+            .get();
+
+        if (activeAssignments.empty) {
+            return { success: true, athletes: [] };
+        }
+
+        const athleteIds = activeAssignments.docs.map(doc => doc.data().athleteId);
+
+        // 2. Obtener los perfiles de esos atletas
+        const athletesSnapshot = await adminDb.collection("users")
+            .where("__name__", "in", athleteIds)
+            .get();
+
+        const athletes = athletesSnapshot.docs.map(doc => ({
+            id: doc.id,
+            name: doc.data().name || "Atleta",
+            image: doc.data().image || null,
+            email: doc.data().email,
+        }));
+
+        return { success: true, athletes };
+    } catch (error) {
+        console.error("Error fetching assigned athletes:", error);
+        return { success: false, error: "Error al obtener atletas asignados" };
+    }
+}
+
 // Get Single Routine
 export async function getRoutine(id: string) {
     const session = await auth();
