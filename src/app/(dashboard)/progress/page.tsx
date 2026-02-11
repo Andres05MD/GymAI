@@ -216,23 +216,56 @@ export default async function ProgressPage({ searchParams }: ProgressPageProps) 
                 <div className="p-6">
                     {metrics?.measurements && Object.keys(metrics.measurements).length > 0 ? (
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            {Object.entries(metrics.measurements).map(([key, value]) => {
-                                const labels: Record<string, string> = {
-                                    chest: "Pecho", hips: "Cadera", waist: "Cintura", shoulders: "Hombros",
-                                    glutes: "Glúteos", neck: "Cuello", biceps: "Bíceps", quads: "Cuádriceps",
-                                    calves: "Pantorrillas", forearms: "Antebrazos",
-                                    bicepsleft: "Bíceps (Izq)", bicepsright: "Bíceps (Der)",
-                                    forearmsleft: "Antebrazos (Izq)", forearmsright: "Antebrazos (Der)",
-                                    quadsleft: "Cuádriceps (Izq)", quadsright: "Cuádriceps (Der)",
-                                    calvesleft: "Pantorrillas (Izq)", calvesright: "Pantorrillas (Der)",
-                                };
-                                return (
-                                    <div key={key} className="text-center p-5 bg-neutral-900/50 border border-neutral-800 rounded-3xl hover:border-red-500/30 transition-all hover:bg-neutral-800/50 group">
-                                        <p className="text-3xl font-black text-white mb-1 group-hover:scale-110 transition-transform origin-bottom">{value as number}<span className="text-sm text-neutral-500 ml-1 font-bold">cm</span></p>
-                                        <p className="text-[10px] text-neutral-400 uppercase tracking-widest font-bold group-hover:text-red-400 transition-colors">{labels[key.toLowerCase()] || key}</p>
-                                    </div>
-                                );
-                            })}
+                            {Object.entries(metrics.measurements)
+                                .sort(([a], [b]) => {
+                                    const order = [
+                                        "neck", "shoulders", "chest", "waist", "hips", "glutes",
+                                        "bicepsleft", "bicepsright", "forearmsleft", "forearmsright",
+                                        "quadsleft", "quadsright", "calvesleft", "calvesright",
+                                        "weight", "bodyfat"
+                                    ];
+                                    const indexA = order.indexOf(a.toLowerCase());
+                                    const indexB = order.indexOf(b.toLowerCase());
+                                    if (indexA === -1 && indexB === -1) return a.localeCompare(b);
+                                    if (indexA === -1) return 1;
+                                    if (indexB === -1) return -1;
+                                    return indexA - indexB;
+                                })
+                                .map(([key, value]) => {
+                                    const labels: Record<string, string> = {
+                                        chest: "Pecho",
+                                        hips: "Cadera",
+                                        waist: "Cintura",
+                                        shoulders: "Hombros",
+                                        glutes: "Glúteos",
+                                        neck: "Cuello",
+                                        weight: "Peso",
+                                        bodyfat: "Grasa Corporal",
+                                        bicepsleft: "Bíceps (Izq)",
+                                        bicepsright: "Bíceps (Der)",
+                                        forearmsleft: "Antebrazos (Izq)",
+                                        forearmsright: "Antebrazos (Der)",
+                                        quadsleft: "Cuádriceps (Izq)",
+                                        quadsright: "Cuádriceps (Der)",
+                                        calvesleft: "Pantorrillas (Izq)",
+                                        calvesright: "Pantorrillas (Der)",
+                                    };
+
+                                    const isBodyFat = key.toLowerCase() === "bodyfat";
+                                    const unit = isBodyFat ? "%" : (key.toLowerCase() === "weight" ? "kg" : "cm");
+
+                                    return (
+                                        <div key={key} className="text-center p-5 bg-neutral-900/50 border border-neutral-800 rounded-3xl hover:border-red-500/30 transition-all hover:bg-neutral-800/50 group">
+                                            <p className="text-3xl font-black text-white mb-1 group-hover:scale-110 transition-transform origin-bottom">
+                                                {value as number}
+                                                <span className="text-sm text-neutral-500 ml-1 font-bold">{unit}</span>
+                                            </p>
+                                            <p className="text-[10px] text-neutral-400 uppercase tracking-widest font-bold group-hover:text-red-400 transition-colors">
+                                                {labels[key.toLowerCase()] || key}
+                                            </p>
+                                        </div>
+                                    );
+                                })}
                         </div>
                     ) : (
                         <div className="text-center py-20 text-neutral-500 flex flex-col items-center gap-4">
