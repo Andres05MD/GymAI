@@ -351,6 +351,7 @@ export function OnboardingWizard() {
 
                                         <div className="grid grid-cols-2 gap-4">
                                             {[
+                                                { id: "measurements.neck", label: "Cuello" },
                                                 { id: "measurements.shoulders", label: "Hombros" },
                                                 { id: "measurements.chest", label: "Pecho" },
                                                 { id: "measurements.waist", label: "Cintura" },
@@ -366,8 +367,8 @@ export function OnboardingWizard() {
                                                 { id: "measurements.quadsLeft", label: "Cuádriceps Izq." },
                                                 { id: "measurements.quadsRight", label: "Cuádriceps Der." },
 
-                                                { id: "measurements.calvesLeft", label: "Pantorilla Izq." },
-                                                { id: "measurements.calvesRight", label: "Pantorilla Der." },
+                                                { id: "measurements.calvesLeft", label: "Pantorrilla Izq." },
+                                                { id: "measurements.calvesRight", label: "Pantorrilla Der." },
                                             ].map((m) => (
                                                 <div key={m.id} className="space-y-2">
                                                     <Label className="uppercase text-xs font-bold text-neutral-500">{m.label} (cm)</Label>
