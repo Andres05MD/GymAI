@@ -33,12 +33,22 @@ export async function getRoutines() {
             snapshot = await adminDb.collection("routines").where("athleteId", "==", session.user.id).where("active", "==", true).get();
         }
 
-        const routines = snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data(),
-            createdAt: doc.data().createdAt?.toDate ? doc.data().createdAt.toDate().toISOString() : doc.data().createdAt,
-            updatedAt: doc.data().updatedAt?.toDate ? doc.data().updatedAt.toDate().toISOString() : doc.data().updatedAt,
-        }));
+        const routines = snapshot.docs.map(doc => {
+            const data = doc.data();
+            // Serializar todos los campos Timestamp de Firestore
+            const serialized: Record<string, unknown> = { id: doc.id };
+            for (const [key, value] of Object.entries(data)) {
+                if (value && typeof value === "object" && "_seconds" in value) {
+                    // Es un Firestore Timestamp
+                    serialized[key] = (value as { toDate: () => Date }).toDate?.()
+                        ? (value as { toDate: () => Date }).toDate().toISOString()
+                        : new Date((value as { _seconds: number })._seconds * 1000).toISOString();
+                } else {
+                    serialized[key] = value;
+                }
+            }
+            return serialized;
+        });
 
         return { success: true, routines };
     } catch (error) {
@@ -86,12 +96,20 @@ export async function getCoachRoutines() {
             .where("coachId", "==", session.user.id)
             .get();
 
-        const routines = snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data(),
-            createdAt: doc.data().createdAt?.toDate ? doc.data().createdAt.toDate().toISOString() : doc.data().createdAt,
-            updatedAt: doc.data().updatedAt?.toDate ? doc.data().updatedAt.toDate().toISOString() : doc.data().updatedAt,
-        }));
+        const routines = snapshot.docs.map(doc => {
+            const data = doc.data();
+            const serialized: Record<string, unknown> = { id: doc.id };
+            for (const [key, value] of Object.entries(data)) {
+                if (value && typeof value === "object" && "_seconds" in value) {
+                    serialized[key] = (value as { toDate: () => Date }).toDate?.()
+                        ? (value as { toDate: () => Date }).toDate().toISOString()
+                        : new Date((value as { _seconds: number })._seconds * 1000).toISOString();
+                } else {
+                    serialized[key] = value;
+                }
+            }
+            return serialized;
+        });
 
         return { success: true, routines };
     } catch (error) {

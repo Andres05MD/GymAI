@@ -90,7 +90,8 @@ export default async function AthleteDetailsPage({ params }: PageProps) {
 
     // Fetch library routines for assignment model
     const { routines: coachRoutinesRaw } = await getCoachRoutines();
-    const coachRoutines = Array.from(new Map((coachRoutinesRaw || []).map(r => [r.id, r])).values());
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const coachRoutines = Array.from(new Map((coachRoutinesRaw || []).map((r: any) => [r.id, r])).values());
 
     // Calculate total volume from activity data
     const weeklyVolume = activityData?.reduce((acc: number, cur: ActivityData) => acc + cur.total, 0) || 0;
