@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, ReactNode } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -33,7 +33,12 @@ const LogSchema = z.object({
     notes: z.string().optional(),
 });
 
-export function LogMeasurementDialog({ onLogSuccess }: { onLogSuccess?: () => void }) {
+interface LogMeasurementDialogProps {
+    onLogSuccess?: () => void;
+    children?: ReactNode;
+}
+
+export function LogMeasurementDialog({ onLogSuccess, children }: LogMeasurementDialogProps) {
     const [open, setOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -67,9 +72,11 @@ export function LogMeasurementDialog({ onLogSuccess }: { onLogSuccess?: () => vo
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button className="bg-red-600 hover:bg-red-700 text-white gap-2 w-full md:w-auto">
-                    <Plus className="w-4 h-4" /> Registrar Medidas
-                </Button>
+                {children ? children : (
+                    <Button className="bg-red-600 hover:bg-red-700 text-white gap-2 w-full md:w-auto">
+                        <Plus className="w-4 h-4" /> Registrar Medidas
+                    </Button>
+                )}
             </DialogTrigger>
             <DialogContent className="bg-neutral-900 border-neutral-800 text-white sm:max-w-[700px] max-h-[90vh] overflow-hidden flex flex-col">
                 <DialogHeader>
