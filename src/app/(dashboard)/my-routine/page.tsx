@@ -106,7 +106,7 @@ export default async function MyRoutinePage() {
 
             {/* Info Metrics */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-[2rem] p-6 flex items-center gap-5 relative overflow-hidden group">
+                <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-4xl p-6 flex items-center gap-5 relative overflow-hidden group">
                     <div className="absolute top-0 right-0 w-24 h-24 bg-red-600/5 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
                     <div className="h-14 w-14 rounded-2xl bg-neutral-800 flex items-center justify-center text-white font-bold text-xl shadow-lg group-hover:scale-105 transition-transform">
                         {frequency}
@@ -116,7 +116,7 @@ export default async function MyRoutinePage() {
                         <p className="text-white font-bold text-lg">Días / Semana</p>
                     </div>
                 </div>
-                <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-[2rem] p-6 flex items-center gap-5 relative overflow-hidden group">
+                <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-4xl p-6 flex items-center gap-5 relative overflow-hidden group">
                     <div className="absolute top-0 right-0 w-24 h-24 bg-blue-600/5 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
                     <div className="h-14 w-14 rounded-2xl bg-neutral-800 flex items-center justify-center text-white font-bold text-xl shadow-lg group-hover:scale-105 transition-transform">
                         {totalExercises}
@@ -126,7 +126,7 @@ export default async function MyRoutinePage() {
                         <p className="text-white font-bold text-lg">Ejercicios Totales</p>
                     </div>
                 </div>
-                <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-[2rem] p-6 flex items-center gap-5 relative overflow-hidden group">
+                <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-4xl p-6 flex items-center gap-5 relative overflow-hidden group">
                     <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-600/5 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
                     <div className="h-14 w-14 rounded-2xl bg-emerald-900/20 text-emerald-500 flex items-center justify-center font-bold text-xl shadow-lg border border-emerald-900/30 group-hover:scale-105 transition-transform">
                         W{weeksActive}
@@ -142,7 +142,11 @@ export default async function MyRoutinePage() {
             <div className="space-y-6">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 px-2">
                     <div>
-                        <h3 className="text-2xl font-black text-white mb-2">{activeRoutine.name}</h3>
+                        <h3 className="text-2xl font-black text-white mb-2">
+                            {schedule.length === 1
+                                ? "Rutina Compuesta"
+                                : activeRoutine.name.replace(/\s*\(Assigned\)/gi, "").trim()}
+                        </h3>
                         {activeRoutine.description && (
                             <p className="text-neutral-400 text-sm max-w-2xl leading-relaxed">{activeRoutine.description}</p>
                         )}
@@ -156,9 +160,9 @@ export default async function MyRoutinePage() {
                     {schedule.map((day: ScheduleDay, index: number) => (
                         <div
                             key={index}
-                            className="bg-neutral-900 border border-neutral-800 rounded-[1.5rem] p-6 flex flex-col md:flex-row items-start md:items-center justify-between hover:border-neutral-700 transition-all group relative overflow-hidden"
+                            className="bg-neutral-900 border border-neutral-800 rounded-3xl p-6 flex flex-col md:flex-row items-start md:items-center justify-between hover:border-neutral-700 transition-all group relative overflow-hidden"
                         >
-                            <div className="absolute inset-0 bg-linear-to-r from-white/0 to-white/[0.02] opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                            <div className="absolute inset-0 bg-linear-to-r from-white/0 to-white/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
 
                             <div className="flex items-center gap-6 relative z-10 w-full md:w-auto">
                                 <div className="h-16 w-16 bg-black border border-neutral-800 rounded-2xl flex items-center justify-center font-black text-2xl text-neutral-600 group-hover:text-white group-hover:border-red-900/50 group-hover:bg-red-900/10 transition-all">
@@ -188,7 +192,7 @@ export default async function MyRoutinePage() {
                     ))}
 
                     {schedule.length === 0 && (
-                        <div className="p-12 text-center text-neutral-500 bg-neutral-900 rounded-[2rem] border border-neutral-800">
+                        <div className="p-12 text-center text-neutral-500 bg-neutral-900 rounded-4xl border border-neutral-800">
                             Esta rutina no tiene días configurados.
                         </div>
                     )}

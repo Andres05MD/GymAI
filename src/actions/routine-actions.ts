@@ -132,7 +132,7 @@ export async function assignRoutineToAthlete(athleteId: string, routineId: strin
 
         batch.set(newRoutineRef, {
             ...templateData,
-            name: `${templateData?.name} (Assigned)`,
+            name: templateData?.name,
             coachId: session.user.id,
             athleteId: athleteId,
             active: true,

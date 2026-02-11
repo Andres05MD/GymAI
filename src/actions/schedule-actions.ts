@@ -45,7 +45,7 @@ async function getRoutineCopyId(athleteId: string, originalRoutineId: string, co
     const newRoutineRef = adminDb.collection("routines").doc();
     await newRoutineRef.set({
         ...templateData,
-        name: `${templateData?.name} (Asignada)`,
+        name: templateData?.name,
         coachId,
         athleteId,
         active: true,

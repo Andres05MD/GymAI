@@ -55,9 +55,11 @@ interface RetroactiveWorkoutLoggerProps {
     routineDay?: RoutineDay;
     routineId?: string;
     routineName?: string;
+    defaultDate?: string;
+    onBack?: () => void;
 }
 
-export function RetroactiveWorkoutLogger({ routineDay, routineId, routineName: initialRoutineName }: RetroactiveWorkoutLoggerProps) {
+export function RetroactiveWorkoutLogger({ routineDay, routineId, routineName: initialRoutineName, defaultDate, onBack }: RetroactiveWorkoutLoggerProps) {
     const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -66,6 +68,7 @@ export function RetroactiveWorkoutLogger({ routineDay, routineId, routineName: i
         return (initialRoutineName || "").replace(/\s*\(Assigned\)/gi, "").trim();
     });
     const [date, setDate] = useState(() => {
+        if (defaultDate) return defaultDate;
         const now = new Date();
         return now.toISOString().split("T")[0];
     });
@@ -226,7 +229,7 @@ export function RetroactiveWorkoutLogger({ routineDay, routineId, routineName: i
                 <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => router.back()}
+                    onClick={() => onBack ? onBack() : router.back()}
                     className="h-10 w-10 rounded-xl bg-neutral-900 border border-neutral-800 text-white hover:bg-neutral-800 shrink-0"
                 >
                     <ChevronLeft className="w-5 h-5" />

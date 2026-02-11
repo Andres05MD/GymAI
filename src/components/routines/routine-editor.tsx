@@ -61,6 +61,9 @@ interface AvailableExercise {
     name: string;
 }
 
+// --- Constantes ---
+const WEEKDAYS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
+
 // --- AI Generator Component ---
 function AIGenerator({ onGenerate }: { onGenerate: (routine: AIRoutine) => void }) {
     const [loading, setLoading] = useState(false);
@@ -400,6 +403,10 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                                     type="button"
                                     onClick={() => {
                                         setValue("type", "daily");
+                                        // Reducir a 1 solo día al cambiar a diaria
+                                        if (schedule.length > 1) {
+                                            setValue("schedule", [schedule[0]]);
+                                        }
                                         setActiveDayIndex(0);
                                     }}
                                     className={cn(
@@ -463,6 +470,9 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                                                 {index + 1}
                                             </div>
                                             <div>
+                                                <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 mb-0.5">
+                                                    {WEEKDAYS[index] || `Día ${index + 1}`}
+                                                </p>
                                                 <p className={cn("font-bold text-base transition-colors", activeDayIndex === index ? "text-white" : "text-neutral-400 group-hover:text-white")}>
                                                     {schedule[index]?.name || `Día ${index + 1}`}
                                                 </p>
@@ -487,13 +497,15 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                                     </div>
                                 ))}
 
-                                <Button
-                                    variant="outline"
-                                    className="w-full h-14 border-dashed border-neutral-800 bg-transparent text-neutral-500 hover:text-white hover:bg-neutral-900 hover:border-neutral-700 rounded-2xl transition-all"
-                                    onClick={() => appendDay({ name: `Día ${dayFields.length + 1}`, exercises: [] })}
-                                >
-                                    <Plus className="w-5 h-5 mr-2" /> AÑADIR DÍA
-                                </Button>
+                                {dayFields.length < 5 && (
+                                    <Button
+                                        variant="outline"
+                                        className="w-full h-14 border-dashed border-neutral-800 bg-transparent text-neutral-500 hover:text-white hover:bg-neutral-900 hover:border-neutral-700 rounded-2xl transition-all"
+                                        onClick={() => appendDay({ name: WEEKDAYS[dayFields.length] || `Día ${dayFields.length + 1}`, exercises: [] })}
+                                    >
+                                        <Plus className="w-5 h-5 mr-2" /> AÑADIR {WEEKDAYS[dayFields.length]?.toUpperCase() || "DÍA"}
+                                    </Button>
+                                )}
                             </div>
                         </div>
                     )}
@@ -507,7 +519,7 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                             <div className="bg-neutral-900 border-b border-neutral-800 p-6 sm:px-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 rounded-t-3xl">
                                 <div>
                                     <Label className="text-xs font-bold uppercase tracking-widest text-neutral-500 block mb-1">
-                                        {routineType === 'daily' ? 'Sesión Única' : 'Editando Día'}
+                                        {routineType === 'daily' ? 'Sesión Única' : WEEKDAYS[activeDayIndex] || `Día ${activeDayIndex + 1}`}
                                     </Label>
                                     <Input
                                         value={schedule[activeDayIndex].name}

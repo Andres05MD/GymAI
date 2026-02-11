@@ -108,7 +108,11 @@ export function AssignRoutineDialog({ athleteId, athleteName, trigger }: AssignR
                                             </div>
                                             <div>
                                                 <h4 className="font-bold text-sm">{routine.name}</h4>
-                                                <p className="text-xs text-neutral-500">{routine.exercises?.length || 0} ejercicios</p>
+                                                <p className="text-xs text-neutral-500">
+                                                    {(routine.schedule?.length || 0) === 1 ? "Diaria" : `Semanal · ${routine.schedule?.length || 0} días`}
+                                                    {" · "}
+                                                    {routine.schedule?.reduce((acc: number, d: any) => acc + (d.exercises?.length || 0), 0) || 0} ejercicios
+                                                </p>
                                             </div>
                                         </div>
                                         {selectedRoutineId === routine.id && (
