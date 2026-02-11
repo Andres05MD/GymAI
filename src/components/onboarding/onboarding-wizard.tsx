@@ -7,9 +7,9 @@ import * as z from "zod";
 import { OnboardingInputSchema } from "@/lib/schemas";
 import { completeOnboarding } from "@/actions/auth-actions";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Loader2, ChevronRight, ChevronLeft, Check, Activity, HeartPulse, User, Ruler, Target, Lock } from "lucide-react";
+import { Loader2, ChevronRight, ChevronLeft, Check, Activity, HeartPulse, User, Ruler, Target, Lock, LogOut, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -20,7 +20,7 @@ import { toast } from "sonner";
 
 type Step = "bio" | "goals" | "health" | "measurements" | "security";
 
-const steps: { id: Step; label: string; icon: any }[] = [
+const steps: { id: Step; label: string; icon: LucideIcon }[] = [
     { id: "bio", label: "Biometría", icon: User },
     { id: "goals", label: "Objetivos", icon: Target },
     { id: "health", label: "Salud", icon: HeartPulse },
@@ -32,7 +32,7 @@ export function OnboardingWizard() {
     const [currentStep, setCurrentStep] = useState<Step>("bio");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const router = useRouter();
-    const { update } = useSession();
+    const { data: session, update } = useSession();
 
     const form = useForm<z.infer<typeof OnboardingInputSchema>>({
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -113,7 +113,31 @@ export function OnboardingWizard() {
     };
 
     return (
-        <div className="w-full max-w-3xl mx-auto">
+        <div className="w-full max-w-3xl mx-auto space-y-6">
+            {/* Header con Identidad y Salida */}
+            <div className="flex justify-between items-center px-4 md:px-0">
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-2xl bg-red-600/10 flex items-center justify-center border border-red-500/20 glass">
+                        <User className="w-5 h-5 text-red-500" />
+                    </div>
+                    <div className="flex flex-col">
+                        <span className="text-[10px] text-neutral-500 uppercase font-black tracking-widest leading-none mb-1">Registro de Usuario</span>
+                        <span className="text-sm font-bold text-white leading-none">{session?.user?.email || "Cargando..."}</span>
+                    </div>
+                </div>
+
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => signOut({ callbackUrl: "/login" })}
+                    className="text-neutral-500 hover:text-white hover:bg-neutral-800 rounded-xl px-4 border border-neutral-800"
+                >
+                    <LogOut className="w-4 h-4 mr-2" />
+                    <span className="hidden sm:inline">Cerrar Sesión</span>
+                    <span className="sm:hidden">Salir</span>
+                </Button>
+            </div>
+
             {/* Progress Bar */}
             <div className="mb-8">
                 <div className="flex justify-between mb-2">
