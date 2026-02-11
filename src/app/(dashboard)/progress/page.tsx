@@ -153,7 +153,7 @@ export default async function ProgressPage({ searchParams }: ProgressPageProps) 
             </div>
 
             {/* Metrics Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6">
                 {/* Peso Card con Modal - Solo para el propio usuario o coach */}
                 <LogMeasurementDialog>
                     <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-3xl md:rounded-4xl p-4 md:p-6 relative overflow-hidden group hover:border-blue-500/30 transition-all cursor-pointer h-full flex flex-col items-center justify-center text-center">
@@ -186,19 +186,7 @@ export default async function ProgressPage({ searchParams }: ProgressPageProps) 
                     </div>
                 </Link>
 
-                <Link href="#prs-section" className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-3xl md:rounded-4xl p-4 md:p-6 relative overflow-hidden group hover:border-yellow-500/30 transition-all cursor-pointer h-full flex flex-col items-center justify-center text-center">
-                    <div className="absolute top-0 right-0 w-20 h-20 bg-yellow-600/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none group-hover:bg-yellow-600/20 transition-colors"></div>
-                    <div className="relative z-10 flex flex-col items-center">
-                        <div className="w-12 h-12 md:w-14 md:h-14 bg-neutral-900 rounded-2xl flex items-center justify-center mb-3 shadow-lg border border-neutral-800 group-hover:scale-105 transition-transform duration-300">
-                            <Trophy className="h-5 w-5 md:h-6 md:w-6 text-yellow-500" />
-                        </div>
-                        <p className="text-2xl md:text-3xl font-black text-white tracking-tighter mb-1">{prs?.length || 0}</p>
-                        <p className="text-[9px] md:text-[10px] text-neutral-500 uppercase tracking-widest font-bold mb-2">PRs Nuevos</p>
-                        <p className="text-[10px] md:text-xs text-neutral-600 font-bold group-hover:text-yellow-500 transition-colors shrink-0">Ver Historial</p>
-                    </div>
-                </Link>
-
-                <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-3xl md:rounded-4xl p-4 md:p-6 relative overflow-hidden group hover:border-green-500/30 transition-all h-full flex flex-col items-center justify-center text-center">
+                <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-3xl md:rounded-4xl p-4 md:p-6 relative overflow-hidden group hover:border-green-500/30 transition-all h-full flex flex-col items-center justify-center text-center col-span-2 md:col-span-1">
                     <div className="absolute top-0 right-0 w-20 h-20 bg-green-600/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none group-hover:bg-green-600/20 transition-colors"></div>
                     <div className="relative z-10 flex flex-col items-center">
                         <div className="w-12 h-12 md:w-14 md:h-14 bg-neutral-900 rounded-2xl flex items-center justify-center mb-3 shadow-lg border border-neutral-800 group-hover:scale-105 transition-transform duration-300">
