@@ -153,19 +153,19 @@ export default async function ProgressPage({ searchParams }: ProgressPageProps) 
             </div>
 
             {/* Metrics Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
                 {/* Peso Card con Modal - Solo para el propio usuario o coach */}
                 <LogMeasurementDialog>
-                    <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-4xl p-6 relative overflow-hidden group hover:border-blue-500/30 transition-all cursor-pointer text-left h-full">
+                    <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-3xl md:rounded-4xl p-4 md:p-6 relative overflow-hidden group hover:border-blue-500/30 transition-all cursor-pointer h-full flex flex-col items-center justify-center text-center">
                         <div className="absolute top-0 right-0 w-20 h-20 bg-blue-600/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none group-hover:bg-blue-600/20 transition-colors"></div>
-                        <div className="flex flex-col items-center text-center relative z-10">
-                            <div className="w-14 h-14 bg-neutral-900 rounded-2xl flex items-center justify-center mb-4 shadow-lg border border-neutral-800 group-hover:scale-105 transition-transform duration-300">
-                                <Scale className="h-6 w-6 text-blue-500" />
+                        <div className="relative z-10 flex flex-col items-center">
+                            <div className="w-12 h-12 md:w-14 md:h-14 bg-neutral-900 rounded-2xl flex items-center justify-center mb-3 shadow-lg border border-neutral-800 group-hover:scale-105 transition-transform duration-300">
+                                <Scale className="h-5 w-5 md:h-6 md:w-6 text-blue-500" />
                             </div>
-                            <p className="text-3xl font-black text-white tracking-tighter mb-1">{metrics?.weight || "—"}</p>
-                            <p className="text-[10px] text-neutral-500 uppercase tracking-widest font-bold mb-2">Peso (kg)</p>
+                            <p className="text-2xl md:text-3xl font-black text-white tracking-tighter mb-1">{metrics?.weight || "—"}</p>
+                            <p className="text-[9px] md:text-[10px] text-neutral-500 uppercase tracking-widest font-bold mb-2">Peso (kg)</p>
                             <span className={cn(
-                                "px-2 py-0.5 rounded-md text-[10px] font-bold border",
+                                "px-2 py-0.5 rounded-md text-[9px] md:text-[10px] font-bold border shrink-0",
                                 isWeightLoss ? 'bg-green-500/10 text-green-500 border-green-500/20' : 'bg-neutral-800 text-neutral-500 border-neutral-700'
                             )}>
                                 {parseFloat(weightChange) > 0 ? '+' : ''}{weightChange} kg
@@ -174,39 +174,39 @@ export default async function ProgressPage({ searchParams }: ProgressPageProps) 
                     </div>
                 </LogMeasurementDialog>
 
-                <Link href="#measurements-section" className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-4xl p-6 relative overflow-hidden group hover:border-orange-500/30 transition-all cursor-pointer">
+                <Link href="#measurements-section" className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-3xl md:rounded-4xl p-4 md:p-6 relative overflow-hidden group hover:border-orange-500/30 transition-all cursor-pointer h-full flex flex-col items-center justify-center text-center">
                     <div className="absolute top-0 right-0 w-20 h-20 bg-orange-600/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none group-hover:bg-orange-600/20 transition-colors"></div>
-                    <div className="flex flex-col items-center text-center relative z-10">
-                        <div className="w-14 h-14 bg-neutral-900 rounded-2xl flex items-center justify-center mb-4 shadow-lg border border-neutral-800 group-hover:scale-105 transition-transform duration-300">
-                            <Flame className="h-6 w-6 text-orange-500" />
+                    <div className="relative z-10 flex flex-col items-center">
+                        <div className="w-12 h-12 md:w-14 md:h-14 bg-neutral-900 rounded-2xl flex items-center justify-center mb-3 shadow-lg border border-neutral-800 group-hover:scale-105 transition-transform duration-300">
+                            <Flame className="h-5 w-5 md:h-6 md:w-6 text-orange-500" />
                         </div>
-                        <p className="text-3xl font-black text-white tracking-tighter mb-1">{metrics?.bodyFat ? `${metrics.bodyFat}%` : "—"}</p>
-                        <p className="text-[10px] text-neutral-500 uppercase tracking-widest font-bold mb-2">Grasa Est.</p>
-                        <p className="text-xs text-neutral-600 font-medium">Ver Medidas</p>
+                        <p className="text-2xl md:text-3xl font-black text-white tracking-tighter mb-1">{metrics?.bodyFat ? `${metrics.bodyFat}%` : "—"}</p>
+                        <p className="text-[9px] md:text-[10px] text-neutral-500 uppercase tracking-widest font-bold mb-2">Grasa Est.</p>
+                        <p className="text-[10px] md:text-xs text-neutral-600 font-medium group-hover:text-orange-500 transition-colors shrink-0">Ver Medidas</p>
                     </div>
                 </Link>
 
-                <Link href="#prs-section" className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-4xl p-6 relative overflow-hidden group hover:border-yellow-500/30 transition-all cursor-pointer">
+                <Link href="#prs-section" className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-3xl md:rounded-4xl p-4 md:p-6 relative overflow-hidden group hover:border-yellow-500/30 transition-all cursor-pointer h-full flex flex-col items-center justify-center text-center">
                     <div className="absolute top-0 right-0 w-20 h-20 bg-yellow-600/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none group-hover:bg-yellow-600/20 transition-colors"></div>
-                    <div className="flex flex-col items-center text-center relative z-10">
-                        <div className="w-14 h-14 bg-neutral-900 rounded-2xl flex items-center justify-center mb-4 shadow-lg border border-neutral-800 group-hover:scale-105 transition-transform duration-300">
-                            <Trophy className="h-6 w-6 text-yellow-500" />
+                    <div className="relative z-10 flex flex-col items-center">
+                        <div className="w-12 h-12 md:w-14 md:h-14 bg-neutral-900 rounded-2xl flex items-center justify-center mb-3 shadow-lg border border-neutral-800 group-hover:scale-105 transition-transform duration-300">
+                            <Trophy className="h-5 w-5 md:h-6 md:w-6 text-yellow-500" />
                         </div>
-                        <p className="text-3xl font-black text-white tracking-tighter mb-1">{prs?.length || 0}</p>
-                        <p className="text-[10px] text-neutral-500 uppercase tracking-widest font-bold mb-2">PRs Nuevos</p>
-                        <p className="text-xs text-neutral-600 font-medium font-bold group-hover:text-yellow-500 transition-colors">Ver Historial</p>
+                        <p className="text-2xl md:text-3xl font-black text-white tracking-tighter mb-1">{prs?.length || 0}</p>
+                        <p className="text-[9px] md:text-[10px] text-neutral-500 uppercase tracking-widest font-bold mb-2">PRs Nuevos</p>
+                        <p className="text-[10px] md:text-xs text-neutral-600 font-bold group-hover:text-yellow-500 transition-colors shrink-0">Ver Historial</p>
                     </div>
                 </Link>
 
-                <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-4xl p-6 relative overflow-hidden group hover:border-green-500/30 transition-all">
+                <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-3xl md:rounded-4xl p-4 md:p-6 relative overflow-hidden group hover:border-green-500/30 transition-all h-full flex flex-col items-center justify-center text-center">
                     <div className="absolute top-0 right-0 w-20 h-20 bg-green-600/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none group-hover:bg-green-600/20 transition-colors"></div>
-                    <div className="flex flex-col items-center text-center relative z-10">
-                        <div className="w-14 h-14 bg-neutral-900 rounded-2xl flex items-center justify-center mb-4 shadow-lg border border-neutral-800 group-hover:scale-105 transition-transform duration-300">
-                            <TrendingUp className="h-6 w-6 text-green-500" />
+                    <div className="relative z-10 flex flex-col items-center">
+                        <div className="w-12 h-12 md:w-14 md:h-14 bg-neutral-900 rounded-2xl flex items-center justify-center mb-3 shadow-lg border border-neutral-800 group-hover:scale-105 transition-transform duration-300">
+                            <TrendingUp className="h-5 w-5 md:h-6 md:w-6 text-green-500" />
                         </div>
-                        <p className="text-3xl font-black text-white tracking-tighter mb-1">—</p>
-                        <p className="text-[10px] text-neutral-500 uppercase tracking-widest font-bold mb-2">Volumen</p>
-                        <p className="text-xs text-neutral-600 font-medium italic italic">Próximamente</p>
+                        <p className="text-2xl md:text-3xl font-black text-white tracking-tighter mb-1">—</p>
+                        <p className="text-[9px] md:text-[10px] text-neutral-500 uppercase tracking-widest font-bold mb-2">Volumen</p>
+                        <p className="text-[10px] md:text-xs text-neutral-600 font-medium italic shrink-0">Próximamente</p>
                     </div>
                 </div>
             </div>
