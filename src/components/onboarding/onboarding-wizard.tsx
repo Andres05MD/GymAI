@@ -156,26 +156,25 @@ export function OnboardingWizard({ authProvider }: OnboardingWizardProps) {
     return (
         <div className="w-full max-w-3xl mx-auto space-y-6">
             {/* Header con Identidad y Salida */}
-            <div className="flex justify-between items-center px-4 md:px-0">
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-2xl bg-red-600/10 flex items-center justify-center border border-red-500/20 glass">
-                        <User className="w-5 h-5 text-red-500" />
+            <div className="flex justify-between items-center gap-4 px-1 md:px-0">
+                <div className="flex items-center gap-2 min-w-0">
+                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-red-600/10 shrink-0 flex items-center justify-center border border-red-500/20 glass">
+                        <User className="w-4 h-4 md:w-5 md:h-5 text-red-500" />
                     </div>
-                    <div className="flex flex-col">
-                        <span className="text-[10px] text-neutral-500 uppercase font-black tracking-widest leading-none mb-1">Registro de Usuario</span>
-                        <span className="text-sm font-bold text-white leading-none">{session?.user?.email || "Cargando..."}</span>
+                    <div className="flex flex-col min-w-0">
+                        <span className="text-[8px] md:text-[10px] text-neutral-500 uppercase font-black tracking-widest leading-none mb-1">Registro de Usuario</span>
+                        <span className="text-xs md:text-sm font-bold text-white leading-none truncate block">{session?.user?.email || "Cargando..."}</span>
                     </div>
                 </div>
 
                 <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => signOut({ callbackUrl: "/login" })}
-                    className="text-neutral-500 hover:text-white hover:bg-neutral-800 rounded-xl px-4 border border-neutral-800"
+                    onClick={() => signOut({ callbackUrl: "/" })}
+                    className="text-neutral-500 hover:text-white hover:bg-neutral-800 rounded-xl px-2 md:px-4 h-8 md:h-10 border border-neutral-800 shrink-0"
                 >
-                    <LogOut className="w-4 h-4 mr-2" />
-                    <span className="hidden sm:inline">Cerrar Sesión</span>
-                    <span className="sm:hidden">Salir</span>
+                    <LogOut className="w-3.5 h-3.5 mr-1 md:mr-2" />
+                    <span className="text-[10px] md:text-sm font-bold uppercase">Salir</span>
                 </Button>
             </div>
 
@@ -195,11 +194,11 @@ export function OnboardingWizard({ authProvider }: OnboardingWizardProps) {
                                 thisIndex === 0 ? "items-start" : thisIndex === activeSteps.length - 1 ? "items-end" : "items-center"
                             )}>
                                 <div className={cn(
-                                    "w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300",
+                                    "w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300",
                                     isActive ? "bg-red-600 border-red-600 text-white scale-110" :
                                         isCompleted ? "bg-neutral-800 border-red-600 text-red-500" : "bg-black border-neutral-800 text-neutral-600"
                                 )}>
-                                    {isCompleted ? <Check className="w-5 h-5" /> : <step.icon className="w-5 h-5" />}
+                                    {isCompleted ? <Check className="w-4 h-4 md:w-5 md:h-5" /> : <step.icon className="w-4 h-4 md:w-5 md:h-5" />}
                                 </div>
                                 <span className={cn("text-xs font-bold uppercase tracking-wider hidden md:block", isActive ? "text-white" : "text-neutral-500")}>
                                     {step.label}
@@ -211,9 +210,9 @@ export function OnboardingWizard({ authProvider }: OnboardingWizardProps) {
                 {/* Progress Line Background would go here if needed */}
             </div>
 
-            <Card className="bg-neutral-900/50 border-neutral-800 backdrop-blur-xl overflow-hidden rounded-4xl">
+            <Card className="bg-neutral-900/50 border-neutral-800 backdrop-blur-xl overflow-hidden rounded-3xl md:rounded-4xl">
                 <form onSubmit={handleSubmit(onSubmit)}>
-                    <CardContent className="p-8 md:p-12 min-h-[500px] flex flex-col">
+                    <CardContent className="p-5 md:p-12 min-h-[450px] md:min-h-[500px] flex flex-col">
                         <AnimatePresence mode="wait">
                             <motion.div
                                 key={currentStep}
@@ -221,14 +220,14 @@ export function OnboardingWizard({ authProvider }: OnboardingWizardProps) {
                                 animate={{ opacity: 1, x: 0 }}
                                 exit={{ opacity: 0, x: -20 }}
                                 transition={{ duration: 0.3 }}
-                                className="flex-1 space-y-8"
+                                className="flex-1 space-y-6 md:space-y-8"
                             >
                                 {/* STEP 1: BIO */}
                                 {currentStep === "bio" && (
-                                    <div className="space-y-6">
-                                        <div className="text-center mb-8">
-                                            <h2 className="text-3xl font-black text-white mb-2">Comencemos por lo básico</h2>
-                                            <p className="text-neutral-400">Estos datos nos ayudan a calcular tus necesidades calóricas y de carga.</p>
+                                    <div className="space-y-4 md:space-y-6">
+                                        <div className="text-center mb-6 md:mb-8">
+                                            <h2 className="text-xl md:text-3xl font-black text-white mb-1 md:mb-2 text-balance leading-tight">Comencemos por lo básico</h2>
+                                            <p className="text-xs md:text-base text-neutral-400">Estos datos nos ayudan a calcular tus necesidades calóricas.</p>
                                         </div>
 
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -454,18 +453,18 @@ export function OnboardingWizard({ authProvider }: OnboardingWizardProps) {
 
                                 {/* STEP 5: SECURITY - Solo visible para usuarios Google */}
                                 {currentStep === "security" && isGoogleUser && (
-                                    <div className="space-y-6">
-                                        <div className="text-center mb-8">
-                                            <div className="w-16 h-16 rounded-full bg-red-600/10 border border-red-500/20 flex items-center justify-center mx-auto mb-4">
-                                                <ShieldCheck className="w-8 h-8 text-red-500" />
+                                    <div className="space-y-4 md:space-y-6">
+                                        <div className="text-center mb-4 md:mb-8">
+                                            <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-red-600/10 border border-red-500/20 flex items-center justify-center mx-auto mb-3 md:mb-4">
+                                                <ShieldCheck className="w-6 h-6 md:w-8 md:h-8 text-red-500" />
                                             </div>
-                                            <h2 className="text-3xl font-black text-white mb-2">Seguridad de la Cuenta</h2>
-                                            <p className="text-neutral-400">
-                                                Crea una contraseña para poder acceder con tu email <span className="text-white font-semibold">{session?.user?.email}</span> desde cualquier dispositivo.
+                                            <h2 className="text-xl md:text-3xl font-black text-white mb-1 md:mb-2 leading-tight">Seguridad de la Cuenta</h2>
+                                            <p className="text-[11px] md:text-base text-neutral-400 px-2">
+                                                Crea una contraseña para acceder con <span className="text-white font-semibold break-all">{session?.user?.email}</span> desde cualquier dispositivo.
                                             </p>
                                         </div>
 
-                                        <div className="space-y-5 max-w-md mx-auto">
+                                        <div className="space-y-4 md:space-y-5 max-w-md mx-auto">
                                             {/* Contraseña */}
                                             <div className="space-y-2">
                                                 <Label className="uppercase text-xs font-bold text-neutral-500">Contraseña <span className="text-red-500">*</span></Label>
@@ -511,11 +510,10 @@ export function OnboardingWizard({ authProvider }: OnboardingWizardProps) {
                                             </div>
 
                                             {/* Nota informativa */}
-                                            <div className="bg-neutral-900/80 border border-neutral-800 rounded-2xl p-4 mt-4">
-                                                <p className="text-[11px] text-neutral-400 leading-relaxed">
-                                                    <span className="text-red-500 font-bold">¿Por qué es obligatoria?</span> Al iniciar sesión con Google, tu cuenta no tiene contraseña.
-                                                    Crear una te permite acceder desde <span className="text-white font-medium">cualquier dispositivo</span> usando tu email y esta contraseña,
-                                                    además del botón de Google.
+                                            <div className="bg-neutral-900/80 border border-neutral-800 rounded-2xl p-3 md:p-4 mt-2 md:mt-4">
+                                                <p className="text-[10px] md:text-[11px] text-neutral-400 leading-relaxed text-balance md:text-left text-center">
+                                                    <span className="text-red-500 font-bold block md:inline mb-1 md:mb-0 md:mr-1">¿Por qué es obligatoria?</span>
+                                                    Al ser de Google, tu cuenta no tiene contraseña. Esto te permite acceder con email y contraseña además del botón de Google.
                                                 </p>
                                             </div>
                                         </div>
@@ -544,7 +542,7 @@ export function OnboardingWizard({ authProvider }: OnboardingWizardProps) {
                                 <Button
                                     type="submit"
                                     disabled={isSubmitting}
-                                    className="bg-red-600 hover:bg-red-700 text-white rounded-full px-8 h-12 font-bold shadow-lg shadow-red-900/20"
+                                    className="bg-red-600 hover:bg-red-700 text-white rounded-full px-6 md:px-10 h-11 md:h-14 font-black uppercase tracking-widest text-xs md:text-sm shadow-lg shadow-red-900/30 hover:scale-105 active:scale-95 transition-all"
                                 >
                                     {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Check className="w-4 h-4 mr-2" />}
                                     Finalizar Setup
@@ -553,9 +551,10 @@ export function OnboardingWizard({ authProvider }: OnboardingWizardProps) {
                                 <Button
                                     type="button"
                                     onClick={nextStep}
-                                    className="bg-white text-black hover:bg-neutral-200 rounded-full px-8 h-12 font-bold"
+                                    className="bg-white text-black hover:bg-neutral-100 rounded-full px-6 md:px-10 h-11 md:h-14 font-black uppercase tracking-widest text-xs md:text-sm shadow-xl shadow-white/5 hover:scale-105 active:scale-95 transition-all flex items-center group"
                                 >
-                                    Siguiente <ChevronRight className="w-4 h-4 ml-2" />
+                                    <span>Siguiente</span>
+                                    <ChevronRight className="w-4 h-4 md:w-5 md:h-5 ml-1.5 md:ml-2 group-hover:translate-x-1 transition-transform" />
                                 </Button>
                             )}
                         </div>
@@ -565,3 +564,4 @@ export function OnboardingWizard({ authProvider }: OnboardingWizardProps) {
         </div>
     );
 }
+
