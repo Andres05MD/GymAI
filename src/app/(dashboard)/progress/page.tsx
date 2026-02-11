@@ -258,10 +258,17 @@ export default async function ProgressPage({ searchParams }: ProgressPageProps) 
                                             calvesright: "Pantorrillas (Der)",
                                         };
 
+                                        const isHeight = key.toLowerCase() === "height";
                                         const unit = "cm";
 
                                         return (
-                                            <div key={key} className="text-center p-5 bg-neutral-900/50 border border-neutral-800 rounded-3xl hover:border-red-500/30 transition-all hover:bg-neutral-800/50 group">
+                                            <div
+                                                key={key}
+                                                className={cn(
+                                                    "text-center p-5 bg-neutral-900/50 border border-neutral-800 rounded-3xl hover:border-red-500/30 transition-all hover:bg-neutral-800/50 group",
+                                                    isHeight && "col-span-2"
+                                                )}
+                                            >
                                                 <p className="text-3xl font-black text-white mb-1 group-hover:scale-110 transition-transform origin-bottom">
                                                     {value as number}
                                                     <span className="text-sm text-neutral-500 ml-1 font-bold">{unit}</span>
