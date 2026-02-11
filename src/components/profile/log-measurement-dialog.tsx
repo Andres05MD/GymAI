@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, ReactNode } from "react";
+import { useState, ReactNode, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -36,9 +36,11 @@ const LogSchema = z.object({
 interface LogMeasurementDialogProps {
     onLogSuccess?: () => void;
     children?: ReactNode;
+    initialData?: Record<string, number>;
+    initialWeight?: number;
 }
 
-export function LogMeasurementDialog({ onLogSuccess, children }: LogMeasurementDialogProps) {
+export function LogMeasurementDialog({ onLogSuccess, children, initialData, initialWeight }: LogMeasurementDialogProps) {
     const [open, setOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -47,8 +49,22 @@ export function LogMeasurementDialog({ onLogSuccess, children }: LogMeasurementD
         resolver: zodResolver(LogSchema) as any,
         defaultValues: {
             date: new Date().toISOString().split('T')[0],
+            weight: initialWeight,
+            ...initialData
         }
     });
+
+    // Update form values when dialog opens to ensure fresh data
+    useEffect(() => {
+        if (open) {
+            form.reset({
+                date: new Date().toISOString().split('T')[0],
+                weight: initialWeight,
+                ...initialData,
+                notes: "" // Always reset notes to empty
+            });
+        }
+    }, [open, initialData, initialWeight, form]);
 
     const onSubmit = async (data: z.infer<typeof LogSchema>) => {
         setIsSubmitting(true);

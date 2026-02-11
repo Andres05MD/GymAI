@@ -155,7 +155,10 @@ export default async function ProgressPage({ searchParams }: ProgressPageProps) 
             {/* Metrics Grid */}
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6">
                 {/* Peso Card con Modal - Solo para el propio usuario o coach */}
-                <LogMeasurementDialog>
+                <LogMeasurementDialog
+                    initialWeight={metrics?.weight}
+                    initialData={metrics?.measurements}
+                >
                     <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-3xl md:rounded-4xl p-4 md:p-6 relative overflow-hidden group hover:border-blue-500/30 transition-all cursor-pointer h-full flex flex-col items-center justify-center text-center">
                         <div className="absolute top-0 right-0 w-20 h-20 bg-blue-600/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none group-hover:bg-blue-600/20 transition-colors"></div>
                         <div className="relative z-10 flex flex-col items-center">
