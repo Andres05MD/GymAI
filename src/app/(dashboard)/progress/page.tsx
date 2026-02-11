@@ -292,15 +292,15 @@ export default async function ProgressPage({ searchParams }: ProgressPageProps) 
                 </div>
             </div>
 
-            {/* Personal Records */}
-            <div id="prs-section" className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-4xl overflow-hidden scroll-mt-24">
+            {/* Peso de Ejercicios */}
+            <div id="exercises-weight-section" className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-4xl overflow-hidden scroll-mt-24">
                 <div className="border-b border-neutral-800/50 p-6 flex items-center gap-4 bg-black/20">
-                    <div className="w-12 h-12 bg-yellow-900/20 rounded-2xl flex items-center justify-center border border-yellow-500/10 shadow-[0_0_15px_rgba(234,179,8,0.1)]">
-                        <Trophy className="h-6 w-6 text-yellow-500" />
+                    <div className="w-12 h-12 bg-red-900/20 rounded-2xl flex items-center justify-center border border-red-500/10 shadow-[0_0_15px_rgba(239,68,68,0.1)]">
+                        <Dumbbell className="h-6 w-6 text-red-500" />
                     </div>
                     <div>
-                        <h3 className="text-xl font-black text-white uppercase tracking-tight">Records Personales (PRs)</h3>
-                        <p className="text-xs text-neutral-500 font-medium">Tus mejores marcas históricas</p>
+                        <h3 className="text-xl font-black text-white uppercase tracking-tight">Peso de Ejercicios</h3>
+                        <p className="text-xs text-neutral-500 font-medium">Máximos pesos registrados por ejercicio</p>
                     </div>
                 </div>
 
@@ -309,8 +309,8 @@ export default async function ProgressPage({ searchParams }: ProgressPageProps) 
                         {prs.map((pr: PersonalRecord, i: number) => (
                             <div key={i} className="p-6 flex items-center justify-between hover:bg-neutral-800/30 transition-colors group">
                                 <div className="flex items-center gap-5">
-                                    <div className="h-14 w-14 bg-yellow-500/5 rounded-2xl flex items-center justify-center border border-yellow-500/10 group-hover:border-yellow-500/30 transition-colors">
-                                        <Trophy className="h-6 w-6 text-yellow-600 group-hover:text-yellow-500 transition-colors" />
+                                    <div className="h-14 w-14 bg-red-500/5 rounded-2xl flex items-center justify-center border border-neutral-800 group-hover:border-red-500/30 transition-colors">
+                                        <Dumbbell className="h-6 w-6 text-neutral-600 group-hover:text-red-500 transition-colors" />
                                     </div>
                                     <div>
                                         <h4 className="font-bold text-white text-lg mb-0.5">{pr.exercise}</h4>
@@ -319,7 +319,7 @@ export default async function ProgressPage({ searchParams }: ProgressPageProps) 
                                 </div>
                                 <div className="text-right">
                                     <p className="font-black text-3xl text-white tracking-tighter">{pr.weight} <span className="text-base font-bold text-neutral-600">kg</span></p>
-                                    <p className="text-[9px] uppercase tracking-widest text-yellow-500/70 font-bold">Mejor Serie</p>
+                                    <p className="text-[9px] uppercase tracking-widest text-red-500/70 font-bold">Máximo Peso</p>
                                 </div>
                             </div>
                         ))}
@@ -327,10 +327,10 @@ export default async function ProgressPage({ searchParams }: ProgressPageProps) 
                 ) : (
                     <div className="text-center py-20 text-neutral-500 flex flex-col items-center gap-4">
                         <div className="bg-neutral-800/50 p-4 rounded-full">
-                            <Trophy className="h-8 w-8 text-neutral-600" />
+                            <Dumbbell className="h-8 w-8 text-neutral-600" />
                         </div>
                         <div>
-                            <p className="font-medium">Aún no hay datos suficientes para calcular PRs.</p>
+                            <p className="font-medium">Aún no hay datos suficientes para mostrar pesos máximos.</p>
                             <p className="text-sm mt-1">Sigue entrenando duro.</p>
                         </div>
                     </div>

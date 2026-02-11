@@ -170,7 +170,7 @@ export async function getPersonalRecords(userId?: string) {
             exercise: name,
             weight: val.weight,
             date: val.date
-        })).sort((a, b) => b.weight - a.weight).slice(0, 3);
+        })).sort((a, b) => b.weight - a.weight).slice(0, 20);
 
         return { success: true, prs };
     } catch (error) {
