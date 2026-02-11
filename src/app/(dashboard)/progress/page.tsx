@@ -7,6 +7,7 @@ import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { LogMeasurementDialog } from "@/components/profile/log-measurement-dialog";
 
 interface PersonalRecord {
     exercise: string;
@@ -29,7 +30,6 @@ async function getLatestBodyMetrics(userId: string) {
         const userData = userDoc.data();
 
         // Limpiar measurements para asegurar que solo pasamos números al cliente
-        // Evitamos pasar campos como 'updatedAt' si son de tipo Timestamp
         const rawMeasurements = userData?.measurements || {};
         const cleanMeasurements: Record<string, number> = {};
 
@@ -56,6 +56,7 @@ interface ProgressPageProps {
 }
 
 export default async function ProgressPage({ searchParams }: ProgressPageProps) {
+    // ... logic (session, coach, metrics, etc)
     const session = await auth();
     if (!session?.user?.id) return null;
 
@@ -103,7 +104,7 @@ export default async function ProgressPage({ searchParams }: ProgressPageProps) 
     const isWeightLoss = parseFloat(weightChange) < 0;
 
     return (
-        <div className="flex flex-col gap-8 pb-20">
+        <div className="flex flex-col gap-8 pb-32">
             {/* Header & Athlete Selector */}
             <div className="space-y-6">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
@@ -153,24 +154,27 @@ export default async function ProgressPage({ searchParams }: ProgressPageProps) 
 
             {/* Metrics Grid */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-                <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-4xl p-6 relative overflow-hidden group hover:border-blue-500/30 transition-all">
-                    <div className="absolute top-0 right-0 w-20 h-20 bg-blue-600/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none group-hover:bg-blue-600/20 transition-colors"></div>
-                    <div className="flex flex-col items-center text-center relative z-10">
-                        <div className="w-14 h-14 bg-neutral-900 rounded-2xl flex items-center justify-center mb-4 shadow-lg border border-neutral-800 group-hover:scale-105 transition-transform duration-300">
-                            <Scale className="h-6 w-6 text-blue-500" />
+                {/* Peso Card con Modal - Solo para el propio usuario o coach */}
+                <LogMeasurementDialog>
+                    <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-4xl p-6 relative overflow-hidden group hover:border-blue-500/30 transition-all cursor-pointer text-left h-full">
+                        <div className="absolute top-0 right-0 w-20 h-20 bg-blue-600/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none group-hover:bg-blue-600/20 transition-colors"></div>
+                        <div className="flex flex-col items-center text-center relative z-10">
+                            <div className="w-14 h-14 bg-neutral-900 rounded-2xl flex items-center justify-center mb-4 shadow-lg border border-neutral-800 group-hover:scale-105 transition-transform duration-300">
+                                <Scale className="h-6 w-6 text-blue-500" />
+                            </div>
+                            <p className="text-3xl font-black text-white tracking-tighter mb-1">{metrics?.weight || "—"}</p>
+                            <p className="text-[10px] text-neutral-500 uppercase tracking-widest font-bold mb-2">Peso (kg)</p>
+                            <span className={cn(
+                                "px-2 py-0.5 rounded-md text-[10px] font-bold border",
+                                isWeightLoss ? 'bg-green-500/10 text-green-500 border-green-500/20' : 'bg-neutral-800 text-neutral-500 border-neutral-700'
+                            )}>
+                                {parseFloat(weightChange) > 0 ? '+' : ''}{weightChange} kg
+                            </span>
                         </div>
-                        <p className="text-3xl font-black text-white tracking-tighter mb-1">{metrics?.weight || "—"}</p>
-                        <p className="text-[10px] text-neutral-500 uppercase tracking-widest font-bold mb-2">Peso (kg)</p>
-                        <span className={cn(
-                            "px-2 py-0.5 rounded-md text-[10px] font-bold border",
-                            isWeightLoss ? 'bg-green-500/10 text-green-500 border-green-500/20' : 'bg-neutral-800 text-neutral-500 border-neutral-700'
-                        )}>
-                            {parseFloat(weightChange) > 0 ? '+' : ''}{weightChange} kg
-                        </span>
                     </div>
-                </div>
+                </LogMeasurementDialog>
 
-                <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-4xl p-6 relative overflow-hidden group hover:border-orange-500/30 transition-all">
+                <Link href="#measurements-section" className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-4xl p-6 relative overflow-hidden group hover:border-orange-500/30 transition-all cursor-pointer">
                     <div className="absolute top-0 right-0 w-20 h-20 bg-orange-600/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none group-hover:bg-orange-600/20 transition-colors"></div>
                     <div className="flex flex-col items-center text-center relative z-10">
                         <div className="w-14 h-14 bg-neutral-900 rounded-2xl flex items-center justify-center mb-4 shadow-lg border border-neutral-800 group-hover:scale-105 transition-transform duration-300">
@@ -178,11 +182,11 @@ export default async function ProgressPage({ searchParams }: ProgressPageProps) 
                         </div>
                         <p className="text-3xl font-black text-white tracking-tighter mb-1">{metrics?.bodyFat ? `${metrics.bodyFat}%` : "—"}</p>
                         <p className="text-[10px] text-neutral-500 uppercase tracking-widest font-bold mb-2">Grasa Est.</p>
-                        <p className="text-xs text-neutral-600 font-medium">N/A</p>
+                        <p className="text-xs text-neutral-600 font-medium">Ver Medidas</p>
                     </div>
-                </div>
+                </Link>
 
-                <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-4xl p-6 relative overflow-hidden group hover:border-yellow-500/30 transition-all">
+                <Link href="#prs-section" className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-4xl p-6 relative overflow-hidden group hover:border-yellow-500/30 transition-all cursor-pointer">
                     <div className="absolute top-0 right-0 w-20 h-20 bg-yellow-600/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none group-hover:bg-yellow-600/20 transition-colors"></div>
                     <div className="flex flex-col items-center text-center relative z-10">
                         <div className="w-14 h-14 bg-neutral-900 rounded-2xl flex items-center justify-center mb-4 shadow-lg border border-neutral-800 group-hover:scale-105 transition-transform duration-300">
@@ -190,9 +194,9 @@ export default async function ProgressPage({ searchParams }: ProgressPageProps) 
                         </div>
                         <p className="text-3xl font-black text-white tracking-tighter mb-1">{prs?.length || 0}</p>
                         <p className="text-[10px] text-neutral-500 uppercase tracking-widest font-bold mb-2">PRs Nuevos</p>
-                        <p className="text-xs text-neutral-600 font-medium">Últimos 20 entrenos</p>
+                        <p className="text-xs text-neutral-600 font-medium font-bold group-hover:text-yellow-500 transition-colors">Ver Historial</p>
                     </div>
-                </div>
+                </Link>
 
                 <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-4xl p-6 relative overflow-hidden group hover:border-green-500/30 transition-all">
                     <div className="absolute top-0 right-0 w-20 h-20 bg-green-600/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none group-hover:bg-green-600/20 transition-colors"></div>
@@ -202,13 +206,13 @@ export default async function ProgressPage({ searchParams }: ProgressPageProps) 
                         </div>
                         <p className="text-3xl font-black text-white tracking-tighter mb-1">—</p>
                         <p className="text-[10px] text-neutral-500 uppercase tracking-widest font-bold mb-2">Volumen</p>
-                        <p className="text-xs text-neutral-600 font-medium">Próximamente</p>
+                        <p className="text-xs text-neutral-600 font-medium italic italic">Próximamente</p>
                     </div>
                 </div>
             </div>
 
             {/* Body Measurements */}
-            <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-4xl overflow-hidden">
+            <div id="measurements-section" className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-4xl overflow-hidden scroll-mt-24">
                 <div className="border-b border-neutral-800/50 p-6 flex items-center gap-4 bg-black/20">
                     <div className="w-12 h-12 bg-red-900/20 rounded-2xl flex items-center justify-center border border-red-500/10 shadow-[0_0_15px_rgba(220,38,38,0.1)]">
                         <Ruler className="h-6 w-6 text-red-500" />
@@ -251,7 +255,7 @@ export default async function ProgressPage({ searchParams }: ProgressPageProps) 
             </div>
 
             {/* Personal Records */}
-            <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-4xl overflow-hidden">
+            <div id="prs-section" className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-4xl overflow-hidden scroll-mt-24">
                 <div className="border-b border-neutral-800/50 p-6 flex items-center gap-4 bg-black/20">
                     <div className="w-12 h-12 bg-yellow-900/20 rounded-2xl flex items-center justify-center border border-yellow-500/10 shadow-[0_0_15px_rgba(234,179,8,0.1)]">
                         <Trophy className="h-6 w-6 text-yellow-500" />
