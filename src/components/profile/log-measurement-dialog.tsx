@@ -74,7 +74,8 @@ export function LogMeasurementDialog({ onLogSuccess, children, initialData, init
             if (result.success) {
                 toast.success("Medidas registradas correctamente");
                 setOpen(false);
-                form.reset();
+                // No llamamos a form.reset() aquí para evitar que se borren los datos antes de cerrar
+                // El useEffect se encargará de actualizar los datos la próxima vez que se abra
                 if (onLogSuccess) onLogSuccess();
             } else {
                 toast.error(result.error);
