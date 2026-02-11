@@ -53,6 +53,7 @@ export const authConfig = {
                 session.user.id = token.sub;
                 session.user.role = token.role as UserRole;
                 session.user.onboardingCompleted = token.onboardingCompleted as boolean;
+                session.user.authProvider = token.authProvider as "google" | "password";
             }
             return session;
         },
@@ -61,6 +62,7 @@ export const authConfig = {
                 token.sub = user.id;
                 token.role = user.role as UserRole;
                 token.onboardingCompleted = user.onboardingCompleted as boolean;
+                token.authProvider = user.authProvider as "google" | "password";
             }
             if (trigger === "update" && session) {
                 token.onboardingCompleted = session.onboardingCompleted;

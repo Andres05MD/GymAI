@@ -35,6 +35,7 @@ interface AuthUser {
     role: "athlete" | "coach";
     emailVerified?: Date | null;
     onboardingCompleted: boolean;
+    authProvider: "google" | "password";
 }
 
 /**
@@ -57,6 +58,7 @@ async function getUserByEmail(email: string): Promise<AuthUser | null> {
             image: d.image,
             role: d.role,
             onboardingCompleted: d.onboardingCompleted,
+            authProvider: d.authProvider || "password",
         } as AuthUser;
     } catch (error) {
         console.error("Error obteniendo usuario por email:", error);
@@ -81,6 +83,7 @@ async function getUserById(id: string): Promise<AuthUser | null> {
             image: d.image || null,
             role: d.role || "athlete",
             onboardingCompleted: d.onboardingCompleted || false,
+            authProvider: d.authProvider || "password",
         } as AuthUser;
     } catch (error) {
         console.error("Error obteniendo usuario por ID:", error);
@@ -147,10 +150,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                                 ...existingUser,
                                 name: userName,
                                 email: userEmail,
-                                image: userImage
+                                image: userImage,
+                                authProvider: existingUser.authProvider || "google" as const,
                             };
                         } else {
                             // Usuario nuevo: Lo creamos con todos los campos necesarios
+                            // Usuario nuevo vía Google: marcar como proveedor Google
                             const newUser: AuthUser = {
                                 id: userId,
                                 name: userName,
@@ -159,6 +164,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                                 role: "athlete", // Por defecto
                                 emailVerified: new Date(),
                                 onboardingCompleted: false,
+                                authProvider: "google",
                             };
 
                             await adminDb.collection("users").doc(userId).set({
@@ -210,7 +216,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                         image: firebaseUser.photoURL,
                         emailVerified: firebaseUser.emailVerified ? new Date() : null,
                         role: "athlete",
-                        onboardingCompleted: false
+                        onboardingCompleted: false,
+                        authProvider: "password",
                     };
                     return fallbackUser;
 

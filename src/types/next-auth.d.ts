@@ -6,12 +6,14 @@ declare module "next-auth" {
             id: string;
             role: "athlete" | "coach" | "admin";
             onboardingCompleted: boolean;
+            authProvider: "google" | "password";
         } & DefaultSession["user"];
     }
 
     interface User {
         role: "athlete" | "coach" | "admin";
         onboardingCompleted: boolean;
+        authProvider: "google" | "password";
     }
 }
 
@@ -20,5 +22,6 @@ declare module "next-auth/jwt" {
         id: string;
         role: "athlete" | "coach" | "admin";
         onboardingCompleted: boolean;
+        authProvider: "google" | "password";
     }
 }

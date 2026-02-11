@@ -9,7 +9,7 @@ import { completeOnboarding } from "@/actions/auth-actions";
 import { useRouter } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Loader2, ChevronRight, ChevronLeft, Check, Activity, HeartPulse, User, Ruler, Target, Lock, LogOut, type LucideIcon } from "lucide-react";
+import { Loader2, ChevronRight, ChevronLeft, Check, Activity, HeartPulse, User, Ruler, Target, Lock, LogOut, Eye, EyeOff, ShieldCheck, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -28,9 +28,22 @@ const steps: { id: Step; label: string; icon: LucideIcon }[] = [
     { id: "security", label: "Seguridad", icon: Lock },
 ];
 
-export function OnboardingWizard() {
+// Props del componente - recibe el proveedor de autenticación para decidir si la contraseña es obligatoria
+interface OnboardingWizardProps {
+    authProvider: "google" | "password";
+}
+
+export function OnboardingWizard({ authProvider }: OnboardingWizardProps) {
+    // Si el usuario entró con email/password ya tiene contraseña → no necesita el paso de seguridad
+    const isGoogleUser = authProvider === "google";
+    const activeSteps = isGoogleUser
+        ? steps
+        : steps.filter((s) => s.id !== "security");
+
     const [currentStep, setCurrentStep] = useState<Step>("bio");
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirm, setShowConfirm] = useState(false);
     const router = useRouter();
     const { data: session, update } = useSession();
 
@@ -49,6 +62,7 @@ export function OnboardingWizard() {
             medicalConditions: [],
             measurements: {},
             password: "",
+            confirmPassword: "",
         },
     });
 
@@ -70,7 +84,13 @@ export function OnboardingWizard() {
             if (isValid) setCurrentStep("measurements");
         } else if (currentStep === "measurements") {
             isValid = await trigger(["measurements"]);
-            if (isValid) setCurrentStep("security");
+            // Si es usuario Google, avanzar a seguridad; si no, el formulario se envía directamente
+            if (isValid) {
+                if (isGoogleUser) {
+                    setCurrentStep("security");
+                }
+                // Si no es Google, el botón ya será "submit" → se maneja en el form
+            }
         }
     };
 
@@ -82,6 +102,27 @@ export function OnboardingWizard() {
     };
 
     const onSubmit = async (data: z.infer<typeof OnboardingInputSchema>) => {
+        // Validación adicional: si es usuario Google, la contraseña es OBLIGATORIA
+        if (isGoogleUser) {
+            if (!data.password || data.password.length < 6) {
+                form.setError("password", {
+                    type: "manual",
+                    message: "Debes crear una contraseña de al menos 6 caracteres para acceder desde cualquier dispositivo.",
+                });
+                // Asegurar que estamos en el paso de seguridad
+                if (currentStep !== "security") setCurrentStep("security");
+                return;
+            }
+            if (data.password !== data.confirmPassword) {
+                form.setError("confirmPassword", {
+                    type: "manual",
+                    message: "Las contraseñas no coinciden.",
+                });
+                if (currentStep !== "security") setCurrentStep("security");
+                return;
+            }
+        }
+
         setIsSubmitting(true);
         try {
             const result = await completeOnboarding(data);
@@ -142,13 +183,16 @@ export function OnboardingWizard() {
             <div className="mb-8">
                 <div className="flex justify-between mb-2">
                     {steps.map((step, index) => {
-                        const stepIndex = steps.findIndex(s => s.id === currentStep);
-                        const isCompleted = steps.findIndex(s => s.id === step.id) < stepIndex;
+                        const stepIndex = activeSteps.findIndex(s => s.id === currentStep);
+                        const thisIndex = activeSteps.findIndex(s => s.id === step.id);
+                        // Si este paso no está en los pasos activos, no renderizar
+                        if (thisIndex === -1) return null;
+                        const isCompleted = thisIndex < stepIndex;
                         const isActive = step.id === currentStep;
 
                         return (
                             <div key={step.id} className={cn("flex flex-col items-center gap-2 relative z-10 w-full",
-                                index === 0 ? "items-start" : index === steps.length - 1 ? "items-end" : "items-center"
+                                thisIndex === 0 ? "items-start" : thisIndex === activeSteps.length - 1 ? "items-end" : "items-center"
                             )}>
                                 <div className={cn(
                                     "w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300",
@@ -408,31 +452,70 @@ export function OnboardingWizard() {
                                     </div>
                                 )}
 
-                                {/* STEP 5: SECURITY */}
-                                {currentStep === "security" && (
+                                {/* STEP 5: SECURITY - Solo visible para usuarios Google */}
+                                {currentStep === "security" && isGoogleUser && (
                                     <div className="space-y-6">
                                         <div className="text-center mb-8">
+                                            <div className="w-16 h-16 rounded-full bg-red-600/10 border border-red-500/20 flex items-center justify-center mx-auto mb-4">
+                                                <ShieldCheck className="w-8 h-8 text-red-500" />
+                                            </div>
                                             <h2 className="text-3xl font-black text-white mb-2">Seguridad de la Cuenta</h2>
                                             <p className="text-neutral-400">
-                                                Si entraste con Google, crea una contraseña para poder acceder también con tu email.
+                                                Crea una contraseña para poder acceder con tu email <span className="text-white font-semibold">{session?.user?.email}</span> desde cualquier dispositivo.
                                             </p>
                                         </div>
 
-                                        <div className="space-y-4 max-w-md mx-auto">
+                                        <div className="space-y-5 max-w-md mx-auto">
+                                            {/* Contraseña */}
                                             <div className="space-y-2">
-                                                <Label className="uppercase text-xs font-bold text-neutral-500">Contraseña (Opcional)</Label>
+                                                <Label className="uppercase text-xs font-bold text-neutral-500">Contraseña <span className="text-red-500">*</span></Label>
                                                 <div className="relative">
                                                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-neutral-500" />
                                                     <Input
-                                                        type="password"
+                                                        type={showPassword ? "text" : "password"}
                                                         {...register("password")}
                                                         placeholder="Mínimo 6 caracteres"
-                                                        className="pl-10 bg-black/50 border-neutral-800 h-12 rounded-xl text-white focus:ring-red-500/50"
+                                                        className="pl-10 pr-10 bg-black/50 border-neutral-800 h-12 rounded-xl text-white focus:ring-red-500/50"
                                                     />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setShowPassword(!showPassword)}
+                                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-white transition-colors"
+                                                    >
+                                                        {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                                                    </button>
                                                 </div>
                                                 {errors.password && <p className="text-red-500 text-xs">{errors.password.message}</p>}
-                                                <p className="text-[10px] text-neutral-500 mt-2">
-                                                    * Esto te permitirá iniciar sesión desde cualquier dispositivo usando tu email y esta contraseña, además del botón de Google.
+                                            </div>
+
+                                            {/* Confirmar Contraseña */}
+                                            <div className="space-y-2">
+                                                <Label className="uppercase text-xs font-bold text-neutral-500">Confirmar Contraseña <span className="text-red-500">*</span></Label>
+                                                <div className="relative">
+                                                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-neutral-500" />
+                                                    <Input
+                                                        type={showConfirm ? "text" : "password"}
+                                                        {...register("confirmPassword")}
+                                                        placeholder="Repite tu contraseña"
+                                                        className="pl-10 pr-10 bg-black/50 border-neutral-800 h-12 rounded-xl text-white focus:ring-red-500/50"
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setShowConfirm(!showConfirm)}
+                                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-white transition-colors"
+                                                    >
+                                                        {showConfirm ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                                                    </button>
+                                                </div>
+                                                {errors.confirmPassword && <p className="text-red-500 text-xs">{errors.confirmPassword.message}</p>}
+                                            </div>
+
+                                            {/* Nota informativa */}
+                                            <div className="bg-neutral-900/80 border border-neutral-800 rounded-2xl p-4 mt-4">
+                                                <p className="text-[11px] text-neutral-400 leading-relaxed">
+                                                    <span className="text-red-500 font-bold">¿Por qué es obligatoria?</span> Al iniciar sesión con Google, tu cuenta no tiene contraseña.
+                                                    Crear una te permite acceder desde <span className="text-white font-medium">cualquier dispositivo</span> usando tu email y esta contraseña,
+                                                    además del botón de Google.
                                                 </p>
                                             </div>
                                         </div>
@@ -456,7 +539,8 @@ export function OnboardingWizard() {
                                 <div></div> // Spacer
                             )}
 
-                            {currentStep === "security" ? (
+                            {/* Determinar si es el último paso: para Google → security, para password → measurements */}
+                            {((currentStep === "security" && isGoogleUser) || (currentStep === "measurements" && !isGoogleUser)) ? (
                                 <Button
                                     type="submit"
                                     disabled={isSubmitting}

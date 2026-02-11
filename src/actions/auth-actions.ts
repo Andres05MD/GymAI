@@ -87,7 +87,7 @@ export async function completeOnboarding(data: z.infer<typeof OnboardingInputSch
         return { success: false, error: "Datos inválidos" };
     }
 
-    const { password, ...profileData } = validation.data;
+    const { password, confirmPassword, ...profileData } = validation.data;
 
     try {
         // Si el usuario proporcionó una contraseña (para usuarios de Google), la actualizamos en Auth
@@ -104,11 +104,19 @@ export async function completeOnboarding(data: z.infer<typeof OnboardingInputSch
 
         // Usamos set con { merge: true } para crear el documento si no existe 
         // o actualizarlo si ya existe, evitando el error NOT_FOUND.
-        await adminDb.collection("users").doc(session.user.id).set({
+        // Si el usuario estableció contraseña, marcar hasPassword como true
+        const updateData: Record<string, unknown> = {
             ...profileData,
             onboardingCompleted: true,
-            updatedAt: new Date()
-        }, { merge: true });
+            updatedAt: new Date(),
+        };
+
+        // Si el usuario de Google estableció contraseña, ahora puede acceder con ambos métodos
+        if (password && password.length >= 6) {
+            updateData.hasPassword = true;
+        }
+
+        await adminDb.collection("users").doc(session.user.id).set(updateData, { merge: true });
 
         // UNIFICACIÓN: Registrar también las medidas iniciales en el historial `body_measurements`
         // Esto permite que el gráfico del perfil tenga un punto inicial.

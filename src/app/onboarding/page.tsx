@@ -13,6 +13,9 @@ export default async function OnboardingPage() {
         redirect("/dashboard");
     }
 
+    // Obtener el proveedor de autenticación de la sesión para decidir si la contraseña es obligatoria
+    const authProvider = session.user.authProvider || "password";
+
     return (
         <div className="min-h-screen bg-black relative overflow-hidden flex flex-col items-center justify-center p-6">
             {/* Background Mood */}
@@ -29,8 +32,9 @@ export default async function OnboardingPage() {
                     </p>
                 </div>
 
-                <OnboardingWizard />
+                <OnboardingWizard authProvider={authProvider} />
             </div>
         </div>
     );
 }
+

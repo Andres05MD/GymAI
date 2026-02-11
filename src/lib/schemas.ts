@@ -104,7 +104,7 @@ export const OnboardingInputSchema = z.object({
         chest: z.coerce.number().optional(),
         waist: z.coerce.number().optional(),
         hips: z.coerce.number().optional(),
-        glutes: z.coerce.number().optional(), // Added glutes
+        glutes: z.coerce.number().optional(),
         shoulders: z.coerce.number().optional(),
         neck: z.coerce.number().optional(),
 
@@ -118,8 +118,19 @@ export const OnboardingInputSchema = z.object({
         calvesRight: z.coerce.number().optional(),
     }).optional(),
 
-    // Seguridad: Contraseña para acceso correo/password (Requerido para usuarios Google)
-    password: z.string().min(6).optional().or(z.literal("")),
+    // Seguridad: Contraseña para acceso correo/password
+    // Opcional a nivel de schema; la obligatoriedad se controla desde el frontend según authProvider
+    password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres").optional().or(z.literal("")),
+    confirmPassword: z.string().optional().or(z.literal("")),
+}).refine((data) => {
+    // Si se proporcionó contraseña, debe coincidir con la confirmación
+    if (data.password && data.password.length >= 6) {
+        return data.confirmPassword === data.password;
+    }
+    return true;
+}, {
+    message: "Las contraseñas no coinciden",
+    path: ["confirmPassword"],
 });
 
 // Schema de Ejercicio
