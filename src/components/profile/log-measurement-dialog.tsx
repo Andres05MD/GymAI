@@ -39,9 +39,10 @@ interface LogMeasurementDialogProps {
     children?: ReactNode;
     initialData?: Record<string, number>;
     initialWeight?: number;
+    targetUserId?: string;
 }
 
-export function LogMeasurementDialog({ onLogSuccess, children, initialData, initialWeight }: LogMeasurementDialogProps) {
+export function LogMeasurementDialog({ onLogSuccess, children, initialData, initialWeight, targetUserId }: LogMeasurementDialogProps) {
     const [open, setOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -70,7 +71,7 @@ export function LogMeasurementDialog({ onLogSuccess, children, initialData, init
     const onSubmit = async (data: z.infer<typeof LogSchema>) => {
         setIsSubmitting(true);
         try {
-            const result = await logBodyMeasurements(data);
+            const result = await logBodyMeasurements(data, targetUserId);
             if (result.success) {
                 toast.success("Medidas registradas correctamente");
                 setOpen(false);

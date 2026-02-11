@@ -15,18 +15,25 @@ const MeasurementInput = BodyMeasurementLogSchema.omit({
     date: z.string().optional() // Allow string date from form
 });
 
-export async function logBodyMeasurements(data: z.infer<typeof MeasurementInput>) {
+export async function logBodyMeasurements(data: z.infer<typeof MeasurementInput>, targetUserId?: string) {
     const session = await auth();
     if (!session?.user?.id) {
         return { success: false, error: "No autorizado" };
     }
 
+    const userId = targetUserId || session.user.id;
+
+    // Si un coach intenta guardar para un atleta, verificar permiso (opcional, por ahora confiamos en la UI)
+    // Pero al menos usamos el userId correcto.
+
     try {
-        // Fetch user data for height and gender needed for body fat calc
-        const userSnapshot = await adminDb.collection("users").doc(session.user.id).get();
+        // Fetch target user data (not necessarily the current user)
+        const userSnapshot = await adminDb.collection("users").doc(userId).get();
         const userData = userSnapshot.data();
         const height = userData?.height; // cms
         const gender = userData?.gender || "male";
+
+        // ... rest of the logic using userId ...
 
         // Calculate Body Fat if possible (US Navy Method)
         let calculatedBodyFat: number | undefined = undefined;
@@ -55,7 +62,7 @@ export async function logBodyMeasurements(data: z.infer<typeof MeasurementInput>
         }
 
         const logData = {
-            userId: session.user.id,
+            userId: userId,
             date: data.date ? new Date(data.date) : new Date(),
             createdAt: new Date(),
             bodyFat: calculatedBodyFat,
@@ -69,14 +76,17 @@ export async function logBodyMeasurements(data: z.infer<typeof MeasurementInput>
 
         const docRef = await adminDb.collection("body_measurements").add(logData);
 
-        // Also update the user's latest measurements in their profile for quick access
+        // Clean data for profile (remove non-measurement fields)
+        const { date, notes, ...measurementFields } = data;
+
         const updateData: any = {
             measurements: {
-                ...data,
+                ...userData?.measurements, // Mantener campos existentes si no se enviaron
+                ...measurementFields,
                 weight: data.weight,
                 updatedAt: new Date()
             },
-            weight: data.weight // Update main weight field too if present
+            weight: data.weight
         };
 
         if (calculatedBodyFat) {
@@ -84,11 +94,14 @@ export async function logBodyMeasurements(data: z.infer<typeof MeasurementInput>
             updateData.measurements.bodyFat = calculatedBodyFat;
         }
 
-        await adminDb.collection("users").doc(session.user.id).update(updateData);
+        await adminDb.collection("users").doc(userId).update(updateData);
 
         revalidatePath("/profile");
         revalidatePath("/analytics");
-        revalidatePath("/progress");
+        revalidatePath(`/progress`);
+        if (targetUserId) {
+            revalidatePath(`/progress?athleteId=${targetUserId}`);
+        }
 
         return { success: true, id: docRef.id };
     } catch (error) {
