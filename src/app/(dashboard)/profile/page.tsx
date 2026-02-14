@@ -59,17 +59,17 @@ export default async function ProfilePage() {
             </div>
 
             <Tabs defaultValue="details" className="w-full">
-                <TabsList className={`grid w-full bg-neutral-900/50 backdrop-blur-md border border-white/5 mb-8 rounded-full p-1 ${isCoach ? 'grid-cols-1' : 'grid-cols-2'}`}>
-                    <TabsTrigger value="details" className="rounded-full data-[state=active]:bg-red-600 data-[state=active]:text-white transition-all text-neutral-400">
+                <TabsList className={`grid w-full bg-neutral-900/50 backdrop-blur-md border border-white/5 mb-8 rounded-full p-1 h-12 ${isCoach ? 'grid-cols-1' : 'grid-cols-3'}`}>
+                    <TabsTrigger value="details" className="rounded-full data-[state=active]:bg-red-600 data-[state=active]:text-white transition-all text-neutral-400 font-bold">
                         <User className="w-4 h-4 mr-2" /> Datos Personales
                     </TabsTrigger>
                     {!isCoach && (
                         <>
-                            <TabsTrigger value="measurements" className="rounded-full data-[state=active]:bg-red-600 data-[state=active]:text-white transition-all text-neutral-400">
+                            <TabsTrigger value="measurements" className="rounded-full data-[state=active]:bg-red-600 data-[state=active]:text-white transition-all text-neutral-400 font-bold">
                                 <Ruler className="w-4 h-4 mr-2" /> Progreso Corporal
                             </TabsTrigger>
-                            <TabsTrigger value="health" className="rounded-full data-[state=active]:bg-red-600 data-[state=active]:text-white transition-all text-neutral-400">
-                                <Activity className="w-4 h-4 mr-2" /> Salud
+                            <TabsTrigger value="health" className="rounded-full data-[state=active]:bg-red-600 data-[state=active]:text-white transition-all text-neutral-400 font-bold">
+                                <HeartPulse className="w-4 h-4 mr-2" /> Salud
                             </TabsTrigger>
                         </>
                     )}

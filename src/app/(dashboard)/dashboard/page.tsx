@@ -200,10 +200,17 @@ async function CoachDashboard({ user }: { user: DashboardUser | undefined }) {
 
 async function AthleteDashboard({ user }: { user: DashboardUser | undefined }) {
     const userId = user?.id ?? "";
-    const { prs } = await getPersonalRecords(userId);
-    const { routine } = await getActiveRoutine();
-    const { data: activityData } = await getWeeklyActivity(userId);
-    const { completed: weeklyCompleted, target: weeklyTarget } = await getWeeklyProgress(userId);
+    const [prsRes, routineRes, activityRes, progressRes] = await Promise.all([
+        getPersonalRecords(userId),
+        getActiveRoutine(),
+        getWeeklyActivity(userId),
+        getWeeklyProgress(userId)
+    ]);
+
+    const { prs } = prsRes;
+    const { routine } = routineRes;
+    const { data: activityData } = activityRes;
+    const { completed: weeklyCompleted, target: weeklyTarget } = progressRes;
 
     return (
         <div className="space-y-8 pb-24 md:pb-10">

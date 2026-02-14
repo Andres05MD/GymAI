@@ -23,9 +23,12 @@ export default async function RoutinesPage() {
     const routinesRaw = routinesRes.success ? routinesRes.routines || [] : [];
     const athletesRaw = athletesRes.success ? athletesRes.athletes || [] : [];
 
-    // Asegurar que no haya duplicados por ID (evita error de keys de React)
+    // Asegurar que no haya duplicados por ID y minimizar serialización enviada a Client Components (server-serialization)
     const routines = Array.from(new Map(routinesRaw.map(r => [r.id, r])).values());
-    const athletes = Array.from(new Map(athletesRaw.map(a => [a.id, a])).values());
+    const athletes = Array.from(new Map(athletesRaw.map(a => [
+        a.id,
+        { id: a.id, name: a.name, email: a.email, image: a.image } // Solo campos usados por el diálogo
+    ])).values());
 
     return (
         <div className="space-y-8">

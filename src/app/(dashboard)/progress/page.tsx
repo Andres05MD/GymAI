@@ -27,6 +27,8 @@ interface Athlete {
 async function getLatestBodyMetrics(userId: string) {
     try {
         const userDoc = await adminDb.collection("users").doc(userId).get();
+        if (!userDoc.exists) return null;
+
         const userData = userDoc.data();
 
         // Limpiar measurements para asegurar que solo pasamos números al cliente
@@ -39,15 +41,47 @@ async function getLatestBodyMetrics(userId: string) {
             }
         });
 
+        // TRAYECTORIA DE CÁLCULO: Priorizar campo directo, si no, intentar calcular
+        let bodyFat = userData?.bodyFat;
+
+        if (!bodyFat && userData?.height && cleanMeasurements.waist && cleanMeasurements.neck) {
+            const h = userData.height;
+            const w = cleanMeasurements.waist;
+            const n = cleanMeasurements.neck;
+            const gender = userData?.gender || "male";
+            const log10 = Math.log10;
+
+            if (gender === "male" || gender !== "female") {
+                const diff = w - n;
+                if (diff > 0) {
+                    const denom = 1.0324 - 0.19077 * log10(diff) + 0.15456 * log10(h);
+                    bodyFat = (495 / denom) - 450;
+                }
+            } else if (gender === "female" && cleanMeasurements.hips) {
+                const hip = cleanMeasurements.hips;
+                const diff = (w + hip) - n;
+                if (diff > 0) {
+                    const denom = 1.29579 - 0.35004 * log10(diff) + 0.22100 * log10(h);
+                    bodyFat = (495 / denom) - 450;
+                }
+            }
+
+            if (bodyFat !== undefined && !isNaN(bodyFat)) {
+                bodyFat = Math.max(2, Math.min(60, bodyFat));
+                bodyFat = parseFloat(bodyFat.toFixed(1));
+            }
+        }
+
         return {
             name: userData?.name || "Usuario",
             weight: userData?.weight || 0,
-            bodyFat: userData?.bodyFat || 0,
+            bodyFat: bodyFat || null,
             height: userData?.height || 0,
             measurements: cleanMeasurements,
             startWeight: userData?.startWeight || userData?.weight || 0,
         };
     } catch (e) {
+        console.error("Error in getLatestBodyMetrics:", e);
         return null;
     }
 }

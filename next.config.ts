@@ -25,8 +25,9 @@ const nextConfig: NextConfig = {
     ],
   },
 
-  // Optimización experimental de caché del cliente
+  // Optimización de importaciones de paquetes
   experimental: {
+    optimizePackageImports: ["lucide-react"],
     staleTimes: {
       dynamic: 30, // Páginas dinámicas cachean 30 segundos
       static: 180, // Páginas estáticas cachean 3 minutos

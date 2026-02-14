@@ -56,8 +56,19 @@ export const adminAuth = admin.auth(app);
 export { app };
 
 /**
+ * Generic converter for Firestore Admin SDK
+ */
+export const createAdminConverter = <T extends admin.firestore.DocumentData>() => ({
+    toFirestore(data: T): admin.firestore.DocumentData {
+        return data;
+    },
+    fromFirestore(snapshot: admin.firestore.QueryDocumentSnapshot): T {
+        return snapshot.data() as T;
+    },
+});
+
+/**
  * Utility to serialize Firestore data (convert Timestamps to strings)
- * suitable for passing from Server Components to Client Components.
  */
 export const serializeFirestoreData = (data: any): any => {
     if (!data) return data;

@@ -20,24 +20,15 @@ interface TrainingExercise {
 // Caché para estadísticas del coach (revalida cada 60 segundos)
 const getCachedCoachStats = unstable_cache(
     async (coachId: string) => {
-        // 1. Contar atletas
-        const athletesSnapshot = await adminDb.collection("users")
-            .where("role", "==", "athlete")
-            .count()
-            .get();
+        // 1, 2, 3. Contar atletas, rutinas y ejercicios en paralelo (async-parallel)
+        const [athletesSnapshot, routinesSnapshot, exercisesSnapshot] = await Promise.all([
+            adminDb.collection("users").where("role", "==", "athlete").count().get(),
+            adminDb.collection("routines").where("coachId", "==", coachId).count().get(),
+            adminDb.collection("exercises").count().get()
+        ]);
+
         const totalAthletes = athletesSnapshot.data().count;
-
-        // 2. Contar rutinas
-        const routinesSnapshot = await adminDb.collection("routines")
-            .where("coachId", "==", coachId)
-            .count()
-            .get();
         const totalRoutines = routinesSnapshot.data().count;
-
-        // 3. Contar ejercicios
-        const exercisesSnapshot = await adminDb.collection("exercises")
-            .count()
-            .get();
         const totalExercises = exercisesSnapshot.data().count;
 
         // 4. Calcular volumen semanal

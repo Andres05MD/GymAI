@@ -35,29 +35,38 @@ export async function logBodyMeasurements(data: z.infer<typeof MeasurementInput>
 
         // ... rest of the logic using userId ...
 
-        // Calculate Body Fat if possible (US Navy Method)
+        // Calculate Body Fat if possible (Official US Navy Metric Method)
         let calculatedBodyFat: number | undefined = undefined;
 
         if (height && data.waist && data.neck) {
+            // Formula Navy (Metric Version)
+            // Men: BF = 495 / (1.0324 - 0.19077 * log10(waist - neck) + 0.15456 * log10(height)) - 450
+            // Women: BF = 495 / (1.29579 - 0.35004 * log10(waist + hip - neck) + 0.22100 * log10(height)) - 450
+
+            const log10 = Math.log10;
             const h = height;
             const w = data.waist;
             const n = data.neck;
 
-            if (gender === "male") {
-                // BF = 86.010 * log10(abdomen - neck) - 70.041 * log10(height) + 36.76
-                if (w - n > 0) {
-                    calculatedBodyFat = 86.010 * Math.log10(w - n) - 70.041 * Math.log10(h) + 36.76;
+            if (gender === "male" || (gender !== "female")) { // Default to male if unknown
+                const diff = w - n;
+                if (diff > 0) {
+                    const denom = 1.0324 - 0.19077 * log10(diff) + 0.15456 * log10(h);
+                    calculatedBodyFat = (495 / denom) - 450;
                 }
             } else if (gender === "female" && data.hips) {
-                // BF = 163.205 * log10(waist + hip - neck) - 97.684 * log10(height) - 78.387
                 const hip = data.hips;
-                if (w + hip - n > 0) {
-                    calculatedBodyFat = 163.205 * Math.log10(w + hip - n) - 97.684 * Math.log10(h) - 78.387;
+                const diff = (w + hip) - n;
+                if (diff > 0) {
+                    const denom = 1.29579 - 0.35004 * log10(diff) + 0.22100 * log10(h);
+                    calculatedBodyFat = (495 / denom) - 450;
                 }
             }
         }
 
-        if (calculatedBodyFat) {
+        if (calculatedBodyFat !== undefined && !isNaN(calculatedBodyFat)) {
+            // Clamp value between 2 and 60% for sanity
+            calculatedBodyFat = Math.max(2, Math.min(60, calculatedBodyFat));
             calculatedBodyFat = parseFloat(calculatedBodyFat.toFixed(1));
         }
 
