@@ -7,6 +7,8 @@ import { startOfMonth, endOfMonth, format, parseISO, isSameDay } from "date-fns"
 import { es } from "date-fns/locale";
 import { Loader2, Dumbbell } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+import { Moon } from "lucide-react";
 
 interface Assignment {
     id: string;
@@ -16,7 +18,7 @@ interface Assignment {
     completed?: boolean;
 }
 
-export function ScheduleCalendar({ athleteId }: { athleteId: string }) {
+export function ScheduleCalendar({ athleteId, activeRoutine }: { athleteId: string, activeRoutine?: any }) {
     const [date, setDate] = useState<Date | undefined>(new Date());
     const [assignments, setAssignments] = useState<Assignment[]>([]);
     const [month, setMonth] = useState<Date>(new Date());
@@ -43,9 +45,24 @@ export function ScheduleCalendar({ athleteId }: { athleteId: string }) {
 
     const assignedDays = assignments.map(a => parseISO(a.date));
 
+    // Determinar días de entrenamiento y descanso basados en la rutina activa
+    const getDayInfo = (day: Date) => {
+        if (!activeRoutine || !activeRoutine.schedule || activeRoutine.schedule.length !== 7) return null;
+
+        const startDate = activeRoutine.startDate ? (typeof activeRoutine.startDate === 'string' ? parseISO(activeRoutine.startDate) : activeRoutine.startDate) : null;
+        if (startDate && day < startDate) return null;
+
+        // Mapear getDay (0=Dom, 1=Lun...) a nuestro índice (0=Lun, 6=Dom)
+        const routineIdx = (day.getDay() + 6) % 7;
+        return activeRoutine.schedule[routineIdx];
+    };
+
     const selectedDayAssignments = date
         ? assignments.filter(a => isSameDay(parseISO(a.date), date))
         : [];
+
+    const selectedDayInfo = date ? getDayInfo(date) : null;
+    const isRestDay = selectedDayInfo?.isRest;
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -64,9 +81,15 @@ export function ScheduleCalendar({ athleteId }: { athleteId: string }) {
                         onSelect={setDate}
                         month={month}
                         onMonthChange={setMonth}
-                        modifiers={{ assigned: assignedDays }}
+                        modifiers={{
+                            assigned: assignedDays,
+                            training: (day) => getDayInfo(day)?.isRest === false,
+                            rest: (day) => getDayInfo(day)?.isRest === true
+                        }}
                         modifiersClassNames={{
-                            assigned: "bg-red-500/10 text-red-500 font-bold hover:bg-red-500/20"
+                            assigned: "bg-red-500/10 text-red-500 font-bold hover:bg-red-500/20",
+                            training: "after:content-[''] after:absolute after:bottom-1 after:w-1 after:h-1 after:bg-red-500 after:rounded-full",
+                            rest: "opacity-40"
                         }}
                         locale={es}
                         className="w-full"
@@ -87,13 +110,25 @@ export function ScheduleCalendar({ athleteId }: { athleteId: string }) {
                     {date ? format(date, "EEEE d 'de' MMMM", { locale: es }) : "Selecciona un día"}
                 </h3>
                 <p className="text-sm text-neutral-500 mb-6">
-                    {selectedDayAssignments.length > 0
-                        ? `${selectedDayAssignments.length} sesiones asignadas`
-                        : "Sin asignaciones"}
+                    {isRestDay
+                        ? "Día de descanso programado"
+                        : selectedDayAssignments.length > 0
+                            ? `${selectedDayAssignments.length} sesiones asignadas`
+                            : "Sin asignaciones"}
                 </p>
 
                 <div className="space-y-3 overflow-y-auto max-h-[400px] md:max-h-[500px] pr-2">
-                    {selectedDayAssignments.length > 0 ? (
+                    {isRestDay ? (
+                        <div className="p-8 text-center bg-neutral-950/40 border border-neutral-800 border-dashed rounded-3xl flex flex-col items-center gap-3">
+                            <div className="h-12 w-12 bg-neutral-900 rounded-full flex items-center justify-center">
+                                <Moon className="h-6 w-6 text-neutral-600" />
+                            </div>
+                            <div>
+                                <h4 className="font-bold text-white">Recuperación</h4>
+                                <p className="text-xs text-neutral-500 mt-1">No hay entrenamientos previstos para hoy.</p>
+                            </div>
+                        </div>
+                    ) : selectedDayAssignments.length > 0 ? (
                         selectedDayAssignments.map((assignment) => (
                             <div key={assignment.id} className="p-4 bg-neutral-950/80 border border-neutral-800 rounded-2xl hover:border-red-500/30 transition-all group">
                                 <div className="flex justify-between items-start mb-2">

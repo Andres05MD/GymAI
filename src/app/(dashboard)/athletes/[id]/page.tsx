@@ -350,7 +350,7 @@ export default async function AthleteDetailsPage({ params }: PageProps) {
                 </TabsContent>
 
                 <TabsContent value="schedule">
-                    <ScheduleCalendar athleteId={athlete.id} />
+                    <ScheduleCalendar athleteId={athlete.id} activeRoutine={routine} />
                 </TabsContent>
 
                 <TabsContent value="history">
