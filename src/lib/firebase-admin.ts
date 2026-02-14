@@ -56,24 +56,35 @@ export const adminAuth = admin.auth(app);
 export { app };
 
 /**
- * REGLA .cursorrules: Firestore Converter para Server SDK (admin)
+ * Utility to serialize Firestore data (convert Timestamps to strings)
+ * suitable for passing from Server Components to Client Components.
  */
-export const createAdminConverter = <T extends Record<string, any>>() => ({
-    toFirestore: (data: T): admin.firestore.DocumentData => {
-        // Eliminar undefined para que Firestore no proteste
-        const clean: any = {};
-        Object.entries(data).forEach(([key, value]) => {
-            if (value !== undefined) clean[key] = value;
-        });
-        return clean;
-    },
-    fromFirestore: (snapshot: admin.firestore.QueryDocumentSnapshot): T => {
-        const data = snapshot.data();
-        return {
-            ...data,
-            id: snapshot.id,
-            createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : data.createdAt,
-            updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : data.updatedAt,
-        } as unknown as T;
+export const serializeFirestoreData = (data: any): any => {
+    if (!data) return data;
+
+    // Handle Firestore Timestamp (admin and client have different structures but both usually have toDate)
+    if (data && typeof data === "object" && (data.toDate || "_seconds" in data)) {
+        try {
+            const date = data.toDate ? data.toDate() : new Date(data._seconds * 1000);
+            return date.toISOString();
+        } catch (e) {
+            return data;
+        }
     }
-});
+
+    // Handle Arrays
+    if (Array.isArray(data)) {
+        return data.map(item => serializeFirestoreData(item));
+    }
+
+    // Handle Objects
+    if (typeof data === "object" && data !== null) {
+        const serialized: Record<string, any> = {};
+        for (const [key, value] of Object.entries(data)) {
+            serialized[key] = serializeFirestoreData(value);
+        }
+        return serialized;
+    }
+
+    return data;
+};

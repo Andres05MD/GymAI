@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { RoutineSchema, RoutineDaySchema, RoutineExerciseSchema, RoutineSetSchema } from "@/lib/schemas";
-import { adminDb } from "@/lib/firebase-admin";
+import { adminDb, serializeFirestoreData } from "@/lib/firebase-admin";
 import { auth } from "@/lib/auth";
 import { getGroqClient } from "@/lib/ai";
 import { getExercises } from "./exercise-actions";
@@ -34,20 +34,7 @@ export async function getRoutines() {
         }
 
         const routines = snapshot.docs.map(doc => {
-            const data = doc.data();
-            // Serializar todos los campos Timestamp de Firestore
-            const serialized: Record<string, unknown> = { id: doc.id };
-            for (const [key, value] of Object.entries(data)) {
-                if (value && typeof value === "object" && "_seconds" in value) {
-                    // Es un Firestore Timestamp
-                    serialized[key] = (value as { toDate: () => Date }).toDate?.()
-                        ? (value as { toDate: () => Date }).toDate().toISOString()
-                        : new Date((value as { _seconds: number })._seconds * 1000).toISOString();
-                } else {
-                    serialized[key] = value;
-                }
-            }
-            return serialized;
+            return serializeFirestoreData({ id: doc.id, ...doc.data() });
         });
 
         return { success: true, routines };
@@ -72,12 +59,10 @@ export async function getAthleteRoutine(athleteId: string) {
         if (snapshot.empty) return null;
 
         const doc = snapshot.docs[0];
-        return {
+        return serializeFirestoreData({
             id: doc.id,
             ...doc.data(),
-            createdAt: doc.data().createdAt?.toDate ? doc.data().createdAt.toDate().toISOString() : doc.data().createdAt,
-            updatedAt: doc.data().updatedAt?.toDate ? doc.data().updatedAt.toDate().toISOString() : doc.data().updatedAt,
-        };
+        });
     } catch (error) {
         console.error("Error fetching athlete routine:", error);
         return null; // Return null instead of object error for simpler page handling
@@ -97,18 +82,7 @@ export async function getCoachRoutines() {
             .get();
 
         const routines = snapshot.docs.map(doc => {
-            const data = doc.data();
-            const serialized: Record<string, unknown> = { id: doc.id };
-            for (const [key, value] of Object.entries(data)) {
-                if (value && typeof value === "object" && "_seconds" in value) {
-                    serialized[key] = (value as { toDate: () => Date }).toDate?.()
-                        ? (value as { toDate: () => Date }).toDate().toISOString()
-                        : new Date((value as { _seconds: number })._seconds * 1000).toISOString();
-                } else {
-                    serialized[key] = value;
-                }
-            }
-            return serialized;
+            return serializeFirestoreData({ id: doc.id, ...doc.data() });
         });
 
         return { success: true, routines };
@@ -226,12 +200,10 @@ export async function getRoutine(id: string) {
 
         return {
             success: true,
-            routine: {
+            routine: serializeFirestoreData({
                 id: docSnap.id,
                 ...data,
-                createdAt: data?.createdAt?.toDate ? data.createdAt.toDate().toISOString() : (data?.createdAt instanceof Date ? data.createdAt.toISOString() : data?.createdAt),
-                updatedAt: data?.updatedAt?.toDate ? data.updatedAt.toDate().toISOString() : (data?.updatedAt instanceof Date ? data.updatedAt.toISOString() : data?.updatedAt),
-            }
+            })
         };
     } catch (error) {
         return { success: false, error: "Error al cargar rutina" };

@@ -1,6 +1,6 @@
 "use server";
 
-import { adminDb } from "@/lib/firebase-admin";
+import { adminDb, serializeFirestoreData } from "@/lib/firebase-admin";
 import { auth } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 
@@ -229,10 +229,9 @@ export async function getAthleteAssignments(athleteId: string, start: string, en
             .where("date", "<=", end)
             .get();
 
-        const assignments = snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-        }));
+        const assignments = snapshot.docs.map(doc => {
+            return serializeFirestoreData({ id: doc.id, ...doc.data() });
+        });
 
         return { success: true, assignments };
     } catch (error) {
@@ -254,10 +253,10 @@ export async function getTodayAssignment(athleteId: string, date: string) {
         }
 
         const doc = snapshot.docs[0];
-        const assignment = {
+        const assignment = serializeFirestoreData({
             id: doc.id,
             ...doc.data()
-        };
+        });
 
         return { success: true, assignment };
     } catch (error) {

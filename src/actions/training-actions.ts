@@ -1,6 +1,6 @@
 "use server";
 
-import { adminDb } from "@/lib/firebase-admin";
+import { adminDb, serializeFirestoreData } from "@/lib/firebase-admin";
 import { auth } from "@/lib/auth";
 import { z } from "zod";
 import { TrainingLogSchema } from "@/lib/schemas";
@@ -122,18 +122,7 @@ export async function getTrainingLogs(userId?: string) {
             .get();
 
         const logs = snapshot.docs.map(doc => {
-            const d = doc.data();
-            return {
-                id: doc.id,
-                athleteId: d.athleteId,
-                routineId: d.routineId,
-                routineName: d.routineName,
-                dayName: d.dayName,
-                status: d.status,
-                durationMinutes: d.durationMinutes,
-                exercises: d.exercises,
-                date: d.date?.toDate ? d.date.toDate().toISOString() : new Date().toISOString(),
-            };
+            return serializeFirestoreData({ id: doc.id, ...doc.data() });
         });
 
         return { success: true, logs };
@@ -183,13 +172,10 @@ export async function getTrainingLog(logId: string) {
 
         return {
             success: true,
-            log: {
+            log: serializeFirestoreData({
                 id: docSnap.id,
                 ...data,
-                date: data?.date?.toDate?.()?.toISOString(),
-                startTime: data?.startTime?.toDate?.()?.toISOString(),
-                endTime: data?.endTime?.toDate?.()?.toISOString(),
-            }
+            })
         };
     } catch (error) {
         console.error("Error fetching log:", error);
@@ -228,13 +214,7 @@ export async function getAthleteRoutines() {
             .get();
 
         const routines = snapshot.docs.map(doc => {
-            const d = doc.data();
-            return {
-                id: doc.id,
-                ...d,
-                createdAt: d.createdAt?.toDate?.()?.toISOString(),
-                updatedAt: d.updatedAt?.toDate?.()?.toISOString(),
-            };
+            return serializeFirestoreData({ id: doc.id, ...doc.data() });
         });
 
         return { success: true, routines };
@@ -296,14 +276,7 @@ export async function getAthleteHistory() {
             .get();
 
         const history = snapshot.docs.map(doc => {
-            const data = doc.data();
-            return {
-                id: doc.id,
-                ...data,
-                date: data.date?.toDate?.()?.toISOString(),
-                startTime: data.startTime?.toDate?.()?.toISOString(),
-                endTime: data.endTime?.toDate?.()?.toISOString(),
-            };
+            return serializeFirestoreData({ id: doc.id, ...doc.data() });
         });
 
         return { success: true, history };

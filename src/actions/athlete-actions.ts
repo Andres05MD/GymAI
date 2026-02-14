@@ -1,6 +1,6 @@
 "use server";
 
-import { adminDb } from "@/lib/firebase-admin";
+import { adminDb, serializeFirestoreData } from "@/lib/firebase-admin";
 import { auth } from "@/lib/auth";
 
 export async function getActiveRoutine() {
@@ -19,17 +19,10 @@ export async function getActiveRoutine() {
         }
 
         const doc = snapshot.docs[0];
-        const d = doc.data();
-        const routine = {
+        const routine = serializeFirestoreData({
             id: doc.id,
-            name: d.name,
-            coachId: d.coachId,
-            athleteId: d.athleteId,
-            active: d.active,
-            schedule: d.schedule,
-            createdAt: d.createdAt?.toDate ? d.createdAt.toDate().toISOString() : new Date().toISOString(),
-            updatedAt: d.updatedAt?.toDate ? d.updatedAt.toDate().toISOString() : new Date().toISOString(),
-        };
+            ...doc.data(),
+        });
 
         return { success: true, routine };
     } catch (error) {

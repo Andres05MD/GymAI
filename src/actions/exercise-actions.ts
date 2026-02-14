@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { ExerciseSchema } from "@/lib/schemas";
-import { adminDb } from "@/lib/firebase-admin";
+import { adminDb, serializeFirestoreData } from "@/lib/firebase-admin";
 import { auth } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 
@@ -33,22 +33,7 @@ export async function getExercises() {
         }
 
         const exercises = snapshot.docs.map(doc => {
-            const data = doc.data();
-            const getDate = (field: unknown): string => {
-                if (!field) return new Date().toISOString();
-                if (typeof field === 'object' && field !== null && 'toDate' in field && typeof (field as { toDate: () => Date }).toDate === 'function') {
-                    return (field as { toDate: () => Date }).toDate().toISOString();
-                }
-                if (field instanceof Date) return field.toISOString();
-                return String(field);
-            };
-
-            return {
-                id: doc.id,
-                ...data,
-                createdAt: getDate(data.createdAt),
-                updatedAt: getDate(data.updatedAt),
-            };
+            return serializeFirestoreData({ id: doc.id, ...doc.data() });
         });
 
         return { success: true, exercises };
