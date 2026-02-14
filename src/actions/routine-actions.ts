@@ -136,14 +136,13 @@ export async function assignRoutineToAthlete(athleteId: string, routineId: strin
 
             // Determinar mapping de días (índices 0-6: Lun-Dom)
             let mapping: number[] = [];
-            if (trainingDaysCount === 3) mapping = [0, 2, 4]; // Lun, Mie, Vie
+            if (trainingDaysCount === 1) mapping = [0]; // Lun
+            else if (trainingDaysCount === 2) mapping = [0, 3]; // Lun, Jue
+            else if (trainingDaysCount === 3) mapping = [0, 2, 4]; // Lun, Mie, Vie
             else if (trainingDaysCount === 4) mapping = [0, 1, 3, 4]; // Lun, Mar, Jue, Vie
-            else {
-                // Asignación secuencial hasta un máximo de 5 días (Lun-Vie)
-                for (let i = 0; i < Math.min(trainingDaysCount, 5); i++) {
-                    mapping.push(i);
-                }
-            }
+            else if (trainingDaysCount === 5) mapping = [0, 1, 2, 3, 4]; // Lun-Vie
+            else if (trainingDaysCount === 6) mapping = [0, 1, 2, 3, 4, 5]; // Lun-Sab
+            else mapping = [0, 1, 2, 3, 4, 5, 6]; // Lun-Dom
 
             const newSchedule = [];
             let trainingPointer = 0;

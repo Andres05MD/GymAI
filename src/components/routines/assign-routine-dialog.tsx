@@ -3,16 +3,13 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Users, Search, Loader2, Calendar as CalendarIcon, ArrowLeft } from "lucide-react";
-import { assignRoutineToAthlete } from "@/actions/training-actions";
+import { assignRoutineToAthlete } from "@/actions/routine-actions";
+import { Users, Search, Loader2, ArrowLeft, Info } from "lucide-react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Calendar } from "@/components/ui/calendar";
-import { format } from "date-fns";
-import { es } from "date-fns/locale";
 
 interface Athlete {
     id: string;
@@ -25,7 +22,6 @@ export function AssignRoutineDialog({ routineId, athletes }: { routineId: string
     const [open, setOpen] = useState(false);
     const [step, setStep] = useState<'athlete' | 'date'>('athlete');
     const [selectedAthlete, setSelectedAthlete] = useState<Athlete | null>(null);
-    const [date, setDate] = useState<Date | undefined>(new Date());
     const [searchTerm, setSearchTerm] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -45,21 +41,20 @@ export function AssignRoutineDialog({ routineId, athletes }: { routineId: string
     };
 
     const handleConfirmAssign = async () => {
-        if (!selectedAthlete || !date) return;
+        if (!selectedAthlete) return;
 
         setIsSubmitting(true);
         try {
-            const res = await assignRoutineToAthlete(routineId, selectedAthlete.id, date);
+            const res = await assignRoutineToAthlete(selectedAthlete.id, routineId);
             if (res.success) {
                 toast.success(`Rutina asignada a ${selectedAthlete.name || "Atleta"}`, {
-                    description: `Inicio programado para el ${format(date, "PPP", { locale: es })}`
+                    description: `Días identificados automáticamente. Inicio: Próximo Lunes.`
                 });
                 setOpen(false);
                 // Reset states
                 setStep('athlete');
                 setSelectedAthlete(null);
                 setSearchTerm("");
-                setDate(new Date());
             } else {
                 toast.error(res.error || "Error al asignar");
             }
@@ -98,13 +93,13 @@ export function AssignRoutineDialog({ routineId, athletes }: { routineId: string
                                 </Button>
                             )}
                             <DialogTitle className="text-lg font-bold">
-                                {step === 'athlete' ? 'Asignar Rutina' : 'Fecha de Inicio'}
+                                {step === 'athlete' ? 'Asignar Rutina' : 'Confirmar Asignación'}
                             </DialogTitle>
                         </div>
                         <DialogDescription className="text-neutral-400 text-xs">
                             {step === 'athlete'
                                 ? 'Selecciona un atleta de tu lista.'
-                                : `¿Cuándo comenzará ${selectedAthlete?.name?.split(" ")[0]}?`}
+                                : `¿Confirmas la asignación automática para ${selectedAthlete?.name?.split(" ")[0]}?`}
                         </DialogDescription>
                     </DialogHeader>
                 </div>
@@ -165,25 +160,35 @@ export function AssignRoutineDialog({ routineId, athletes }: { routineId: string
                     </>
                 ) : (
                     <div className="flex flex-col">
-                        <div className="flex-1 flex flex-col items-center justify-center p-4">
-                            <Calendar
-                                mode="single"
-                                selected={date}
-                                onSelect={setDate}
-                                className="rounded-xl border border-neutral-800 bg-neutral-950 shadow-sm"
-                                locale={es}
-                                disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))} // Deshabilitar fechas pasadas si se desea
-                            />
-                            <p className="mt-4 text-xs text-neutral-500 font-medium">
-                                Fecha seleccionada: <span className="text-white">{date ? format(date, "PPP", { locale: es }) : "Ninguna"}</span>
-                            </p>
+                        <div className="flex-1 p-6 space-y-4">
+                            <div className="bg-blue-500/10 border border-blue-500/20 p-4 rounded-xl flex items-start gap-3 text-blue-400">
+                                <Info className="h-5 w-5 shrink-0 mt-0.5" />
+                                <div className="space-y-1">
+                                    <p className="text-sm font-bold uppercase tracking-tight">Programación Automática</p>
+                                    <p className="text-xs leading-relaxed opacity-80 text-neutral-300">
+                                        La rutina se organizará automáticamente de Lunes a Viernes (según el número de días) y comenzará el
+                                        <span className="text-blue-400 font-bold"> próximo lunes</span>.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="bg-neutral-950 p-4 rounded-xl border border-neutral-800 space-y-3">
+                                <div className="flex justify-between items-center text-xs">
+                                    <span className="text-neutral-500">Atleta</span>
+                                    <span className="text-white font-bold">{selectedAthlete?.name}</span>
+                                </div>
+                                <div className="flex justify-between items-center text-xs">
+                                    <span className="text-neutral-500">Días de descanso</span>
+                                    <span className="text-white font-bold">Sábado y Domingo</span>
+                                </div>
+                            </div>
                         </div>
 
                         <div className="p-4 border-t border-neutral-800 bg-neutral-900">
                             <Button
                                 className="w-full bg-white text-black hover:bg-neutral-200 font-bold"
                                 onClick={handleConfirmAssign}
-                                disabled={!date || isSubmitting}
+                                disabled={isSubmitting}
                             >
                                 {isSubmitting ? (
                                     <>

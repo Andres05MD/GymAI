@@ -45,63 +45,6 @@ export interface ProgressionSuggestion {
 
 // --- COACH ACTIONS ---
 
-// Assign Routine to Athlete
-export async function assignRoutineToAthlete(routineId: string, athleteId: string, startDate?: Date) {
-    const session = await auth();
-    if (!session?.user?.id || session.user.role !== "coach") {
-        return { success: false, error: "No autorizado" };
-    }
-
-    try {
-        // 1. Verify routine ownership
-        const routineRef = adminDb.collection("routines").doc(routineId);
-        const routineSnap = await routineRef.get();
-        if (!routineSnap.exists || routineSnap.data()?.coachId !== session.user.id) {
-            return { success: false, error: "Rutina no encontrada o sin permisos" };
-        }
-
-        // 2. Deactivate previous routines
-        const batch = adminDb.batch();
-        const oldRoutines = await adminDb.collection("routines")
-            .where("athleteId", "==", athleteId)
-            .where("active", "==", true)
-            .get();
-
-        oldRoutines.forEach(doc => {
-            batch.update(doc.ref, { active: false });
-        });
-
-        // 3. Duplicate routine and link athlete to coach
-        const templateData = routineSnap.data();
-        const newRoutineRef = adminDb.collection("routines").doc();
-        const userRef = adminDb.collection("users").doc(athleteId);
-        const assignmentDate = startDate || new Date();
-
-        batch.set(newRoutineRef, {
-            ...templateData,
-            name: `${templateData?.name} (Assigned)`,
-            coachId: session.user.id,
-            athleteId: athleteId,
-            active: true,
-            originalRoutineId: routineId,
-            startDate: assignmentDate,
-            createdAt: new Date(),
-            updatedAt: new Date()
-        });
-
-        // 4. Update the athlete's doc to set the coachId if not already set or updated
-        batch.update(userRef, { coachId: session.user.id });
-
-        await batch.commit();
-
-        return { success: true };
-    } catch (error) {
-        console.error("Error assigning routine:", error);
-        return { success: false, error: "Error al asignar rutina" };
-    }
-}
-
-
 // --- ATHLETE ACTIONS ---
 
 // Get Training Log History
