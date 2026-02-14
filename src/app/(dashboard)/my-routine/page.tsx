@@ -1,11 +1,12 @@
 import { auth } from "@/lib/auth";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CalendarDays, Clock, Dumbbell, Play, AlertCircle, ClipboardList } from "lucide-react";
+import { CalendarDays, Clock, Dumbbell, Play, AlertCircle, ClipboardList, Moon, Info } from "lucide-react";
 import Link from "next/link";
 import { getRoutines } from "@/actions/routine-actions";
 import { differenceInCalendarWeeks } from "date-fns";
 import { redirect } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 // Interfaces para la rutina
 interface ScheduleExercise {
@@ -17,6 +18,7 @@ interface ScheduleExercise {
 interface ScheduleDay {
     name: string;
     exercises?: ScheduleExercise[];
+    isRest?: boolean;
 }
 
 interface ActiveRoutine {
@@ -24,6 +26,7 @@ interface ActiveRoutine {
     name: string;
     description?: string;
     createdAt?: string;
+    startDate?: any;
     schedule: ScheduleDay[];
 }
 
@@ -76,9 +79,9 @@ export default async function MyRoutinePage() {
     const frequency = schedule.length;
     const totalExercises = schedule.reduce((acc: number, day: ScheduleDay) => acc + (day.exercises?.length || 0), 0);
 
-    // Calcular semanas activo (aproximado)
-    const startDate = activeRoutine.createdAt ? new Date(activeRoutine.createdAt) : new Date();
-    const weeksActive = Math.max(1, differenceInCalendarWeeks(new Date(), startDate));
+    const startDateRaw = activeRoutine.startDate ? (typeof activeRoutine.startDate === 'string' ? new Date(activeRoutine.startDate) : activeRoutine.startDate) : (activeRoutine.createdAt ? new Date(activeRoutine.createdAt) : new Date());
+    const isFuture = startDateRaw > new Date();
+    const weeksActive = Math.max(1, differenceInCalendarWeeks(new Date(), startDateRaw));
 
     return (
         <div className="space-y-8">
@@ -138,6 +141,16 @@ export default async function MyRoutinePage() {
                 </div>
             </div>
 
+            {/* Banner si comienza en el futuro */}
+            {isFuture && (
+                <div className="bg-blue-500/10 border border-blue-500/20 p-4 rounded-2xl flex items-center gap-3 text-blue-400">
+                    <Info className="h-5 w-5 shrink-0" />
+                    <p className="text-sm font-medium">
+                        Esta rutina está programada para comenzar el <span className="font-bold underline">próximo lunes {startDateRaw.toLocaleDateString('es-ES', { day: 'numeric', month: 'long' })}</span>. ¡Prepárate!
+                    </p>
+                </div>
+            )}
+
             {/* Rutina Activa */}
             <div className="space-y-6">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 px-2">
@@ -160,33 +173,56 @@ export default async function MyRoutinePage() {
                     {schedule.map((day: ScheduleDay, index: number) => (
                         <div
                             key={index}
-                            className="bg-neutral-900 border border-neutral-800 rounded-3xl p-6 flex flex-col md:flex-row items-start md:items-center justify-between hover:border-neutral-700 transition-all group relative overflow-hidden"
+                            className={cn(
+                                "border rounded-3xl p-6 flex flex-col md:flex-row items-start md:items-center justify-between transition-all group relative overflow-hidden",
+                                day.isRest
+                                    ? "bg-neutral-900/30 border-neutral-800/50 grayscale opacity-70"
+                                    : "bg-neutral-900 border-neutral-800 hover:border-neutral-700"
+                            )}
                         >
                             <div className="absolute inset-0 bg-linear-to-r from-white/0 to-white/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
 
                             <div className="flex items-center gap-6 relative z-10 w-full md:w-auto">
-                                <div className="h-16 w-16 bg-black border border-neutral-800 rounded-2xl flex items-center justify-center font-black text-2xl text-neutral-600 group-hover:text-white group-hover:border-red-900/50 group-hover:bg-red-900/10 transition-all">
-                                    {index + 1}
+                                <div className={cn(
+                                    "h-16 w-16 border rounded-2xl flex items-center justify-center font-black text-2xl transition-all",
+                                    day.isRest
+                                        ? "bg-neutral-900 border-neutral-800 text-neutral-700"
+                                        : "bg-black border-neutral-800 text-neutral-600 group-hover:text-white group-hover:border-red-900/50 group-hover:bg-red-900/10"
+                                )}>
+                                    {day.isRest ? <Moon className="h-7 w-7" /> : index + 1}
                                 </div>
                                 <div className="flex-1">
-                                    <h3 className="font-bold text-white text-lg mb-1 group-hover:text-red-500 transition-colors">{day.name}</h3>
+                                    <h3 className={cn(
+                                        "font-bold text-lg mb-1 transition-colors",
+                                        day.isRest ? "text-neutral-600" : "text-white group-hover:text-red-500"
+                                    )}>{day.name}</h3>
                                     <div className="flex items-center gap-4 text-xs font-medium text-neutral-500">
-                                        <span className="flex items-center gap-1.5 bg-neutral-800/50 px-2 py-1 rounded-md">
-                                            <Dumbbell className="h-3.5 w-3.5" /> {day.exercises?.length || 0} Ejercicios
-                                        </span>
-                                        <span className="flex items-center gap-1.5 bg-neutral-800/50 px-2 py-1 rounded-md">
-                                            <Clock className="h-3.5 w-3.5" /> {(day.exercises?.length || 0) * 4} min
-                                        </span>
+                                        {day.isRest ? (
+                                            <span className="flex items-center gap-1.5 uppercase tracking-widest text-[10px] font-black text-neutral-700">
+                                                Día de Descanso
+                                            </span>
+                                        ) : (
+                                            <>
+                                                <span className="flex items-center gap-1.5 bg-neutral-800/50 px-2 py-1 rounded-md">
+                                                    <Dumbbell className="h-3.5 w-3.5" /> {day.exercises?.length || 0} Ejercicios
+                                                </span>
+                                                <span className="flex items-center gap-1.5 bg-neutral-800/50 px-2 py-1 rounded-md">
+                                                    <Clock className="h-3.5 w-3.5" /> {(day.exercises?.length || 0) * 4} min
+                                                </span>
+                                            </>
+                                        )}
                                     </div>
                                 </div>
                             </div>
 
                             <div className="mt-4 md:mt-0 w-full md:w-auto relative z-10">
-                                <Link href={`/my-routine/day/${index}`} className="block">
-                                    <Button variant="outline" className="w-full md:w-auto rounded-xl border-neutral-700 hover:bg-white hover:text-black font-bold transition-all">
-                                        Ver Detalles
-                                    </Button>
-                                </Link>
+                                {!day.isRest && (
+                                    <Link href={`/my-routine/day/${index}`} className="block">
+                                        <Button variant="outline" className="w-full md:w-auto rounded-xl border-neutral-700 hover:bg-white hover:text-black font-bold transition-all">
+                                            Ver Detalles
+                                        </Button>
+                                    </Link>
+                                )}
                             </div>
                         </div>
                     ))}

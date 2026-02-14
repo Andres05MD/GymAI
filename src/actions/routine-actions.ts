@@ -123,16 +123,68 @@ export async function assignRoutineToAthlete(athleteId: string, routineId: strin
         });
 
         // 3. Create a COPY of the routine assigned to the athlete
-        const templateData = routineSnap.data();
+        const templateData = routineSnap.data() || {};
         const newRoutineRef = adminDb.collection("routines").doc();
+
+        // Lógica de programación inteligente para rutinas semanales
+        let finalSchedule = templateData.schedule || [];
+        const isWeekly = templateData.type === "weekly";
+
+        if (isWeekly) {
+            const WEEK_DAYS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
+            const trainingDaysCount = finalSchedule.length;
+
+            // Determinar mapping de días (índices 0-6: Lun-Dom)
+            let mapping: number[] = [];
+            if (trainingDaysCount === 3) mapping = [0, 2, 4]; // Lun, Mie, Vie
+            else if (trainingDaysCount === 4) mapping = [0, 1, 3, 4]; // Lun, Mar, Jue, Vie
+            else {
+                // Asignación secuencial hasta un máximo de 5 días (Lun-Vie)
+                for (let i = 0; i < Math.min(trainingDaysCount, 5); i++) {
+                    mapping.push(i);
+                }
+            }
+
+            const newSchedule = [];
+            let trainingPointer = 0;
+
+            for (let i = 0; i < 7; i++) {
+                const isTrainingDay = mapping.includes(i) && trainingPointer < trainingDaysCount;
+                if (isTrainingDay) {
+                    newSchedule.push({
+                        ...finalSchedule[trainingPointer],
+                        name: WEEK_DAYS[i],
+                        isRest: false
+                    });
+                    trainingPointer++;
+                } else {
+                    newSchedule.push({
+                        name: WEEK_DAYS[i],
+                        isRest: true,
+                        exercises: []
+                    });
+                }
+            }
+            finalSchedule = newSchedule;
+        }
+
+        // Calcular el próximo lunes como fecha de inicio
+        const today = new Date();
+        const dayOfWeek = today.getDay(); // 0 (Dom) a 6 (Sab)
+        const daysUntilMonday = (dayOfWeek === 0) ? 1 : (8 - dayOfWeek);
+        const nextMonday = new Date(today);
+        nextMonday.setDate(today.getDate() + daysUntilMonday);
+        nextMonday.setHours(0, 0, 0, 0);
 
         batch.set(newRoutineRef, {
             ...templateData,
-            name: templateData?.name,
+            name: templateData.name,
             coachId: session.user.id,
             athleteId: athleteId,
             active: true,
             originalRoutineId: routineId,
+            schedule: finalSchedule,
+            startDate: nextMonday,
             createdAt: new Date(),
             updatedAt: new Date()
         });
