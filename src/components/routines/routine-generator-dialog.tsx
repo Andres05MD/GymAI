@@ -27,11 +27,12 @@ export function RoutineGeneratorDialog({ onGenerated }: RoutineGeneratorProps) {
     const [goal, setGoal] = useState("Hipertrofia");
     const [level, setLevel] = useState("Intermedio");
     const [split, setSplit] = useState("Full Body");
+    const [type, setType] = useState<"weekly" | "daily">("weekly");
 
     const handleGenerate = async () => {
         setIsLoading(true);
         try {
-            const result = await generateRoutinePlan(split, level, "60");
+            const result = await generateRoutinePlan(split, level, "60", type);
 
             if (result.success) {
                 toast.success("Rutina generada con IA");
@@ -103,6 +104,19 @@ export function RoutineGeneratorDialog({ onGenerated }: RoutineGeneratorProps) {
                                 <SelectItem value="Pierna">Pierna</SelectItem>
                                 <SelectItem value="Push">Empuje (Push)</SelectItem>
                                 <SelectItem value="Pull">Tracción (Pull)</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label>Tipo de Planificación</Label>
+                        <Select value={type} onValueChange={(v: "weekly" | "daily") => setType(v)}>
+                            <SelectTrigger className="bg-neutral-900 border-neutral-800">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent className="bg-neutral-900 border-neutral-800 text-white">
+                                <SelectItem value="weekly">Semanal (Varios días)</SelectItem>
+                                <SelectItem value="daily">Diaria (Sesión única)</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>

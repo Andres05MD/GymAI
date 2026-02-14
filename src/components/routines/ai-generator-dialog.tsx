@@ -40,13 +40,14 @@ export function AIGeneratorDialog({ onGenerate }: AIGeneratorDialogProps) {
         goal: "Hipertrofia",
         level: "Intermedio",
         days: 4,
-        equipment: ""
+        equipment: "",
+        type: "weekly" as "weekly" | "daily"
     });
 
     const handleGenerate = async () => {
         setLoading(true);
         try {
-            const result = await generateRoutinePlan(formData.goal, formData.level, String(formData.days));
+            const result = await generateRoutinePlan(formData.goal, formData.level, String(formData.days), formData.type);
             if (result.success && result.exercises) {
                 onGenerate(result.exercises);
                 setOpen(false);
@@ -123,6 +124,22 @@ export function AIGeneratorDialog({ onGenerate }: AIGeneratorDialogProps) {
                                 onChange={(e) => setFormData({ ...formData, days: Number(e.target.value) })}
                             />
                         </div>
+                    </div>
+
+                    <div className="grid gap-2">
+                        <Label>Tipo de Planificación</Label>
+                        <Select
+                            value={formData.type}
+                            onValueChange={(v: "weekly" | "daily") => setFormData({ ...formData, type: v })}
+                        >
+                            <SelectTrigger>
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="weekly">Semanal (Varios días)</SelectItem>
+                                <SelectItem value="daily">Diaria (Sesión única)</SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
 
                     <div className="grid gap-2">

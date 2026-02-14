@@ -83,7 +83,7 @@ export async function suggestSubstitute(exerciseName: string, reason: "busy" | "
     }
 }
 
-export async function generateRoutinePlan(goal: string, level: string, days: string) {
+export async function generateRoutinePlan(goal: string, level: string, days: string, type: "weekly" | "daily" = "weekly") {
     const session = await auth();
     if (!session?.user?.id || session.user.role !== "coach") {
         return { success: false, error: "No autorizado" };
@@ -92,6 +92,7 @@ export async function generateRoutinePlan(goal: string, level: string, days: str
     try {
         const prompt = `
             Eres un entrenador personal experto. Genera un plan de rutina de ${days} días para un atleta de nivel ${level} con objetivo de ${goal}.
+            TIPO DE PLANIFICACIÓN: ${type === "daily" ? "Rutina diaria única (Full Body o similar)" : "Estructura semanal de varios días"}.
             
             La respuesta DEBE ser un objeto JSON con esta estructura:
             {
@@ -202,11 +203,19 @@ export async function analyzeRoutineSafety(routineData: any, athleteId: string) 
         const groq = getGroqClient();
 
         // Get athlete data for context (injuries, experience)
-        // Note: In real app, we should fetch athlete data from DB. 
-        // For now, let's assume routineData contains context or we fetch it here.
-        // Fetching athlete profile from DB:
-        const athleteDoc = await adminDb.collection("users").doc(athleteId).get();
-        const athlete = athleteDoc.exists ? athleteDoc.data() : {};
+        let athlete: any = {};
+
+        if (athleteId && typeof athleteId === "string" && athleteId.trim() !== "") {
+            try {
+                const athleteDoc = await adminDb.collection("users").doc(athleteId).get();
+                if (athleteDoc.exists) {
+                    athlete = athleteDoc.data();
+                }
+            } catch (dbError) {
+                console.warn("Could not fetch athlete data for safety analysis:", dbError);
+                // Continue with empty athlete object
+            }
+        }
 
         const injuries = athlete?.injuries || "Ninguna reportada";
         const experience = athlete?.experience || "Intermedio";

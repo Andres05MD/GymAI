@@ -1,9 +1,9 @@
 "use client";
 
-import { deleteRoutine } from "@/actions/routine-actions";
+import { deleteRoutine, duplicateRoutine } from "@/actions/routine-actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, Trash, Edit } from "lucide-react";
+import { Calendar, Trash, Edit, Copy } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -39,6 +39,7 @@ interface RoutineCardProps {
 export function RoutineCard({ routine, athletes }: RoutineCardProps) {
     const router = useRouter();
     const [isDeleting, setIsDeleting] = useState(false);
+    const [isDuplicating, setIsDuplicating] = useState(false);
 
     const handleDelete = async () => {
         if (confirm("¿Eliminar esta rutina? Se perderá la asignación actual.")) {
@@ -52,6 +53,18 @@ export function RoutineCard({ routine, athletes }: RoutineCardProps) {
             }
             setIsDeleting(false);
         }
+    };
+
+    const handleDuplicate = async () => {
+        setIsDuplicating(true);
+        const res = await duplicateRoutine(routine.id);
+        if (res.success) {
+            toast.success("Rutina duplicada con éxito");
+            router.refresh();
+        } else {
+            toast.error(res.error);
+        }
+        setIsDuplicating(false);
     };
 
     // Calcular estadísticas básicas
@@ -91,15 +104,28 @@ export function RoutineCard({ routine, athletes }: RoutineCardProps) {
                         )}
                     </div>
 
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-neutral-600 hover:text-red-500 hover:bg-red-500/10 rounded-full h-8 w-8 -mr-1 -mt-1 opacity-100 md:opacity-0 group-hover:opacity-100 transition-all"
-                        onClick={handleDelete}
-                        disabled={isDeleting}
-                    >
-                        <Trash className="w-4 h-4" />
-                    </Button>
+                    <div className="flex gap-1 md:opacity-0 group-hover:opacity-100 transition-all -mr-1 -mt-1">
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-neutral-600 hover:text-white hover:bg-white/10 rounded-full h-8 w-8"
+                            onClick={handleDuplicate}
+                            disabled={isDuplicating}
+                            title="Duplicar"
+                        >
+                            <Copy className="w-4 h-4" />
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-neutral-600 hover:text-red-500 hover:bg-red-500/10 rounded-full h-8 w-8"
+                            onClick={handleDelete}
+                            disabled={isDeleting}
+                            title="Eliminar"
+                        >
+                            <Trash className="w-4 h-4" />
+                        </Button>
+                    </div>
                 </div>
 
                 <CardTitle className="text-lg md:text-xl font-black text-white leading-tight uppercase tracking-tight group-hover:text-red-500 transition-colors">

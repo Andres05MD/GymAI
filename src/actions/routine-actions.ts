@@ -16,6 +16,8 @@ const GenerateRoutineSchema = z.object({
     experienceLevel: z.string().optional(),
     injuries: z.array(z.string()).optional(),
     focus: z.string().optional(), // "upper body", "legs", etc. (optional input from coach)
+    routineType: z.enum(["weekly", "daily"]).optional(),
+    userPrompt: z.string().optional(),
 });
 
 type RoutineInput = z.infer<typeof RoutineSchema>;
@@ -33,9 +35,11 @@ export async function getRoutines() {
             snapshot = await adminDb.collection("routines").where("athleteId", "==", session.user.id).where("active", "==", true).get();
         }
 
-        const routines = snapshot.docs.map(doc => {
+        const routinesRaw = snapshot.docs.map(doc => {
             return serializeFirestoreData({ id: doc.id, ...doc.data() });
         });
+
+        const routines = Array.from(new Map(routinesRaw.map(r => [r.id, r])).values());
 
         return { success: true, routines };
     } catch (error) {
@@ -272,6 +276,37 @@ export async function deleteRoutine(id: string) {
     }
 }
 
+// Duplicate Routine
+export async function duplicateRoutine(id: string) {
+    const session = await auth();
+    if (!session?.user?.id || session.user.role !== "coach") {
+        return { success: false, error: "No autorizado" };
+    }
+
+    try {
+        const docSnap = await adminDb.collection("routines").doc(id).get();
+        if (!docSnap.exists) return { success: false, error: "Rutina no encontrada" };
+
+        const data = docSnap.data();
+        const duplicatedRoutine = {
+            ...data,
+            name: `Copia de ${data?.name}`,
+            coachId: session.user.id,
+            athleteId: null, // No asignar automáticamente a ningún atleta
+            active: true,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        };
+
+        const docRef = await adminDb.collection("routines").add(duplicatedRoutine);
+        revalidatePath("/routines");
+        return { success: true, id: docRef.id };
+    } catch (error) {
+        console.error("Error duplicating routine:", error);
+        return { success: false, error: "Error al duplicar la rutina" };
+    }
+}
+
 // --- AI GENERATION ---
 
 export async function generateRoutineWithAI(data: z.infer<typeof GenerateRoutineSchema>) {
@@ -300,8 +335,10 @@ export async function generateRoutineWithAI(data: z.infer<typeof GenerateRoutine
             - Objetivo: ${data.goal}
             - Días disponibles: ${data.daysPerWeek}
             - Nivel: ${data.experienceLevel || "Intermedio"}
+            - Tipo de Routine: ${data.routineType === "daily" ? "Sesión Diaria Única (Full Body o similar)" : "Planificación Semanal de varios días"}
             - Lesiones/Limitaciones: ${data.injuries?.join(", ") || "Ninguna"}
             ${data.focus ? `- Enfoque especial: ${data.focus}` : ""}
+            ${data.userPrompt ? `- REQUERIMIENTOS ESPECÍFICOS DEL USUARIO: "${data.userPrompt}"` : ""}
 
             Usa PREFERENTEMENTE los siguientes ejercicios disponibles en mi biblioteca, pero puedes sugerir variantes comunes si faltan básicos:
             [${simplifiedExercises}]

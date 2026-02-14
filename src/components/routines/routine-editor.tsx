@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { createRoutine, updateRoutine, generateRoutineWithAI } from "@/actions/routine-actions";
 import { generateRoutineDescription } from "@/actions/ai-actions";
@@ -65,7 +65,7 @@ interface AvailableExercise {
 const WEEKDAYS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
 
 // --- AI Generator Component ---
-function AIGenerator({ onGenerate }: { onGenerate: (routine: AIRoutine) => void }) {
+function AIGenerator({ onGenerate, currentType }: { onGenerate: (routine: AIRoutine) => void, currentType: "weekly" | "daily" }) {
     const [loading, setLoading] = useState(false);
     const [open, setOpen] = useState(false);
     const [criteria, setCriteria] = useState({
@@ -73,7 +73,8 @@ function AIGenerator({ onGenerate }: { onGenerate: (routine: AIRoutine) => void 
         daysPerWeek: 3,
         experienceLevel: "intermediate",
         injuries: "",
-        focus: ""
+        focus: "",
+        userPrompt: ""
     });
 
     const handleGenerate = async () => {
@@ -86,7 +87,9 @@ function AIGenerator({ onGenerate }: { onGenerate: (routine: AIRoutine) => void 
                 daysPerWeek: Number(criteria.daysPerWeek),
                 experienceLevel: criteria.experienceLevel,
                 injuries: injuriesArray,
-                focus: criteria.focus
+                focus: criteria.focus,
+                routineType: currentType,
+                userPrompt: criteria.userPrompt
             });
 
             if (res.success && res.routine) {
@@ -170,12 +173,12 @@ function AIGenerator({ onGenerate }: { onGenerate: (routine: AIRoutine) => void 
                     </div>
 
                     <div className="space-y-2">
-                        <Label className="text-xs font-bold uppercase tracking-widest text-neutral-500">Enfoque Especial (Opcional)</Label>
-                        <Input
-                            placeholder="Ej: Priorizar hombros y brazos"
-                            value={criteria.focus}
-                            onChange={(e) => setCriteria({ ...criteria, focus: e.target.value })}
-                            className="bg-neutral-800 border-transparent rounded-xl h-12 text-white focus-visible:ring-red-500"
+                        <Label className="text-xs font-bold uppercase tracking-widest text-neutral-500">¿Qué necesitas? (Prompt Libre)</Label>
+                        <Textarea
+                            placeholder="Ej: Quiero una rutina que incluya ejercicios de peso corporal y se enfoque en la fuerza explosiva para atletismo..."
+                            value={criteria.userPrompt}
+                            onChange={(e) => setCriteria({ ...criteria, userPrompt: e.target.value })}
+                            className="bg-neutral-800 border-transparent rounded-xl min-h-[100px] text-white focus-visible:ring-red-500 resize-none"
                         />
                     </div>
 
@@ -183,6 +186,68 @@ function AIGenerator({ onGenerate }: { onGenerate: (routine: AIRoutine) => void 
                         {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Sparkles className="w-4 h-4 mr-2" />}
                         GENERAR RUTINA
                     </Button>
+                </div>
+            </DialogContent>
+        </Dialog>
+    );
+}
+
+// --- Routine Importer Component ---
+function RoutineImporter({ routines = [], onImport }: { routines: any[], onImport: (routine: any) => void }) {
+    const [open, setOpen] = useState(false);
+
+    // Deduplicar rutinas por ID para evitar el error "Children with the same key"
+    const uniqueRoutines = Array.from(new Map(routines.map(r => [r.id, r])).values());
+
+    return (
+        <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+                <Button variant="outline" className="border-white/10 bg-white/5 text-white hover:bg-white/10 gap-2 transition-all rounded-full px-4 sm:px-6 h-12 text-xs font-bold tracking-wide">
+                    <Copy className="w-4 h-4" />
+                    <span className="hidden sm:inline">IMPORTAR</span>
+                    <span className="sm:hidden">IMPORTAR</span>
+                </Button>
+            </DialogTrigger>
+            <DialogContent className="bg-neutral-900 border-neutral-800 text-white sm:max-w-[450px] p-0 overflow-hidden rounded-2xl">
+                <DialogHeader className="p-6 pb-0">
+                    <DialogTitle className="text-xl font-black uppercase tracking-tighter">Copiar de Existente</DialogTitle>
+                    <DialogDescription className="text-neutral-400">
+                        Selecciona una rutina para copiar su estructura y ejercicios.
+                    </DialogDescription>
+                </DialogHeader>
+                <div className="p-4">
+                    <Command className="bg-transparent text-white">
+                        <CommandInput placeholder="Buscar rutina..." className="border-none focus:ring-0 text-white" />
+                        <CommandList className="max-h-[300px] mt-2">
+                            <CommandEmpty className="py-4 text-center text-neutral-500">No se encontraron rutinas.</CommandEmpty>
+                            <CommandGroup>
+                                {uniqueRoutines.map((r) => (
+                                    <CommandItem
+                                        key={r.id}
+                                        onSelect={() => {
+                                            onImport(r);
+                                            setOpen(false);
+                                            toast.success(`Datos importados de: ${r.name}`);
+                                        }}
+                                        className="hover:bg-white/5 cursor-pointer rounded-lg p-3 aria-selected:bg-white/10"
+                                    >
+                                        <div className="flex flex-col">
+                                            <span className="font-bold text-red-500 text-sm uppercase">{r.name}</span>
+                                            <span className="text-xs text-neutral-400 line-clamp-1">{r.description || "Sin descripción"}</span>
+                                            <div className="flex gap-2 mt-1">
+                                                <span className="text-[10px] text-neutral-600 uppercase tracking-widest font-bold">
+                                                    {r.type === 'daily' ? '1 Día' : `${r.schedule?.length || 0} Días`}
+                                                </span>
+                                                <span className="text-[10px] text-neutral-600 uppercase tracking-widest font-bold">
+                                                    {r.schedule?.reduce((acc: number, d: any) => acc + (d.exercises?.length || 0), 0)} Ejercicios
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </CommandItem>
+                                ))}
+                            </CommandGroup>
+                        </CommandList>
+                    </Command>
                 </div>
             </DialogContent>
         </Dialog>
@@ -200,13 +265,21 @@ interface RoutineEditorProps {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     availableExercises?: any[];
     athleteId?: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    availableRoutines?: any[];
 }
 
-export function RoutineEditor({ initialData, isEditing = false, availableExercises = [], athleteId }: RoutineEditorProps) {
+export function RoutineEditor({ initialData, isEditing = false, availableExercises = [], athleteId, availableRoutines = [] }: RoutineEditorProps) {
+    const sortedExercises = useMemo(() => {
+        return [...availableExercises].sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+    }, [availableExercises]);
+
     const router = useRouter();
     const [isSaving, setIsSaving] = useState(false);
     const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
     const [activeDayIndex, setActiveDayIndex] = useState(0);
+
+    const DRAFT_KEY = "gymia-routine-draft";
 
     const form = useForm({
         defaultValues: initialData || {
@@ -225,8 +298,57 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
         name: "schedule"
     });
 
+    const formData = watch();
     const schedule = watch("schedule");
     const routineType = watch("type");
+
+    // --- LOGICA DE PERSISTENCIA (LocalStorage) ---
+
+    // Cargar borrador al montar (solo si no estamos editando una existente)
+    useEffect(() => {
+        if (!isEditing) {
+            const savedDraft = localStorage.getItem(DRAFT_KEY);
+            if (savedDraft) {
+                try {
+                    const parsedDraft = JSON.parse(savedDraft);
+                    // Solo restaurar si tiene contenido (nombre o al menos un ejercicio)
+                    const hasContent = parsedDraft.name || (parsedDraft.schedule[0]?.exercises?.length > 0);
+
+                    if (hasContent) {
+                        reset(parsedDraft);
+                        toast.info("Se ha restaurado el borrador anterior", {
+                            description: "No perderás tu progreso aunque se reinicie la página.",
+                            action: {
+                                label: "Descartar",
+                                onClick: () => {
+                                    localStorage.removeItem(DRAFT_KEY);
+                                    reset({
+                                        name: "",
+                                        description: "",
+                                        type: "weekly",
+                                        schedule: [{ name: "Día 1", exercises: [] }]
+                                    });
+                                }
+                            }
+                        });
+                    }
+                } catch (e) {
+                    console.error("Error al cargar borrador:", e);
+                }
+            }
+        }
+    }, [isEditing, reset]);
+
+    // Guardar automáticamente al cambiar
+    useEffect(() => {
+        if (!isEditing) {
+            // Guardamos con un pequeño retraso para no saturar el localStorage
+            const timer = setTimeout(() => {
+                localStorage.setItem(DRAFT_KEY, JSON.stringify(formData));
+            }, 1000);
+            return () => clearTimeout(timer);
+        }
+    }, [formData, isEditing]);
 
     const addExerciseToDay = (dayIndex: number) => {
         const currentExercises = schedule[dayIndex].exercises || [];
@@ -302,6 +424,12 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
 
             if (res.success) {
                 toast.success(isEditing ? "Rutina actualizada" : "Rutina creada");
+
+                // Limpiar borrador al guardar con éxito
+                if (!isEditing) {
+                    localStorage.removeItem(DRAFT_KEY);
+                }
+
                 if (athleteId) {
                     router.push(`/athletes/${athleteId}`);
                 } else {
@@ -361,7 +489,8 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                 </div>
                 <div className="flex gap-2 sm:gap-3 justify-end">
                     <RoutineSafetyCheck routine={watch()} athleteId={athleteId} />
-                    <AIGenerator onGenerate={onAIResult} />
+                    <RoutineImporter routines={availableRoutines} onImport={onAIResult} />
+                    <AIGenerator onGenerate={onAIResult} currentType={watch("type") as "weekly" | "daily"} />
                     <Button onClick={handleSubmit(onSubmit)} disabled={isSaving} className="bg-white text-black hover:bg-neutral-200 font-bold rounded-full px-4 sm:px-8 h-12 tracking-wide transition-all shadow-md hover:shadow-lg text-xs sm:text-sm">
                         {isSaving ? <Loader2 className="w-4 h-4 animate-spin sm:mr-2" /> : <Save className="w-4 h-4 sm:mr-2" />}
                         <span className="hidden sm:inline">GUARDAR</span>
@@ -821,7 +950,7 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                 open={selectorOpen}
                 onOpenChange={setSelectorOpen}
                 onSelect={handleExerciseSelect}
-                availableExercises={availableExercises}
+                availableExercises={sortedExercises}
             />
         </div >
     );

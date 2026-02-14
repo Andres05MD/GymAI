@@ -50,10 +50,10 @@ function WorkoutLogItem({ log }: { log: TrainingLog }) {
     const completionRate = totalSets > 0 ? Math.round((completedSets / totalSets) * 100) : 0;
 
     return (
-        <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-[2rem] overflow-hidden hover:border-neutral-700 transition-all group shadow-sm hover:shadow-md">
+        <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-4xl overflow-hidden hover:border-neutral-700 transition-all group shadow-sm hover:shadow-md">
             {/* Header - Clickable */}
             <div
-                className="p-5 sm:p-6 flex items-center justify-between cursor-pointer hover:bg-white/[0.02] transition-colors relative"
+                className="p-5 sm:p-6 flex items-center justify-between cursor-pointer hover:bg-white/2 transition-colors relative"
                 onClick={() => setExpanded(!expanded)}
             >
                 <div className="flex items-center gap-4 sm:gap-6">

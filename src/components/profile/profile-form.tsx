@@ -16,6 +16,8 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { updateProfile } from "@/actions/profile-actions";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { LoaderPremium } from "@/components/ui/loader-premium";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { User } from "lucide-react";
 
@@ -43,6 +45,7 @@ interface ProfileFormProps {
 
 export function ProfileForm({ user }: ProfileFormProps) {
     const router = useRouter();
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     // 1. Define your form.
     const form = useForm<z.infer<typeof profileSchema>>({
@@ -57,11 +60,13 @@ export function ProfileForm({ user }: ProfileFormProps) {
 
     // 2. Define a submit handler.
     async function onSubmit(values: z.infer<typeof profileSchema>) {
+        setIsSubmitting(true);
         const res = await updateProfile({
             ...values,
             height: values.height ? Number(values.height) : undefined,
             weight: values.weight ? Number(values.weight) : undefined,
         } as any); // Use any temporarily to avoid complex Zod/TS intersection issues if they persist
+        setIsSubmitting(false);
         if (res.success) {
             toast.success("Perfil actualizado");
             router.refresh();
@@ -214,9 +219,10 @@ export function ProfileForm({ user }: ProfileFormProps) {
                     <div className="pt-4 flex justify-end">
                         <Button
                             type="submit"
+                            disabled={isSubmitting}
                             className="w-full md:w-auto px-8 bg-red-600 hover:bg-red-700 text-white h-12 rounded-full font-bold shadow-lg shadow-red-900/20 transition-all hover:scale-105"
                         >
-                            Guardar Cambios
+                            {isSubmitting ? <LoaderPremium size="sm" /> : "Guardar Cambios"}
                         </Button>
                     </div>
                 </form>

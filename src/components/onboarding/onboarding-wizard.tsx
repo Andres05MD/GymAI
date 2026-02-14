@@ -9,7 +9,8 @@ import { completeOnboarding } from "@/actions/auth-actions";
 import { useRouter } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Loader2, ChevronRight, ChevronLeft, Check, Activity, HeartPulse, User, Ruler, Target, Lock, LogOut, Eye, EyeOff, ShieldCheck, type LucideIcon } from "lucide-react";
+import { ChevronRight, ChevronLeft, Check, Activity, HeartPulse, User, Ruler, Target, Lock, LogOut, Eye, EyeOff, ShieldCheck, type LucideIcon } from "lucide-react";
+import { LoaderPremium } from "@/components/ui/loader-premium";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -544,7 +545,7 @@ export function OnboardingWizard({ authProvider }: OnboardingWizardProps) {
                                     disabled={isSubmitting}
                                     className="bg-red-600 hover:bg-red-700 text-white rounded-full px-6 md:px-10 h-11 md:h-14 font-black uppercase tracking-widest text-xs md:text-sm shadow-lg shadow-red-900/30 hover:scale-105 active:scale-95 transition-all"
                                 >
-                                    {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Check className="w-4 h-4 mr-2" />}
+                                    {isSubmitting ? <LoaderPremium size="sm" /> : <Check className="w-4 h-4 mr-2" />}
                                     Finalizar Setup
                                 </Button>
                             ) : (

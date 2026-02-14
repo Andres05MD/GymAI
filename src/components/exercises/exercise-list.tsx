@@ -27,18 +27,21 @@ export function ExerciseList({ exercises }: ExerciseListProps) {
     const router = useRouter();
 
     const filteredExercises = useMemo(() => {
-        return exercises.filter(ex => {
-            const term = searchTerm.toLowerCase().trim();
-            if (!term && !filterGroup) return true;
+        return exercises
+            .filter((ex) => {
+                const term = searchTerm.toLowerCase().trim();
+                if (!term && !filterGroup) return true;
 
-            const matchesSearch = !term ||
-                (ex.name?.toLowerCase().includes(term) ||
-                    ex.specificMuscles?.some((m: string) => m.toLowerCase().includes(term)));
+                const matchesSearch =
+                    !term ||
+                    ex.name?.toLowerCase().includes(term) ||
+                    ex.specificMuscles?.some((m: string) => m.toLowerCase().includes(term));
 
-            const matchesFilter = filterGroup ? ex.muscleGroups?.includes(filterGroup) : true;
+                const matchesFilter = filterGroup ? ex.muscleGroups?.includes(filterGroup) : true;
 
-            return matchesSearch && matchesFilter;
-        });
+                return matchesSearch && matchesFilter;
+            })
+            .sort((a, b) => (a.name || "").localeCompare(b.name || ""));
     }, [exercises, searchTerm, filterGroup]);
 
     const handleDelete = async (id: string) => {
@@ -54,7 +57,7 @@ export function ExerciseList({ exercises }: ExerciseListProps) {
     };
 
     // Extract unique muscle groups for filter tabs
-    const allGroups = useMemo(() => Array.from(new Set(exercises.flatMap(e => e.muscleGroups || []))), [exercises]);
+    const allGroups = useMemo(() => Array.from(new Set(exercises.flatMap(e => e.muscleGroups || []))).sort(), [exercises]);
 
     // Muscle group colors
     const groupColors: Record<string, string> = {
@@ -81,7 +84,7 @@ export function ExerciseList({ exercises }: ExerciseListProps) {
     return (
         <div className="space-y-6">
             {/* Controls */}
-            <div className="sticky top-4 md:top-6 z-20 bg-black/80 backdrop-blur-xl border border-white/5 rounded-[2rem] p-2 shadow-2xl shadow-black/50">
+            <div className="sticky top-4 md:top-6 z-20 bg-black/80 backdrop-blur-xl border border-white/5 rounded-4xl p-2 shadow-2xl shadow-black/50">
                 <div className="flex flex-col gap-2">
                     <div className="relative flex-1 group">
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-neutral-500 group-focus-within:text-white transition-colors" />

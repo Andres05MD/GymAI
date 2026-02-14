@@ -8,9 +8,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus, Loader2 } from "lucide-react";
+import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import { logBodyMeasurements } from "@/actions/measurement-actions";
+import { LoaderPremium } from "@/components/ui/loader-premium";
 
 const LogSchema = z.object({
     date: z.string(),
@@ -209,7 +210,7 @@ export function LogMeasurementDialog({ onLogSuccess, children, initialData, init
 
                     <div className="flex justify-center pt-4 pb-2">
                         <Button type="submit" disabled={isSubmitting} className="bg-white text-black hover:bg-neutral-300 w-full md:w-auto font-black rounded-full px-12 h-12 text-sm uppercase tracking-wide shadow-lg shadow-white/10 hover:scale-105 transition-all">
-                            {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : "Guardar Registro"}
+                            {isSubmitting ? <LoaderPremium size="sm" /> : "Guardar Registro"}
                         </Button>
                     </div>
                 </form>

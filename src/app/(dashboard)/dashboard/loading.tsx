@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function DashboardLoading() {
     return (
-        <div className="space-y-8 animate-pulse">
+        <div className="space-y-8">
             {/* Header Skeleton */}
             <div className="flex justify-between items-center">
                 <div className="space-y-2">

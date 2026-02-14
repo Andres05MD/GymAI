@@ -107,7 +107,7 @@ export function ExercisesManager({ initialExercises }: ExercisesManagerProps) {
                             <Plus className="mr-2 h-5 w-5" /> Nuevo Ejercicio
                         </Button>
                     </DialogTrigger>
-                    <DialogContent className="bg-neutral-950 border-neutral-800 text-white sm:rounded-[2rem]">
+                    <DialogContent className="bg-neutral-950 border-neutral-800 text-white sm:rounded-4xl">
                         <DialogHeader>
                             <DialogTitle>Añadir Ejercicio</DialogTitle>
                         </DialogHeader>
@@ -148,7 +148,7 @@ export function ExercisesManager({ initialExercises }: ExercisesManagerProps) {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredExercises.map((exercise) => (
-                    <div key={exercise.id} className="bg-neutral-900 border border-neutral-800 rounded-[2rem] p-6 hover:border-neutral-600 transition-all group flex items-start justify-between">
+                    <div key={exercise.id} className="bg-neutral-900 border border-neutral-800 rounded-4xl p-6 hover:border-neutral-600 transition-all group flex items-start justify-between">
                         <div className="flex items-center gap-4">
                             <div className="h-14 w-14 bg-black border border-neutral-800 rounded-2xl flex items-center justify-center text-neutral-500 group-hover:text-red-500 group-hover:border-red-500/30 transition-all">
                                 <Dumbbell className="h-6 w-6" />
@@ -173,7 +173,7 @@ export function ExercisesManager({ initialExercises }: ExercisesManagerProps) {
                 ))}
 
                 {filteredExercises.length === 0 && (
-                    <div className="col-span-full py-20 text-center text-neutral-500 border border-dashed border-neutral-800 rounded-[2rem] bg-neutral-900/30">
+                    <div className="col-span-full py-20 text-center text-neutral-500 border border-dashed border-neutral-800 rounded-4xl bg-neutral-900/30">
                         <div className="w-16 h-16 bg-neutral-800/50 rounded-full flex items-center justify-center mx-auto mb-4">
                             <Dumbbell className="h-6 w-6 text-neutral-600" />
                         </div>

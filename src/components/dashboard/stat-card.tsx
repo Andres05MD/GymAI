@@ -35,7 +35,7 @@ export function StatCard({
     const TrendIcon = trend === "up" ? ArrowUpRight : trend === "down" ? ArrowDownRight : null;
 
     return (
-        <div className={cn("p-6 rounded-[2rem] bg-neutral-900 border border-neutral-800 flex flex-col justify-between h-40 group hover:border-neutral-700 transition-all", className)}>
+        <div className={cn("p-6 rounded-4xl bg-neutral-900 border border-neutral-800 flex flex-col justify-between h-40 group hover:border-neutral-700 transition-all", className)}>
             <div className="flex justify-between items-start">
                 <div>
                     <p className="text-neutral-400 font-medium text-sm mb-1">{title}</p>
