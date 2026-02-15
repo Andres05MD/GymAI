@@ -2,6 +2,7 @@ import { getActiveRoutine } from "@/actions/athlete-actions";
 import { getTodayAssignment } from "@/actions/schedule-actions";
 import { getRoutine } from "@/actions/routine-actions";
 import { WorkoutSession } from "@/components/training/workout-session";
+import { RestDayView } from "@/components/training/rest-day-view";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { AlertCircle } from "lucide-react";
@@ -30,9 +31,20 @@ export default async function TrainPage() {
     const session = await auth();
     if (!session?.user?.id) redirect("/login");
 
+    // Detect if today is a weekend day (Saturday = 6, Sunday = 0)
+    const todayDate = new Date();
+    const dayOfWeek = todayDate.getDay();
+    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+    const dayName = todayDate.toLocaleDateString('es-ES', { weekday: 'long' });
+
     // 1. Check for a specific assignment for TODAY
-    const today = new Date().toISOString().split('T')[0];
-    const { assignment } = await getTodayAssignment(session.user.id, today);
+    const todayISO = todayDate.toISOString().split('T')[0];
+    const { assignment } = await getTodayAssignment(session.user.id, todayISO);
+
+    // If it's a weekend and there's no coach assignment, it's a rest day
+    if (isWeekend && !assignment) {
+        return <RestDayView dayName={dayName} />;
+    }
 
     let routine;
     let activeDayId: string | undefined;

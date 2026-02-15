@@ -34,6 +34,8 @@ const WEEKDAYS = [
     { name: "Miércoles", short: "MIÉ" },
     { name: "Jueves", short: "JUE" },
     { name: "Viernes", short: "VIE" },
+    { name: "Sábado", short: "SÁB" },
+    { name: "Domingo", short: "DOM" },
 ];
 
 // --- Helpers ---
@@ -43,17 +45,20 @@ function cleanName(name?: string): string {
 }
 
 function getTodayWeekdayIndex(): number {
-    const dayOfWeek = new Date().getDay(); // 0=Dom, 1=Lun, ..., 5=Vie, 6=Sáb
-    return dayOfWeek - 1; // -1=Dom, 0=Lun, ..., 4=Vie, 5=Sáb
+    const dayOfWeek = new Date().getDay(); // 0=Dom, 1=Lun, ..., 6=Sáb
+    // Map to 0=Lun, 1=Mar, 2=Mié, 3=Jue, 4=Vie, 5=Sáb, 6=Dom
+    return (dayOfWeek + 6) % 7;
 }
 
 function getDateForWeekday(dayIndex: number): string {
     const today = new Date();
-    const currentDayOfWeek = today.getDay();
-    const targetDayOfWeek = dayIndex + 1;
-    const diff = currentDayOfWeek - targetDayOfWeek;
+    today.setHours(0, 0, 0, 0); // Normalize today
+    const currentDayOfWeek = today.getDay(); // 0=Dom, 1=Lun ...
+    const currentAdjusted = (currentDayOfWeek + 6) % 7; // 0=Lun ... 6=Dom
+
+    const diff = dayIndex - currentAdjusted;
     const targetDate = new Date(today);
-    targetDate.setDate(today.getDate() - diff);
+    targetDate.setDate(today.getDate() + diff);
     return targetDate.toISOString().split("T")[0];
 }
 
@@ -67,7 +72,6 @@ export function WeeklyRoutineView({ schedule, routineId, routineName, routineTyp
     const isDaily = routineType === "daily" || schedule.length === 1;
 
     const isDayAccessible = (dayIndex: number) => {
-        if (todayIndex < 0 || todayIndex > 4) return true; // Fin de semana
         return dayIndex <= todayIndex;
     };
 

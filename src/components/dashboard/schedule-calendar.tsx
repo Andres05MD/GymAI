@@ -62,7 +62,9 @@ export function ScheduleCalendar({ athleteId, activeRoutine }: { athleteId: stri
         : [];
 
     const selectedDayInfo = date ? getDayInfo(date) : null;
-    const isRestDay = selectedDayInfo?.isRest;
+    const selectedDayWeekDay = date?.getDay();
+    const isWeekend = selectedDayWeekDay === 0 || selectedDayWeekDay === 6;
+    const isRestDay = selectedDayInfo ? selectedDayInfo.isRest : (isWeekend && selectedDayAssignments.length === 0);
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -84,12 +86,17 @@ export function ScheduleCalendar({ athleteId, activeRoutine }: { athleteId: stri
                         modifiers={{
                             assigned: assignedDays,
                             training: (day) => getDayInfo(day)?.isRest === false,
-                            rest: (day) => getDayInfo(day)?.isRest === true
+                            rest: (day) => {
+                                const info = getDayInfo(day);
+                                if (info) return info.isRest === true;
+                                const dow = day.getDay();
+                                return dow === 0 || dow === 6;
+                            }
                         }}
                         modifiersClassNames={{
                             assigned: "bg-red-500/10 text-red-500 font-bold hover:bg-red-500/20",
                             training: "after:content-[''] after:absolute after:bottom-1 after:w-1 after:h-1 after:bg-red-500 after:rounded-full",
-                            rest: "opacity-40"
+                            rest: "opacity-40 grayscale-[0.5]"
                         }}
                         locale={es}
                         className="w-full"

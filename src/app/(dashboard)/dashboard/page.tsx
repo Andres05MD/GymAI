@@ -4,7 +4,7 @@ import { NotificationBell } from "@/components/notifications/notification-bell";
 import { UserNav } from "@/components/layout/user-nav";
 import { Button } from "@/components/ui/button";
 import { StatCard } from "@/components/dashboard/stat-card";
-import { getPersonalRecords, getWeeklyActivity, getWeeklyProgress } from "@/actions/analytics-actions";
+import { getWeeklyActivity, getWeeklyProgress } from "@/actions/analytics-actions";
 import { getCoachStats, getRecentActivity } from "@/actions/coach-stats-actions";
 import { getActiveRoutine } from "@/actions/athlete-actions";
 import Link from "next/link";
@@ -200,17 +200,15 @@ async function CoachDashboard({ user }: { user: DashboardUser | undefined }) {
 
 async function AthleteDashboard({ user }: { user: DashboardUser | undefined }) {
     const userId = user?.id ?? "";
-    const [prsRes, routineRes, activityRes, progressRes] = await Promise.all([
-        getPersonalRecords(userId),
+    const [routineRes, activityRes, progressRes] = await Promise.all([
         getActiveRoutine(),
         getWeeklyActivity(userId),
         getWeeklyProgress(userId)
     ]);
 
-    const { prs } = prsRes;
     const { routine } = routineRes;
     const { data: activityData } = activityRes;
-    const { completed: weeklyCompleted, target: weeklyTarget } = progressRes;
+    const { completed: weeklyCompleted = 0, target: weeklyTarget = 0 } = progressRes;
 
     return (
         <div className="space-y-8 pb-24 md:pb-10">
@@ -259,11 +257,10 @@ async function AthleteDashboard({ user }: { user: DashboardUser | undefined }) {
                     icon={Clock}
                 />
                 <StatCard
-                    title="Récords"
-                    value={prs?.length?.toString() || "0"}
-                    label="Registrados"
-                    trend="up"
-                    trendValue="New"
+                    title="Meta"
+                    value={weeklyTarget?.toString() || "0"}
+                    label="Sesiones objetivo"
+                    trend="neutral"
                     icon={Activity}
                     color="blue"
                 />
@@ -299,11 +296,23 @@ async function AthleteDashboard({ user }: { user: DashboardUser | undefined }) {
 
                     <div className="bg-neutral-900 border border-neutral-800 rounded-4xl overflow-hidden group hover:border-red-500/30 transition-all hover:-translate-y-1 duration-300 shadow-xl">
                         <div className="relative z-10 p-6">
-                            <p className="text-xs font-bold uppercase tracking-widest text-neutral-500 mb-1">Próxima Sesión</p>
-                            {routine ? (
+                            <p className="text-xs font-bold uppercase tracking-widest text-neutral-500 mb-1">
+                                {new Date().getDay() === 0 || new Date().getDay() === 6 ? "Recuperación" : "Próxima Sesión"}
+                            </p>
+                            {new Date().getDay() === 0 || new Date().getDay() === 6 ? (
+                                <>
+                                    <h3 className="text-2xl font-black mb-1 text-white">Día de Descanso</h3>
+                                    <p className="text-sm text-neutral-400 mb-4">Carga energías para la semana.</p>
+                                    <Link href="/train">
+                                        <Button variant="outline" className="w-full rounded-full border-neutral-700 hover:bg-neutral-800 text-white font-bold">
+                                            Ver Detalles
+                                        </Button>
+                                    </Link>
+                                </>
+                            ) : routine ? (
                                 <>
                                     <h3 className="text-2xl font-black mb-1 text-white">{(routine as unknown as SerializedRoutine).name}</h3>
-                                    <p className="text-sm text-neutral-400 mb-4">{((routine as unknown as SerializedRoutine).schedule?.length) || 0} Ejercicios</p>
+                                    <p className="text-sm text-neutral-400 mb-4">{((routine as unknown as SerializedRoutine).schedule?.length) || 0} Sesiones</p>
                                     <Link href="/train">
                                         <Button className="w-full rounded-full bg-white text-black hover:bg-neutral-200 font-bold">
                                             Iniciar Ahora
@@ -324,27 +333,38 @@ async function AthleteDashboard({ user }: { user: DashboardUser | undefined }) {
                 </div>
             </div>
 
-            {/* PRs Section */}
-            <div className="bg-neutral-900 border border-neutral-800 rounded-4xl p-8">
-                <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-xl font-bold text-white">Récords Personales (PRs)</h3>
+            {/* AI Insight Card */}
+            <div className="bg-linear-to-br from-neutral-900 via-neutral-900 to-red-900/10 border border-neutral-800 rounded-4xl p-8 relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
+                    <Activity className="w-40 h-40 text-white" />
                 </div>
-                {prs && prs.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        {prs.map((pr: PersonalRecord, i: number) => (
-                            <div key={i} className="flex items-center justify-between p-4 bg-black rounded-2xl border border-neutral-800">
-                                <div>
-                                    <p className="text-white font-bold">{pr.exercise}</p>
-                                    <p className="text-neutral-500 text-xs">{pr.date}</p>
-                                </div>
-                                <span className="text-xl font-black text-white">{pr.weight} kg</span>
-                            </div>
-                        ))}
+
+                <div className="relative z-10 flex flex-col md:flex-row gap-8 items-center">
+                    <div className="flex-1 space-y-4 text-center md:text-left">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] font-black uppercase tracking-widest">
+                            <TrendingUp className="w-3 h-3" />
+                            AI Insight
+                        </div>
+                        <h3 className="text-2xl font-black text-white tracking-tight uppercase italic">
+                            Análisis de Rendimiento Semanal
+                        </h3>
+                        <p className="text-neutral-400 max-w-xl">
+                            {weeklyCompleted >= (weeklyTarget || 0)
+                                ? "¡Increíble trabajo! Has superado tu meta semanal. Considera un día extra de recuperación o aumenta ligeramente la intensidad en tu próxima sesión."
+                                : `Llevas ${weeklyCompleted} de ${weeklyTarget} sesiones. Mantén la constancia para alcanzar tu objetivo. ¡Tú puedes, ${user?.name?.split(' ')[0]}!`}
+                        </p>
                     </div>
-                ) : (
-                    <p className="text-neutral-500 text-center py-8">Registra tus marcas para verlas aquí.</p>
-                )}
+
+                    <div className="shrink-0 w-full md:w-auto">
+                        <Link href="/progress">
+                            <Button className="w-full md:w-auto rounded-2xl h-14 px-8 bg-white text-black hover:bg-neutral-200 font-bold transition-transform active:scale-95 shadow-lg shadow-white/5">
+                                Ver Detalles de Progreso
+                            </Button>
+                        </Link>
+                    </div>
+                </div>
             </div>
+
 
         </div>
     );

@@ -50,48 +50,48 @@ function WorkoutLogItem({ log }: { log: TrainingLog }) {
     const completionRate = totalSets > 0 ? Math.round((completedSets / totalSets) * 100) : 0;
 
     return (
-        <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-4xl overflow-hidden hover:border-neutral-700 transition-all group shadow-sm hover:shadow-md">
+        <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-3xl md:rounded-4xl overflow-hidden hover:border-neutral-700 transition-all group shadow-sm hover:shadow-md">
             {/* Header - Clickable */}
             <div
-                className="p-5 sm:p-6 flex items-center justify-between cursor-pointer hover:bg-white/2 transition-colors relative"
+                className="p-4 md:p-6 flex items-center justify-between cursor-pointer hover:bg-white/2 transition-colors relative"
                 onClick={() => setExpanded(!expanded)}
             >
-                <div className="flex items-center gap-4 sm:gap-6">
+                <div className="flex items-center gap-3 md:gap-6">
                     {/* Date Circle */}
-                    <div className="h-16 w-16 rounded-2xl bg-linear-to-br from-red-600 to-red-900 text-white flex flex-col items-center justify-center shadow-lg shadow-red-900/30 border border-white/10 shrink-0">
-                        <span className="text-xl font-black leading-none tracking-tight">
+                    <div className="h-14 w-14 md:h-16 md:w-16 rounded-xl md:rounded-2xl bg-linear-to-br from-red-600 to-red-900 text-white flex flex-col items-center justify-center shadow-lg shadow-red-900/30 border border-white/10 shrink-0">
+                        <span className="text-lg md:text-xl font-black leading-none tracking-tight">
                             {new Date(log.date).getDate()}
                         </span>
-                        <span className="text-[9px] uppercase tracking-widest opacity-90 font-bold mt-1">
+                        <span className="text-[8px] md:text-[9px] uppercase tracking-widest opacity-90 font-bold mt-0.5 md:mt-1">
                             {new Date(log.date).toLocaleDateString('es', { month: 'short' }).slice(0, 3)}
                         </span>
                     </div>
 
-                    <div>
-                        <div className="flex items-center gap-2 mb-1.5">
-                            <h4 className="font-bold text-white text-lg tracking-tight">
+                    <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-1 md:mb-1.5">
+                            <h4 className="font-bold text-white text-base md:text-lg tracking-tight truncate">
                                 {log.routineName || "Sesión de Entrenamiento"}
                             </h4>
                             {log.routineId && (
-                                <span className="bg-linear-to-r from-red-500/10 to-transparent text-red-400 text-[10px] px-2 py-0.5 rounded-full uppercase font-bold tracking-wider border border-red-500/20">
-                                    Rutina
+                                <span className="bg-red-500/10 text-red-400 text-[8px] md:text-[10px] px-1.5 md:px-2 py-0.5 rounded-full uppercase font-black tracking-wider border border-red-500/20">
+                                    RUTINA
                                 </span>
                             )}
                         </div>
 
                         {/* Stats Row */}
-                        <div className="flex flex-wrap gap-3 text-xs text-neutral-400 font-medium">
-                            <span className="flex items-center gap-1.5 bg-black/20 px-2.5 py-1.5 rounded-lg border border-white/5">
-                                <Dumbbell className="w-3.5 h-3.5 text-neutral-500" />
-                                {log.exercises?.length || 0}
+                        <div className="flex flex-wrap gap-2 md:gap-3 text-[10px] md:text-xs text-neutral-400 font-bold">
+                            <span className="flex items-center gap-1 bg-black/30 px-2 py-1 rounded-lg border border-white/5">
+                                <Dumbbell className="w-3 md:w-3.5 h-3 md:h-3.5 text-neutral-500" />
+                                {log.exercises?.length || 0} <span className="hidden xs:inline text-neutral-600 font-normal">EJERCICIOS</span>
                             </span>
-                            <span className="flex items-center gap-1.5 bg-black/20 px-2.5 py-1.5 rounded-lg border border-white/5">
-                                <Flame className="w-3.5 h-3.5 text-orange-500" />
-                                {Math.round(totalVolume).toLocaleString()} <span className="text-[10px] uppercase text-neutral-600">kg</span>
+                            <span className="flex items-center gap-1 bg-black/30 px-2 py-1 rounded-lg border border-white/5">
+                                <Flame className="w-3 md:w-3.5 h-3 md:h-3.5 text-orange-500" />
+                                {Math.round(totalVolume).toLocaleString()} <span className="text-[8px] md:text-[10px] uppercase text-neutral-600 font-normal">kg</span>
                             </span>
-                            <span className="flex items-center gap-1.5 bg-black/20 px-2.5 py-1.5 rounded-lg border border-white/5">
-                                <Clock className="w-3.5 h-3.5 text-blue-500" />
-                                {log.durationMinutes || 0} <span className="text-[10px] uppercase text-neutral-600">min</span>
+                            <span className="flex items-center gap-1 bg-black/30 px-2 py-1 rounded-lg border border-white/5">
+                                <Clock className="w-3 md:w-3.5 h-3 md:h-3.5 text-blue-500" />
+                                {log.durationMinutes || 0} <span className="text-[8px] md:text-[10px] uppercase text-neutral-600 font-normal">min</span>
                             </span>
                         </div>
                     </div>
