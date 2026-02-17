@@ -83,17 +83,34 @@ export default async function TrainPage() {
         );
     }
 
-    // Filter the routine to only show the relevant day if assigned
+    // Filter the routine to only show the relevant day
     let workoutRoutine = routine as unknown as WorkoutRoutine;
+    let selectedDay;
 
     if (activeDayId) {
-        const day = workoutRoutine.schedule.find(d => d.id === activeDayId);
-        if (day) {
-            workoutRoutine = {
-                ...workoutRoutine,
-                schedule: [day]
-            };
+        selectedDay = workoutRoutine.schedule.find(d => d.id === activeDayId);
+    } else {
+        // Try to find a day that matches current weekday (case insensitive)
+        selectedDay = workoutRoutine.schedule.find(d =>
+            d.name.toLowerCase().trim() === dayName.toLowerCase().trim()
+        );
+
+        // If not found by name, fallback to schedule[0] (existing behavior) but at least we tried
+        if (!selectedDay) {
+            selectedDay = workoutRoutine.schedule[0];
         }
+    }
+
+    if (selectedDay) {
+        // If the selected day is a rest day, show rest view
+        if ((selectedDay as any).isRest) {
+            return <RestDayView dayName={dayName} />;
+        }
+
+        workoutRoutine = {
+            ...workoutRoutine,
+            schedule: [selectedDay as any]
+        };
     }
 
     return <WorkoutSession routine={workoutRoutine} />;

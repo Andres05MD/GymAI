@@ -13,6 +13,7 @@ import { AIAssistantDialog } from "@/components/training/ai-assistant-dialog";
 import { ProgressionTip } from "@/components/training/progression-tip";
 import { useOfflineSync } from "@/hooks/use-offline-sync";
 import { SessionFeedbackDialog } from "@/components/training/session-feedback-dialog";
+import { CancelWorkoutDialog } from "@/components/training/cancel-workout-dialog";
 
 // --- INTERFACES ---
 
@@ -74,9 +75,10 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
     // We map the active day exercises to a local state for logging
     const [sessionLog, setSessionLog] = useState<SessionExercise[]>([]);
     const [showFeedback, setShowFeedback] = useState(false);
+    const [showCancelDialog, setShowCancelDialog] = useState(false);
     const { saveLogLocally } = useOfflineSync();
 
-    const activeDay = routine.schedule[0]; // TODO: Logic to select day if multiple are available
+    const activeDay = routine.schedule[0]; // El componente padre (TrainPage) filtra la rutina para enviar solo el día activo
     // Estado para guardar el historial de la última sesión
     const [historySets, setHistorySets] = useState<any[]>([]);
 
@@ -186,6 +188,12 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
 
     const handleFinishClick = () => {
         setShowFeedback(true);
+    };
+
+    const handleCancelConfirm = () => {
+        if (!activeDay) return;
+        localStorage.removeItem(`gymia_session_${routine.id}_${activeDay.name}`);
+        router.push("/dashboard");
     };
 
     const handleCompleteSession = async (sessionRpe: number, sessionNotes: string) => {
@@ -335,6 +343,13 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
                             availableExercises={[currentExercise?.exerciseName]}
                         />
                         <Button
+                            onClick={() => setShowCancelDialog(true)}
+                            variant="ghost"
+                            className="text-neutral-500 hover:text-red-500 hover:bg-red-500/10 rounded-full font-bold transition-colors"
+                        >
+                            Cancelar
+                        </Button>
+                        <Button
                             onClick={handleFinishClick}
                             disabled={isSubmitting}
                             variant="ghost"
@@ -417,11 +432,16 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
                                             </div>
                                             <div className="col-span-3 md:col-span-2 relative z-10">
                                                 <Input
-                                                    type="number"
+                                                    type="text"
                                                     inputMode="decimal"
                                                     placeholder={historySet ? `${historySet.weight}` : "-"}
                                                     value={logSet?.weight}
-                                                    onChange={(e) => updateSet(currentExerciseIndex, setIndex, "weight", e.target.value)}
+                                                    onChange={(e) => {
+                                                        const val = e.target.value.replace(",", ".");
+                                                        if (val === "" || /^\d*\.?\d*$/.test(val)) {
+                                                            updateSet(currentExerciseIndex, setIndex, "weight", val);
+                                                        }
+                                                    }}
                                                     className={cn(
                                                         "h-12 md:h-14 px-0 text-center text-lg md:text-xl font-black border-0 bg-neutral-800 rounded-xl focus:ring-2 focus:ring-white/20 transition-all placeholder:text-neutral-700 text-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
                                                         isCompleted && "text-green-400 bg-green-900/20 ring-1 ring-green-500/30"
@@ -430,11 +450,16 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
                                             </div>
                                             <div className="col-span-3 md:col-span-2 relative z-10">
                                                 <Input
-                                                    type="number"
+                                                    type="text"
                                                     inputMode="decimal"
                                                     placeholder={historySet ? `${historySet.reps}` : "-"}
                                                     value={logSet?.reps}
-                                                    onChange={(e) => updateSet(currentExerciseIndex, setIndex, "reps", e.target.value)}
+                                                    onChange={(e) => {
+                                                        const val = e.target.value.replace(",", ".");
+                                                        if (val === "" || /^\d*\.?\d*$/.test(val)) {
+                                                            updateSet(currentExerciseIndex, setIndex, "reps", val);
+                                                        }
+                                                    }}
                                                     className={cn(
                                                         "h-12 md:h-14 px-0 text-center text-lg md:text-xl font-black border-0 bg-neutral-800 rounded-xl focus:ring-2 focus:ring-white/20 transition-all placeholder:text-neutral-700 text-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
                                                         isCompleted && "text-green-400 bg-green-900/20 ring-1 ring-green-500/30"
@@ -544,6 +569,12 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
                 onOpenChange={setShowFeedback}
                 onConfirm={handleCompleteSession}
                 isSubmitting={isSubmitting}
+            />
+
+            <CancelWorkoutDialog
+                open={showCancelDialog}
+                onOpenChange={setShowCancelDialog}
+                onConfirm={handleCancelConfirm}
             />
         </div>
     );

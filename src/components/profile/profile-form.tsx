@@ -182,7 +182,14 @@ export function ProfileForm({ user }: ProfileFormProps) {
                                             <FormControl>
                                                 <Input
                                                     {...field}
-                                                    type="number"
+                                                    type="text"
+                                                    inputMode="decimal"
+                                                    onChange={(e) => {
+                                                        const val = e.target.value.replace(",", ".");
+                                                        if (val === "" || /^\d*\.?\d*$/.test(val)) {
+                                                            field.onChange(val);
+                                                        }
+                                                    }}
                                                     placeholder="175"
                                                     className="bg-neutral-950/50 border-neutral-800 focus:border-red-500 transition-all h-12 rounded-xl text-white placeholder:text-neutral-600"
                                                 />
@@ -202,7 +209,14 @@ export function ProfileForm({ user }: ProfileFormProps) {
                                                 <FormControl>
                                                     <Input
                                                         {...field}
-                                                        type="number"
+                                                        type="text"
+                                                        inputMode="decimal"
+                                                        onChange={(e) => {
+                                                            const val = e.target.value.replace(",", ".");
+                                                            if (val === "" || /^\d*\.?\d*$/.test(val)) {
+                                                                field.onChange(val);
+                                                            }
+                                                        }}
                                                         placeholder="70"
                                                         className="bg-neutral-950/50 border-neutral-800 focus:border-red-500 transition-all h-12 rounded-xl text-white placeholder:text-neutral-600"
                                                     />

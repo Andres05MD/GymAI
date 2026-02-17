@@ -68,10 +68,16 @@ export function CheckinDialog() {
                         <div className="col-span-3 relative">
                             <Scale className="absolute left-3 top-2.5 h-4 w-4 text-neutral-500" />
                             <Input
-                                type="number" step="0.1"
+                                type="text"
+                                inputMode="decimal"
                                 className="pl-9 bg-neutral-900 border-neutral-800"
                                 value={weight}
-                                onChange={e => setWeight(e.target.value)}
+                                onChange={e => {
+                                    const val = e.target.value.replace(",", ".");
+                                    if (val === "" || /^\d*\.?\d*$/.test(val)) {
+                                        setWeight(val);
+                                    }
+                                }}
                             />
                         </div>
                     </div>
@@ -80,10 +86,16 @@ export function CheckinDialog() {
                         <div className="col-span-3 relative">
                             <Ruler className="absolute left-3 top-2.5 h-4 w-4 text-neutral-500" />
                             <Input
-                                type="number"
+                                type="text"
+                                inputMode="decimal"
                                 className="pl-9 bg-neutral-900 border-neutral-800"
                                 value={waist}
-                                onChange={e => setWaist(e.target.value)}
+                                onChange={e => {
+                                    const val = e.target.value.replace(",", ".");
+                                    if (val === "" || /^\d*\.?\d*$/.test(val)) {
+                                        setWaist(val);
+                                    }
+                                }}
                                 placeholder="Opcional"
                             />
                         </div>
@@ -93,10 +105,16 @@ export function CheckinDialog() {
                         <div className="col-span-3 relative">
                             <Ruler className="absolute left-3 top-2.5 h-4 w-4 text-neutral-500" />
                             <Input
-                                type="number"
+                                type="text"
+                                inputMode="decimal"
                                 className="pl-9 bg-neutral-900 border-neutral-800"
                                 value={biceps}
-                                onChange={e => setBiceps(e.target.value)}
+                                onChange={e => {
+                                    const val = e.target.value.replace(",", ".");
+                                    if (val === "" || /^\d*\.?\d*$/.test(val)) {
+                                        setBiceps(val);
+                                    }
+                                }}
                                 placeholder="Opcional"
                             />
                         </div>

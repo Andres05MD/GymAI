@@ -114,7 +114,22 @@ export function LogMeasurementDialog({ onLogSuccess, children, initialData, init
                             <div className="space-y-2">
                                 <Label className="text-xs font-bold text-neutral-400 uppercase tracking-widest pl-1">Peso (kg)</Label>
                                 <div className="relative">
-                                    <Input type="number" step="0.1" {...form.register("weight")} className="bg-neutral-950 border-neutral-800 focus:border-red-500 h-11 text-white pl-4 placeholder:text-neutral-500" placeholder="0.0" />
+                                    <Input
+                                        type="text"
+                                        inputMode="decimal"
+                                        {...form.register("weight", {
+                                            onChange: (e) => {
+                                                const val = e.target.value.replace(",", ".");
+                                                if (val === "" || /^\d*\.?\d*$/.test(val)) {
+                                                    form.setValue("weight", val as any);
+                                                } else {
+                                                    e.target.value = form.getValues("weight")?.toString() || "";
+                                                }
+                                            }
+                                        })}
+                                        className="bg-neutral-950 border-neutral-800 focus:border-red-500 h-11 text-white pl-4 placeholder:text-neutral-500"
+                                        placeholder="0.0"
+                                    />
                                     <span className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-600 text-sm font-medium">kg</span>
                                 </div>
                             </div>
@@ -131,27 +146,63 @@ export function LogMeasurementDialog({ onLogSuccess, children, initialData, init
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-5">
                             <div className="space-y-2">
                                 <Label className="text-xs font-medium text-neutral-400 pl-1 uppercase">Cuello</Label>
-                                <Input type="number" step="0.1" {...form.register("neck")} className="bg-neutral-950 border-neutral-800 focus:border-red-500 h-11 text-white placeholder:text-neutral-500" placeholder="0" />
+                                <Input
+                                    type="text"
+                                    inputMode="decimal"
+                                    {...form.register("neck", { onChange: (e) => { e.target.value = e.target.value.replace(",", "."); } })}
+                                    className="bg-neutral-950 border-neutral-800 focus:border-red-500 h-11 text-white placeholder:text-neutral-500"
+                                    placeholder="0"
+                                />
                             </div>
                             <div className="space-y-2">
                                 <Label className="text-xs font-medium text-neutral-400 pl-1 uppercase">Pecho / Espalda</Label>
-                                <Input type="number" step="0.1" {...form.register("chest")} className="bg-neutral-950 border-neutral-800 focus:border-red-500 h-11 text-white placeholder:text-neutral-500" placeholder="0" />
+                                <Input
+                                    type="text"
+                                    inputMode="decimal"
+                                    {...form.register("chest", { onChange: (e) => { e.target.value = e.target.value.replace(",", "."); } })}
+                                    className="bg-neutral-950 border-neutral-800 focus:border-red-500 h-11 text-white placeholder:text-neutral-500"
+                                    placeholder="0"
+                                />
                             </div>
                             <div className="space-y-2">
                                 <Label className="text-xs font-medium text-neutral-400 pl-1 uppercase">Hombros</Label>
-                                <Input type="number" step="0.1" {...form.register("shoulders")} className="bg-neutral-950 border-neutral-800 focus:border-red-500 h-11 text-white placeholder:text-neutral-500" placeholder="0" />
+                                <Input
+                                    type="text"
+                                    inputMode="decimal"
+                                    {...form.register("shoulders", { onChange: (e) => { e.target.value = e.target.value.replace(",", "."); } })}
+                                    className="bg-neutral-950 border-neutral-800 focus:border-red-500 h-11 text-white placeholder:text-neutral-500"
+                                    placeholder="0"
+                                />
                             </div>
                             <div className="space-y-2">
                                 <Label className="text-xs font-medium text-neutral-400 pl-1 uppercase">Cintura</Label>
-                                <Input type="number" step="0.1" {...form.register("waist")} className="bg-neutral-950 border-neutral-800 focus:border-red-500 h-11 text-white placeholder:text-neutral-500" placeholder="0" />
+                                <Input
+                                    type="text"
+                                    inputMode="decimal"
+                                    {...form.register("waist", { onChange: (e) => { e.target.value = e.target.value.replace(",", "."); } })}
+                                    className="bg-neutral-950 border-neutral-800 focus:border-red-500 h-11 text-white placeholder:text-neutral-500"
+                                    placeholder="0"
+                                />
                             </div>
                             <div className="space-y-2">
                                 <Label className="text-xs font-medium text-neutral-400 pl-1 uppercase">Cadera</Label>
-                                <Input type="number" step="0.1" {...form.register("hips")} className="bg-neutral-950 border-neutral-800 focus:border-red-500 h-11 text-white placeholder:text-neutral-500" placeholder="0" />
+                                <Input
+                                    type="text"
+                                    inputMode="decimal"
+                                    {...form.register("hips", { onChange: (e) => { e.target.value = e.target.value.replace(",", "."); } })}
+                                    className="bg-neutral-950 border-neutral-800 focus:border-red-500 h-11 text-white placeholder:text-neutral-500"
+                                    placeholder="0"
+                                />
                             </div>
                             <div className="space-y-2">
                                 <Label className="text-xs font-medium text-neutral-400 pl-1 uppercase">Glúteos</Label>
-                                <Input type="number" step="0.1" {...form.register("glutes")} className="bg-neutral-950 border-neutral-800 focus:border-red-500 h-11 text-white placeholder:text-neutral-500" placeholder="0" />
+                                <Input
+                                    type="text"
+                                    inputMode="decimal"
+                                    {...form.register("glutes", { onChange: (e) => { e.target.value = e.target.value.replace(",", "."); } })}
+                                    className="bg-neutral-950 border-neutral-800 focus:border-red-500 h-11 text-white placeholder:text-neutral-500"
+                                    placeholder="0"
+                                />
                             </div>
                         </div>
                     </div>
@@ -175,29 +226,77 @@ export function LogMeasurementDialog({ onLogSuccess, children, initialData, init
                                 {/* Row Biceps */}
                                 <div className="grid grid-cols-12 gap-4 items-center group hover:bg-white/5 p-2 rounded-lg transition-colors -mx-2">
                                     <Label className="col-span-4 text-sm font-bold text-neutral-300 uppercase tracking-wide">Bíceps</Label>
-                                    <Input type="number" step="0.1" {...form.register("bicepsLeft")} className="col-span-4 bg-neutral-950 border-neutral-800 focus:border-red-500 h-10 text-center text-white placeholder:text-neutral-500" placeholder="-" />
-                                    <Input type="number" step="0.1" {...form.register("bicepsRight")} className="col-span-4 bg-neutral-950 border-neutral-800 focus:border-red-500 h-10 text-center text-white placeholder:text-neutral-500" placeholder="-" />
+                                    <Input
+                                        type="text"
+                                        inputMode="decimal"
+                                        {...form.register("bicepsLeft", { onChange: (e) => { e.target.value = e.target.value.replace(",", "."); } })}
+                                        className="col-span-4 bg-neutral-950 border-neutral-800 focus:border-red-500 h-10 text-center text-white placeholder:text-neutral-500"
+                                        placeholder="-"
+                                    />
+                                    <Input
+                                        type="text"
+                                        inputMode="decimal"
+                                        {...form.register("bicepsRight", { onChange: (e) => { e.target.value = e.target.value.replace(",", "."); } })}
+                                        className="col-span-4 bg-neutral-950 border-neutral-800 focus:border-red-500 h-10 text-center text-white placeholder:text-neutral-500"
+                                        placeholder="-"
+                                    />
                                 </div>
 
                                 {/* Row Antebrazos */}
                                 <div className="grid grid-cols-12 gap-4 items-center group hover:bg-white/5 p-2 rounded-lg transition-colors -mx-2">
                                     <Label className="col-span-4 text-sm font-bold text-neutral-300 uppercase tracking-wide">Antebrazos</Label>
-                                    <Input type="number" step="0.1" {...form.register("forearmsLeft")} className="col-span-4 bg-neutral-950 border-neutral-800 focus:border-red-500 h-10 text-center text-white placeholder:text-neutral-500" placeholder="-" />
-                                    <Input type="number" step="0.1" {...form.register("forearmsRight")} className="col-span-4 bg-neutral-950 border-neutral-800 focus:border-red-500 h-10 text-center text-white placeholder:text-neutral-500" placeholder="-" />
+                                    <Input
+                                        type="text"
+                                        inputMode="decimal"
+                                        {...form.register("forearmsLeft", { onChange: (e) => { e.target.value = e.target.value.replace(",", "."); } })}
+                                        className="col-span-4 bg-neutral-950 border-neutral-800 focus:border-red-500 h-10 text-center text-white placeholder:text-neutral-500"
+                                        placeholder="-"
+                                    />
+                                    <Input
+                                        type="text"
+                                        inputMode="decimal"
+                                        {...form.register("forearmsRight", { onChange: (e) => { e.target.value = e.target.value.replace(",", "."); } })}
+                                        className="col-span-4 bg-neutral-950 border-neutral-800 focus:border-red-500 h-10 text-center text-white placeholder:text-neutral-500"
+                                        placeholder="-"
+                                    />
                                 </div>
 
                                 {/* Row Cuádriceps */}
                                 <div className="grid grid-cols-12 gap-4 items-center group hover:bg-white/5 p-2 rounded-lg transition-colors -mx-2">
                                     <Label className="col-span-4 text-sm font-bold text-neutral-300 uppercase tracking-wide">Cuádriceps</Label>
-                                    <Input type="number" step="0.1" {...form.register("quadsLeft")} className="col-span-4 bg-neutral-950 border-neutral-800 focus:border-red-500 h-10 text-center text-white placeholder:text-neutral-500" placeholder="-" />
-                                    <Input type="number" step="0.1" {...form.register("quadsRight")} className="col-span-4 bg-neutral-950 border-neutral-800 focus:border-red-500 h-10 text-center text-white placeholder:text-neutral-500" placeholder="-" />
+                                    <Input
+                                        type="text"
+                                        inputMode="decimal"
+                                        {...form.register("quadsLeft", { onChange: (e) => { e.target.value = e.target.value.replace(",", "."); } })}
+                                        className="col-span-4 bg-neutral-950 border-neutral-800 focus:border-red-500 h-10 text-center text-white placeholder:text-neutral-500"
+                                        placeholder="-"
+                                    />
+                                    <Input
+                                        type="text"
+                                        inputMode="decimal"
+                                        {...form.register("quadsRight", { onChange: (e) => { e.target.value = e.target.value.replace(",", "."); } })}
+                                        className="col-span-4 bg-neutral-950 border-neutral-800 focus:border-red-500 h-10 text-center text-white placeholder:text-neutral-500"
+                                        placeholder="-"
+                                    />
                                 </div>
 
                                 {/* Row Pantorrillas */}
                                 <div className="grid grid-cols-12 gap-4 items-center group hover:bg-white/5 p-2 rounded-lg transition-colors -mx-2">
                                     <Label className="col-span-4 text-sm font-bold text-neutral-300 uppercase tracking-wide">Pantorrillas</Label>
-                                    <Input type="number" step="0.1" {...form.register("calvesLeft")} className="col-span-4 bg-neutral-950 border-neutral-800 focus:border-red-500 h-10 text-center text-white placeholder:text-neutral-500" placeholder="-" />
-                                    <Input type="number" step="0.1" {...form.register("calvesRight")} className="col-span-4 bg-neutral-950 border-neutral-800 focus:border-red-500 h-10 text-center text-white placeholder:text-neutral-500" placeholder="-" />
+                                    <Input
+                                        type="text"
+                                        inputMode="decimal"
+                                        {...form.register("calvesLeft", { onChange: (e) => { e.target.value = e.target.value.replace(",", "."); } })}
+                                        className="col-span-4 bg-neutral-950 border-neutral-800 focus:border-red-500 h-10 text-center text-white placeholder:text-neutral-500"
+                                        placeholder="-"
+                                    />
+                                    <Input
+                                        type="text"
+                                        inputMode="decimal"
+                                        {...form.register("calvesRight", { onChange: (e) => { e.target.value = e.target.value.replace(",", "."); } })}
+                                        className="col-span-4 bg-neutral-950 border-neutral-800 focus:border-red-500 h-10 text-center text-white placeholder:text-neutral-500"
+                                        placeholder="-"
+                                    />
                                 </div>
                             </div>
                         </div>

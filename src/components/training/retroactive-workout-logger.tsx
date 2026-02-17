@@ -380,18 +380,28 @@ export function RetroactiveWorkoutLogger({ routineDay, routineId, routineName: i
                                         </span>
                                     </div>
                                     <Input
-                                        type="number"
+                                        type="text"
                                         inputMode="decimal"
                                         value={set.weight}
-                                        onChange={(e) => updateSet(exIndex, setIndex, "weight", e.target.value)}
+                                        onChange={(e) => {
+                                            const val = e.target.value.replace(",", ".");
+                                            if (val === "" || /^\d*\.?\d*$/.test(val)) {
+                                                updateSet(exIndex, setIndex, "weight", val);
+                                            }
+                                        }}
                                         placeholder="-"
                                         className="h-9 sm:h-11 text-center text-sm sm:text-base font-bold bg-neutral-900 border-neutral-800 focus:border-neutral-700 text-white rounded-lg sm:rounded-xl focus:ring-1 focus:ring-white/20 px-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none placeholder:text-neutral-800 transition-all placeholder:font-normal"
                                     />
                                     <Input
-                                        type="number"
+                                        type="text"
                                         inputMode="decimal"
                                         value={set.reps}
-                                        onChange={(e) => updateSet(exIndex, setIndex, "reps", e.target.value)}
+                                        onChange={(e) => {
+                                            const val = e.target.value.replace(",", ".");
+                                            if (val === "" || /^\d*\.?\d*$/.test(val)) {
+                                                updateSet(exIndex, setIndex, "reps", val);
+                                            }
+                                        }}
                                         placeholder={set.targetReps || "-"}
                                         className="h-9 sm:h-11 text-center text-sm sm:text-base font-bold bg-neutral-900 border-neutral-800 focus:border-neutral-700 text-white rounded-lg sm:rounded-xl focus:ring-1 focus:ring-white/20 px-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none placeholder:text-neutral-600 transition-all placeholder:font-normal"
                                     />
