@@ -37,11 +37,10 @@ export function MobileNav({ role }: MobileNavProps) {
 
     const athleteItems = [
         ...commonItems,
+        { label: "Rutina", href: "/my-routine", icon: ClipboardList },
         { label: "Entrenar", href: "/train", icon: Dumbbell },
         { label: "Historial", href: "/history", icon: History },
         { label: "Progreso", href: "/progress", icon: BarChart2 },
-        // 5th item: Profile? or More?
-        // Let's use Profile as the 5th item directly since it's common.
         { label: "Perfil", href: "/profile", icon: UserCircle },
     ];
 
