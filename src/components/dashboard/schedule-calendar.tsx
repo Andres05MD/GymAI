@@ -14,7 +14,10 @@ import { cn } from "@/lib/utils";
  */
 const capitalize = (str: string) => {
     if (!str) return str;
-    return str.charAt(0).toUpperCase() + str.slice(1);
+    return str
+        .split(" ")
+        .map((word) => (word.toLowerCase() === "de" ? word : word.charAt(0).toUpperCase() + word.slice(1)))
+        .join(" ");
 };
 
 interface Assignment {

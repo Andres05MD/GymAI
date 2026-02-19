@@ -84,6 +84,7 @@ export async function logWorkoutSession(data: WorkoutSessionData) {
         await adminDb.collection("training_logs").add({
             ...data,
             athleteId: session.user.id,
+            status: "completed",
             date: new Date(),
             createdAt: new Date()
         });
@@ -107,11 +108,14 @@ export async function checkCompletedWorkoutToday() {
         const snapshot = await adminDb.collection("training_logs")
             .where("athleteId", "==", session.user.id)
             .where("date", ">=", today)
-            .where("status", "==", "completed")
-            .limit(1)
             .get();
 
-        return { success: true, completed: !snapshot.empty };
+        const isCompleted = snapshot.docs.some(doc => {
+            const data = doc.data();
+            return data.status !== "in_progress";
+        });
+
+        return { success: true, completed: isCompleted };
     } catch (error) {
         console.error("Error checking completed workout:", error);
         return { success: false, completed: false };

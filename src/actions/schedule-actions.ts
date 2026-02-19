@@ -278,14 +278,19 @@ export async function getRecordedWorkoutDays(athleteId: string, start: string, e
             .where("athleteId", "==", athleteId)
             .where("date", ">=", startDate)
             .where("date", "<=", endDate)
-            .where("status", "==", "completed")
             .get();
 
-        const dates = snapshot.docs.map(doc => {
-            const data = doc.data();
-            const logDate = data.date.toDate();
-            return format(logDate, "yyyy-MM-dd");
-        });
+        const dates = snapshot.docs
+            .map(doc => {
+                const data = doc.data();
+                // Considerar completado si el status es 'completed' O si no tiene status (logs antiguos)
+                // Ignorar explícitamente los que están 'in_progress'
+                if (data.status === 'in_progress') return null;
+
+                const logDate = data.date.toDate();
+                return format(logDate, "yyyy-MM-dd");
+            })
+            .filter((d): d is string => d !== null);
 
         // Unique dates
         const uniqueDates = Array.from(new Set(dates));
