@@ -33,15 +33,15 @@ export function MeasurementChart({ data, metrics, title }: MeasurementChartProps
         }));
     }, [data]);
 
-    // Mostrar loading mientras se monta el componente
+    // Mostrar esqueleto idéntico mientras se monta el componente para evitar errores de hidratación
     if (!mounted) {
         return (
-            <Card className="bg-neutral-900 border-neutral-800">
-                <CardHeader>
-                    <CardTitle className="text-white text-lg font-medium">{title}</CardTitle>
+            <Card className="bg-neutral-900/50 backdrop-blur-sm border-neutral-800 rounded-4xl shadow-xl overflow-hidden">
+                <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 px-6 pt-6">
+                    <CardTitle className="text-white text-xl font-black uppercase tracking-tight">{title}</CardTitle>
                 </CardHeader>
-                <CardContent className="h-[300px] flex items-center justify-center">
-                    <div className="w-full h-full bg-neutral-800/50 animate-pulse rounded-xl" />
+                <CardContent className="px-2 sm:px-4 pb-6">
+                    <div className="h-[280px] w-full bg-neutral-800/20 animate-pulse rounded-2xl" />
                 </CardContent>
             </Card>
         );
@@ -49,12 +49,12 @@ export function MeasurementChart({ data, metrics, title }: MeasurementChartProps
 
     if (!data || data.length === 0) {
         return (
-            <Card className="bg-neutral-900 border-neutral-800">
-                <CardHeader>
-                    <CardTitle className="text-white text-lg font-medium">{title}</CardTitle>
+            <Card className="bg-neutral-900/50 backdrop-blur-sm border-neutral-800 rounded-4xl shadow-xl overflow-hidden">
+                <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 px-6 pt-6">
+                    <CardTitle className="text-white text-xl font-black uppercase tracking-tight">{title}</CardTitle>
                 </CardHeader>
-                <CardContent className="h-[300px] flex items-center justify-center text-neutral-500">
-                    No hay datos suficientes para graficar.
+                <CardContent className="h-[280px] flex items-center justify-center text-neutral-500 font-bold uppercase text-xs tracking-widest">
+                    No hay datos suficientes
                 </CardContent>
             </Card>
         );
@@ -80,22 +80,22 @@ export function MeasurementChart({ data, metrics, title }: MeasurementChartProps
             </CardHeader>
             <CardContent className="px-2 sm:px-4 pb-6">
                 <div className="h-[280px] w-full">
-                    <ResponsiveContainer width="100%" height="100%">
+                    <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0} debounce={50}>
                         <LineChart data={formattedData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#262626" vertical={false} />
                             <XAxis
                                 dataKey="formattedDate"
-                                stroke="#525252"
-                                fontSize={11}
-                                fontWeight={600}
+                                stroke="#404040"
+                                fontSize={10}
+                                fontWeight={700}
                                 tickLine={false}
                                 axisLine={false}
                                 dy={10}
                             />
                             <YAxis
-                                stroke="#525252"
-                                fontSize={11}
-                                fontWeight={600}
+                                stroke="#404040"
+                                fontSize={10}
+                                fontWeight={700}
                                 tickLine={false}
                                 axisLine={false}
                                 dx={-5}
@@ -104,14 +104,15 @@ export function MeasurementChart({ data, metrics, title }: MeasurementChartProps
                             />
                             <Tooltip
                                 contentStyle={{
-                                    backgroundColor: "rgba(10, 10, 10, 0.9)",
+                                    backgroundColor: "rgba(10, 10, 10, 0.95)",
                                     border: "1px solid rgba(255, 255, 255, 0.1)",
                                     borderRadius: "16px",
-                                    backdropFilter: "blur(10px)",
-                                    boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.5)"
+                                    backdropFilter: "blur(12px)",
+                                    boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.5)"
                                 }}
-                                itemStyle={{ fontSize: "12px", fontWeight: "700" }}
-                                labelStyle={{ color: "#737373", fontSize: "10px", fontWeight: "800", textTransform: "uppercase", marginBottom: "4px" }}
+                                itemStyle={{ fontSize: "11px", fontWeight: "700", padding: "2px 0" }}
+                                labelStyle={{ color: "#737373", fontSize: "10px", fontWeight: "800", textTransform: "uppercase", marginBottom: "6px" }}
+                                cursor={{ stroke: '#404040', strokeWidth: 1 }}
                             />
                             {metrics.map(m => (
                                 <Line
@@ -120,10 +121,10 @@ export function MeasurementChart({ data, metrics, title }: MeasurementChartProps
                                     dataKey={m.key}
                                     stroke={m.color}
                                     strokeWidth={3}
-                                    dot={{ r: 4, fill: m.color, stroke: "#0a0a0a", strokeWidth: 2 }}
-                                    activeDot={{ r: 6, fill: m.color, stroke: "#fff", strokeWidth: 2 }}
+                                    dot={{ r: 3, fill: m.color, stroke: "#0a0a0a", strokeWidth: 2 }}
+                                    activeDot={{ r: 5, fill: m.color, stroke: "#fff", strokeWidth: 2 }}
                                     name={m.label}
-                                    animationDuration={1500}
+                                    animationDuration={1000}
                                 />
                             ))}
                         </LineChart>

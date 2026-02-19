@@ -86,7 +86,7 @@ export function RetroactiveWorkoutLogger({ routineDay, routineId, routineName: i
                 sets: ex.sets.map((s) => ({
                     weight: "",
                     reps: "",
-                    rpe: "",
+                    rpe: s.rpeTarget?.toString() || "8", // Precargar RPE objetivo o default 8
                     targetReps: s.reps?.toString(),
                     targetRpe: s.rpeTarget?.toString(),
                 })),
@@ -101,7 +101,7 @@ export function RetroactiveWorkoutLogger({ routineDay, routineId, routineName: i
             exerciseName: "",
             exerciseId: "",
             feedback: "",
-            sets: [{ weight: "", reps: "", rpe: "" }],
+            sets: [{ weight: "", reps: "", rpe: "8" }], // Por defecto RPE 8 para evitar vacíos
         };
     }
 
