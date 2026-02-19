@@ -6,10 +6,20 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Ruler, User, Activity, Pencil, Flame, HeartPulse } from "lucide-react";
 import Link from "next/link";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MeasurementChart } from "@/components/profile/measurement-chart";
 import { LogMeasurementDialog } from "@/components/profile/log-measurement-dialog";
 import { getBodyMeasurementsHistory } from "@/actions/measurement-actions";
 import { EditHealthDialog } from "@/components/dashboard/edit-health-dialog";
+import dynamic from "next/dynamic";
+
+const MeasurementChart = dynamic(
+    () => import("@/components/profile/measurement-chart").then((mod) => mod.MeasurementChart),
+    {
+        ssr: false,
+        loading: () => (
+            <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-4xl h-[380px] w-full animate-pulse" />
+        )
+    }
+);
 
 export default async function ProfilePage() {
     const session = await auth();

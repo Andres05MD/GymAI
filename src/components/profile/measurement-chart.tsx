@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
+import { useMemo } from "react";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -19,33 +19,12 @@ interface MeasurementChartProps {
 }
 
 export function MeasurementChart({ data, metrics, title }: MeasurementChartProps) {
-    // Prevenir problemas de hidratación SSR con Recharts
-    const [mounted, setMounted] = useState(false);
-
-    useEffect(() => {
-        setMounted(true);
-    }, []);
-
     const formattedData = useMemo(() => {
         return data.map(item => ({
             ...item,
             formattedDate: format(new Date(item.date), "d MMM", { locale: es })
         }));
     }, [data]);
-
-    // Mostrar esqueleto idéntico mientras se monta el componente para evitar errores de hidratación
-    if (!mounted) {
-        return (
-            <Card className="bg-neutral-900/50 backdrop-blur-sm border-neutral-800 rounded-4xl shadow-xl overflow-hidden">
-                <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 px-6 pt-6">
-                    <CardTitle className="text-white text-xl font-black uppercase tracking-tight">{title}</CardTitle>
-                </CardHeader>
-                <CardContent className="px-2 sm:px-4 pb-6">
-                    <div className="h-[280px] w-full bg-neutral-800/20 animate-pulse rounded-2xl" />
-                </CardContent>
-            </Card>
-        );
-    }
 
     if (!data || data.length === 0) {
         return (
