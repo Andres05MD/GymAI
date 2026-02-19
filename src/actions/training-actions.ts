@@ -470,7 +470,7 @@ export async function logRetroactiveWorkout(data: RetroactiveWorkoutData) {
                 sets: ex.sets.map(s => ({
                     weight: s.weight,
                     reps: s.reps,
-                    rpe: s.rpe || undefined,
+                    rpe: s.rpe || null,
                     completed: s.completed,
                 })),
             })),
