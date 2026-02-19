@@ -89,10 +89,6 @@ function WorkoutLogItem({ log }: { log: TrainingLog }) {
                                 <Flame className="w-3 md:w-3.5 h-3 md:h-3.5 text-orange-500" />
                                 {Math.round(totalVolume).toLocaleString()} <span className="text-[8px] md:text-[10px] uppercase text-neutral-600 font-normal">kg</span>
                             </span>
-                            <span className="flex items-center gap-1 bg-black/30 px-2 py-1 rounded-lg border border-white/5">
-                                <Clock className="w-3 md:w-3.5 h-3 md:h-3.5 text-blue-500" />
-                                {log.durationMinutes || 0} <span className="text-[8px] md:text-[10px] uppercase text-neutral-600 font-normal">min</span>
-                            </span>
                         </div>
                     </div>
                 </div>
@@ -118,72 +114,74 @@ function WorkoutLogItem({ log }: { log: TrainingLog }) {
                         {expanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
                     </Button>
                 </div>
-            </div>
+            </div >
 
             {/* Expanded Content */}
-            {expanded && (
-                <div className="border-t border-neutral-800/50 bg-black/20 p-5 sm:p-6 space-y-6 animate-in slide-in-from-top-2 duration-300">
-                    {/* Session Feedback */}
-                    {log.sessionFeedback && (
-                        <div className="flex gap-3 bg-neutral-900 p-4 rounded-2xl border border-neutral-800">
-                            <MessageSquare className="w-5 h-5 text-neutral-500 shrink-0 mt-0.5" />
-                            <p className="text-sm text-neutral-300 italic">&quot;{log.sessionFeedback}&quot;</p>
-                        </div>
-                    )}
-
-                    {/* Exercises List */}
-                    <div className="space-y-4">
-                        {log.exercises?.map((ex: TrainingExercise, i: number) => (
-                            <div key={i} className="bg-neutral-900/50 rounded-2xl p-4 border border-neutral-800/50">
-                                <div className="flex justify-between items-center mb-3">
-                                    <div className="flex items-center gap-3">
-                                        <div className="h-8 w-8 rounded-lg bg-neutral-800 flex items-center justify-center text-neutral-500 text-xs font-bold">
-                                            {i + 1}
-                                        </div>
-                                        <h5 className="font-bold text-white">{ex.exerciseName}</h5>
-                                    </div>
-                                    <span className="text-xs text-neutral-500">{ex.sets.length} series</span>
-                                </div>
-
-                                {/* Sets Grid */}
-                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-                                    {ex.sets.map((set: TrainingSet, j: number) => (
-                                        <div
-                                            key={j}
-                                            className={cn(
-                                                "p-3 rounded-xl text-center border transition-colors",
-                                                set.completed
-                                                    ? "bg-green-500/5 border-green-500/20"
-                                                    : "bg-neutral-800/30 border-neutral-800"
-                                            )}
-                                        >
-                                            <p className="text-[10px] text-neutral-500 uppercase tracking-wider font-bold mb-1">
-                                                Set {j + 1}
-                                            </p>
-                                            <p className={cn(
-                                                "font-bold text-sm",
-                                                set.completed ? "text-white" : "text-neutral-400"
-                                            )}>
-                                                {set.weight}<span className="text-neutral-500 text-xs">kg</span> × {set.reps}
-                                            </p>
-                                            {set.completed && (
-                                                <span className="text-green-500 text-xs">✓</span>
-                                            )}
-                                        </div>
-                                    ))}
-                                </div>
-
-                                {ex.feedback && (
-                                    <p className="text-xs text-neutral-500 mt-3 pl-2 border-l-2 border-neutral-700 italic">
-                                        {ex.feedback}
-                                    </p>
-                                )}
+            {
+                expanded && (
+                    <div className="border-t border-neutral-800/50 bg-black/20 p-5 sm:p-6 space-y-6 animate-in slide-in-from-top-2 duration-300">
+                        {/* Session Feedback */}
+                        {log.sessionFeedback && (
+                            <div className="flex gap-3 bg-neutral-900 p-4 rounded-2xl border border-neutral-800">
+                                <MessageSquare className="w-5 h-5 text-neutral-500 shrink-0 mt-0.5" />
+                                <p className="text-sm text-neutral-300 italic">&quot;{log.sessionFeedback}&quot;</p>
                             </div>
-                        ))}
+                        )}
+
+                        {/* Exercises List */}
+                        <div className="space-y-4">
+                            {log.exercises?.map((ex: TrainingExercise, i: number) => (
+                                <div key={i} className="bg-neutral-900/50 rounded-2xl p-4 border border-neutral-800/50">
+                                    <div className="flex justify-between items-center mb-3">
+                                        <div className="flex items-center gap-3">
+                                            <div className="h-8 w-8 rounded-lg bg-neutral-800 flex items-center justify-center text-neutral-500 text-xs font-bold">
+                                                {i + 1}
+                                            </div>
+                                            <h5 className="font-bold text-white">{ex.exerciseName}</h5>
+                                        </div>
+                                        <span className="text-xs text-neutral-500">{ex.sets.length} series</span>
+                                    </div>
+
+                                    {/* Sets Grid */}
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                                        {ex.sets.map((set: TrainingSet, j: number) => (
+                                            <div
+                                                key={j}
+                                                className={cn(
+                                                    "p-3 rounded-xl text-center border transition-colors",
+                                                    set.completed
+                                                        ? "bg-green-500/5 border-green-500/20"
+                                                        : "bg-neutral-800/30 border-neutral-800"
+                                                )}
+                                            >
+                                                <p className="text-[10px] text-neutral-500 uppercase tracking-wider font-bold mb-1">
+                                                    Set {j + 1}
+                                                </p>
+                                                <p className={cn(
+                                                    "font-bold text-sm",
+                                                    set.completed ? "text-white" : "text-neutral-400"
+                                                )}>
+                                                    {set.weight}<span className="text-neutral-500 text-xs">kg</span> × {set.reps}
+                                                </p>
+                                                {set.completed && (
+                                                    <span className="text-green-500 text-xs">✓</span>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {ex.feedback && (
+                                        <p className="text-xs text-neutral-500 mt-3 pl-2 border-l-2 border-neutral-700 italic">
+                                            {ex.feedback}
+                                        </p>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
                     </div>
-                </div>
-            )}
-        </div>
+                )
+            }
+        </div >
     );
 }
 

@@ -287,7 +287,7 @@ export function RetroactiveWorkoutLogger({ routineDay, routineId, routineName: i
                             </div>
                         </div>
 
-                        {/* Duración */}
+                        {/* Duración - Oculto temporalmente 
                         <div className="space-y-1.5">
                             <Label className="text-[11px] font-bold uppercase tracking-wider text-neutral-500">
                                 Duración (min)
@@ -304,6 +304,7 @@ export function RetroactiveWorkoutLogger({ routineDay, routineId, routineName: i
                                 />
                             </div>
                         </div>
+                        */}
                     </div>
                 </div>
             </div>

@@ -249,6 +249,7 @@ async function AthleteDashboard({ user }: { user: DashboardUser | undefined }) {
                     trend="neutral"
                     icon={TrendingUp}
                 />
+                {/* 
                 <StatCard
                     title="Tiempo"
                     value="0h"
@@ -256,6 +257,7 @@ async function AthleteDashboard({ user }: { user: DashboardUser | undefined }) {
                     trend="neutral"
                     icon={Clock}
                 />
+                */}
                 <StatCard
                     title="Meta"
                     value={weeklyTarget?.toString() || "0"}

@@ -3,6 +3,8 @@ import { getTodayAssignment } from "@/actions/schedule-actions";
 import { getRoutine } from "@/actions/routine-actions";
 import { WorkoutSession } from "@/components/training/workout-session";
 import { RestDayView } from "@/components/training/rest-day-view";
+import { WorkoutCompletedView } from "@/components/training/workout-completed-view";
+import { checkCompletedWorkoutToday } from "@/actions/training-actions";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { AlertCircle } from "lucide-react";
@@ -35,7 +37,14 @@ export default async function TrainPage() {
     const todayDate = new Date();
     const dayOfWeek = todayDate.getDay();
     const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-    const dayName = todayDate.toLocaleDateString('es-ES', { weekday: 'long' });
+    const rawDayName = todayDate.toLocaleDateString('es-ES', { weekday: 'long' });
+    const dayName = rawDayName.charAt(0).toUpperCase() + rawDayName.slice(1);
+
+    // 0. Check if there's a completed session for today
+    const { completed } = await checkCompletedWorkoutToday();
+    if (completed) {
+        return <WorkoutCompletedView />;
+    }
 
     // 1. Check for a specific assignment for TODAY
     const todayISO = todayDate.toISOString().split('T')[0];

@@ -4,7 +4,7 @@ import { adminDb, serializeFirestoreData } from "@/lib/firebase-admin";
 import { auth } from "@/lib/auth";
 import { z } from "zod";
 import { TrainingLogSchema } from "@/lib/schemas";
-import { unstable_cache, revalidateTag } from "next/cache";
+import { unstable_cache, revalidateTag, revalidatePath } from "next/cache";
 
 // --- TIPOS LOCALES ---
 
@@ -88,10 +88,33 @@ export async function logWorkoutSession(data: WorkoutSessionData) {
             createdAt: new Date()
         });
 
+        revalidatePath("/train");
         return { success: true };
     } catch (error) {
         console.error("Error logging session:", error);
         return { success: false, error: "Error al guardar entrenamiento" };
+    }
+}
+
+export async function checkCompletedWorkoutToday() {
+    const session = await auth();
+    if (!session?.user?.id) return { success: false, completed: false };
+
+    try {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const snapshot = await adminDb.collection("training_logs")
+            .where("athleteId", "==", session.user.id)
+            .where("date", ">=", today)
+            .where("status", "==", "completed")
+            .limit(1)
+            .get();
+
+        return { success: true, completed: !snapshot.empty };
+    } catch (error) {
+        console.error("Error checking completed workout:", error);
+        return { success: false, completed: false };
     }
 }
 
@@ -504,6 +527,7 @@ export async function logRetroactiveWorkout(data: RetroactiveWorkoutData) {
 
         // Invalidar cache de historial
         revalidateTag("training-logs", "default");
+        revalidatePath("/train");
 
         return { success: true };
     } catch (error) {

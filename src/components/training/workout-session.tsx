@@ -332,10 +332,12 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
                         <h2 className="text-base sm:text-lg font-black text-white tracking-tight truncate">
                             Ej. {currentExerciseIndex + 1}/{activeDay.exercises.length}
                         </h2>
+                        {/* 
                         <div className="flex items-center text-red-500 font-mono text-xs sm:text-sm font-bold tracking-widest bg-red-500/10 px-2 py-0.5 rounded-md w-fit mt-1">
                             <Clock className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1.5" />
                             {formatTime(elapsedTime)}
                         </div>
+                        */}
                     </div>
                     <div className="flex gap-2 items-center shrink-0">
                         <AIAssistantDialog

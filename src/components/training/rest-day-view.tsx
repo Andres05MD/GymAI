@@ -34,7 +34,7 @@ export function RestDayView({ dayName }: RestDayViewProps) {
                     </div>
 
                     <h1 className="text-4xl md:text-6xl font-black text-white tracking-tighter uppercase italic">
-                        Hoy es <span className="text-blue-400">{dayName}</span>
+                        Hoy es <span className="text-blue-400 capitalize">{dayName}</span>
                     </h1>
 
                     <p className="text-neutral-400 text-lg md:text-xl font-medium leading-relaxed max-w-sm mx-auto">

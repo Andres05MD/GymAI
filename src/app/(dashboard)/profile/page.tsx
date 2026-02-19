@@ -14,7 +14,6 @@ import dynamic from "next/dynamic";
 const MeasurementChart = dynamic(
     () => import("@/components/profile/measurement-chart").then((mod) => mod.MeasurementChart),
     {
-        ssr: false,
         loading: () => (
             <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-4xl h-[380px] w-full animate-pulse" />
         )

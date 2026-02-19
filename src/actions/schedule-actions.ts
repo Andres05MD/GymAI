@@ -3,6 +3,7 @@
 import { adminDb, serializeFirestoreData } from "@/lib/firebase-admin";
 import { auth } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
+import { format } from "date-fns";
 
 interface AssignmentInput {
     athleteId: string;
@@ -262,5 +263,36 @@ export async function getTodayAssignment(athleteId: string, date: string) {
     } catch (error) {
         console.error("Error checking today assignment:", error);
         return { success: false, error: "Error verificando sesión de hoy" };
+    }
+}
+
+export async function getRecordedWorkoutDays(athleteId: string, start: string, end: string) {
+    try {
+        // start y end son YYYY-MM-DD
+        // Firestore date objects comparison
+        const startDate = new Date(start);
+        const endDate = new Date(end);
+        endDate.setHours(23, 59, 59, 999);
+
+        const snapshot = await adminDb.collection("training_logs")
+            .where("athleteId", "==", athleteId)
+            .where("date", ">=", startDate)
+            .where("date", "<=", endDate)
+            .where("status", "==", "completed")
+            .get();
+
+        const dates = snapshot.docs.map(doc => {
+            const data = doc.data();
+            const logDate = data.date.toDate();
+            return format(logDate, "yyyy-MM-dd");
+        });
+
+        // Unique dates
+        const uniqueDates = Array.from(new Set(dates));
+
+        return { success: true, recordedDates: uniqueDates };
+    } catch (error) {
+        console.error("Error fetching recorded days:", error);
+        return { success: false, error: "Error al cargar días registrados" };
     }
 }
