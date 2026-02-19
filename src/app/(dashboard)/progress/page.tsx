@@ -14,6 +14,7 @@ interface PersonalRecord {
     weight: number;
     date: string;
     reps?: number;
+    rpe?: number;
 }
 
 interface Athlete {
@@ -341,21 +342,27 @@ export default async function ProgressPage({ searchParams }: ProgressPageProps) 
                 {prs && prs.length > 0 ? (
                     <div className="divide-y divide-neutral-800">
                         {prs.map((pr: PersonalRecord, i: number) => (
-                            <div key={i} className="p-6 flex items-center justify-between hover:bg-neutral-800/30 transition-colors group">
-                                <div className="flex items-center gap-5 flex-1 min-w-0">
-                                    <div className="h-14 w-14 bg-red-500/5 rounded-2xl shrink-0 flex items-center justify-center border border-neutral-800 group-hover:border-red-500/30 transition-colors">
-                                        <Dumbbell className="h-6 w-6 text-neutral-600 group-hover:text-red-500 transition-colors" />
+                            <div key={i} className="p-4 md:p-6 flex items-center justify-between hover:bg-neutral-800/30 transition-colors group">
+                                <div className="flex items-center gap-3 md:gap-5 flex-1 min-w-0">
+                                    <div className="h-10 w-10 md:h-14 md:w-14 bg-red-500/5 rounded-xl md:rounded-2xl shrink-0 flex items-center justify-center border border-neutral-800 group-hover:border-red-500/30 transition-colors">
+                                        <Dumbbell className="h-4 w-4 md:h-6 md:w-6 text-neutral-600 group-hover:text-red-500 transition-colors" />
                                     </div>
                                     <div className="min-w-0">
-                                        <h4 className="font-bold text-white text-lg mb-0.5">{pr.exercise}</h4>
-                                        <p className="text-xs text-neutral-500 font-medium font-mono">{pr.date}</p>
+                                        <h4 className="font-bold text-white text-[15px] md:text-lg mb-0.5 truncate">{pr.exercise}</h4>
+                                        <div className="flex items-center gap-x-2 gap-y-1">
+                                            <p className="text-[9px] md:text-[10px] text-neutral-500 font-bold uppercase tracking-widest">{pr.date}</p>
+                                            <span className="h-1 w-1 rounded-full bg-neutral-700 shrink-0" />
+                                            <p className="text-[9px] md:text-[10px] text-red-500 font-black uppercase tracking-widest whitespace-nowrap">
+                                                {pr.reps} REPS {pr.rpe ? `• RPE ${pr.rpe}` : ""}
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
-                                <div className="text-right shrink-0 ml-4">
-                                    <p className="font-black text-3xl text-white tracking-tighter whitespace-nowrap">
-                                        {pr.weight} <span className="text-base font-bold text-neutral-600">kg</span>
+                                <div className="text-right shrink-0 ml-2">
+                                    <p className="font-black text-2xl md:text-3xl text-white tracking-tighter whitespace-nowrap leading-none">
+                                        {pr.weight}<span className="text-sm md:text-base font-bold text-neutral-600 ml-0.5">kg</span>
                                     </p>
-                                    <p className="text-[9px] uppercase tracking-widest text-red-500/70 font-bold whitespace-nowrap">Máximo Peso</p>
+                                    <p className="text-[8px] md:text-[9px] uppercase tracking-widest text-neutral-500 font-black mt-1">Récord</p>
                                 </div>
                             </div>
                         ))}

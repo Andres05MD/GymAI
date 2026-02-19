@@ -60,16 +60,25 @@ export default async function ProfilePage() {
 
             <Tabs defaultValue="details" className="w-full">
                 <TabsList className={`grid w-full bg-neutral-900/50 backdrop-blur-md border border-white/5 mb-8 rounded-full p-1 h-12 ${isCoach ? 'grid-cols-1' : 'grid-cols-3'}`}>
-                    <TabsTrigger value="details" className="rounded-full data-[state=active]:bg-red-600 data-[state=active]:text-white transition-all text-neutral-400 font-bold">
-                        <User className="w-4 h-4 mr-2" /> Datos Personales
+                    <TabsTrigger value="details" className="rounded-full data-[state=active]:bg-red-600 data-[state=active]:text-white transition-all text-neutral-400 font-bold h-full text-[10px] xs:text-xs sm:text-sm px-1">
+                        <div className="flex items-center justify-center whitespace-nowrap">
+                            <User className="w-4 h-4 mr-2 hidden lg:inline" />
+                            <span>Datos<span className="hidden sm:inline"> Personales</span></span>
+                        </div>
                     </TabsTrigger>
                     {!isCoach && (
                         <>
-                            <TabsTrigger value="measurements" className="rounded-full data-[state=active]:bg-red-600 data-[state=active]:text-white transition-all text-neutral-400 font-bold">
-                                <Ruler className="w-4 h-4 mr-2" /> Progreso Corporal
+                            <TabsTrigger value="measurements" className="rounded-full data-[state=active]:bg-red-600 data-[state=active]:text-white transition-all text-neutral-400 font-bold h-full text-[10px] xs:text-xs sm:text-sm px-1">
+                                <div className="flex items-center justify-center whitespace-nowrap">
+                                    <Ruler className="w-4 h-4 mr-2 hidden lg:inline" />
+                                    <span>Progreso<span className="hidden sm:inline"> Corporal</span></span>
+                                </div>
                             </TabsTrigger>
-                            <TabsTrigger value="health" className="rounded-full data-[state=active]:bg-red-600 data-[state=active]:text-white transition-all text-neutral-400 font-bold">
-                                <HeartPulse className="w-4 h-4 mr-2" /> Salud
+                            <TabsTrigger value="health" className="rounded-full data-[state=active]:bg-red-600 data-[state=active]:text-white transition-all text-neutral-400 font-bold h-full text-[10px] xs:text-xs sm:text-sm px-1">
+                                <div className="flex items-center justify-center whitespace-nowrap">
+                                    <HeartPulse className="w-4 h-4 mr-2 hidden lg:inline" />
+                                    <span>Salud</span>
+                                </div>
                             </TabsTrigger>
                         </>
                     )}

@@ -20,7 +20,7 @@ export function MobileNav({ role }: MobileNavProps) {
     if (pathname === "/train") return null;
 
     const commonItems = [
-        { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+        { label: "Inicio", href: "/dashboard", icon: LayoutDashboard },
     ];
 
     const coachItems = [
@@ -39,8 +39,8 @@ export function MobileNav({ role }: MobileNavProps) {
         ...commonItems,
         { label: "Rutina", href: "/my-routine", icon: ClipboardList },
         { label: "Entrenar", href: "/train", icon: Dumbbell },
-        { label: "Historial", href: "/history", icon: History },
-        { label: "Progreso", href: "/progress", icon: BarChart2 },
+        { label: "Actividad", href: "/history", icon: History },
+        { label: "Avance", href: "/progress", icon: BarChart2 },
         { label: "Perfil", href: "/profile", icon: UserCircle },
     ];
 
@@ -50,7 +50,7 @@ export function MobileNav({ role }: MobileNavProps) {
     const displayItems = items.slice(0, 6);
 
     return (
-        <div className="md:hidden fixed bottom-4 left-4 right-4 bg-neutral-900/90 backdrop-blur-lg border border-neutral-800 rounded-3xl shadow-2xl z-50 h-16 flex items-center justify-around px-2">
+        <div className="md:hidden fixed bottom-4 left-4 right-4 bg-neutral-900/90 backdrop-blur-lg border border-neutral-800 rounded-3xl shadow-2xl z-50 h-16 flex items-center justify-between px-1">
             {displayItems.map((item) => {
                 const isActive = pathname === item.href;
                 const Icon = item.icon;
@@ -60,17 +60,17 @@ export function MobileNav({ role }: MobileNavProps) {
                         key={item.href}
                         href={item.href}
                         className={cn(
-                            "flex flex-col items-center justify-center w-14 h-full gap-1 transition-all",
+                            "flex flex-col items-center justify-center flex-1 h-full gap-1 transition-all min-w-0 px-0.5",
                             isActive ? "text-red-500" : "text-neutral-500 hover:text-neutral-300"
                         )}
                     >
                         <div className={cn(
-                            "p-1.5 rounded-full transition-all",
+                            "p-1 rounded-full transition-all",
                             isActive && "bg-red-500/10"
                         )}>
-                            <Icon className={cn("w-5 h-5", isActive && "fill-current")} />
+                            <Icon className={cn("w-[18px] h-[18px]", isActive && "fill-current")} />
                         </div>
-                        <span className="text-[10px] font-medium">{item.label}</span>
+                        <span className="text-[8px] xs:text-[9px] font-medium truncate w-full text-center">{item.label}</span>
                     </Link>
                 );
             })}

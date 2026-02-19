@@ -136,16 +136,13 @@ export async function getPersonalRecords(userId?: string) {
     const targetUserId = userId || session.user.id;
 
     try {
-        // Query recent logs to find max lifts
-        // This is expensive if we scan everything.
-        // For MVP, scan last 20 logs.
         const logsSnapshot = await adminDb.collection("training_logs")
             .where("athleteId", "==", targetUserId)
             .orderBy("date", "desc")
             .limit(20)
             .get();
 
-        const prsMap = new Map(); // Exercise -> { weight, date }
+        const prsMap = new Map(); // Exercise -> { weight, reps, rpe, date }
 
         logsSnapshot.docs.forEach(doc => {
             const data = doc.data();
@@ -158,7 +155,12 @@ export async function getPersonalRecords(userId?: string) {
                         if (s.completed && s.weight && s.weight > 0) {
                             const current = prsMap.get(name);
                             if (!current || s.weight > current.weight) {
-                                prsMap.set(name, { weight: s.weight, date: dateStr });
+                                prsMap.set(name, {
+                                    weight: s.weight,
+                                    reps: s.reps || 0,
+                                    rpe: s.rpe || 0,
+                                    date: dateStr
+                                });
                             }
                         }
                     });
@@ -169,6 +171,8 @@ export async function getPersonalRecords(userId?: string) {
         const prs = Array.from(prsMap.entries()).map(([name, val]) => ({
             exercise: name,
             weight: val.weight,
+            reps: val.reps,
+            rpe: val.rpe,
             date: val.date
         })).sort((a, b) => b.weight - a.weight).slice(0, 20);
 
@@ -185,7 +189,7 @@ export async function getStrengthProgress(userId?: string) {
     const targetUserId = userId || session.user.id;
 
     try {
-        // Obtenemos los últimos 20 logs para tener suficiente data de comparación
+        // Obtenemos los últimos 20 logs para encontrar suficientes pares de comparación
         const logsSnapshot = await adminDb.collection("training_logs")
             .where("athleteId", "==", targetUserId)
             .orderBy("date", "desc")
@@ -196,53 +200,63 @@ export async function getStrengthProgress(userId?: string) {
             return { success: true, progress: 0 };
         }
 
-        const logs = logsSnapshot.docs.map(doc => doc.data());
+        // Estructura: Ejercicio -> [E1RM_sesión_más_reciente, E1RM_sesión_anterior, ...]
+        const exerciseHistory = new Map<string, number[]>();
 
-        // Dividir en dos mitades: Reciente (0-9) vs Anterior (10-19)
-        // Como están ordenados desc (más nuevo primero), los primeros son los recientes.
-        const half = Math.ceil(logs.length / 2);
-        const recentLogs = logs.slice(0, half);
-        const olderLogs = logs.slice(half);
-
-        const calculateAverageE1RM = (periodLogs: any[]) => {
-            let totalE1RM = 0;
-            let count = 0;
-
-            periodLogs.forEach(log => {
-                if (log.exercises) {
-                    log.exercises.forEach((ex: TrainingExercise) => {
-                        // Calcular Max E1RM de este ejercicio en esta sesión
-                        let maxSessionE1RM = 0;
-                        ex.sets.forEach((s: TrainingSet) => {
-                            if (s.completed && s.weight && s.reps) {
-                                // Fórmula E1RM con RPE: Weight * (1 + (Reps + (10 - RPE)) / 30)
-                                // Si no hay RPE, asumimos RIR 2 (RPE 8) como estándar seguro
-                                const rpe = s.rpe || 8;
-                                const e1rm = s.weight * (1 + (s.reps + (10 - rpe)) / 30);
-                                if (e1rm > maxSessionE1RM) maxSessionE1RM = e1rm;
-                            }
-                        });
-                        if (maxSessionE1RM > 0) {
-                            totalE1RM += maxSessionE1RM;
-                            count++;
-                        }
-                    });
+        const calculateMaxE1RM = (exercise: TrainingExercise) => {
+            let maxE1RM = 0;
+            exercise.sets.forEach((s: TrainingSet) => {
+                if (s.completed && s.weight && s.reps) {
+                    const rpe = s.rpe || 8;
+                    // Fórmula E1RM: Weight * (1 + (Reps + (10 - RPE)) / 30)
+                    const e1rm = s.weight * (1 + (s.reps + (10 - rpe)) / 30);
+                    if (e1rm > maxE1RM) maxE1RM = e1rm;
                 }
             });
-            return count > 0 ? totalE1RM / count : 0;
+            return maxE1RM;
         };
 
-        const recentAvg = calculateAverageE1RM(recentLogs);
-        const olderAvg = calculateAverageE1RM(olderLogs);
+        // Procesar logs desde el más nuevo al más viejo
+        logsSnapshot.docs.forEach(doc => {
+            const data = doc.data();
+            if (data.exercises) {
+                data.exercises.forEach((ex: TrainingExercise) => {
+                    const name = ex.exerciseName;
+                    const maxE1RM = calculateMaxE1RM(ex);
 
-        let percentageChange = 0;
-        if (olderAvg > 0) {
-            percentageChange = ((recentAvg - olderAvg) / olderAvg) * 100;
-        } else if (recentAvg > 0) {
-            percentageChange = 100; // Si antes era 0 y ahora hay algo, es 100% de mejora (o infinito, ponemos 100 por UI)
-        }
+                    if (maxE1RM > 0) {
+                        if (!exerciseHistory.has(name)) {
+                            exerciseHistory.set(name, []);
+                        }
+                        // Solo añadimos si es una sesión distinta (un log por sesión)
+                        exerciseHistory.get(name)?.push(maxE1RM);
+                    }
+                });
+            }
+        });
 
-        return { success: true, progress: parseFloat(percentageChange.toFixed(1)) };
+        let totalProgress = 0;
+        let comparableExercisesCount = 0;
+
+        // Comparar cada ejercicio consigo mismo de la sesión anterior
+        exerciseHistory.forEach((history, exerciseName) => {
+            if (history.length >= 2) {
+                const latest = history[0];   // El más reciente (primero en el slice desc)
+                const previous = history[1]; // El anterior
+
+                if (previous > 0) {
+                    const diff = ((latest - previous) / previous) * 100;
+                    totalProgress += diff;
+                    comparableExercisesCount++;
+                }
+            }
+        });
+
+        const finalProgress = comparableExercisesCount > 0
+            ? parseFloat((totalProgress / comparableExercisesCount).toFixed(1))
+            : 0;
+
+        return { success: true, progress: finalProgress };
 
     } catch (error) {
         console.error("Error calculating strength progress:", error);
