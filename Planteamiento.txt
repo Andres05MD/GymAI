@@ -88,3 +88,13 @@ PENDIENTE (TODO)
 - Notificaciones: Sistema de avisos in-app y correo para atletas (ej. rutina actualizada).
 - Gamification: Logros, rachas y niveles para aumentar la retención.
 - Dashboard Global Coach: Métricas agregadas de todos los atletas.
+
+
+Nuevos Cambios,Mejoras y Nuevos Requisitos:
+    - Nuevo Rol: Atleta Avanzado
+        - Este podra:
+            - Editar su rutina
+            - Anadir nuevos Ejercicios 
+    - Nueva Funcionalidad:
+        - Al crear una rutina se podra colocar el ejercicio principal y una o mas variantes.
+        - Al un atleta Iniciar su rutina podra seleccionar entre el ejercicio principal y las variantes cualquiera realizar. Ya que abra casos donde los equipos no esten disponibles.

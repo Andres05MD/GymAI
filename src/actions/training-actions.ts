@@ -20,12 +20,20 @@ export interface RoutineExercise {
     exerciseId?: string;
     exerciseName?: string;
     sets: RoutineSet[];
+    variantIds?: string[];
 }
 
 export interface WorkoutSessionData {
     routineId?: string;
     routineName?: string;
-    exercises?: RoutineExercise[];
+    exercises?: Array<{
+        exerciseId?: string;
+        exerciseName?: string;
+        exerciseIdUsed?: string;
+        variantIds?: string[];
+        sets: RoutineSet[];
+        feedback?: string;
+    }>;
     notes?: string;
     sessionRpe?: number;
     sessionNotes?: string;

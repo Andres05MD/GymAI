@@ -194,7 +194,7 @@ export interface DashboardUser {
     name?: string | null;
     email?: string | null;
     image?: string | null;
-    role?: "athlete" | "coach" | "admin";
+    role?: "athlete" | "coach" | "admin" | "advanced_athlete";
     onboardingCompleted?: boolean;
 }
 

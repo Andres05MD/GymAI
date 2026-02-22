@@ -1,7 +1,7 @@
 import type { NextAuthConfig } from "next-auth";
 
 // Tipo de rol de usuario
-type UserRole = "athlete" | "coach";
+type UserRole = "athlete" | "coach" | "advanced_athlete";
 
 export const authConfig = {
     pages: {

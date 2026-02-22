@@ -9,9 +9,11 @@ interface ExerciseSelectorProps {
     onOpenChange: (open: boolean) => void;
     onSelect: (exercise: { id?: string; name: string }) => void;
     availableExercises: { id: string; name: string }[];
+    title?: string;
+    isVariantSelector?: boolean;
 }
 
-export function ExerciseSelector({ open, onOpenChange, onSelect, availableExercises }: ExerciseSelectorProps) {
+export function ExerciseSelector({ open, onOpenChange, onSelect, availableExercises, title, isVariantSelector = false }: ExerciseSelectorProps) {
     // We rely on Command's internal filtering for simplicity with small lists
     // If list is huge, we'd manage filtered state manually
     const [searchValue, setSearchValue] = useState("");
@@ -22,7 +24,7 @@ export function ExerciseSelector({ open, onOpenChange, onSelect, availableExerci
                 <DialogHeader className="px-4 py-4 border-b border-neutral-800 bg-neutral-900 shrink-0">
                     <DialogTitle className="text-sm font-bold uppercase tracking-widest flex items-center gap-2 text-neutral-400">
                         <Search className="w-4 h-4" />
-                        Seleccionar Ejercicio
+                        {title || (isVariantSelector ? "Seleccionar Variantes" : "Seleccionar Ejercicio")}
                     </DialogTitle>
                 </DialogHeader>
 

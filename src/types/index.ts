@@ -18,7 +18,7 @@ export type RoutineSet = z.infer<typeof RoutineSetSchema>;
 export type TrainingLog = z.infer<typeof TrainingLogSchema>;
 
 // Tipos de Rol y Género para uso directo
-export type UserRole = "athlete" | "coach";
+export type UserRole = "athlete" | "coach" | "advanced_athlete";
 export type Gender = "male" | "female" | "other";
 
 // Re-exportar tipos de API para uso centralizado

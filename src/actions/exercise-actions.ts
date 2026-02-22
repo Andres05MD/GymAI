@@ -18,14 +18,14 @@ export type ExerciseInput = z.infer<typeof ExerciseInputSchema>;
 
 export async function getExercises() {
     const session = await auth();
-    if (!session?.user?.id || session.user.role !== "coach") {
+    const role = session?.user?.role as string;
+    if (!session?.user?.id || (role !== "coach" && role !== "advanced_athlete")) {
         return { success: false, error: "No autorizado" };
     }
 
     try {
         const snapshot = await adminDb
             .collection("exercises")
-            .where("coachId", "==", session.user.id)
             .get();
 
         if (snapshot.empty) {
@@ -45,7 +45,8 @@ export async function getExercises() {
 
 export async function createExercise(data: ExerciseInput) {
     const session = await auth();
-    if (!session?.user?.id || session.user.role !== "coach") {
+    const role = session?.user?.role as string;
+    if (!session?.user?.id || (role !== "coach" && role !== "advanced_athlete")) {
         return { success: false, error: "No autorizado" };
     }
 
@@ -76,7 +77,8 @@ export async function createExercise(data: ExerciseInput) {
 
 export async function updateExercise(id: string, data: ExerciseInput) {
     const session = await auth();
-    if (!session?.user?.id || session.user.role !== "coach") {
+    const role = session?.user?.role as string;
+    if (!session?.user?.id || (role !== "coach" && role !== "advanced_athlete")) {
         return { success: false, error: "No autorizado" };
     }
 
@@ -114,7 +116,8 @@ export async function updateExercise(id: string, data: ExerciseInput) {
 
 export async function deleteExercise(id: string) {
     const session = await auth();
-    if (!session?.user?.id || session.user.role !== "coach") {
+    const role = session?.user?.role as string;
+    if (!session?.user?.id || (role !== "coach" && role !== "advanced_athlete")) {
         return { success: false, error: "No autorizado" };
     }
 
@@ -139,5 +142,26 @@ export async function deleteExercise(id: string) {
     } catch (error) {
         console.error("Error deleting exercise:", error);
         return { success: false, error: "Error al eliminar ejercicio" };
+    }
+}
+export async function getExerciseNames(ids: string[]) {
+    if (!ids || ids.length === 0) return { success: true, names: {} };
+
+    try {
+        const names: Record<string, string> = {};
+        // Firestore 'in' query works up to 10-30 IDs usually.
+        // If more, we'd need to chunk.
+        const snapshot = await adminDb.collection("exercises")
+            .where("__name__", "in", ids)
+            .get();
+
+        snapshot.docs.forEach(doc => {
+            names[doc.id] = doc.data().name;
+        });
+
+        return { success: true, names };
+    } catch (error) {
+        console.error("Error fetching exercise names:", error);
+        return { success: false, error: "Error al cargar nombres de ejercicios" };
     }
 }

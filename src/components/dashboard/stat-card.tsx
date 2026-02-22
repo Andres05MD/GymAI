@@ -1,5 +1,8 @@
+"use client";
+
 import { LucideIcon, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 
 interface StatCardProps {
     title: string;
@@ -35,26 +38,48 @@ export function StatCard({
     const TrendIcon = trend === "up" ? ArrowUpRight : trend === "down" ? ArrowDownRight : null;
 
     return (
-        <div className={cn("p-6 rounded-4xl bg-neutral-900 border border-neutral-800 flex flex-col justify-between h-40 group hover:border-neutral-700 transition-all", className)}>
-            <div className="flex justify-between items-start">
-                <div>
-                    <p className="text-neutral-400 font-medium text-sm mb-1">{title}</p>
-                    <h3 className="text-3xl font-bold text-white tracking-tight">{value}</h3>
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            whileHover={{ y: -4 }}
+            transition={{ duration: 0.3 }}
+            className={cn(
+                "p-6 rounded-[2.5rem] bg-neutral-900/40 backdrop-blur-xl border border-white/5 flex flex-col justify-between h-44 group transition-all relative overflow-hidden shadow-2xl shadow-black/40",
+                "hover:border-white/20 hover:bg-neutral-900/60",
+                className
+            )}
+        >
+            {/* Glossy Overlay */}
+            <div className="absolute inset-0 bg-linear-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+
+            <div className="flex justify-between items-start relative z-10">
+                <div className="space-y-1">
+                    <p className="text-neutral-500 font-bold text-[10px] uppercase tracking-[0.2em]">{title}</p>
+                    <h3 className="text-3xl font-black text-white tracking-tighter leading-none">{value}</h3>
                 </div>
-                <div className={cn("w-12 h-12 rounded-full flex items-center justify-center transition-transform group-hover:scale-110", colorStyles[color])}>
-                    <Icon className="w-6 h-6" />
+                <div className={cn(
+                    "w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-500 group-hover:rotate-12 group-hover:scale-110 shadow-lg",
+                    colorStyles[color],
+                    "border border-white/5"
+                )}>
+                    <Icon className="w-5 h-5" />
                 </div>
             </div>
 
-            <div className="flex items-center gap-2 mt-auto">
+            <div className="flex items-center gap-2 mt-auto relative z-10">
                 {TrendIcon && (
-                    <div className={cn("flex items-center text-xs font-bold px-2 py-1 rounded-full bg-neutral-950", trendColor)}>
-                        <TrendIcon className="w-3 h-3 mr-1" />
+                    <div className={cn(
+                        "flex items-center text-[10px] font-black px-2.5 py-1 rounded-full border shadow-sm",
+                        trend === "up" ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" : "bg-red-500/10 text-red-500 border-red-500/20"
+                    )}>
+                        <TrendIcon className="w-3 h-3 mr-1 shrink-0" />
                         {trendValue}
                     </div>
                 )}
-                {label && <span className="text-xs text-neutral-500 font-medium">{label}</span>}
+                {label && (
+                    <span className="text-[11px] text-neutral-500 font-bold uppercase tracking-wider">{label}</span>
+                )}
             </div>
-        </div>
+        </motion.div>
     );
 }

@@ -12,12 +12,13 @@ export default async function RoutinesPage() {
 
     // Verificación de autenticación
     if (!session?.user?.id) redirect("/login");
-    if (session.user.role !== "coach") redirect("/dashboard");
+    const role = session.user.role as string;
+    if (role !== "coach" && role !== "advanced_athlete") redirect("/dashboard");
 
-    // Cargar datos en paralelo desde el servidor (más rápido que useEffect)
+    // Cargar datos en paralelo desde el servidor
     const [routinesRes, athletesRes] = await Promise.all([
         getRoutines(),
-        getAllAthletes()
+        role === "coach" ? getAllAthletes() : Promise.resolve({ success: true, athletes: [] })
     ]);
 
     const routinesRaw = routinesRes.success ? routinesRes.routines || [] : [];

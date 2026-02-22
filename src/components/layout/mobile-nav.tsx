@@ -44,7 +44,17 @@ export function MobileNav({ role }: MobileNavProps) {
         { label: "Perfil", href: "/profile", icon: UserCircle },
     ];
 
-    const items = role === "coach" ? [...coachItems, { label: "Perfil", href: "/profile", icon: UserCircle }] : athleteItems;
+    const advancedAthleteItems = [
+        ...athleteItems,
+        { label: "Rutinas", href: "/routines", icon: ClipboardList },
+        { label: "Ejercicios", href: "/exercises", icon: Dumbbell },
+    ];
+
+    const items = role === "coach"
+        ? [...coachItems, { label: "Usuarios", href: "/users", icon: Users }, { label: "Perfil", href: "/profile", icon: UserCircle }]
+        : role === "advanced_athlete"
+            ? advancedAthleteItems
+            : athleteItems;
 
     // Use up to 6 items for mobile bar if needed
     const displayItems = items.slice(0, 6);

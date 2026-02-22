@@ -43,7 +43,17 @@ export function Sidebar({ role }: SidebarProps) {
         { label: "Progreso", href: "/progress", icon: BarChart2, prefetch: false },
     ];
 
-    const menuItems = role === "coach" ? coachItems : athleteItems;
+    const advancedAthleteItems = [
+        ...athleteItems,
+        { label: "Rutinas", href: "/routines", icon: ClipboardList, prefetch: true },
+        { label: "Ejercicios", href: "/exercises", icon: Dumbbell, prefetch: false },
+    ];
+
+    const menuItems = role === "coach"
+        ? [...coachItems, { label: "Usuarios", href: "/users", icon: Users, prefetch: true }]
+        : role === "advanced_athlete"
+            ? advancedAthleteItems
+            : athleteItems;
 
     const generalItems = [
         { label: "Perfil", href: "/profile", icon: UserCircle, prefetch: false },

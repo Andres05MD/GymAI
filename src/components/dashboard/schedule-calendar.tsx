@@ -5,9 +5,10 @@ import { Calendar } from "@/components/ui/calendar";
 import { getAthleteAssignments, getRecordedWorkoutDays } from "@/actions/schedule-actions";
 import { startOfMonth, endOfMonth, format, parseISO, isSameDay } from "date-fns";
 import { es } from "date-fns/locale";
-import { Loader2, Dumbbell, CheckCircle2, Moon } from "lucide-react";
+import { Loader2, Dumbbell, CheckCircle2, Moon, Calendar as CalendarIcon, ChevronRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { motion, AnimatePresence } from "framer-motion";
 
 /**
  * Capitaliza la primera letra de cada palabra o de la cadena
@@ -91,15 +92,25 @@ export function ScheduleCalendar({ athleteId, activeRoutine }: { athleteId: stri
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="md:col-span-2 p-3 sm:p-4 bg-neutral-900 border border-neutral-800 rounded-3xl">
-                <div className="flex items-center justify-between mb-4 px-2">
-                    <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                        <Dumbbell className="w-5 h-5 text-red-500" />
-                        Calendario
-                    </h3>
-                    {loading && <Loader2 className="w-4 h-4 animate-spin text-neutral-500" />}
+            <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="md:col-span-2 p-6 bg-neutral-900/40 backdrop-blur-xl border border-white/5 rounded-4xl shadow-2xl shadow-black/40"
+            >
+                <div className="flex items-center justify-between mb-8 px-2">
+                    <div className="space-y-1">
+                        <h3 className="text-xl font-black text-white uppercase tracking-tight flex items-center gap-3">
+                            <div className="p-2 rounded-xl bg-red-500/10 border border-red-500/20">
+                                <CalendarIcon className="w-5 h-5 text-red-500" />
+                            </div>
+                            Planificación
+                        </h3>
+                        <p className="text-xs text-neutral-500 font-bold uppercase tracking-widest ml-11">Calendario de Actividad</p>
+                    </div>
+                    {loading && <Loader2 className="w-4 h-4 animate-spin text-red-500" />}
                 </div>
-                <div className="bg-neutral-950/50 rounded-2xl p-0.5 sm:p-4">
+
+                <div className="bg-neutral-950/30 rounded-4xl p-4 border border-white/5 shadow-inner">
                     <Calendar
                         mode="single"
                         selected={date}
@@ -118,96 +129,125 @@ export function ScheduleCalendar({ athleteId, activeRoutine }: { athleteId: stri
                             }
                         }}
                         modifiersClassNames={{
-                            assigned: "bg-red-500/10 text-red-500 font-bold hover:bg-red-500/20",
-                            recorded: "bg-green-500/20 text-green-500 font-black hover:bg-green-500/30 border border-green-500/30 scale-105 z-10",
-                            training: "after:content-[''] after:absolute after:bottom-1 after:w-1 after:h-1 after:bg-red-500 after:rounded-full",
-                            rest: "opacity-40 grayscale-[0.5]"
+                            assigned: "before:content-[''] before:absolute before:top-1 before:right-1 before:w-1.5 before:h-1.5 before:bg-red-500/40 before:rounded-full",
+                            recorded: "bg-emerald-500/20 text-emerald-400 font-black hover:bg-emerald-500/30 border border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.1)]",
+                            training: "after:content-[''] after:absolute after:bottom-1.5 after:w-1 after:h-1 after:bg-red-500 after:rounded-full",
+                            rest: "opacity-30"
                         }}
                         locale={es}
                         className="w-full"
                         classNames={{
-                            month_caption: "flex justify-center pt-1 relative items-center capitalize",
+                            month_caption: "flex justify-center pt-1 relative items-center capitalize text-white font-black tracking-tight mb-4",
                             month_grid: "w-full border-collapse",
-                            weekday: "text-neutral-500 rounded-md w-full font-normal text-[0.7rem] text-center capitalize",
-                            day: "h-9 sm:h-12 w-full text-center text-sm p-0 m-0 relative flex items-center justify-center",
-                            day_button: "h-8 w-8 sm:h-10 sm:w-10 p-0 font-normal aria-selected:opacity-100 hover:bg-neutral-800 rounded-xl transition-all flex items-center justify-center",
-                            selected: "bg-white !text-black hover:bg-neutral-200 hover:!text-black shadow-lg",
-                            today: "bg-red-500/10 text-red-500 border border-red-500/20 font-bold",
+                            weekday: "text-neutral-600 rounded-md w-full font-black text-[0.65rem] text-center capitalize tracking-widest",
+                            day: "h-10 sm:h-14 w-full text-center text-sm p-0.5 m-0 relative flex items-center justify-center",
+                            day_button: "h-9 w-9 sm:h-12 sm:w-12 p-0 font-bold aria-selected:opacity-100 hover:bg-white/5 rounded-2xl transition-all flex items-center justify-center relative",
+                            selected: "bg-white !text-black hover:bg-neutral-200 hover:!text-black shadow-xl scale-105 z-20",
+                            today: "bg-red-500/10 text-red-500 border border-red-500/20 font-black",
                         }}
                     />
                 </div>
-            </div>
+            </motion.div>
 
-            <div className="bg-neutral-900 border border-neutral-800 rounded-3xl p-4 sm:p-6 flex flex-col h-full">
-                <div className="flex justify-between items-start mb-1">
-                    <h3 className="text-lg font-bold text-white first-letter:uppercase">
-                        {date ? capitalize(format(date, "EEEE d 'de' MMMM", { locale: es })) : "Selecciona un día"}
-                    </h3>
-                    {isRecordedDay && (
-                        <Badge className="bg-green-500 hover:bg-green-600 text-black font-black uppercase text-[9px] tracking-wider px-2 py-0.5 rounded-md">
-                            Completado
-                        </Badge>
-                    )}
+            <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="bg-neutral-900/40 backdrop-blur-xl border border-white/5 rounded-4xl p-6 flex flex-col h-full shadow-2xl shadow-black/40"
+            >
+                <div className="space-y-4 mb-8">
+                    <div className="flex justify-between items-start">
+                        <h3 className="text-2xl font-black text-white tracking-tighter leading-none first-letter:uppercase">
+                            {date ? format(date, "EEEE d", { locale: es }) : "Hoy"}
+                        </h3>
+                        {isRecordedDay && (
+                            <Badge className="bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 font-black uppercase text-[8px] tracking-[0.2em] px-2.5 py-1 rounded-lg">
+                                LOGGED
+                            </Badge>
+                        )}
+                    </div>
+                    <p className="text-[10px] text-neutral-500 font-black uppercase tracking-[0.2em] bg-white/5 px-3 py-1.5 rounded-full inline-block">
+                        {date ? format(date, "MMMM yyyy", { locale: es }) : ""}
+                    </p>
                 </div>
-                <p className="text-sm text-neutral-500 mb-6">
-                    {isRecordedDay
-                        ? "Entrenamiento registrado correctamente"
-                        : isRestDay
-                            ? "Día de descanso programado"
-                            : selectedDayAssignments.length > 0
-                                ? `${selectedDayAssignments.length} sesiones asignadas`
-                                : "Sin asignaciones"}
-                </p>
 
-                <div className="space-y-3 overflow-y-auto max-h-[400px] md:max-h-[500px] pr-2">
-                    {isRestDay && !isRecordedDay ? (
-                        <div className="p-8 text-center bg-neutral-950/40 border border-neutral-800 border-dashed rounded-3xl flex flex-col items-center gap-3">
-                            <div className="h-12 w-12 bg-neutral-900 rounded-full flex items-center justify-center">
-                                <Moon className="h-6 w-6 text-neutral-600" />
-                            </div>
-                            <div>
-                                <h4 className="font-bold text-white">Recuperación</h4>
-                                <p className="text-xs text-neutral-500 mt-1">No hay entrenamientos previstos para hoy.</p>
-                            </div>
-                        </div>
-                    ) : selectedDayAssignments.length > 0 ? (
-                        selectedDayAssignments.map((assignment) => (
-                            <div key={assignment.id} className={cn(
-                                "p-4 border rounded-2xl transition-all group",
-                                isRecordedDay ? "bg-green-500/10 border-green-500/20" : "bg-neutral-950/80 border-neutral-800 hover:border-red-500/30"
-                            )}>
-                                <div className="flex justify-between items-start mb-2">
-                                    <Badge variant="outline" className={cn(
-                                        "text-[10px] uppercase font-bold tracking-wider",
-                                        isRecordedDay ? "border-green-500/20 text-green-500 bg-green-500/10" : "border-red-500/20 text-red-500 bg-red-500/10"
-                                    )}>
-                                        {isRecordedDay ? "Realizado" : "Asignado"}
-                                    </Badge>
+                <div className="space-y-4 flex-1 overflow-y-auto pr-1 custom-scrollbar">
+                    <AnimatePresence mode="wait">
+                        {isRestDay && !isRecordedDay ? (
+                            <motion.div
+                                key="rest"
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.95 }}
+                                className="p-8 text-center bg-neutral-950/30 border border-white/5 border-dashed rounded-4xl flex flex-col items-center gap-4 mt-4"
+                            >
+                                <div className="h-16 w-16 bg-neutral-900 rounded-2xl flex items-center justify-center shadow-lg border border-white/5">
+                                    <Moon className="h-8 w-8 text-neutral-600" />
                                 </div>
-                                <h4 className={cn(
-                                    "font-bold transition-colors",
-                                    isRecordedDay ? "text-white" : "text-white group-hover:text-red-500"
-                                )}>
-                                    {assignment.routineName}
-                                </h4>
-                                <p className="text-sm text-neutral-400 mt-1 first-letter:uppercase">
-                                    {assignment.dayName}
-                                </p>
+                                <div className="space-y-1">
+                                    <h4 className="font-black text-white uppercase tracking-tight">Recuperación</h4>
+                                    <p className="text-xs text-neutral-500 font-medium">Escucha a tu cuerpo hoy.</p>
+                                </div>
+                            </motion.div>
+                        ) : selectedDayAssignments.length > 0 ? (
+                            <div className="space-y-3">
+                                {selectedDayAssignments.map((assignment, idx) => (
+                                    <motion.div
+                                        key={assignment.id}
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: idx * 0.1 }}
+                                        className={cn(
+                                            "p-5 rounded-3xl border transition-all group relative overflow-hidden",
+                                            isRecordedDay
+                                                ? "bg-emerald-500/5 border-emerald-500/10"
+                                                : "bg-neutral-950/50 border-white/5 hover:border-red-500/40"
+                                        )}
+                                    >
+                                        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                                            <Dumbbell className="w-12 h-12 text-white" />
+                                        </div>
+                                        <div className="flex justify-between items-center mb-3 relative z-10">
+                                            <Badge variant="outline" className={cn(
+                                                "text-[8px] font-black uppercase tracking-[0.2em] px-2 py-0.5 rounded-md",
+                                                isRecordedDay ? "border-emerald-500/20 text-emerald-500" : "border-red-500/20 text-red-500"
+                                            )}>
+                                                {isRecordedDay ? "Finalizado" : "Asignado"}
+                                            </Badge>
+                                            <ChevronRight className="w-4 h-4 text-neutral-700 group-hover:text-red-500 transition-all" />
+                                        </div>
+                                        <h4 className="font-black text-white text-lg tracking-tight relative z-10 group-hover:text-red-500 transition-colors">
+                                            {assignment.routineName}
+                                        </h4>
+                                        <p className="text-xs text-neutral-500 font-bold mt-1 uppercase tracking-widest relative z-10">
+                                            {assignment.dayName}
+                                        </p>
+                                    </motion.div>
+                                ))}
                             </div>
-                        ))
-                    ) : isRecordedDay ? (
-                        <div className="p-6 bg-green-500/5 border border-green-500/20 rounded-2xl flex flex-col items-center gap-2 text-center">
-                            <CheckCircle2 className="h-8 w-8 text-green-500" />
-                            <h4 className="font-bold text-white">Sesión Extra</h4>
-                            <p className="text-xs text-neutral-500">Registraste un entrenamiento fuera de lo asignado.</p>
-                        </div>
-                    ) : (
-                        <div className="text-center py-10 border border-dashed border-neutral-800 rounded-2xl">
-                            <p className="text-neutral-600 text-sm">No hay rutinas para este día</p>
-                        </div>
-                    )}
+                        ) : isRecordedDay ? (
+                            <motion.div
+                                key="extra"
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                className="p-6 bg-emerald-500/5 border border-emerald-500/20 rounded-4xl flex flex-col items-center gap-4 text-center mt-4"
+                            >
+                                <div className="h-16 w-16 bg-emerald-500/10 rounded-2xl flex items-center justify-center border border-emerald-500/20">
+                                    <CheckCircle2 className="h-8 w-8 text-emerald-500" />
+                                </div>
+                                <div className="space-y-1">
+                                    <h4 className="font-black text-white uppercase tracking-tight">Sesión Extra</h4>
+                                    <p className="text-xs text-neutral-500 font-medium italic">Fuera de programación.</p>
+                                </div>
+                            </motion.div>
+                        ) : (
+                            <div className="h-full flex flex-col items-center justify-center py-20 opacity-30 grayscale">
+                                <Dumbbell className="h-12 w-12 mb-4" />
+                                <p className="text-xs font-black uppercase tracking-widest">Sin Actividad</p>
+                            </div>
+                        )}
+                    </AnimatePresence>
                 </div>
-            </div>
+            </motion.div>
         </div>
     );
 }

@@ -246,10 +246,14 @@ export async function getRoutine(id: string) {
         if (!docSnap.exists) return { success: false, error: "Rutina no encontrada" };
 
         const data = docSnap.data();
-        if (session.user.role === "athlete" && data?.athleteId !== session.user.id) {
+        const isOwner = data?.athleteId === session.user.id;
+        const isCoachOfAthlete = (session.user.role as string) === "coach" && data?.coachId === session.user.id;
+        const isAdvancedAthleteOwner = (session.user.role as string) === "advanced_athlete" && isOwner;
+
+        if (!isOwner && !isCoachOfAthlete && (session.user.role as string) !== "coach") {
             return { success: false, error: "No autorizado" };
         }
-        if (session.user.role === "coach" && data?.coachId !== session.user.id) {
+        if ((session.user.role as string) === "coach" && data?.coachId !== session.user.id) {
             return { success: false, error: "No autorizado" };
         }
 
@@ -268,8 +272,9 @@ export async function getRoutine(id: string) {
 // Create Routine
 export async function createRoutine(data: Partial<RoutineInput>) {
     const session = await auth();
-    if (!session?.user?.id || session.user.role !== "coach") {
-        return { success: false, error: "Solo coaches pueden crear rutinas" };
+    const role = session?.user?.role as string;
+    if (!session?.user?.id || (role !== "coach" && role !== "advanced_athlete")) {
+        return { success: false, error: "Solo coaches y atletas avanzados pueden crear rutinas" };
     }
 
     try {
@@ -294,7 +299,8 @@ export async function createRoutine(data: Partial<RoutineInput>) {
 // Update Routine
 export async function updateRoutine(id: string, data: Partial<RoutineInput>) {
     const session = await auth();
-    if (!session?.user?.id || session.user.role !== "coach") {
+    const role = session?.user?.role as string;
+    if (!session?.user?.id || (role !== "coach" && role !== "advanced_athlete")) {
         return { success: false, error: "No autorizado" };
     }
 
@@ -313,7 +319,8 @@ export async function updateRoutine(id: string, data: Partial<RoutineInput>) {
 // Delete Routine
 export async function deleteRoutine(id: string) {
     const session = await auth();
-    if (!session?.user?.id || session.user.role !== "coach") {
+    const role = session?.user?.role as string;
+    if (!session?.user?.id || (role !== "coach" && role !== "advanced_athlete")) {
         return { success: false, error: "No autorizado" };
     }
 
@@ -330,7 +337,8 @@ export async function deleteRoutine(id: string) {
 // Duplicate Routine
 export async function duplicateRoutine(id: string) {
     const session = await auth();
-    if (!session?.user?.id || session.user.role !== "coach") {
+    const role = session?.user?.role as string;
+    if (!session?.user?.id || (role !== "coach" && role !== "advanced_athlete")) {
         return { success: false, error: "No autorizado" };
     }
 

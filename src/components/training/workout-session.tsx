@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { AIAssistantDialog } from "@/components/training/ai-assistant-dialog";
+import { getExerciseNames } from "@/actions/exercise-actions";
 import { ProgressionTip } from "@/components/training/progression-tip";
 import { useOfflineSync } from "@/hooks/use-offline-sync";
 import { SessionFeedbackDialog } from "@/components/training/session-feedback-dialog";
@@ -31,6 +32,7 @@ interface RoutineExercise {
     exerciseName: string;
     notes?: string;
     sets: RoutineSet[];
+    variantIds?: string[];
 }
 
 interface RoutineDay {
@@ -58,6 +60,7 @@ interface SessionExercise {
     exerciseName: string;
     sets: SessionSet[];
     feedback: string;
+    exerciseIdUsed: string; // ID del ejercicio realmente realizado (principal o variante)
 }
 
 interface WorkoutSessionProps {
@@ -126,7 +129,8 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
                 completed: false,
                 targetReps: set.reps, // Keep reference to target
             })),
-            feedback: ""
+            feedback: "",
+            exerciseIdUsed: ex.exerciseId || "temp-id"
         })));
     }, [activeDay, routine.id]);
 
@@ -145,11 +149,11 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
         localStorage.setItem(storageKey, JSON.stringify(state));
     }, [sessionLog, elapsedTime, isStarted, currentExerciseIndex, routine.id, activeDay]);
 
-    // 3. Effect: Load history for current exercise when index changes
     useEffect(() => {
         const currentEx = activeDay?.exercises[currentExerciseIndex];
+        const currentLog = sessionLog[currentExerciseIndex];
         if (currentEx?.exerciseId && currentEx.exerciseId !== "temp-id") {
-            getLastSessionExerciseData(currentEx.exerciseId)
+            getLastSessionExerciseData(currentLog?.exerciseIdUsed || currentEx.exerciseId)
                 .then(res => {
                     if (res.success && res.sets) {
                         setHistorySets(res.sets);
@@ -162,6 +166,28 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
             setHistorySets([]);
         }
     }, [currentExerciseIndex, activeDay]);
+
+    const [variantNames, setVariantNames] = useState<Record<string, string>>({});
+
+    useEffect(() => {
+        if (!activeDay) return;
+        const allVariantIds = activeDay.exercises.flatMap(ex => ex.variantIds || []);
+        if (allVariantIds.length > 0) {
+            getExerciseNames(allVariantIds).then(res => {
+                if (res.success && res.names) {
+                    setVariantNames(res.names);
+                }
+            });
+        }
+    }, [activeDay]);
+
+    const switchExerciseVariant = (exerciseIndex: number, variantId: string, variantName: string) => {
+        const newLog = [...sessionLog];
+        newLog[exerciseIndex].exerciseIdUsed = variantId;
+        newLog[exerciseIndex].exerciseName = variantName;
+        setSessionLog(newLog);
+        toast.info(`Cambiado a: ${variantName}`);
+    };
 
     useEffect(() => {
         if (!isStarted) return;
@@ -209,6 +235,7 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
             exercises: sessionLog.map(ex => ({
                 exerciseName: ex.exerciseName,
                 exerciseId: ex.exerciseId,
+                exerciseIdUsed: ex.exerciseIdUsed,
                 feedback: ex.feedback,
                 sets: ex.sets.filter((s: SessionSet) => s.completed || s.weight || s.reps).map((s: SessionSet) => ({
                     weight: Number(s.weight) || 0,
@@ -376,7 +403,37 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
                     <div className="bg-neutral-900 rounded-4xl border border-neutral-800 overflow-hidden shadow-xl animate-in slide-in-from-right-8 duration-300 key={currentExerciseIndex}">
                         <div className="bg-neutral-900 border-b border-neutral-800/50 p-5 flex flex-col gap-1">
                             <div className="flex justify-between items-start">
-                                <h3 className="text-xl font-bold text-white">{currentExercise.exerciseName}</h3>
+                                <div className="space-y-1">
+                                    <h3 className="text-xl font-bold text-white">{currentLogExercise.exerciseName}</h3>
+                                    {currentExercise.variantIds && currentExercise.variantIds.length > 0 && (
+                                        <Select
+                                            value={currentLogExercise.exerciseIdUsed}
+                                            onValueChange={(val) => {
+                                                const name = val === currentExercise.exerciseId
+                                                    ? currentExercise.exerciseName
+                                                    : variantNames[val] || "Variante";
+                                                switchExerciseVariant(currentExerciseIndex, val, name);
+                                            }}
+                                        >
+                                            <SelectTrigger className="h-7 text-[10px] font-bold uppercase tracking-wider bg-red-500/10 border-red-500/20 text-red-500 w-auto px-2 rounded-full hover:bg-red-500/20 transition-all">
+                                                <div className="flex items-center gap-1.5">
+                                                    <Dumbbell className="w-3 h-3" />
+                                                    <span>Cambiar Variante</span>
+                                                </div>
+                                            </SelectTrigger>
+                                            <SelectContent className="bg-neutral-900 border-neutral-800 text-white">
+                                                <SelectItem value={currentExercise.exerciseId || "primary"}>
+                                                    {currentExercise.exerciseName} (Principal)
+                                                </SelectItem>
+                                                {currentExercise.variantIds.map(vId => (
+                                                    <SelectItem key={vId} value={vId}>
+                                                        {variantNames[vId] || "Cargando variante..."}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    )}
+                                </div>
                                 {currentExercise.notes && (
                                     <div className="text-neutral-500 hover:text-white transition-colors cursor-help" title={currentExercise.notes}>
                                         <Info className="w-5 h-5" />

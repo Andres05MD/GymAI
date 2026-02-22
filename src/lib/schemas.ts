@@ -2,7 +2,7 @@ import { z } from "zod";
 
 // --- Enums y Constantes ---
 
-export const RoleEnum = z.enum(["athlete", "coach"]);
+export const RoleEnum = z.enum(["athlete", "coach", "advanced_athlete"]);
 export const GenderEnum = z.enum(["male", "female"]);
 export const GoalEnum = z.enum(["hypertrophy", "weight_loss", "endurance", "flexibility", "strength"]);
 
@@ -13,7 +13,7 @@ export const RegisterInputSchema = z.object({
     email: z.string().email("Email inválido"),
     password: z.string().min(6, "Mínimo 6 caracteres"),
     confirmPassword: z.string().min(6),
-    role: z.enum(["athlete", "coach"]),
+    role: z.enum(["athlete", "coach", "advanced_athlete"]),
 }).refine((data) => data.password === data.confirmPassword, {
     message: "Las contraseñas no coinciden",
     path: ["confirmPassword"],
@@ -24,7 +24,7 @@ export const RegisterInputSchemaServer = z.object({
     name: z.string().min(2, "Mínimo 2 caracteres"),
     email: z.string().email("Email inválido"),
     password: z.string().min(6, "Mínimo 6 caracteres"),
-    role: z.enum(["athlete", "coach"]),
+    role: z.enum(["athlete", "coach", "advanced_athlete"]),
 });
 
 // Schema para medidas corporales (Solo Atletas)
@@ -162,6 +162,7 @@ export const RoutineExerciseSchema = z.object({
     notes: z.string().optional(),
     sets: z.array(RoutineSetSchema),
     order: z.number(), // Orden en la sesión
+    variantIds: z.array(z.string()).optional(), // IDs de ejercicios variantes
 });
 
 // Schema de Día de Rutina (Workout Day)
@@ -197,6 +198,7 @@ export const TrainingLogSetSchema = z.object({
 export const TrainingLogExerciseSchema = z.object({
     exerciseId: z.string(),
     exerciseName: z.string(),
+    exerciseIdUsed: z.string().optional(), // ID del ejercicio específico realizado (puede ser el principal o una variante)
     sets: z.array(TrainingLogSetSchema),
     feedback: z.string().optional(), // Feedback del atleta sobre este ejercicio particular
 });

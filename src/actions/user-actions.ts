@@ -89,5 +89,56 @@ export async function getCoachAthletes() {
         return { success: false, error: "Error al cargar atletas" };
     }
 }
+export async function getAllUsers() {
+    const session = await auth();
+    if (!session?.user?.id || session.user.role !== "coach") {
+        return { success: false, error: "No autorizado" };
+    }
 
+    try {
+        const snapshot = await adminDb.collection("users")
+            .orderBy("name", "asc")
+            .get();
 
+        const users = snapshot.docs.map(doc => ({
+            id: doc.id,
+            name: doc.data().name || "Usuario",
+            email: doc.data().email,
+            role: doc.data().role || "athlete",
+            photoUrl: doc.data().photoUrl || null,
+            image: doc.data().image || null,
+        }));
+
+        return { success: true, users };
+    } catch (error) {
+        console.error("Error fetching all users:", error);
+        return { success: false, error: "Error al cargar usuarios" };
+    }
+}
+
+export async function updateUserRole(userId: string, newRole: string) {
+    const session = await auth();
+    if (!session?.user?.id || session.user.role !== "coach") {
+        return { success: false, error: "No autorizado" };
+    }
+
+    // Validar el rol
+    const validRoles = ["athlete", "coach", "advanced_athlete"];
+    if (!validRoles.includes(newRole)) {
+        return { success: false, error: "Rol inválido" };
+    }
+
+    try {
+        await adminDb.collection("users").doc(userId).update({
+            role: newRole,
+            updatedAt: new Date()
+        });
+
+        revalidatePath("/users");
+        revalidatePath("/dashboard");
+        return { success: true };
+    } catch (error) {
+        console.error("Error updating user role:", error);
+        return { success: false, error: "Error al actualizar el rol" };
+    }
+}

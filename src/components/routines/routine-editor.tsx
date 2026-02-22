@@ -34,6 +34,7 @@ interface ScheduleExercise {
     notes?: string;
     sets: ExerciseSet[];
     order?: number;
+    variantIds?: string[];
 }
 
 interface ScheduleDay {
@@ -358,7 +359,8 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
             sets: [
                 { type: "working", reps: "10-12", rpeTarget: 8, restSeconds: 60 }
             ],
-            order: currentExercises.length + 1
+            order: currentExercises.length + 1,
+            variantIds: []
         };
         const updatedSchedule = [...schedule];
         updatedSchedule[dayIndex].exercises.push(newExercise);
@@ -458,19 +460,41 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
     const handleExerciseSelect = (exercise: { id?: string; name: string }) => {
         if (selectorContext) {
             const { dayIndex, exIndex } = selectorContext;
-            updateExerciseField(dayIndex, exIndex, "exerciseName", exercise.name);
-            // Si tiene ID, actualizarlo también
-            if (exercise.id) {
-                // updateExerciseField no maneja IDs directos en la firma actual, pero la logica interna si
-                // Forzamos actualización manual del ID en el state
-                const updatedSchedule = [...schedule];
-                updatedSchedule[dayIndex].exercises[exIndex].exerciseId = exercise.id;
-                setValue("schedule", updatedSchedule);
+            if (isVariantMode) {
+                // Agregar variante
+                if (exercise.id) {
+                    const updatedSchedule = [...schedule];
+                    const currentVariants = updatedSchedule[dayIndex].exercises[exIndex].variantIds || [];
+                    if (!currentVariants.includes(exercise.id)) {
+                        updatedSchedule[dayIndex].exercises[exIndex].variantIds = [...currentVariants, exercise.id];
+                        setValue("schedule", updatedSchedule);
+                        toast.success("Variante añadida");
+                    }
+                }
+            } else {
+                // Seleccionar ejercicio principal
+                updateExerciseField(dayIndex, exIndex, "exerciseName", exercise.name);
+                if (exercise.id) {
+                    const updatedSchedule = [...schedule];
+                    updatedSchedule[dayIndex].exercises[exIndex].exerciseId = exercise.id;
+                    setValue("schedule", updatedSchedule);
+                }
             }
         }
         setSelectorOpen(false);
         setSelectorContext(null);
+        setIsVariantMode(false);
     };
+
+    // Corregir error de tipo en handleVariantSelect
+    const removeVariant = (dayIndex: number, exIndex: number, variantId: string) => {
+        const updatedSchedule = [...schedule];
+        const currentVariants = updatedSchedule[dayIndex].exercises[exIndex].variantIds || [];
+        updatedSchedule[dayIndex].exercises[exIndex].variantIds = currentVariants.filter((id: string) => id !== variantId);
+        setValue("schedule", updatedSchedule);
+    };
+
+    const [isVariantMode, setIsVariantMode] = useState(false);
 
     return (
         <div className="max-w-7xl mx-auto pb-20 px-4 sm:px-6">
@@ -723,6 +747,46 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                                                         className="bg-transparent border-transparent border-b-neutral-800 rounded-none px-0 h-auto py-2 text-sm text-neutral-400 focus-visible:ring-0 focus-visible:border-neutral-600 placeholder:text-neutral-700"
                                                     />
 
+                                                    {/* Variantes Section */}
+                                                    <div className="space-y-2">
+                                                        <div className="flex items-center justify-between">
+                                                            <span className="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Variantes / Alternativos</span>
+                                                            <Button
+                                                                type="button"
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                className="h-6 text-[10px] text-red-500 hover:text-white hover:bg-red-500/10 rounded-full px-2"
+                                                                onClick={() => {
+                                                                    setIsVariantMode(true);
+                                                                    openExerciseSelector(activeDayIndex, exIndex);
+                                                                }}
+                                                            >
+                                                                <Plus className="w-3 h-3 mr-1" /> AÑADIR VARIANTE
+                                                            </Button>
+                                                        </div>
+                                                        <div className="flex flex-wrap gap-2 min-h-6">
+                                                            {exercise.variantIds && exercise.variantIds.length > 0 ? (
+                                                                exercise.variantIds.map((vId: string) => {
+                                                                    const vEx = availableExercises.find(ex => ex.id === vId);
+                                                                    return (
+                                                                        <div key={vId} className="bg-neutral-900 border border-neutral-800 rounded-lg px-2 py-1 flex items-center gap-2 group/var">
+                                                                            <span className="text-[11px] text-white font-medium">{vEx?.name || "Cargando..."}</span>
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() => removeVariant(activeDayIndex, exIndex, vId)}
+                                                                                className="text-neutral-600 hover:text-red-500 transition-colors"
+                                                                            >
+                                                                                <Trash2 className="w-3 h-3" />
+                                                                            </button>
+                                                                        </div>
+                                                                    );
+                                                                })
+                                                            ) : (
+                                                                <p className="text-[10px] text-neutral-600 italic">No hay variantes seleccionadas</p>
+                                                            )}
+                                                        </div>
+                                                    </div>
+
                                                     {/* Sets Area - Mobile & Desktop Optimized */}
                                                     <div className="bg-neutral-900 rounded-xl p-2 md:p-1 overflow-hidden mt-2">
                                                         {/* Desktop Header */}
@@ -948,9 +1012,14 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
 
             <ExerciseSelector
                 open={selectorOpen}
-                onOpenChange={setSelectorOpen}
+                onOpenChange={(op) => {
+                    setSelectorOpen(op);
+                    if (!op) setIsVariantMode(false);
+                }}
                 onSelect={handleExerciseSelect}
                 availableExercises={sortedExercises}
+                isVariantSelector={isVariantMode}
+                title={isVariantMode ? "Añadir Variante" : "Seleccionar Ejercicio"}
             />
         </div >
     );

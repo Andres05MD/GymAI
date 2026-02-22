@@ -12,7 +12,9 @@ export default async function EditRoutinePage({ params }: PageProps) {
     const { id } = await params;
     const session = await auth();
 
-    if (!session?.user?.id || session.user.role !== "coach") redirect("/dashboard");
+    if (!session?.user?.id) redirect("/login");
+    const role = session.user.role as string;
+    if (role !== "coach" && role !== "advanced_athlete") redirect("/dashboard");
 
     const { routine, error } = await getRoutine(id);
     const { exercises } = await getExercises();

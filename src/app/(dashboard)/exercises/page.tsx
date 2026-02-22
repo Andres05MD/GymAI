@@ -12,9 +12,9 @@ export default async function ExercisesPage() {
     // Auth Check
     if (!session?.user?.id) redirect("/login");
 
-    // Access Check: Only coaches can manage the library
-    // Athletes might have a read-only view in the future, but for now this is the management console
-    if (session.user.role !== "coach") {
+    // Access Check: Coaches and Advanced Athletes can manage their library
+    const role = session.user.role as string;
+    if (role !== "coach" && role !== "advanced_athlete") {
         redirect("/dashboard");
     }
 
