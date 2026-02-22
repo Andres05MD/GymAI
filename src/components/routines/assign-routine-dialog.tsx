@@ -4,12 +4,13 @@ import { useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { assignRoutineToAthlete } from "@/actions/routine-actions";
-import { Users, Search, Loader2, ArrowLeft, Info } from "lucide-react";
+import { Users, Search, Loader2, ArrowLeft, Info, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface Athlete {
     id: string;
@@ -81,127 +82,158 @@ export function AssignRoutineDialog({ routineId, athletes }: { routineId: string
                     <Users className="w-4 h-4 mr-2" /> ASIGNAR
                 </Button>
             </DialogTrigger>
-            <DialogContent className="bg-neutral-900 border-neutral-800 text-white sm:max-w-[400px] p-0 overflow-hidden gap-0">
-
-                {/* Header Dinámico */}
-                <div className="p-4 border-b border-neutral-800 bg-neutral-900">
-                    <DialogHeader>
-                        <div className="flex items-center gap-2">
+            <DialogContent className="bg-neutral-950 border-white/5 text-white sm:max-w-[450px] p-0 overflow-hidden gap-0 rounded-4xl shadow-2xl shadow-black/80">
+                {/* Header Estilizado */}
+                <div className="p-8 border-b border-white/5 bg-linear-to-br from-neutral-900 via-neutral-950 to-black relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-red-600/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+                    <DialogHeader className="relative z-10">
+                        <div className="flex items-center gap-3">
                             {step === 'date' && (
-                                <Button variant="ghost" size="icon" className="h-6 w-6 -ml-2 text-neutral-400 hover:text-white" onClick={handleBack}>
-                                    <ArrowLeft className="w-4 h-4" />
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-9 w-9 -ml-2 rounded-xl text-neutral-500 hover:text-white hover:bg-white/5 transition-all"
+                                    onClick={handleBack}
+                                >
+                                    <ArrowLeft className="w-5 h-5" />
                                 </Button>
                             )}
-                            <DialogTitle className="text-lg font-bold">
-                                {step === 'athlete' ? 'Asignar Rutina' : 'Confirmar Asignación'}
+                            <DialogTitle className="text-3xl font-black uppercase tracking-tighter italic text-white flex items-center gap-3">
+                                <Users className="w-6 h-6 text-red-600" />
+                                {step === 'athlete' ? 'Arquitecto' : 'Despliegue'}
                             </DialogTitle>
                         </div>
-                        <DialogDescription className="text-neutral-400 text-xs">
+                        <DialogDescription className="text-neutral-500 font-bold uppercase tracking-[0.2em] text-[10px] mt-1">
                             {step === 'athlete'
-                                ? 'Selecciona un atleta de tu lista.'
-                                : `¿Confirmas la asignación automática para ${selectedAthlete?.name?.split(" ")[0]}?`}
+                                ? 'Selección de Atleta para Sincronización'
+                                : `Confirmación de Programa: ${selectedAthlete?.name?.split(" ")[0]}`}
                         </DialogDescription>
                     </DialogHeader>
                 </div>
 
-                {step === 'athlete' ? (
-                    <>
-                        <div className="px-4 py-3 bg-neutral-900/50">
-                            <div className="relative">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-500" />
-                                <Input
-                                    placeholder="Buscar atleta..."
-                                    className="bg-neutral-950 border-neutral-800 pl-10 h-9 text-sm focus-visible:ring-red-500 rounded-lg"
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                />
+                <AnimatePresence mode="wait">
+                    {step === 'athlete' ? (
+                        <motion.div
+                            key="athlete-step"
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                        >
+                            <div className="px-8 py-6 bg-black/40 backdrop-blur-md border-b border-white/5">
+                                <div className="relative group">
+                                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-600 group-focus-within:text-red-500 transition-colors" />
+                                    <Input
+                                        placeholder="Filtrar por nombre o núcleo..."
+                                        className="bg-neutral-950 border border-white/5 pl-12 h-14 text-sm focus-visible:ring-red-600/30 focus-visible:border-red-600/50 rounded-2xl transition-all placeholder:text-neutral-800"
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                    />
+                                </div>
                             </div>
-                        </div>
 
-                        <ScrollArea className="h-[300px]">
-                            <div className="p-2 space-y-1">
-                                {filteredAthletes.length === 0 ? (
-                                    <div className="text-center py-10 px-4">
-                                        <p className="text-sm text-neutral-500">
-                                            {searchTerm ? "No se encontraron atletas." : "No tienes atletas asignados."}
+                            <ScrollArea className="h-[400px]">
+                                <div className="p-4 space-y-2">
+                                    {filteredAthletes.length === 0 ? (
+                                        <div className="text-center py-20 px-8 flex flex-col items-center gap-4 opacity-30 grayscale">
+                                            <Users className="w-12 h-12" />
+                                            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-neutral-500">
+                                                {searchTerm ? "Sin resultados en la base" : "Lista de atletas no inicializada"}
+                                            </p>
+                                        </div>
+                                    ) : (
+                                        filteredAthletes.map((athlete) => (
+                                            <button
+                                                key={athlete.id}
+                                                onClick={() => handleSelectAthlete(athlete)}
+                                                className="w-full group flex items-center justify-between gap-4 p-4 rounded-2xl hover:bg-white/5 transition-all border border-transparent hover:border-white/5 text-left active:scale-[0.98]"
+                                            >
+                                                <div className="flex items-center gap-4 overflow-hidden">
+                                                    <Avatar className="h-12 w-12 border-2 border-white/5 group-hover:border-red-600/20 transition-colors">
+                                                        <AvatarImage src={athlete.image} />
+                                                        <AvatarFallback className="bg-neutral-900 text-[10px] font-black uppercase text-red-500">
+                                                            {athlete.name?.substring(0, 2).toUpperCase()}
+                                                        </AvatarFallback>
+                                                    </Avatar>
+                                                    <div className="truncate">
+                                                        <h4 className="font-black text-white text-sm uppercase tracking-tight italic group-hover:text-red-500 transition-colors">
+                                                            {athlete.name || "UNNAMED ATLETA"}
+                                                        </h4>
+                                                        <p className="text-[10px] font-bold text-neutral-600 uppercase tracking-widest mt-0.5">
+                                                            {athlete.email}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div className="h-8 w-8 rounded-full border border-white/5 flex items-center justify-center opacity-0 group-hover:opacity-100 group-hover:bg-red-600 transition-all text-white">
+                                                    <ChevronRight className="w-4 h-4 translate-x-0 group-hover:translate-x-0.5 transition-transform" />
+                                                </div>
+                                            </button>
+                                        ))
+                                    )}
+                                </div>
+                            </ScrollArea>
+                        </motion.div>
+                    ) : (
+                        <motion.div
+                            key="confirm-step"
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: 20 }}
+                            className="flex flex-col"
+                        >
+                            <div className="flex-1 p-8 space-y-8">
+                                <div className="bg-red-600/5 border border-red-600/10 p-6 rounded-3xl flex items-start gap-4 text-red-500 shadow-inner">
+                                    <div className="h-10 w-10 rounded-2xl bg-red-600/10 flex items-center justify-center shrink-0 border border-red-600/20">
+                                        <Info className="h-5 w-5" />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <p className="text-[10px] font-black uppercase tracking-[0.2em] italic">Despliegue Programado</p>
+                                        <p className="text-xs leading-relaxed text-neutral-400 font-medium">
+                                            La arquitectura se activará de forma secuencial. El sistema de carga comenzará el
+                                            <span className="text-white font-black"> próximo lunes</span> habilitando los días configurados.
                                         </p>
                                     </div>
-                                ) : (
-                                    filteredAthletes.map((athlete) => (
-                                        <button
-                                            key={athlete.id}
-                                            onClick={() => handleSelectAthlete(athlete)}
-                                            className="w-full group flex items-center justify-between gap-3 p-3 rounded-xl hover:bg-neutral-800 transition-colors text-left"
-                                        >
-                                            <div className="flex items-center gap-3 overflow-hidden">
-                                                <Avatar className="h-9 w-9 border border-neutral-800">
-                                                    <AvatarImage src={athlete.image} />
-                                                    <AvatarFallback className="bg-neutral-800 text-[10px] font-bold">
-                                                        {athlete.name?.[0]?.toUpperCase()}
-                                                    </AvatarFallback>
-                                                </Avatar>
-                                                <div className="truncate">
-                                                    <h4 className="font-bold text-white text-sm truncate">
-                                                        {athlete.name || "Sin nombre"}
-                                                    </h4>
-                                                    <p className="text-[10px] text-neutral-500 truncate">
-                                                        {athlete.email}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                            <div className="text-neutral-600 group-hover:text-white">
-                                                <ArrowLeft className="w-4 h-4 rotate-180" />
-                                            </div>
-                                        </button>
-                                    ))
-                                )}
-                            </div>
-                        </ScrollArea>
-                    </>
-                ) : (
-                    <div className="flex flex-col">
-                        <div className="flex-1 p-6 space-y-4">
-                            <div className="bg-blue-500/10 border border-blue-500/20 p-4 rounded-xl flex items-start gap-3 text-blue-400">
-                                <Info className="h-5 w-5 shrink-0 mt-0.5" />
-                                <div className="space-y-1">
-                                    <p className="text-sm font-bold uppercase tracking-tight">Programación Automática</p>
-                                    <p className="text-xs leading-relaxed opacity-80 text-neutral-300">
-                                        La rutina se organizará automáticamente de Lunes a Viernes (según el número de días) y comenzará el
-                                        <span className="text-blue-400 font-bold"> próximo lunes</span>.
-                                    </p>
+                                </div>
+
+                                <div className="bg-black/40 backdrop-blur-md p-8 rounded-4xl border border-white/5 space-y-6 shadow-2xl relative overflow-hidden">
+                                    <div className="absolute top-0 right-0 w-24 h-24 bg-red-600/5 rounded-full blur-2xl -mr-12 -mt-12 opacity-50"></div>
+
+                                    <div className="space-y-4">
+                                        <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
+                                            <span className="text-neutral-600 italic">Objetivo de Sinc.</span>
+                                            <span className="text-white bg-red-600/10 px-3 py-1 rounded-lg border border-red-600/20">{selectedAthlete?.name}</span>
+                                        </div>
+                                        <div className="h-px bg-white/5 w-full" />
+                                        <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
+                                            <span className="text-neutral-600 italic">Días Operativos</span>
+                                            <span className="text-neutral-400">Lun - Vie</span>
+                                        </div>
+                                        <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
+                                            <span className="text-neutral-600 italic">Reset Semanal</span>
+                                            <span className="text-neutral-400">Domingo / 23:59</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div className="bg-neutral-950 p-4 rounded-xl border border-neutral-800 space-y-3">
-                                <div className="flex justify-between items-center text-xs">
-                                    <span className="text-neutral-500">Atleta</span>
-                                    <span className="text-white font-bold">{selectedAthlete?.name}</span>
-                                </div>
-                                <div className="flex justify-between items-center text-xs">
-                                    <span className="text-neutral-500">Días de descanso</span>
-                                    <span className="text-white font-bold">Sábado y Domingo</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="p-4 border-t border-neutral-800 bg-neutral-900">
-                            <Button
-                                className="w-full bg-white text-black hover:bg-neutral-200 font-bold"
-                                onClick={handleConfirmAssign}
-                                disabled={isSubmitting}
-                            >
-                                {isSubmitting ? (
-                                    <>
-                                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                        Asignando...
-                                    </>
-                                ) : (
-                                    "Confirmar Asignación"
-                                )}
-                            </Button>
-                        </div>
-                    </div>
-                )}
+                            <DialogFooter className="p-8 border-t border-white/5 bg-black/60 backdrop-blur-2xl">
+                                <Button
+                                    className="w-full h-16 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-black uppercase tracking-[0.2em] text-xs shadow-2xl shadow-red-900/40 hover:-translate-y-1 transition-all active:scale-95 duration-500"
+                                    onClick={handleConfirmAssign}
+                                    disabled={isSubmitting}
+                                >
+                                    {isSubmitting ? (
+                                        <Loader2 className="w-5 h-5 animate-spin" />
+                                    ) : (
+                                        <span className="flex items-center gap-3">
+                                            Ejecutar Despliegue
+                                            <ChevronRight className="w-5 h-5" />
+                                        </span>
+                                    )}
+                                </Button>
+                            </DialogFooter>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </DialogContent>
         </Dialog>
     );

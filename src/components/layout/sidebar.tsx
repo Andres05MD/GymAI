@@ -15,6 +15,7 @@ import {
     ClipboardList,
     History
 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface SidebarProps {
     role?: string;
@@ -24,55 +25,74 @@ export function Sidebar({ role }: SidebarProps) {
     const pathname = usePathname();
 
     const commonItems = [
-        { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard, prefetch: true },
+        { label: "CONSOLA", href: "/dashboard", icon: LayoutDashboard, prefetch: true },
     ];
 
     const coachItems = [
         ...commonItems,
-        { label: "Atletas", href: "/athletes", icon: Users, prefetch: true },
-        { label: "Rutinas", href: "/routines", icon: ClipboardList, prefetch: true },
-        { label: "Ejercicios", href: "/exercises", icon: Dumbbell, prefetch: false },
-        { label: "Progreso", href: "/progress", icon: BarChart2, prefetch: false },
+        { label: "ATLETAS", href: "/athletes", icon: Users, prefetch: true },
+        { label: "RUTINAS", href: "/routines", icon: ClipboardList, prefetch: true },
+        { label: "EJERCICIOS", href: "/exercises", icon: Dumbbell, prefetch: false },
+        { label: "PROGRESO", href: "/progress", icon: BarChart2, prefetch: false },
+        { label: "USUARIOS", href: "/users", icon: Users, prefetch: true },
     ];
 
     const athleteItems = [
         ...commonItems,
-        { label: "Rutina Hoy", href: "/train", icon: Dumbbell, prefetch: true },
-        { label: "Rutina Semanal", href: "/my-routine", icon: ClipboardList, prefetch: true },
-        { label: "Historial", href: "/history", icon: History, prefetch: false },
-        { label: "Progreso", href: "/progress", icon: BarChart2, prefetch: false },
+        { label: "DESPLIEGUE", href: "/train", icon: Dumbbell, prefetch: true },
+        { label: "MI RUTINA", href: "/my-routine", icon: ClipboardList, prefetch: true },
+        { label: "BITÁCORA", href: "/history", icon: History, prefetch: false },
+        { label: "ANÁLISIS", href: "/progress", icon: BarChart2, prefetch: false },
     ];
 
     const advancedAthleteItems = [
         ...athleteItems,
-        { label: "Rutinas", href: "/routines", icon: ClipboardList, prefetch: true },
-        { label: "Ejercicios", href: "/exercises", icon: Dumbbell, prefetch: false },
+        { label: "RUTINAS", href: "/routines", icon: ClipboardList, prefetch: true },
+        { label: "EJERCICIOS", href: "/exercises", icon: Dumbbell, prefetch: false },
     ];
 
     const menuItems = role === "coach"
-        ? [...coachItems, { label: "Usuarios", href: "/users", icon: Users, prefetch: true }]
+        ? coachItems
         : role === "advanced_athlete"
             ? advancedAthleteItems
             : athleteItems;
 
     const generalItems = [
-        { label: "Perfil", href: "/profile", icon: UserCircle, prefetch: false },
+        { label: "PERFIL", href: "/profile", icon: UserCircle, prefetch: false },
     ];
 
     return (
-        <div className="hidden md:flex h-screen w-72 flex-col bg-black p-6 border-r border-neutral-900">
-            <Link href="/dashboard" className="flex items-center gap-3 px-2 mb-10 hover:opacity-80 transition-opacity">
-                <div className="h-10 w-10 bg-white rounded-full flex items-center justify-center">
-                    <Target className="h-6 w-6 text-black" />
-                </div>
-                <span className="text-2xl font-bold text-white tracking-tighter">GymIA</span>
-            </Link>
+        <aside className="hidden md:flex h-screen w-72 flex-col bg-black relative overflow-hidden">
+            {/* Geometric Accents */}
+            <div className="absolute top-0 left-0 w-full h-[500px] bg-linear-to-b from-red-600/5 to-transparent pointer-events-none" />
+            <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-red-600/5 rounded-full blur-[100px] pointer-events-none" />
 
-            <div className="space-y-8 flex-1">
-                <div>
-                    <h3 className="mb-4 px-4 text-xs font-bold uppercase tracking-widest text-neutral-500">
-                        Menú
-                    </h3>
+            {/* Logo Section */}
+            <div className="p-8 relative z-10">
+                <Link href="/dashboard" className="flex items-center gap-4 group transition-all">
+                    <div className="relative">
+                        <div className="h-12 w-12 bg-white rounded-2xl flex items-center justify-center shadow-[0_0_20px_rgba(255,255,255,0.1)] group-hover:scale-110 transition-transform duration-500">
+                            <Target className="h-7 w-7 text-black" />
+                        </div>
+                        <div className="absolute -inset-1 bg-white/20 rounded-2xl blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </div>
+                    <div className="flex flex-col">
+                        <span className="text-2xl font-black text-white tracking-tighter italic leading-none">GymIA</span>
+                        <span className="text-[8px] font-black text-red-500 uppercase tracking-[0.4em] italic mt-1 bg-red-500/10 px-2 py-0.5 rounded-full border border-red-500/20">OPERATIVE_OS</span>
+                    </div>
+                </Link>
+            </div>
+
+            <div className="px-6 flex-1 overflow-y-auto relative z-10 space-y-12 py-6 scrollbar-none">
+                {/* Menu Central */}
+                <div className="space-y-6">
+                    <div className="flex items-center gap-3 px-4">
+                        <div className="h-px flex-1 bg-white/5" />
+                        <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-neutral-600 italic">
+                            Protocolos
+                        </h3>
+                        <div className="h-px w-4 bg-white/5" />
+                    </div>
                     <nav className="space-y-2">
                         {menuItems.map((item) => {
                             const isActive = pathname === item.href;
@@ -83,16 +103,27 @@ export function Sidebar({ role }: SidebarProps) {
                                     href={item.href}
                                     prefetch={item.prefetch}
                                     className={cn(
-                                        "flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-200 group font-medium",
+                                        "flex items-center gap-4 px-5 py-4 rounded-3xl transition-all duration-300 group relative overflow-hidden",
                                         isActive
-                                            ? "bg-neutral-800 text-white shadow-lg shadow-neutral-900/50"
-                                            : "text-neutral-400 hover:bg-neutral-900 hover:text-white"
+                                            ? "bg-white/5 text-white shadow-inner"
+                                            : "text-neutral-500 hover:text-white"
                                     )}
                                 >
-                                    <Icon className={cn("h-5 w-5", isActive ? "text-red-500" : "text-neutral-500 group-hover:text-white")} />
-                                    {item.label}
                                     {isActive && (
-                                        <div className="ml-auto w-1.5 h-1.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)]" />
+                                        <motion.div
+                                            layoutId="active-pill"
+                                            className="absolute left-0 top-1/4 bottom-1/4 w-1 bg-red-600 rounded-r-full shadow-[4px_0_12px_rgba(220,38,38,0.5)]"
+                                        />
+                                    )}
+                                    <Icon className={cn("h-5 w-5 transition-transform duration-300", isActive ? "text-red-500 scale-110" : "text-neutral-600 group-hover:text-white group-hover:scale-110")} />
+                                    <span className={cn("text-xs font-black uppercase italic tracking-widest", isActive ? "text-white" : "group-hover:translate-x-1 transition-transform")}>
+                                        {item.label}
+                                    </span>
+
+                                    {isActive && (
+                                        <div className="ml-auto">
+                                            <div className="h-1 w-1 rounded-full bg-red-600 animate-pulse" />
+                                        </div>
                                     )}
                                 </Link>
                             );
@@ -100,10 +131,15 @@ export function Sidebar({ role }: SidebarProps) {
                     </nav>
                 </div>
 
-                <div>
-                    <h3 className="mb-4 px-4 text-xs font-bold uppercase tracking-widest text-neutral-500">
-                        General
-                    </h3>
+                {/* Sistema */}
+                <div className="space-y-6">
+                    <div className="flex items-center gap-3 px-4">
+                        <div className="h-px flex-1 bg-white/5" />
+                        <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-neutral-600 italic">
+                            Operador
+                        </h3>
+                        <div className="h-px w-4 bg-white/5" />
+                    </div>
                     <nav className="space-y-2">
                         {generalItems.map((item) => {
                             const isActive = pathname === item.href;
@@ -114,30 +150,50 @@ export function Sidebar({ role }: SidebarProps) {
                                     href={item.href}
                                     prefetch={item.prefetch}
                                     className={cn(
-                                        "flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-200 group font-medium",
+                                        "flex items-center gap-4 px-5 py-4 rounded-3xl transition-all duration-300 group relative overflow-hidden",
                                         isActive
-                                            ? "bg-neutral-800 text-white"
-                                            : "text-neutral-400 hover:bg-neutral-900 hover:text-white"
+                                            ? "bg-white/5 text-white"
+                                            : "text-neutral-500 hover:text-white"
                                     )}
                                 >
-                                    <Icon className={cn("h-5 w-5", isActive ? "text-red-500" : "text-neutral-500 group-hover:text-white")} />
-                                    {item.label}
+                                    {isActive && (
+                                        <motion.div
+                                            layoutId="active-pill-gen"
+                                            className="absolute left-0 top-1/4 bottom-1/4 w-1 bg-red-600 rounded-r-full shadow-[4px_0_12px_rgba(220,38,38,0.5)]"
+                                        />
+                                    )}
+                                    <Icon className={cn("h-5 w-5", isActive ? "text-red-500 scale-110" : "text-neutral-600 group-hover:text-white group-hover:scale-110")} />
+                                    <span className={cn("text-xs font-black uppercase italic tracking-widest", isActive ? "text-white" : "group-hover:translate-x-1 transition-transform")}>
+                                        {item.label}
+                                    </span>
                                 </Link>
                             );
                         })}
                         <button
                             onClick={() => signOut({ callbackUrl: "/" })}
-                            className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-neutral-400 hover:bg-red-500/10 hover:text-red-500 transition-all duration-200 font-medium group text-left mt-2"
+                            className="w-full flex items-center gap-4 px-5 py-4 rounded-3xl text-neutral-600 hover:bg-red-600/10 hover:text-red-500 transition-all duration-300 group mt-4 relative overflow-hidden"
                         >
-                            <LogOut className="h-5 w-5 text-neutral-500 group-hover:text-red-500" />
-                            Cerrar Sesión
+                            <LogOut className="h-5 w-5 text-neutral-600 group-hover:text-red-500 transition-transform group-hover:-translate-x-1" />
+                            <span className="text-xs font-black uppercase italic tracking-widest">
+                                DESCONEXIÓN
+                            </span>
+                            <div className="absolute inset-0 bg-linear-to-r from-red-600/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                         </button>
                     </nav>
                 </div>
             </div>
 
-
-
-        </div>
+            {/* Footer / Build Version */}
+            <div className="p-8 relative z-10 border-t border-white/5 bg-black/40 backdrop-blur-sm">
+                <div className="flex items-center justify-between opacity-30">
+                    <span className="text-[7px] font-black uppercase tracking-[0.5em] text-white italic">Build_v2.0.4</span>
+                    <div className="flex gap-1">
+                        <div className="h-1 w-1 bg-white rounded-full" />
+                        <div className="h-1 w-1 bg-white/50 rounded-full" />
+                        <div className="h-1 w-1 bg-white/20 rounded-full" />
+                    </div>
+                </div>
+            </div>
+        </aside>
     );
 }

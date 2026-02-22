@@ -2,9 +2,10 @@ import { getTrainingLogs } from "@/actions/training-actions";
 import { TrainingHistoryList } from "@/components/training/training-history-list";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { ArrowLeft, Calendar, Dumbbell, Flame, Zap } from "lucide-react";
+import { ArrowLeft, Calendar, Dumbbell, Flame, Zap, Activity, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { ClientMotionDiv } from "@/components/ui/client-motion";
 
 // Tipos locales para cálculos
 interface TrainingSet {
@@ -56,77 +57,79 @@ export default async function HistoryPage() {
     }) || [];
 
     return (
-        <div className="max-w-4xl mx-auto space-y-8 pb-20">
-            {/* Header */}
-            <div className="flex items-center gap-4">
-                <Link href="/dashboard">
-                    <Button variant="ghost" size="icon" className="rounded-full text-neutral-400 hover:text-white hover:bg-neutral-800">
-                        <ArrowLeft className="w-5 h-5" />
-                    </Button>
-                </Link>
-                <div>
-                    <h1 className="text-2xl md:text-3xl font-black text-white uppercase tracking-tighter">
-                        Historial de Entrenamientos
-                    </h1>
-                    <p className="text-neutral-400 text-sm">Registro completo de todas tus sesiones.</p>
-                </div>
-            </div>
+        <div className="space-y-12 pb-24 md:pb-10 relative">
+            {/* Background Decorative Blobs */}
+            <div className="absolute top-0 right-1/4 w-96 h-96 bg-red-600/5 rounded-full blur-[120px] pointer-events-none -z-10" />
+            <div className="absolute bottom-1/4 -left-20 w-80 h-80 bg-red-600/5 rounded-full blur-[100px] pointer-events-none -z-10" />
 
-            {/* Quick Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
-                <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-3xl md:rounded-4xl p-4 md:p-6 relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 w-20 h-20 bg-red-600/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none group-hover:bg-red-600/20 transition-colors"></div>
-                    <div className="flex flex-col items-center text-center relative z-10">
-                        <div className="w-10 h-10 md:w-12 md:h-12 bg-neutral-900 rounded-xl md:rounded-2xl flex items-center justify-center mb-2 md:mb-3 shadow-lg border border-neutral-800 group-hover:scale-110 transition-transform duration-300">
-                            <Dumbbell className="w-5 h-5 md:w-6 md:h-6 text-white" />
+            {/* Header Area */}
+            <ClientMotionDiv
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex flex-col md:flex-row md:items-end justify-between gap-8"
+            >
+                <div className="flex items-center gap-6">
+                    <Link href="/dashboard">
+                        <div className="group h-12 w-12 rounded-2xl border border-white/5 bg-neutral-900/50 flex items-center justify-center hover:bg-red-600 hover:border-red-600 transition-all duration-500 text-neutral-500 group-hover:text-white group">
+                            <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform duration-500" />
                         </div>
-                        <p className="text-2xl md:text-3xl font-black text-white tracking-tighter mb-0.5 md:mb-1">{totalSessions}</p>
-                        <p className="text-[9px] md:text-[10px] text-neutral-500 uppercase tracking-widest font-bold">Total Sesiones</p>
-                    </div>
-                </div>
-                <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-3xl md:rounded-4xl p-4 md:p-6 relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 w-20 h-20 bg-orange-600/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none group-hover:bg-orange-600/20 transition-colors"></div>
-                    <div className="flex flex-col items-center text-center relative z-10">
-                        <div className="w-10 h-10 md:w-12 md:h-12 bg-neutral-900 rounded-xl md:rounded-2xl flex items-center justify-center mb-2 md:mb-3 shadow-lg border border-neutral-800 group-hover:scale-110 transition-transform duration-300">
-                            <Flame className="w-5 h-5 md:w-6 md:h-6 text-orange-500" />
-                        </div>
-                        <p className="text-2xl md:text-3xl font-black text-white tracking-tighter mb-0.5 md:mb-1">{Math.round(totalVolume / 1000)}k</p>
-                        <p className="text-[9px] md:text-[10px] text-neutral-500 uppercase tracking-widest font-bold">Kg Totales</p>
-                    </div>
-                </div>
-                <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-3xl md:rounded-4xl p-4 md:p-6 relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 w-20 h-20 bg-emerald-600/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none group-hover:bg-emerald-600/20 transition-colors"></div>
-                    <div className="flex flex-col items-center text-center relative z-10">
-                        <div className="w-10 h-10 md:w-12 md:h-12 bg-neutral-900 rounded-xl md:rounded-2xl flex items-center justify-center mb-2 md:mb-3 shadow-lg border border-neutral-800 group-hover:scale-110 transition-transform duration-300">
-                            <Calendar className="w-5 h-5 md:w-6 md:h-6 text-emerald-500" />
-                        </div>
-                        <p className="text-2xl md:text-3xl font-black text-white tracking-tighter mb-0.5 md:mb-1">{thisMonthLogs.length}</p>
-                        <p className="text-[9px] md:text-[10px] text-neutral-500 uppercase tracking-widest font-bold">Este Mes</p>
-                    </div>
-                </div>
-                <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-3xl md:rounded-4xl p-4 md:p-6 relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 w-20 h-20 bg-purple-600/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none group-hover:bg-purple-600/20 transition-colors"></div>
-                    <div className="flex flex-col items-center text-center relative z-10">
-                        <div className="w-10 h-10 md:w-12 md:h-12 bg-neutral-900 rounded-xl md:rounded-2xl flex items-center justify-center mb-2 md:mb-3 shadow-lg border border-neutral-800 group-hover:scale-110 transition-transform duration-300">
-                            <Zap className="w-5 h-5 md:w-6 md:h-6 text-purple-500" />
-                        </div>
-                        <p className="text-2xl md:text-3xl font-black text-white tracking-tighter mb-0.5 md:mb-1">
-                            {avgRpe > 0 ? avgRpe.toFixed(1) : "0"}
+                    </Link>
+                    <div className="space-y-1">
+                        <h2 className="text-4xl md:text-5xl font-black text-white tracking-tighter uppercase italic leading-none">Registros</h2>
+                        <p className="text-neutral-500 font-bold uppercase tracking-[0.3em] text-[10px] ml-1">
+                            Análisis Temporal: <span className="text-red-500">Historial de Operaciones</span>
                         </p>
-                        <p className="text-[9px] md:text-[10px] text-neutral-500 uppercase tracking-widest font-bold">Esfuerzo (RPE)</p>
                     </div>
                 </div>
+            </ClientMotionDiv>
+
+            {/* Quick Stats Matrix */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                {[
+                    { label: "Sesiones", value: totalSessions, icon: Activity, color: "text-white", glow: "bg-white/5" },
+                    { label: "Carga Total", value: `${Math.round(totalVolume / 1000)}k`, icon: TrendingUp, color: "text-red-500", glow: "bg-red-600/5" },
+                    { label: "Mensual", value: thisMonthLogs.length, icon: Calendar, color: "text-blue-500", glow: "bg-blue-600/5" },
+                    { label: "Esfuerzo", value: avgRpe > 0 ? avgRpe.toFixed(1) : "0", icon: Zap, color: "text-amber-500", glow: "bg-amber-500/5" }
+                ].map((stat, i) => (
+                    <ClientMotionDiv
+                        key={i}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.1 }}
+                        className="bg-neutral-900/20 backdrop-blur-3xl border border-white/5 rounded-4xl p-8 relative overflow-hidden group shadow-2xl"
+                    >
+                        <div className={cn("absolute top-0 right-0 w-24 h-24 rounded-full blur-3xl -mr-12 -mt-12 pointer-events-none transition-colors duration-500 opacity-0 group-hover:opacity-100", stat.glow)}></div>
+                        <div className="flex flex-col relative z-10">
+                            <div className="w-12 h-12 bg-neutral-950 border border-white/5 rounded-2xl flex items-center justify-center mb-6 shadow-2xl group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
+                                <stat.icon className={cn("w-6 h-6", stat.color)} />
+                            </div>
+                            <p className="text-4xl font-black text-white italic tracking-tighter mb-1">{stat.value}</p>
+                            <p className="text-[10px] font-black text-neutral-600 uppercase tracking-[0.2em]">{stat.label}</p>
+                        </div>
+                    </ClientMotionDiv>
+                ))}
             </div>
 
-            {/* Logs List */}
-            {error ? (
-                <div className="text-red-500 bg-red-900/10 p-6 rounded-2xl border border-red-900/20 text-center">
-                    <p className="font-bold mb-1">Error al cargar historial</p>
-                    <p className="text-sm opacity-70">{error}</p>
-                </div>
-            ) : (
-                <TrainingHistoryList logs={logs || []} />
-            )}
+            {/* Logs List Section */}
+            <div className="relative">
+                {error ? (
+                    <ClientMotionDiv
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="bg-red-600/10 border border-red-600/20 p-12 rounded-4xl backdrop-blur-3xl text-center"
+                    >
+                        <ShieldAlert className="w-12 h-12 text-red-600 mx-auto mb-6" />
+                        <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter mb-2">Error de Sincronización</h3>
+                        <p className="text-red-500 font-bold uppercase tracking-widest text-[10px]">{error}</p>
+                    </ClientMotionDiv>
+                ) : (
+                    <TrainingHistoryList logs={logs || []} />
+                )}
+            </div>
         </div>
     );
 }
+
+// Missing icons and utils
+import { ShieldAlert } from "lucide-react";
+import { cn } from "@/lib/utils";

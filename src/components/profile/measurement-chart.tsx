@@ -4,8 +4,7 @@ import { useMemo } from "react";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Activity } from "lucide-react";
 
 interface MeasurementData {
     date: Date;
@@ -23,75 +22,96 @@ export function MeasurementChart({ data, metrics, title }: MeasurementChartProps
         return data.map(item => ({
             ...item,
             formattedDate: format(new Date(item.date), "d MMM", { locale: es })
-        }));
+        })).reverse(); // Show chronological order
     }, [data]);
 
     if (!data || data.length === 0) {
         return (
-            <Card className="bg-neutral-900/50 backdrop-blur-sm border-neutral-800 rounded-4xl shadow-xl overflow-hidden">
-                <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 px-6 pt-6">
-                    <CardTitle className="text-white text-xl font-black uppercase tracking-tight">{title}</CardTitle>
-                </CardHeader>
-                <CardContent className="h-[280px] flex items-center justify-center text-neutral-500 font-bold uppercase text-xs tracking-widest">
-                    No hay datos suficientes
-                </CardContent>
-            </Card>
+            <div className="bg-neutral-900/20 backdrop-blur-3xl border border-white/5 rounded-4xl shadow-2xl overflow-hidden p-8 flex flex-col items-center justify-center text-center gap-6 group">
+                <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center border border-white/5 group-hover:border-white/10 transition-all">
+                    <Activity className="w-8 h-8 text-neutral-700" />
+                </div>
+                <div>
+                    <h3 className="text-white font-black uppercase italic tracking-widest text-xs mb-2">{title}</h3>
+                    <p className="text-[10px] text-neutral-600 font-black uppercase italic tracking-widest">Esperando Sincronización de Datos</p>
+                </div>
+            </div>
         );
     }
 
     return (
-        <Card className="bg-neutral-900/50 backdrop-blur-sm border-neutral-800 rounded-4xl shadow-xl overflow-hidden">
-            <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 px-6 pt-6">
-                <CardTitle className="text-white text-xl font-black uppercase tracking-tight">{title}</CardTitle>
+        <div className="bg-neutral-900/20 backdrop-blur-3xl border border-white/5 rounded-4xl shadow-2xl overflow-hidden relative group">
+            <div className="absolute inset-0 bg-linear-to-b from-red-600/5 to-transparent pointer-events-none" />
+
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-8 border-b border-white/5 relative z-10 bg-black/20">
+                <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center border border-white/5">
+                        <Activity className="w-5 h-5 text-red-500" />
+                    </div>
+                    <h3 className="text-white text-lg font-black uppercase italic tracking-tighter">{title}</h3>
+                </div>
                 <div className="flex flex-wrap gap-2">
                     {metrics.map(m => (
-                        <Badge
+                        <div
                             key={m.key}
-                            style={{ backgroundColor: m.color + "15", color: m.color, borderColor: m.color + "30" }}
-                            variant="outline"
-                            className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md border"
+                            className="flex items-center gap-2 bg-black/40 border border-white/5 px-3 py-1.5 rounded-xl"
                         >
-                            <span className="w-1.5 h-1.5 rounded-full mr-1.5" style={{ backgroundColor: m.color }}></span>
-                            {m.label}
-                        </Badge>
+                            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: m.color }} />
+                            <span className="text-[9px] font-black uppercase tracking-widest text-neutral-400 italic">{m.label}</span>
+                        </div>
                     ))}
                 </div>
-            </CardHeader>
-            <CardContent className="px-2 sm:px-4 pb-6">
+            </div>
+
+            <div className="p-8 relative z-10">
                 <div className="h-[280px] w-full">
-                    <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0} debounce={50}>
-                        <LineChart data={formattedData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#262626" vertical={false} />
+                    <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={formattedData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#262626" vertical={false} strokeOpacity={0.2} />
                             <XAxis
                                 dataKey="formattedDate"
                                 stroke="#404040"
-                                fontSize={10}
-                                fontWeight={700}
+                                fontSize={9}
+                                fontWeight={900}
                                 tickLine={false}
                                 axisLine={false}
-                                dy={10}
+                                dy={15}
+                                className="uppercase italic"
                             />
                             <YAxis
                                 stroke="#404040"
-                                fontSize={10}
-                                fontWeight={700}
+                                fontSize={9}
+                                fontWeight={900}
                                 tickLine={false}
                                 axisLine={false}
-                                dx={-5}
+                                dx={-10}
                                 domain={['auto', 'auto']}
-                                hide={false}
+                                className="italic"
                             />
                             <Tooltip
                                 contentStyle={{
-                                    backgroundColor: "rgba(10, 10, 10, 0.95)",
-                                    border: "1px solid rgba(255, 255, 255, 0.1)",
+                                    backgroundColor: "rgba(0, 0, 0, 0.8)",
+                                    border: "1px solid rgba(255, 255, 255, 0.05)",
                                     borderRadius: "16px",
-                                    backdropFilter: "blur(12px)",
-                                    boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.5)"
+                                    backdropFilter: "blur(20px)",
+                                    boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)"
                                 }}
-                                itemStyle={{ fontSize: "11px", fontWeight: "700", padding: "2px 0" }}
-                                labelStyle={{ color: "#737373", fontSize: "10px", fontWeight: "800", textTransform: "uppercase", marginBottom: "6px" }}
-                                cursor={{ stroke: '#404040', strokeWidth: 1 }}
+                                itemStyle={{
+                                    fontSize: "10px",
+                                    fontWeight: "900",
+                                    textTransform: "uppercase",
+                                    padding: "2px 0"
+                                }}
+                                labelStyle={{
+                                    color: "#525252",
+                                    fontSize: "9px",
+                                    fontWeight: "900",
+                                    textTransform: "uppercase",
+                                    letterSpacing: "0.1em",
+                                    marginBottom: "10px",
+                                    fontStyle: "italic"
+                                }}
+                                cursor={{ stroke: 'rgba(239, 68, 68, 0.2)', strokeWidth: 2 }}
                             />
                             {metrics.map(m => (
                                 <Line
@@ -99,17 +119,17 @@ export function MeasurementChart({ data, metrics, title }: MeasurementChartProps
                                     type="monotone"
                                     dataKey={m.key}
                                     stroke={m.color}
-                                    strokeWidth={3}
-                                    dot={{ r: 3, fill: m.color, stroke: "#0a0a0a", strokeWidth: 2 }}
-                                    activeDot={{ r: 5, fill: m.color, stroke: "#fff", strokeWidth: 2 }}
+                                    strokeWidth={4}
+                                    dot={{ r: 4, fill: "#000", stroke: m.color, strokeWidth: 2 }}
+                                    activeDot={{ r: 6, fill: m.color, stroke: "#fff", strokeWidth: 2 }}
                                     name={m.label}
-                                    animationDuration={1000}
+                                    animationDuration={1500}
                                 />
                             ))}
                         </LineChart>
                     </ResponsiveContainer>
                 </div>
-            </CardContent>
-        </Card>
+            </div>
+        </div>
     );
 }

@@ -3,13 +3,15 @@
 import { deleteRoutine, duplicateRoutine } from "@/actions/routine-actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, Trash, Edit, Copy } from "lucide-react";
+import { Calendar, Trash, Edit, Copy, MoreVertical, Layers, Target, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { AssignRoutineDialog } from "@/components/routines/assign-routine-dialog";
 import { AssignedAthletesDialog } from "@/components/routines/assigned-athletes-dialog";
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 // Interfaces para la tarjeta de rutina
 interface RoutineScheduleDay {
@@ -47,7 +49,7 @@ export function RoutineCard({ routine, athletes }: RoutineCardProps) {
             const res = await deleteRoutine(routine.id);
             if (res.success) {
                 toast.success("Rutina eliminada");
-                router.refresh(); // Refresca los datos del servidor
+                router.refresh();
             } else {
                 toast.error(res.error);
             }
@@ -76,94 +78,108 @@ export function RoutineCard({ routine, athletes }: RoutineCardProps) {
     const hasAssignedText = routine.name.toUpperCase().includes("(ASSIGNED)");
     const cleanName = routine.name.replace(/\(ASSIGNED\)/gi, "").trim();
 
-
     return (
-        <Card className="group relative bg-neutral-900 border-neutral-800 hover:border-red-600/50 transition-all duration-300 rounded-2xl md:rounded-3xl overflow-hidden hover:shadow-[0_0_30px_-10px_rgba(220,38,38,0.2)] flex flex-col h-full">
-            {/* Gradient Overlay on Hover */}
-            <div className="absolute inset-0 bg-linear-to-br from-red-600/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+        <motion.div
+            layout
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            whileHover={{ y: -5 }}
+            className="group relative h-full"
+        >
+            <div className="absolute inset-0 bg-red-600/10 rounded-4xl blur-3xl opacity-0 group-hover:opacity-40 transition-opacity duration-700 pointer-events-none" />
 
-            <CardHeader className="p-4 md:p-6 pb-3 relative z-10">
-                <div className="flex justify-between items-start gap-2 mb-2">
-                    <div className="flex items-center gap-2">
-                        {isDaily ? (
-                            <span className="bg-neutral-800 text-neutral-400 text-[9px] md:text-[10px] px-2 py-0.5 rounded-md font-mono uppercase tracking-wider border border-neutral-700">
-                                Diaria
+            <Card className="relative h-full bg-neutral-900/20 backdrop-blur-3xl border border-white/5 hover:border-red-600/30 transition-all duration-500 rounded-4xl overflow-hidden shadow-2xl flex flex-col">
+                {/* Visual Accent */}
+                <div className="absolute top-0 right-0 w-32 h-32 bg-linear-to-bl from-red-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+
+                <CardHeader className="p-6 pb-4 relative z-10">
+                    <div className="flex justify-between items-start gap-4 mb-4">
+                        <div className="flex flex-wrap gap-2">
+                            <span className={cn(
+                                "px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-[0.2em] border shadow-sm",
+                                isDaily
+                                    ? "bg-amber-500/10 text-amber-500 border-amber-500/20"
+                                    : "bg-red-600/10 text-red-500 border-red-600/20"
+                            )}>
+                                {isDaily ? "Sesión Diaria" : "Plan Semanal"}
                             </span>
-                        ) : (
-                            <span className="bg-neutral-800 text-neutral-400 text-[9px] md:text-[10px] px-2 py-0.5 rounded-md font-mono uppercase tracking-wider border border-neutral-700">
-                                Semanal
-                            </span>
-                        )}
-                        {routine.active && (
-                            <span className="bg-green-500/10 text-green-500 text-[9px] md:text-[10px] px-2 py-0.5 rounded-full uppercase font-bold tracking-wider border border-green-500/20 shadow-[0_0_10px_-4px_rgba(34,197,94,0.5)]">
-                                Activa
-                            </span>
-                        )}
-                        {hasAssignedText && (
-                            <AssignedAthletesDialog routineId={routine.id} routineName={cleanName} />
-                        )}
-                    </div>
 
-                    <div className="flex gap-1 md:opacity-0 group-hover:opacity-100 transition-all -mr-1 -mt-1">
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="text-neutral-600 hover:text-white hover:bg-white/10 rounded-full h-8 w-8"
-                            onClick={handleDuplicate}
-                            disabled={isDuplicating}
-                            title="Duplicar"
-                        >
-                            <Copy className="w-4 h-4" />
-                        </Button>
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="text-neutral-600 hover:text-red-500 hover:bg-red-500/10 rounded-full h-8 w-8"
-                            onClick={handleDelete}
-                            disabled={isDeleting}
-                            title="Eliminar"
-                        >
-                            <Trash className="w-4 h-4" />
-                        </Button>
-                    </div>
-                </div>
+                            {routine.active && (
+                                <span className="bg-emerald-500/10 text-emerald-500 text-[9px] font-black uppercase tracking-[0.2em] px-3 py-1 rounded-lg border border-emerald-500/20 shadow-[0_0_15px_-5px_rgba(16,185,129,0.3)]">
+                                    Online
+                                </span>
+                            )}
 
-                <CardTitle className="text-lg md:text-xl font-black text-white leading-tight uppercase tracking-tight group-hover:text-red-500 transition-colors">
-                    {cleanName}
-                </CardTitle>
-                <p className="text-xs md:text-sm text-neutral-500 line-clamp-2 mt-2 font-medium">
-                    {routine.description || "Sin descripción definida."}
-                </p>
-            </CardHeader>
-
-            <CardContent className="p-4 md:p-6 mt-auto relative z-10">
-                <div className="space-y-4">
-                    {/* Stats Grid */}
-                    <div className="grid grid-cols-2 gap-2 text-xs font-medium text-neutral-400 bg-neutral-950/50 p-2.5 md:p-3 rounded-xl border border-neutral-800/50">
-                        <div className="flex flex-col items-center justify-center p-0.5">
-                            <span className="text-white font-bold text-sm md:text-base">{dayCount}</span>
-                            <span className="uppercase tracking-wider text-[9px] md:text-[10px]">Días</span>
+                            {hasAssignedText && (
+                                <AssignedAthletesDialog routineId={routine.id} routineName={cleanName} />
+                            )}
                         </div>
-                        <div className="flex flex-col items-center justify-center p-0.5 border-l border-neutral-800">
-                            <span className="text-white font-bold text-sm md:text-base">{totalExercises}</span>
-                            <span className="uppercase tracking-wider text-[9px] md:text-[10px]">Ejercicios</span>
+
+                        <div className="flex gap-1.5 translate-x-2 -translate-y-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="text-neutral-500 hover:text-white hover:bg-white/5 rounded-xl h-9 w-9"
+                                onClick={handleDuplicate}
+                                disabled={isDuplicating}
+                                title="Duplicar Arquitectura"
+                            >
+                                <Copy className="w-4 h-4" />
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="text-neutral-500 hover:text-red-500 hover:bg-red-500/10 rounded-xl h-9 w-9"
+                                onClick={handleDelete}
+                                disabled={isDeleting}
+                                title="Eliminar Registro"
+                            >
+                                <Trash className="w-4 h-4" />
+                            </Button>
                         </div>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row gap-2">
-                        <div className="flex-1">
-                            <Link href={`/routines/${routine.id}`} className="block w-full">
-                                <Button className="w-full bg-white text-black hover:bg-neutral-200 rounded-xl font-bold h-11 sm:h-10 shadow-sm transition-all hover:scale-[1.02]">
-                                    <Edit className="w-4 h-4 mr-2" /> EDITAR
-                                </Button>
-                            </Link>
+                    <CardTitle className="text-2xl font-black text-white leading-tight uppercase tracking-tighter italic group-hover:text-red-500 transition-colors duration-500">
+                        {cleanName}
+                    </CardTitle>
+                    <p className="text-xs text-neutral-500 line-clamp-2 mt-3 font-bold uppercase tracking-wider opacity-60">
+                        {routine.description || "NÚCLEO SIN DESCRIPCIÓN TÉCNICA."}
+                    </p>
+                </CardHeader>
+
+                <CardContent className="p-6 pt-0 mt-auto relative z-10 flex flex-col gap-6">
+                    {/* Stats Matrix */}
+                    <div className="grid grid-cols-2 gap-3">
+                        <div className="bg-black/40 backdrop-blur-md p-4 rounded-2xl border border-white/5 group-hover:border-red-600/10 transition-colors">
+                            <div className="flex flex-col">
+                                <span className="text-2xl font-black text-white leading-none mb-1 tabular-nums">{dayCount}</span>
+                                <span className="text-[9px] font-black uppercase tracking-[0.2em] text-neutral-500 flex items-center gap-1.5">
+                                    <Calendar className="w-2.5 h-2.5 text-red-600" /> Ciclos
+                                </span>
+                            </div>
                         </div>
+                        <div className="bg-black/40 backdrop-blur-md p-4 rounded-2xl border border-white/5 group-hover:border-red-600/10 transition-colors">
+                            <div className="flex flex-col">
+                                <span className="text-2xl font-black text-white leading-none mb-1 tabular-nums">{totalExercises}</span>
+                                <span className="text-[9px] font-black uppercase tracking-[0.2em] text-neutral-500 flex items-center gap-1.5">
+                                    <Layers className="w-2.5 h-2.5 text-red-600" /> Cargas
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex gap-3">
+                        <Link href={`/routines/${routine.id}`} className="flex-[1.5]">
+                            <Button className="w-full bg-white text-black hover:bg-neutral-200 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] h-12 shadow-xl transition-all hover:-translate-y-1 active:scale-95">
+                                <Edit className="w-3.5 h-3.5 mr-2" /> Programar
+                            </Button>
+                        </Link>
                         <div className="flex-1">
                             <AssignRoutineDialog routineId={routine.id} athletes={athletes} />
                         </div>
                     </div>
-                </div>
-            </CardContent>
-        </Card>
+                </CardContent>
+            </Card>
+        </motion.div>
     );
 }

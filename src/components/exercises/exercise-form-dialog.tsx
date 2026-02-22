@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { MediaUpload } from "@/components/ui/media-upload";
-import { Loader2, Dumbbell, Tag, ImagePlay, Search, Eraser } from "lucide-react";
+import { Loader2, Dumbbell, Tag, ImagePlay, Search, Eraser, Activity } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -180,63 +180,62 @@ export function ExerciseFormDialog({ exercise, trigger, open, onOpenChange }: Ex
             <DialogContent className="sm:max-w-[650px] bg-neutral-950 border-neutral-800 text-white p-0 gap-0 rounded-3xl shadow-2xl shadow-black/50 max-h-[95vh] flex flex-col">
 
                 {/* Header Estilizado */}
-                <div className="bg-linear-to-br from-neutral-900 to-neutral-950 p-8 border-b border-white/5">
-                    <DialogHeader>
-                        <DialogTitle className="flex items-center gap-3 text-2xl font-black uppercase tracking-tight text-white">
-                            <div className="h-10 w-10 rounded-full bg-red-600/10 flex items-center justify-center border border-red-600/20">
-                                <Dumbbell className="h-5 w-5 text-red-600" />
+                <div className="bg-linear-to-br from-neutral-900 via-neutral-950 to-black p-8 border-b border-white/5 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-red-600/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+                    <DialogHeader className="relative z-10">
+                        <DialogTitle className="flex items-center gap-4 text-3xl font-black uppercase tracking-tighter italic text-white">
+                            <div className="h-12 w-12 rounded-2xl bg-red-600/10 flex items-center justify-center border border-red-600/20 shadow-2xl">
+                                <Dumbbell className="h-6 w-6 text-red-600" />
                             </div>
                             {exercise ? "Editar Ejercicio" : "Nuevo Ejercicio"}
                         </DialogTitle>
-                        <DialogDescription className="text-neutral-400 text-base mt-2">
-                            Define los parámetros técnicos para potenciar el motor de IA.
+                        <DialogDescription className="text-neutral-500 font-bold uppercase tracking-[0.2em] text-[10px] ml-16 mt-1">
+                            Biblioteca Técnica <span className="text-red-500">/ Engine AI</span>
                         </DialogDescription>
                     </DialogHeader>
                 </div>
 
                 <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col overflow-hidden">
-                    <div className="flex-1 overflow-y-auto p-6 md:p-8 space-y-8 max-h-[65vh]">
-                        <div className="space-y-6">
+                    <div className="flex-1 overflow-y-auto p-6 md:p-10 space-y-10 max-h-[65vh] scrollbar-hide">
+                        <div className="space-y-8">
                             {/* Nombre */}
-                            <div className="space-y-3">
-                                <Label className="text-xs font-bold uppercase tracking-widest text-neutral-500 ml-1">Nombre Técnico</Label>
-                                <div className="flex gap-2">
+                            <div className="space-y-4">
+                                <Label className="text-[10px] font-black uppercase tracking-[0.3em] text-neutral-500 ml-1">Identificador Técnico</Label>
+                                <div className="flex gap-3">
                                     <Input
                                         {...register("name")}
                                         placeholder="Ej: Press de Banca Plano con Barra"
-                                        className="bg-neutral-900/50 border-neutral-800 text-white h-14 rounded-xl px-4 text-lg font-bold focus-visible:ring-red-600/50 focus-visible:border-red-600 transition-all placeholder:text-neutral-600 flex-1"
+                                        className="bg-neutral-900/40 backdrop-blur-md border border-white/5 text-white h-16 rounded-2xl px-6 text-lg font-black uppercase italic tracking-tight focus-visible:ring-red-600/30 focus-visible:border-red-600/50 transition-all placeholder:text-neutral-700 placeholder:not-italic flex-1 shadow-2xl"
                                     />
                                     <Button
                                         type="button"
                                         onClick={handleSearch}
                                         disabled={isSearching || isSubmitting}
-                                        className="h-14 w-14 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-white border border-neutral-700 hover:border-neutral-600 transition-all"
+                                        className="h-16 w-16 rounded-2xl bg-neutral-900 border border-white/5 hover:bg-neutral-800 text-white transition-all shadow-xl group"
                                         title="Buscar detalles con IA"
                                     >
-                                        {isSearching ? <Loader2 className="w-5 h-5 animate-spin" /> : <Search className="w-5 h-5" />}
+                                        {isSearching ? <Loader2 className="w-6 h-6 animate-spin" /> : <Search className="w-6 h-6 group-hover:scale-110 transition-transform text-red-500" />}
                                     </Button>
                                     <Button
                                         type="button"
                                         onClick={handleClear}
                                         disabled={isSearching || isSubmitting}
                                         variant="outline"
-                                        className="h-14 w-14 rounded-xl border-neutral-800 bg-neutral-900/30 hover:bg-neutral-800 text-neutral-400 hover:text-white transition-all"
+                                        className="h-16 w-16 rounded-2xl border-white/5 bg-neutral-900/20 hover:bg-neutral-800 text-neutral-500 hover:text-white transition-all shadow-xl"
                                         title="Limpiar datos de músculos"
                                     >
-                                        <Eraser className="w-5 h-5" />
+                                        <Eraser className="w-6 h-6" />
                                     </Button>
                                 </div>
-                                {errors.name && <p className="text-red-500 text-xs font-medium ml-1">{errors.name.message}</p>}
+                                {errors.name && <p className="text-red-500 text-[10px] font-black uppercase tracking-widest ml-2">{errors.name.message}</p>}
                             </div>
 
-
-
                             {/* Tags Muscles */}
-                            <div className="space-y-3">
-                                <Label className="text-xs font-bold uppercase tracking-widest text-neutral-500 ml-1 flex items-center gap-2">
-                                    <Tag className="w-3 h-3" /> Grupos Musculares Principales
+                            <div className="space-y-4">
+                                <Label className="text-[10px] font-black uppercase tracking-[0.3em] text-neutral-500 ml-1 flex items-center gap-2">
+                                    <Tag className="w-3 h-3 text-red-500" /> Grupos Musculares Primarios
                                 </Label>
-                                <div className="flex flex-wrap gap-2 p-4 bg-neutral-900/30 rounded-2xl border border-white/5">
+                                <div className="flex flex-wrap gap-2.5 p-6 bg-black/40 backdrop-blur-md rounded-4xl border border-white/5 shadow-inner">
                                     {MUSCLE_GROUPS.map(group => {
                                         const isSelected = selectedGroups?.includes(group);
                                         return (
@@ -244,10 +243,10 @@ export function ExerciseFormDialog({ exercise, trigger, open, onOpenChange }: Ex
                                                 key={group}
                                                 onClick={() => toggleMuscleGroup(group)}
                                                 className={cn(
-                                                    "px-4 py-2 rounded-xl text-sm font-bold cursor-pointer transition-all border select-none",
+                                                    "px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.15em] cursor-pointer transition-all border select-none shadow-sm",
                                                     isSelected
-                                                        ? "bg-red-600 text-white border-red-500 shadow-lg shadow-red-900/20"
-                                                        : "bg-neutral-800 border-transparent text-neutral-400 hover:bg-neutral-700 hover:text-white"
+                                                        ? "bg-red-600 text-white border-red-500 shadow-xl shadow-red-900/40 -translate-y-0.5"
+                                                        : "bg-neutral-900/50 border-white/5 text-neutral-500 hover:bg-neutral-800 hover:text-white"
                                                 )}
                                             >
                                                 {group}
@@ -255,14 +254,16 @@ export function ExerciseFormDialog({ exercise, trigger, open, onOpenChange }: Ex
                                         );
                                     })}
                                 </div>
-                                {errors.muscleGroups && <p className="text-red-500 text-xs font-medium ml-1">{errors.muscleGroups.message}</p>}
+                                {errors.muscleGroups && <p className="text-red-500 text-[10px] font-black uppercase tracking-widest ml-2">{errors.muscleGroups.message}</p>}
                             </div>
 
                             {/* Músculos Específicos */}
-                            <div className="space-y-3">
-                                <Label className="text-xs font-bold uppercase tracking-widest text-neutral-500 ml-1">Músculos Específicos</Label>
+                            <div className="space-y-4">
+                                <Label className="text-[10px] font-black uppercase tracking-[0.3em] text-neutral-500 ml-1 flex items-center gap-2">
+                                    <Activity className="w-3 h-3 text-red-500" /> Músculos Específicos (Target)
+                                </Label>
                                 {selectedGroups && selectedGroups.length > 0 ? (
-                                    <div className="flex flex-wrap gap-2 p-4 bg-neutral-900/30 rounded-2xl border border-white/5">
+                                    <div className="flex flex-wrap gap-2.5 p-6 bg-black/20 rounded-4xl border border-white/5 border-dashed">
                                         {Array.from(new Set(selectedGroups.flatMap(group => SPECIFIC_MUSCLES_BY_GROUP[group] || []))).map(muscle => {
                                             const isSelected = watch("specificMuscles")?.includes(muscle);
                                             return (
@@ -277,10 +278,10 @@ export function ExerciseFormDialog({ exercise, trigger, open, onOpenChange }: Ex
                                                         }
                                                     }}
                                                     className={cn(
-                                                        "px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition-all border select-none",
+                                                        "px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider cursor-pointer transition-all border select-none",
                                                         isSelected
-                                                            ? "bg-red-600/20 text-red-500 border-red-500/50"
-                                                            : "bg-neutral-800 border-transparent text-neutral-400 hover:bg-neutral-700 hover:text-white"
+                                                            ? "bg-red-600/10 text-red-500 border-red-500/30 shadow-lg shadow-red-900/10"
+                                                            : "bg-neutral-900/30 border-white/5 text-neutral-600 hover:bg-neutral-800 hover:text-white"
                                                     )}
                                                 >
                                                     {muscle}
@@ -288,55 +289,113 @@ export function ExerciseFormDialog({ exercise, trigger, open, onOpenChange }: Ex
                                             );
                                         })}
                                         {Array.from(new Set(selectedGroups.flatMap(group => SPECIFIC_MUSCLES_BY_GROUP[group] || []))).length === 0 && (
-                                            <p className="text-neutral-500 text-sm">No hay músculos específicos definidos para los grupos seleccionados.</p>
+                                            <p className="text-neutral-600 text-[10px] font-black uppercase tracking-widest italic opacity-50">No hay mapeo específico disponible</p>
                                         )}
                                     </div>
                                 ) : (
-                                    <div className="p-4 bg-neutral-900/10 rounded-2xl border border-white/5 border-dashed flex items-center justify-center text-neutral-600 text-sm">
-                                        Selecciona un grupo muscular para ver los músculos específicos.
+                                    <div className="p-10 bg-black/20 rounded-4xl border border-white/5 border-dashed flex flex-col items-center justify-center text-neutral-700 gap-3 grayscale opacity-50">
+                                        <Activity className="w-8 h-8 opacity-20" />
+                                        <p className="text-[10px] font-black uppercase tracking-[0.3em]">Pendiente de Definición</p>
                                     </div>
                                 )}
                             </div>
 
-                            {/* Multimedia - Subida de archivos */}
-                            <div className="space-y-3">
-                                <Label className="text-xs font-bold uppercase tracking-widest text-neutral-500 ml-1 flex items-center gap-2">
-                                    <ImagePlay className="w-3 h-3" /> Multimedia de Referencia (Opcional)
+                            {/* Multimedia */}
+                            <div className="space-y-4">
+                                <Label className="text-[10px] font-black uppercase tracking-[0.3em] text-neutral-500 ml-1 flex items-center gap-2">
+                                    <ImagePlay className="w-3 h-3 text-red-500" /> Multimedia & Referencia
                                 </Label>
 
-                                {/* Componente de subida */}
-                                <MediaUpload
-                                    value={watch("videoUrl") || ""}
-                                    onChange={(url) => setValue("videoUrl", url)}
-                                    onClear={() => setValue("videoUrl", "")}
-                                    disabled={isSubmitting}
-                                />
+                                <div className="p-8 bg-black/40 backdrop-blur-md rounded-4xl border border-white/5 shadow-inner space-y-6">
+                                    <MediaUpload
+                                        value={watch("videoUrl") || ""}
+                                        onChange={(url) => setValue("videoUrl", url)}
+                                        onClear={() => setValue("videoUrl", "")}
+                                        disabled={isSubmitting}
+                                    />
 
-                                {/* Input para URL manual */}
-                                <Input
-                                    {...register("videoUrl")}
-                                    placeholder="O pega una URL de imagen/video..."
-                                    className="bg-neutral-900/50 border-neutral-800 text-white h-12 rounded-xl px-4 focus-visible:ring-red-600/50 focus-visible:border-red-600 transition-all placeholder:text-neutral-600"
-                                />
+                                    <div className="relative group">
+                                        <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                                            <ExternalLink className="w-4 h-4 text-neutral-600 group-focus-within:text-red-500 transition-colors" />
+                                        </div>
+                                        <Input
+                                            {...register("videoUrl")}
+                                            placeholder="URL de referencia (YouTube, Vimeo, etc...)"
+                                            className="bg-neutral-950/50 border border-white/5 text-white h-14 pl-12 rounded-2xl focus-visible:ring-red-600/20 focus-visible:border-red-600/30 transition-all font-medium text-xs placeholder:text-neutral-700"
+                                        />
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <DialogFooter className="p-6 border-t border-white/5 gap-3 bg-neutral-950">
-                        <Button type="button" variant="ghost" onClick={() => setOpen(false)} className="h-12 rounded-xl text-neutral-400 hover:text-white hover:bg-neutral-800 font-medium px-6">
+                    <DialogFooter className="p-8 border-t border-white/5 gap-4 bg-black/60 backdrop-blur-2xl">
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            onClick={() => setOpen(false)}
+                            className="h-16 rounded-2xl text-neutral-500 hover:text-white hover:bg-white/5 font-black uppercase tracking-[0.2em] text-[10px] px-8 transition-all"
+                        >
                             Cancelar
                         </Button>
                         <Button
                             type="submit"
                             disabled={isSubmitting}
-                            className="h-12 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold px-8 shadow-xl shadow-red-900/20 hover:shadow-2xl hover:-translate-y-0.5 transition-all duration-300"
+                            className="h-16 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-black uppercase tracking-[0.2em] text-[10px] px-10 shadow-2xl shadow-red-900/40 hover:shadow-red-600/40 hover:-translate-y-1 transition-all duration-500 flex-1 md:flex-none"
                         >
-                            {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                            {exercise ? "Guardar Cambios" : "Crear Ejercicio"}
+                            {isSubmitting ? (
+                                <Loader2 className="w-5 h-5 animate-spin" />
+                            ) : (
+                                <span className="flex items-center gap-3">
+                                    {exercise ? "Actualizar Registro" : "Publicar Ejercicio"}
+                                    <ChevronRight className="w-5 h-5" />
+                                </span>
+                            )}
                         </Button>
                     </DialogFooter>
                 </form>
             </DialogContent>
         </Dialog>
+    );
+}
+
+// Helper icons for the footer and labels
+function ExternalLink(props: any) {
+    return (
+        <svg
+            {...props}
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+        >
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+            <polyline points="15 3 21 3 21 9" />
+            <line x1="10" y1="14" x2="21" y2="3" />
+        </svg>
+    );
+}
+
+function ChevronRight(props: any) {
+    return (
+        <svg
+            {...props}
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+        >
+            <path d="m9 18 6-6-6-6" />
+        </svg>
     );
 }

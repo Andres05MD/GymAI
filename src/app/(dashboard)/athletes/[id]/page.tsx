@@ -12,14 +12,15 @@ import { ProgressChart } from "@/components/dashboard/progress-chart";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { TrainingHistoryList } from "@/components/training/training-history-list";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Dumbbell, TrendingUp, Trophy, Target, Calendar, Flame, Activity } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { AssignRoutineModal } from "@/components/routines/assign-routine-modal";
+import { ArrowLeft, Dumbbell, TrendingUp, Trophy, Target, Calendar, Flame, Activity, ShieldAlert, Heart } from "lucide-react";
 import Link from "next/link";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CoachAIAnalysis } from "@/components/dashboard/coach-ai-analysis";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { AssignRoutineModal } from "@/components/routines/assign-routine-modal";
 import { ScheduleCalendar } from "@/components/dashboard/schedule-calendar";
 import { EditHealthDialog } from "@/components/dashboard/edit-health-dialog";
+import { ClientMotionDiv } from "@/components/ui/client-motion";
 
 interface Athlete {
     id: string;
@@ -103,67 +104,80 @@ export default async function AthleteDetailsPage({ params }: PageProps) {
     const weeklyVolume = activityData?.reduce((acc: number, cur: ActivityData) => acc + cur.total, 0) || 0;
 
     return (
-        <div className="space-y-8 pb-32 md:pb-20">
-            {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                <div className="flex items-center gap-5">
+        <div className="space-y-12 pb-32 md:pb-20 relative">
+            {/* Background Decorative Blobs */}
+            <div className="absolute top-0 right-1/4 w-96 h-96 bg-red-600/5 rounded-full blur-[120px] pointer-events-none -z-10" />
+            <div className="absolute top-1/2 -left-20 w-80 h-80 bg-red-600/5 rounded-full blur-[100px] pointer-events-none -z-10" />
+
+            {/* Header Area */}
+            <ClientMotionDiv
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex flex-col md:flex-row md:items-center justify-between gap-8"
+            >
+                <div className="flex items-center gap-6">
                     <Link href="/athletes">
-                        <Button variant="ghost" size="icon" className="rounded-full text-neutral-400 hover:text-white hover:bg-neutral-800">
-                            <ArrowLeft className="w-5 h-5" />
-                        </Button>
+                        <div className="group h-12 w-12 rounded-2xl border border-white/5 bg-neutral-900/50 flex items-center justify-center hover:bg-red-600 hover:border-red-600 transition-all duration-500 text-neutral-500 group-hover:text-white group">
+                            <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform duration-500" />
+                        </div>
                     </Link>
 
-                    <Avatar className="h-16 w-16 border-2 border-neutral-800">
-                        <AvatarImage src={athlete.image} />
-                        <AvatarFallback className="bg-neutral-800 text-white font-bold text-xl">
-                            {athlete.name?.[0]?.toUpperCase()}
-                        </AvatarFallback>
-                    </Avatar>
+                    <div className="relative">
+                        <div className="absolute inset-0 bg-red-600/20 rounded-3xl blur-xl opacity-20 pointer-events-none" />
+                        <Avatar className="h-20 w-20 border-2 border-white/10 rounded-3xl relative z-10 shadow-2xl">
+                            <AvatarImage src={athlete.image} className="object-cover" />
+                            <AvatarFallback className="bg-neutral-900 text-white font-black text-2xl italic">
+                                {athlete.name?.[0]?.toUpperCase()}
+                            </AvatarFallback>
+                        </Avatar>
+                    </div>
 
                     <div>
-                        <div className="flex flex-wrap items-center gap-2 md:gap-3">
-                            <h1 className="text-2xl md:text-3xl font-black text-white uppercase tracking-tight wrap-break-word">
+                        <div className="flex flex-wrap items-center gap-3">
+                            <h1 className="text-3xl md:text-4xl font-black text-white uppercase tracking-tighter italic leading-none">
                                 {athlete.name}
                             </h1>
-
                         </div>
-                        <p className="text-neutral-500 text-sm">{athlete.email}</p>
+                        <p className="text-[10px] font-bold text-neutral-600 uppercase tracking-[0.3em] mt-2">
+                            Sistema de Monitoreo: <span className="text-white italic">{athlete.email}</span>
+                        </p>
                     </div>
                 </div>
 
-                <div className="flex flex-col w-full md:w-auto md:items-end gap-3">
+                <div className="flex flex-col w-full md:w-auto md:items-end gap-4">
                     {routine ? (
                         <Link href={`/athletes/${athlete.id}/routine`} className="group block">
-                            <div className="bg-neutral-900 border border-neutral-800 hover:border-red-500/50 rounded-2xl flex items-center pr-6 pl-3 py-2 gap-4 transition-all hover:bg-neutral-800 cursor-pointer shadow-lg hover:shadow-red-900/10 h-14">
-                                <div className="h-10 w-10 bg-red-600 rounded-xl flex items-center justify-center shrink-0 shadow-inner group-hover:scale-105 transition-transform bg-linear-to-br from-red-500 to-red-700">
-                                    <Dumbbell className="text-white w-5 h-5" />
+                            <div className="bg-neutral-900/40 backdrop-blur-3xl border border-white/5 hover:border-red-600/30 rounded-3xl flex items-center pr-8 pl-4 py-3 gap-5 transition-all duration-500 cursor-pointer shadow-2xl h-20">
+                                <div className="h-12 w-12 bg-linear-to-br from-red-500 to-red-700 rounded-2xl flex items-center justify-center shrink-0 shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
+                                    <Dumbbell className="text-white w-6 h-6" />
                                 </div>
                                 <div className="text-left flex flex-col justify-center">
-                                    <p className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest leading-none mb-1.5">Rutina Activa</p>
-                                    <p className="text-white font-bold text-sm leading-none group-hover:text-red-400 transition-colors truncate max-w-[140px] md:max-w-[200px]">
+                                    <p className="text-[9px] font-black text-neutral-600 uppercase tracking-[0.3em] mb-1.5">Protocolo Activo</p>
+                                    <p className="text-white font-black text-base uppercase tracking-tight italic group-hover:text-red-500 transition-colors duration-500 truncate max-w-[180px] md:max-w-[250px]">
                                         {routine.name || "Sin Nombre"}
                                     </p>
                                 </div>
                                 {routine.schedule && (
-                                    <div className="hidden md:flex flex-col items-center border-l border-neutral-800 pl-4 h-8 justify-center min-w-12">
-                                        <span className="text-[10px] text-neutral-500 font-bold uppercase leading-none mb-0.5">Días</span>
-                                        <span className="text-sm font-black text-white leading-none">{routine.schedule.length}</span>
+                                    <div className="hidden lg:flex flex-col items-center border-l border-white/5 pl-6 h-10 justify-center min-w-[60px]">
+                                        <span className="text-[9px] text-neutral-600 font-black uppercase tracking-widest leading-none mb-1">Días</span>
+                                        <span className="text-lg font-black text-white italic leading-none">{routine.schedule.length}</span>
                                     </div>
                                 )}
                             </div>
                         </Link>
                     ) : (
-                        <AssignRoutineModal
-                            athleteId={athlete.id}
-                            athleteName={athlete.name || "Atleta"}
-                            routines={coachRoutines || []}
-                        />
+                        <div className="h-20 flex items-center justify-center">
+                            <AssignRoutineModal
+                                athleteId={athlete.id}
+                                athleteName={athlete.name || "Atleta"}
+                                routines={coachRoutines || []}
+                            />
+                        </div>
                     )}
 
-                    {/* Quick Info Pills */}
-                    <div className="flex flex-wrap gap-2 md:gap-3 w-full md:w-auto">
+                    <div className="flex flex-wrap gap-3 w-full md:w-auto">
                         {athlete.goal && (
-                            <div className="flex items-center gap-2 bg-red-500/10 text-red-500 px-4 py-2 rounded-full text-sm font-bold border border-red-500/20">
+                            <div className="flex items-center gap-2 bg-red-600/10 text-red-500 px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest border border-red-600/20 italic">
                                 <Target className="w-4 h-4" />
                                 {(() => {
                                     const map: Record<string, string> = {
@@ -177,31 +191,31 @@ export default async function AthleteDetailsPage({ params }: PageProps) {
                                 })()}
                             </div>
                         )}
-                        <div className="flex items-center gap-2 bg-neutral-900 text-neutral-400 px-4 py-2 rounded-full text-sm font-bold border border-neutral-800">
+                        <div className="flex items-center gap-2 bg-neutral-900/50 text-neutral-500 px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest border border-white/5 italic">
                             <Calendar className="w-4 h-4" />
-                            Desde {athlete.createdAt ? new Date(athlete.createdAt.toDate?.() || athlete.createdAt).toLocaleDateString('es', { month: 'short', year: 'numeric' }) : 'N/A'}
+                            Escalón desde {athlete.createdAt ? new Date(athlete.createdAt.toDate?.() || athlete.createdAt).toLocaleDateString('es', { month: 'short', year: 'numeric' }) : 'N/A'}
                         </div>
                     </div>
                 </div>
-            </div>
+            </ClientMotionDiv>
 
-            <Tabs defaultValue="overview" className="space-y-6">
-                <TabsList className="bg-neutral-900 border border-neutral-800 p-1 rounded-2xl w-full sm:w-auto">
+            <Tabs defaultValue="overview" className="space-y-10">
+                <TabsList className="bg-neutral-900/40 backdrop-blur-3xl border border-white/5 p-1.5 rounded-3xl w-full sm:w-auto h-16 flex items-stretch">
                     <TabsTrigger
                         value="overview"
-                        className="flex-1 sm:flex-none rounded-xl data-[state=active]:bg-red-600 data-[state=active]:text-white data-[state=active]:shadow-lg px-6"
+                        className="flex-1 sm:flex-none rounded-2xl data-[state=active]:bg-red-600 data-[state=active]:text-white data-[state=active]:shadow-2xl px-10 text-[10px] font-black uppercase tracking-[0.2em] italic transition-all duration-500"
                     >
                         Visión General
                     </TabsTrigger>
                     <TabsTrigger
                         value="schedule"
-                        className="flex-1 sm:flex-none rounded-xl data-[state=active]:bg-red-600 data-[state=active]:text-white data-[state=active]:shadow-lg px-6"
+                        className="flex-1 sm:flex-none rounded-2xl data-[state=active]:bg-red-600 data-[state=active]:text-white data-[state=active]:shadow-2xl px-10 text-[10px] font-black uppercase tracking-[0.2em] italic transition-all duration-500"
                     >
                         Calendario
                     </TabsTrigger>
                     <TabsTrigger
                         value="history"
-                        className="flex-1 sm:flex-none rounded-xl data-[state=active]:bg-red-600 data-[state=active]:text-white data-[state=active]:shadow-lg px-6"
+                        className="flex-1 sm:flex-none rounded-2xl data-[state=active]:bg-red-600 data-[state=active]:text-white data-[state=active]:shadow-2xl px-10 text-[10px] font-black uppercase tracking-[0.2em] italic transition-all duration-500"
                     >
                         Historial
                     </TabsTrigger>
@@ -247,34 +261,43 @@ export default async function AthleteDetailsPage({ params }: PageProps) {
                     </div>
 
                     {/* Charts */}
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <div className="lg:col-span-2 bg-neutral-900 border border-neutral-800 rounded-3xl p-6 md:p-8">
-                            <div className="flex justify-between items-center mb-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div className="lg:col-span-2 bg-neutral-900/20 backdrop-blur-3xl border border-white/5 rounded-4xl p-8 md:p-10 group relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-64 h-64 bg-red-600/5 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                            <div className="flex justify-between items-center mb-10 relative z-10">
                                 <div>
-                                    <h3 className="text-xl font-bold text-white">Actividad Semanal</h3>
-                                    <p className="text-sm text-neutral-500">Volumen de entrenamiento</p>
+                                    <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter">Actividad Semanal</h3>
+                                    <p className="text-[10px] font-bold text-neutral-600 uppercase tracking-widest mt-1">Sincronización de Volumen de Carga</p>
                                 </div>
                             </div>
-                            <div className="h-[280px]">
+                            <div className="h-[300px] relative z-10">
                                 <ActivityChart data={activityData} />
                             </div>
                         </div>
 
-                        <div className="bg-neutral-900 border border-neutral-800 rounded-3xl p-6 md:p-8 flex flex-col">
-                            <h3 className="text-xl font-bold text-white mb-2">Cumplimiento</h3>
-                            <p className="text-sm text-neutral-500 mb-6">Meta semanal de sesiones</p>
-                            <div className="flex-1 flex items-center justify-center">
+                        <div className="bg-neutral-900/20 backdrop-blur-3xl border border-white/5 rounded-4xl p-8 md:p-10 flex flex-col group relative overflow-hidden">
+                            <div className="absolute bottom-0 left-0 w-48 h-48 bg-red-600/5 rounded-full blur-3xl -ml-24 -mb-24 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                            <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter mb-1 relative z-10">Cumplimiento</h3>
+                            <p className="text-[10px] font-bold text-neutral-600 uppercase tracking-widest mb-10 relative z-10">Meta de Protocolos Semanales</p>
+                            <div className="flex-1 flex items-center justify-center relative z-10">
                                 <ProgressChart completed={weeklyCompleted} target={weeklyTarget} />
                             </div>
                         </div>
                     </div>
 
                     {/* Salud y Lesiones */}
-                    <div className="bg-neutral-900 border border-neutral-800 rounded-3xl p-6 md:p-8">
-                        <div className="flex items-center justify-between mb-6">
-                            <div className="flex items-center gap-3">
-                                <Activity className="w-5 h-5 text-red-500" />
-                                <h3 className="text-xl font-bold text-white">Salud y Lesiones</h3>
+                    <div className="bg-neutral-900/20 backdrop-blur-3xl border border-white/5 rounded-4xl p-8 md:p-12 relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-red-600/5 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none" />
+
+                        <div className="flex items-center justify-between mb-10 relative z-10">
+                            <div className="flex items-center gap-4">
+                                <div className="h-12 w-12 rounded-2xl bg-red-600/10 border border-red-600/20 flex items-center justify-center">
+                                    <Activity className="w-6 h-6 text-red-600" />
+                                </div>
+                                <div>
+                                    <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter">Estado Biométrico</h3>
+                                    <p className="text-[10px] font-bold text-neutral-600 uppercase tracking-widest mt-1">Salud, Lesiones y Limitaciones</p>
+                                </div>
                             </div>
                             <EditHealthDialog
                                 athlete={{
@@ -285,40 +308,43 @@ export default async function AthleteDetailsPage({ params }: PageProps) {
                                 }}
                             />
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            {/* Lesiones */}
-                            <div>
-                                <h4 className="text-xs font-bold uppercase tracking-widest text-neutral-500 mb-4 flex items-center gap-2">
-                                    <Flame className="w-3 h-3" /> Lesiones / Molestias
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 relative z-10">
+                            <div className="space-y-6">
+                                <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-red-500 italic flex items-center gap-2">
+                                    <ShieldAlert className="w-4 h-4" /> Lesiones / Molestias
                                 </h4>
                                 {athlete.injuries && athlete.injuries.length > 0 ? (
-                                    <div className="flex flex-wrap gap-2">
+                                    <div className="flex flex-wrap gap-3">
                                         {athlete.injuries.map((injury, i) => (
-                                            <span key={i} className="bg-red-500/10 text-red-500 px-4 py-1.5 rounded-full text-sm font-bold border border-red-500/20">
+                                            <span key={i} className="bg-red-600/10 text-red-500 px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest border border-red-600/20 italic shadow-lg shadow-red-900/10">
                                                 {injury}
                                             </span>
                                         ))}
                                     </div>
                                 ) : (
-                                    <p className="text-neutral-500 text-sm italic">Sin lesiones reportadas</p>
+                                    <div className="p-6 border-2 border-dashed border-white/5 rounded-3xl bg-white/2 flex items-center justify-center opacity-50">
+                                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-500 italic">Núcleo Íntegro - Sin Lesiones</p>
+                                    </div>
                                 )}
                             </div>
 
-                            {/* Condiciones Médicas */}
-                            <div>
-                                <h4 className="text-xs font-bold uppercase tracking-widest text-neutral-500 mb-4 flex items-center gap-2">
-                                    <Target className="w-3 h-3" /> Condiciones Médicas
+                            <div className="space-y-6">
+                                <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-500 italic flex items-center gap-2">
+                                    <Heart className="w-4 h-4" /> Condiciones Médicas
                                 </h4>
                                 {athlete.medicalConditions && athlete.medicalConditions.length > 0 ? (
-                                    <div className="flex flex-wrap gap-2">
+                                    <div className="flex flex-wrap gap-3">
                                         {athlete.medicalConditions.map((condition, i) => (
-                                            <span key={i} className="bg-blue-500/10 text-blue-400 px-4 py-1.5 rounded-full text-sm font-bold border border-blue-500/20">
+                                            <span key={i} className="bg-blue-600/10 text-blue-400 px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest border border-blue-600/20 italic shadow-lg shadow-blue-900/10">
                                                 {condition}
                                             </span>
                                         ))}
                                     </div>
                                 ) : (
-                                    <p className="text-neutral-500 text-sm italic">Sin condiciones médicas reportadas</p>
+                                    <div className="p-6 border-2 border-dashed border-white/5 rounded-3xl bg-white/2 flex items-center justify-center opacity-50">
+                                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-500 italic">Sin Restricciones Clínicas Detectadas</p>
+                                    </div>
                                 )}
                             </div>
                         </div>
@@ -326,21 +352,32 @@ export default async function AthleteDetailsPage({ params }: PageProps) {
 
                     {/* PRs Preview */}
                     {prs && prs.length > 0 && (
-                        <div className="bg-neutral-900 border border-neutral-800 rounded-3xl p-6 md:p-8">
-                            <div className="flex items-center gap-3 mb-6">
-                                <Trophy className="w-5 h-5 text-yellow-500" />
-                                <h3 className="text-xl font-bold text-white">Records Personales</h3>
+                        <div className="bg-neutral-900/20 backdrop-blur-3xl border border-white/5 rounded-4xl p-8 md:p-12 relative overflow-hidden group">
+                            <div className="absolute bottom-0 right-0 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl -mr-32 -mb-32 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                            <div className="flex items-center gap-4 mb-10 relative z-10">
+                                <div className="h-12 w-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500">
+                                    <Trophy className="w-6 h-6" />
+                                </div>
+                                <div>
+                                    <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter">Récords Personales</h3>
+                                    <p className="text-[10px] font-bold text-neutral-600 uppercase tracking-widest mt-1">Hitos de Capacidad Máxima</p>
+                                </div>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
                                 {prs.slice(0, 3).map((pr: PersonalRecord, i: number) => (
-                                    <div key={i} className="bg-black/40 border border-yellow-500/10 rounded-2xl p-4 flex items-center justify-between hover:border-yellow-500/30 transition-colors">
-                                        <div>
-                                            <p className="font-bold text-white">{pr.exercise}</p>
-                                            <p className="text-xs text-neutral-500">{pr.date}</p>
+                                    <div key={i} className="bg-black/40 backdrop-blur-md border border-white/5 rounded-3xl p-6 flex flex-col gap-4 hover:border-amber-500/30 transition-all duration-500 group/pr shadow-xl">
+                                        <div className="flex justify-between items-start">
+                                            <div>
+                                                <p className="font-black text-white uppercase italic tracking-tight group-hover/pr:text-amber-500 transition-colors">{pr.exercise}</p>
+                                                <p className="text-[9px] font-bold text-neutral-600 uppercase tracking-widest mt-1">{pr.date}</p>
+                                            </div>
+                                            <div className="h-8 w-8 rounded-xl bg-amber-500/10 flex items-center justify-center">
+                                                <Trophy className="w-4 h-4 text-amber-500 opacity-50" />
+                                            </div>
                                         </div>
-                                        <div className="text-right">
-                                            <p className="text-xl font-black text-yellow-500">{pr.weight}</p>
-                                            <p className="text-[10px] text-neutral-500 uppercase tracking-wider">kg</p>
+                                        <div className="flex items-end gap-2 text-right mt-2">
+                                            <p className="text-4xl font-black text-amber-500 italic leading-none">{pr.weight}</p>
+                                            <p className="text-[10px] font-black text-neutral-600 uppercase tracking-[0.2em] mb-1">kg</p>
                                         </div>
                                     </div>
                                 ))}

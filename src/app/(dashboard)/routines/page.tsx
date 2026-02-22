@@ -2,10 +2,11 @@ import { auth } from "@/lib/auth";
 import { getRoutines } from "@/actions/routine-actions";
 import { getAllAthletes } from "@/actions/coach-actions";
 import { Button } from "@/components/ui/button";
-import { Plus, ClipboardList } from "lucide-react";
+import { Plus, ClipboardList, ChevronRight, Zap } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { RoutineCard } from "@/components/routines/routine-card";
+import { ClientMotionDiv } from "@/components/ui/client-motion";
 
 export default async function RoutinesPage() {
     const session = await auth();
@@ -32,72 +33,104 @@ export default async function RoutinesPage() {
     ])).values());
 
     return (
-        <div className="space-y-8">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4">
-                <div>
-                    <h1 className="text-xl sm:text-3xl font-black text-white uppercase tracking-tighter leading-tight">Gestor de Rutinas</h1>
-                    <p className="text-xs sm:text-base text-neutral-400">Diseña planes de entrenamiento o deja que la IA lo haga por ti.</p>
+        <div className="space-y-12 pb-24 md:pb-10 relative">
+            {/* Background Decorative Blobs */}
+            <div className="absolute top-0 right-1/4 w-96 h-96 bg-red-600/5 rounded-full blur-[120px] pointer-events-none -z-10" />
+            <div className="absolute bottom-1/4 -left-20 w-80 h-80 bg-red-600/5 rounded-full blur-[100px] pointer-events-none -z-10" />
+
+            <ClientMotionDiv
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex flex-col gap-6 md:flex-row md:justify-between md:items-end mb-4 md:mb-6"
+            >
+                <div className="space-y-1">
+                    <h2 className="text-4xl md:text-5xl font-black text-white tracking-tighter uppercase italic leading-none">Arquitectura</h2>
+                    <p className="text-neutral-500 font-bold uppercase tracking-[0.3em] text-[10px] ml-1">
+                        Sistemas de Carga: <span className="text-red-500">Rutinas & Programación</span>
+                    </p>
                 </div>
 
-                <Link href="/routines/new">
-                    <Button className="h-9 px-4 text-xs md:h-11 md:px-6 md:text-sm bg-red-600 hover:bg-red-700 text-white rounded-full font-bold shadow-lg shadow-red-900/20">
-                        <Plus className="w-4 h-4 mr-1 md:w-5 md:h-5 md:mr-2" /> Nueva Rutina
-                    </Button>
-                </Link>
-            </div>
-
-            {routines.length === 0 ? (
-                <div className="text-center py-20 bg-neutral-900/50 rounded-3xl border border-neutral-800">
-                    <ClipboardList className="w-16 h-16 text-neutral-700 mx-auto mb-4" />
-                    <h3 className="text-xl font-bold text-white mb-2">No tienes rutinas creadas</h3>
-                    <p className="text-neutral-500 mb-6">Comienza creando tu primera rutina manualmente o con IA.</p>
-                    <Link href="/routines/new">
-                        <Button variant="outline" className="rounded-full border-neutral-700 text-white hover:bg-neutral-800">
-                            Crear Rutina
+                <div className="flex gap-4 items-center w-full md:w-auto">
+                    <Link href="/routines/new" className="w-full md:w-auto">
+                        <Button className="group relative w-full md:w-auto overflow-hidden rounded-2xl bg-red-600 px-8 h-14 text-xs font-black text-white shadow-2xl shadow-red-900/40 transition-all duration-300 active:scale-95 group hover:bg-red-700">
+                            <span className="relative z-10 flex items-center gap-3 uppercase tracking-[0.2em]">
+                                <Plus className="w-5 h-5 transition-transform duration-300 group-hover:scale-110" />
+                                Nueva Rutina
+                                <ChevronRight className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" />
+                            </span>
                         </Button>
                     </Link>
                 </div>
-            ) : (
-                <div className="space-y-12">
-                    {/* Weekly Routines Section */}
-                    <div className="space-y-6">
-                        <div className="flex items-center gap-2 border-b border-neutral-800 pb-2">
-                            <h2 className="text-lg font-bold text-white uppercase tracking-wider">Planificación Semanal</h2>
-                            <span className="text-xs bg-neutral-800 text-neutral-400 px-2 py-0.5 rounded-md font-mono">
-                                {routines.filter((r: any) => r.type !== 'daily').length}
-                            </span>
+            </ClientMotionDiv>
+
+            {routines.length === 0 ? (
+                <ClientMotionDiv
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="relative p-12 md:p-24 bg-neutral-900/20 backdrop-blur-3xl rounded-4xl border border-white/5 overflow-hidden group shadow-2xl"
+                >
+                    <div className="absolute inset-0 bg-linear-to-br from-red-600/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                    <div className="relative z-10 flex flex-col items-center text-center max-w-lg mx-auto">
+                        <div className="w-24 h-24 rounded-3xl bg-neutral-900/50 border border-white/10 flex items-center justify-center mb-8 shadow-2xl group-hover:scale-110 transition-transform duration-500 group-hover:rotate-6">
+                            <ClipboardList className="w-10 h-10 text-red-500" />
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <h3 className="text-3xl font-black text-white uppercase italic tracking-tighter mb-4">Núcleo Vacío</h3>
+                        <p className="text-neutral-500 font-medium text-sm leading-relaxed mb-10">
+                            No se detectan sistemas de entrenamiento programados. Comienza a definir tu arquitectura de carga manualmente o utiliza el motor de IA.
+                        </p>
+                        <Link href="/routines/new">
+                            <Button className="h-14 px-10 rounded-2xl bg-white text-black hover:bg-neutral-200 font-black uppercase tracking-[0.2em] text-[10px] transition-all shadow-xl hover:shadow-white/10 flex items-center gap-3">
+                                <Zap className="w-4 h-4" />
+                                Inicializar Sistema
+                            </Button>
+                        </Link>
+                    </div>
+                </ClientMotionDiv>
+            ) : (
+                <div className="space-y-16">
+                    {/* Weekly Routines Section */}
+                    <div className="space-y-8">
+                        <div className="flex items-center gap-4 group">
+                            <div className="h-8 w-1 bg-red-600 rounded-full group-hover:h-10 transition-all duration-500" />
+                            <h2 className="text-2xl font-black text-white uppercase italic tracking-tighter">Planificación Semanal</h2>
+                            <div className="px-3 py-1 rounded-full bg-red-600/10 border border-red-600/20 text-red-500 text-[10px] font-black tabular-nums">
+                                {routines.filter((r: any) => r.type !== 'daily').length}
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                             {routines
                                 .filter((r: any) => r.type !== 'daily')
                                 .map((routine: any) => (
                                     <RoutineCard key={routine.id} routine={routine} athletes={athletes || []} />
                                 ))}
                             {routines.filter((r: any) => r.type !== 'daily').length === 0 && (
-                                <div className="col-span-full py-8 text-center text-neutral-500 text-sm italic border border-dashed border-neutral-800 rounded-xl">
-                                    No hay rutinas semanales
+                                <div className="col-span-full py-16 text-center border-2 border-dashed border-white/5 rounded-4xl bg-white/5 backdrop-blur-sm">
+                                    <p className="text-neutral-500 font-black uppercase tracking-[0.3em] text-[10px] italic">Sin Arquitecturas Semanales</p>
                                 </div>
                             )}
                         </div>
                     </div>
 
                     {/* Daily Routines Section */}
-                    <div className="space-y-6">
-                        <div className="flex items-center gap-2 border-b border-neutral-800 pb-2">
-                            <h2 className="text-lg font-bold text-white uppercase tracking-wider">Sesiones Diarias</h2>
-                            <span className="text-xs bg-neutral-800 text-neutral-400 px-2 py-0.5 rounded-md font-mono">
+                    <div className="space-y-8">
+                        <div className="flex items-center gap-4 group">
+                            <div className="h-8 w-1 bg-amber-500 rounded-full group-hover:h-10 transition-all duration-500" />
+                            <h2 className="text-2xl font-black text-white uppercase italic tracking-tighter">Sesiones Diarias</h2>
+                            <div className="px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-500 text-[10px] font-black tabular-nums">
                                 {routines.filter((r: any) => r.type === 'daily').length}
-                            </span>
+                            </div>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                             {routines
                                 .filter((r: any) => r.type === 'daily')
                                 .map((routine: any) => (
                                     <RoutineCard key={routine.id} routine={routine} athletes={athletes || []} />
                                 ))}
                             {routines.filter((r: any) => r.type === 'daily').length === 0 && (
-                                <div className="col-span-full py-8 text-center text-neutral-500 text-sm italic border border-dashed border-neutral-800 rounded-xl">
-                                    No hay sesiones diarias sueltas
+                                <div className="col-span-full py-16 text-center border-2 border-dashed border-white/5 rounded-4xl bg-white/5 backdrop-blur-sm">
+                                    <p className="text-neutral-500 font-black uppercase tracking-[0.3em] text-[10px] italic">Sin Módulos Diarios Independientes</p>
                                 </div>
                             )}
                         </div>

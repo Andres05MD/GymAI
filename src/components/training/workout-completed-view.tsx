@@ -1,59 +1,81 @@
 "use client";
 
-import { Trophy, CheckCircle2, ArrowLeft, Calendar, LayoutDashboard } from "lucide-react";
+import { Trophy, CheckCircle2, ArrowLeft, Calendar, LayoutDashboard, Zap, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { ClientMotionDiv } from "@/components/ui/client-motion";
+import { cn } from "@/lib/utils";
 
 export function WorkoutCompletedView() {
     const router = useRouter();
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-[85vh] px-4 text-center animate-in fade-in zoom-in duration-500">
+        <div className="flex flex-col items-center justify-center min-h-[85vh] px-6 text-center relative overflow-hidden">
             {/* Ambient Background Glows */}
-            <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-green-600/10 rounded-full blur-[120px] pointer-events-none" />
-            <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-amber-600/10 rounded-full blur-[120px] pointer-events-none" />
+            <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-emerald-600/5 rounded-full blur-[120px] pointer-events-none -z-10" />
+            <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-amber-600/5 rounded-full blur-[120px] pointer-events-none -z-10" />
 
-            <div className="relative space-y-8 max-w-lg w-full">
-                {/* Icon Circle */}
-                <div className="relative mx-auto w-32 h-32 flex items-center justify-center">
-                    <div className="absolute inset-0 bg-neutral-900 border border-neutral-800 rounded-full shadow-2xl" />
-                    <div className="absolute inset-2 border border-green-500/20 rounded-full border-dashed animate-[spin_15s_linear_infinite]" />
-                    <Trophy className="w-12 h-12 text-amber-400 relative z-10 drop-shadow-[0_0_15px_rgba(251,191,36,0.5)]" />
+            <ClientMotionDiv
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 1, ease: "circOut" }}
+                className="relative space-y-12 max-w-2xl w-full"
+            >
+                {/* Victory Visual */}
+                <div className="relative mx-auto w-44 h-44 flex items-center justify-center group">
+                    <div className="absolute inset-0 bg-neutral-900/40 backdrop-blur-3xl border border-white/5 rounded-full shadow-2xl group-hover:scale-110 transition-transform duration-700" />
+                    <div className="absolute inset-3 border border-emerald-500/20 rounded-full border-dashed animate-[spin_20s_linear_infinite]" />
+                    <div className="absolute inset-10 bg-amber-500/10 rounded-full blur-2xl group-hover:bg-amber-500/20 transition-colors duration-500" />
+                    <Trophy className="w-20 h-20 text-amber-500 relative z-10 drop-shadow-[0_0_25px_rgba(245,158,11,0.5)] group-hover:scale-110 transition-transform duration-500" />
+
+                    {/* Floating Particles Shorthand */}
+                    <div className="absolute -top-4 -right-2 animate-bounce transition-transform duration-1000">
+                        <Zap className="w-6 h-6 text-yellow-400 fill-yellow-400" />
+                    </div>
                 </div>
 
-                <div className="space-y-4">
-                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-green-500/10 border border-green-500/20 text-green-400 text-xs font-black uppercase tracking-[0.2em]">
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                        Sesión Finalizada
+                <div className="space-y-6">
+                    <ClientMotionDiv
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.3 }}
+                        className="inline-flex items-center gap-3 px-6 py-2 rounded-2xl bg-emerald-600/10 border border-emerald-600/20 text-emerald-400"
+                    >
+                        <Sparkles className="w-4 h-4" />
+                        <span className="text-[10px] font-black uppercase tracking-[0.3em] italic">Misión Finalizada</span>
+                    </ClientMotionDiv>
+
+                    <div className="space-y-2">
+                        <h1 className="text-5xl md:text-7xl font-black text-white tracking-tighter uppercase italic leading-none">
+                            OBJETIVO <span className="text-emerald-500">CONSEGUIDO</span>
+                        </h1>
+                        <p className="text-neutral-500 font-bold uppercase tracking-[0.4em] text-xs">
+                            Sincronización: <span className="text-white italic">100% Optimizado</span>
+                        </p>
                     </div>
 
-                    <h1 className="text-4xl md:text-6xl font-black text-white tracking-tighter uppercase italic">
-                        ¡Gran <span className="text-green-400">Trabajo</span>!
-                    </h1>
-
-                    <p className="text-neutral-400 text-lg md:text-xl font-medium leading-relaxed max-w-sm mx-auto">
-                        Has completado tu rutina de hoy. Es momento de descansar y permitir que tus músculos se recuperen hasta mañana.
+                    <p className="text-neutral-400 text-lg font-medium leading-relaxed max-w-md mx-auto">
+                        Has completado la secuencia técnica programada. El sistema ha registrado un incremento en tus niveles de rendimiento operativo.
                     </p>
                 </div>
 
-                <div className="pt-4 flex flex-col gap-4">
+                <div className="pt-8 flex flex-col gap-6 max-w-md mx-auto">
                     <Link href="/dashboard" className="w-full">
-                        <Button className="w-full h-14 rounded-2xl bg-white text-black hover:bg-neutral-200 font-black text-lg shadow-xl shadow-white/5 transition-transform active:scale-95">
-                            <LayoutDashboard className="w-5 h-5 mr-2" />
-                            VOLVER AL PANEL
+                        <Button className="w-full h-16 rounded-2xl bg-white text-black hover:bg-neutral-200 font-black text-sm uppercase tracking-[0.2em] shadow-2xl shadow-white/10 transition-all active:scale-95 group">
+                            <LayoutDashboard className="w-4 h-4 mr-3" />
+                            Regresar a la Central
                         </Button>
                     </Link>
 
-                    <Button
-                        variant="ghost"
+                    <button
                         onClick={() => router.push('/history')}
-                        className="text-neutral-500 hover:text-white font-bold"
+                        className="text-neutral-600 hover:text-white font-black text-[10px] uppercase tracking-[0.3em] transition-colors focus:outline-none"
                     >
-                        Ver mi historial de hoy
-                    </Button>
+                        Analizar Telemetría de Hoy (Historial)
+                    </button>
                 </div>
-            </div>
+            </ClientMotionDiv>
         </div>
     );
 }

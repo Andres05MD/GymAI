@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Sparkles } from "lucide-react";
 
 const RegisterSchema = z.object({
     name: z.string().min(1, "Nombre requerido"),
@@ -81,77 +81,82 @@ export function AuthRegisterForm() {
         <div className="w-full space-y-6">
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
                 <div className="space-y-2">
-                    <Label htmlFor="name" className="ml-1 text-xs font-bold uppercase tracking-widest text-black">Nombre Completo</Label>
+                    <Label htmlFor="name" className="ml-1 text-[10px] font-black uppercase tracking-[0.3em] text-neutral-500 italic">Nombre del Operador</Label>
                     <Input
                         id="name"
-                        placeholder="Juan Pérez"
+                        placeholder="NOMBRE COMPLETO"
                         {...register("name")}
-                        className="bg-white border border-neutral-200 h-14 rounded-xl px-4 text-base font-medium text-neutral-900 shadow-sm transition-all focus-visible:ring-2 focus-visible:ring-black placeholder:text-neutral-400"
+                        className="bg-neutral-950/50 border border-white/5 h-14 rounded-2xl px-4 text-sm font-bold text-white shadow-inner transition-all focus-visible:ring-1 focus-visible:ring-red-500/50 placeholder:text-neutral-700 uppercase"
                     />
-                    {errors.name && <p className="ml-1 text-sm text-red-500 font-medium">{errors.name.message}</p>}
+                    {errors.name && <p className="ml-1 text-[10px] font-black uppercase text-red-500 italic tracking-widest">{errors.name.message}</p>}
                 </div>
 
                 <div className="space-y-2">
-                    <Label htmlFor="email" className="ml-1 text-xs font-bold uppercase tracking-widest text-black">Email</Label>
+                    <Label htmlFor="email" className="ml-1 text-[10px] font-black uppercase tracking-[0.3em] text-neutral-500 italic">Canal de Comunicación / Email</Label>
                     <Input
                         id="email"
                         type="email"
-                        placeholder="ejemplo@gymia.com"
+                        placeholder="OPERATOR@GYMIA.COM"
                         {...register("email")}
-                        className="bg-white border border-neutral-200 h-14 rounded-xl px-4 text-base font-medium text-neutral-900 shadow-sm transition-all focus-visible:ring-2 focus-visible:ring-black placeholder:text-neutral-400"
+                        className="bg-neutral-950/50 border border-white/5 h-14 rounded-2xl px-4 text-sm font-bold text-white shadow-inner transition-all focus-visible:ring-1 focus-visible:ring-red-500/50 placeholder:text-neutral-700 uppercase"
                     />
-                    {errors.email && <p className="ml-1 text-sm text-red-500 font-medium">{errors.email.message}</p>}
+                    {errors.email && <p className="ml-1 text-[10px] font-black uppercase text-red-500 italic tracking-widest">{errors.email.message}</p>}
                 </div>
 
-                {/* Role selection removed - defaulting to athlete */}
-
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                        <Label htmlFor="password" className="ml-1 text-xs font-bold uppercase tracking-widest text-black">Contraseña</Label>
-                        <div className="relative">
+                        <Label htmlFor="password" className="ml-1 text-[10px] font-black uppercase tracking-[0.3em] text-neutral-500 italic">Nueva Clave</Label>
+                        <div className="relative group">
                             <Input
                                 id="password"
                                 type={showPassword ? "text" : "password"}
                                 {...register("password")}
-                                className="bg-white border border-neutral-200 h-14 rounded-xl pl-4 pr-10 text-base font-medium text-neutral-900 shadow-sm transition-all focus-visible:ring-2 focus-visible:ring-black placeholder:text-neutral-400"
+                                className="bg-neutral-950/50 border border-white/5 h-14 rounded-2xl pl-4 pr-10 text-sm font-bold text-white shadow-inner transition-all focus-visible:ring-1 focus-visible:ring-red-500/50 placeholder:text-neutral-700"
                             />
                             <Button
                                 type="button"
                                 variant="ghost"
                                 size="icon"
-                                className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 text-neutral-400 hover:text-neutral-900 hover:bg-transparent"
+                                className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 text-neutral-600 hover:text-white hover:bg-transparent transition-colors"
                                 onClick={() => setShowPassword(!showPassword)}
                             >
                                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                             </Button>
                         </div>
-                        {errors.password && <p className="ml-1 text-sm text-red-500 font-medium">{errors.password.message}</p>}
+                        {errors.password && <p className="ml-1 text-[10px] font-black uppercase text-red-500 italic tracking-widest">{errors.password.message}</p>}
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="confirmPassword" className="ml-1 text-xs font-bold uppercase tracking-widest text-black">Confirmar</Label>
-                        <div className="relative">
+                        <Label htmlFor="confirmPassword" className="ml-1 text-[10px] font-black uppercase tracking-[0.3em] text-neutral-500 italic">Validar Clave</Label>
+                        <div className="relative group">
                             <Input
                                 id="confirmPassword"
                                 type={showConfirmPassword ? "text" : "password"}
                                 {...register("confirmPassword")}
-                                className="bg-white border border-neutral-200 h-14 rounded-xl pl-4 pr-10 text-base font-medium text-neutral-900 shadow-sm transition-all focus-visible:ring-2 focus-visible:ring-black placeholder:text-neutral-400"
+                                className="bg-neutral-950/50 border border-white/5 h-14 rounded-2xl pl-4 pr-10 text-sm font-bold text-white shadow-inner transition-all focus-visible:ring-1 focus-visible:ring-red-500/50 placeholder:text-neutral-700"
                             />
                             <Button
                                 type="button"
                                 variant="ghost"
                                 size="icon"
-                                className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 text-neutral-400 hover:text-neutral-900 hover:bg-transparent"
+                                className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 text-neutral-600 hover:text-white hover:bg-transparent transition-colors"
                                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                             >
                                 {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                             </Button>
                         </div>
-                        {errors.confirmPassword && <p className="ml-1 text-sm text-red-500 font-medium">{errors.confirmPassword.message}</p>}
+                        {errors.confirmPassword && <p className="ml-1 text-[10px] font-black uppercase text-red-500 italic tracking-widest">{errors.confirmPassword.message}</p>}
                     </div>
                 </div>
 
-                <Button type="submit" className="w-full h-14 rounded-xl bg-red-600 text-white hover:bg-red-700 text-base font-bold tracking-widest uppercase shadow-xl shadow-red-900/20 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 mt-4" disabled={loading}>
-                    {loading ? "Registrando..." : "Crear Cuenta"}
+                <Button
+                    type="submit"
+                    className="group relative w-full h-14 rounded-2xl bg-white text-black hover:bg-neutral-200 text-xs font-black tracking-[0.2em] uppercase italic transition-all duration-500 shadow-xl hover:shadow-2xl hover:-translate-y-0.5"
+                    disabled={loading}
+                >
+                    <span className="relative z-10 flex items-center justify-center gap-3">
+                        {loading ? "Generando..." : "Finalizar Registro"}
+                        {!loading && <Sparkles className="w-5 h-5 group-hover:rotate-12 transition-transform" />}
+                    </span>
                 </Button>
             </form>
         </div>

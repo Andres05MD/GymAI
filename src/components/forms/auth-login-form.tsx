@@ -13,7 +13,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Label } from "@/components/ui/label";
 import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { auth } from "@/lib/firebase";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, ShieldCheck, Sparkles } from "lucide-react";
 
 const LoginSchema = z.object({
     email: z.string().email("Email inválido"),
@@ -100,64 +100,74 @@ export function AuthLoginForm() {
         <div className="w-full space-y-8">
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                 <div className="space-y-2">
-                    <Label htmlFor="email" className="ml-1 text-xs font-bold uppercase tracking-widest text-black">Email</Label>
+                    <Label htmlFor="email" className="ml-1 text-[10px] font-black uppercase tracking-[0.3em] text-neutral-500 italic">Identificador / Email</Label>
                     <Input
                         id="email"
                         type="email"
-                        placeholder="ejemplo@gymia.com"
+                        placeholder="OPERATOR@GYMIA.COM"
                         {...register("email")}
-                        className="bg-white border border-neutral-200 h-14 rounded-xl px-4 text-base font-medium text-neutral-900 shadow-sm transition-all focus-visible:ring-2 focus-visible:ring-black placeholder:text-neutral-400"
+                        className="bg-neutral-950/50 border border-white/5 h-14 rounded-2xl px-4 text-sm font-bold text-white shadow-inner transition-all focus-visible:ring-1 focus-visible:ring-red-500/50 placeholder:text-neutral-700 uppercase"
                     />
-                    {errors.email && <p className="ml-1 text-sm text-red-500 font-medium">{errors.email.message}</p>}
+                    {errors.email && <p className="ml-1 text-[10px] font-black uppercase text-red-500 italic tracking-widest">{errors.email.message}</p>}
                 </div>
                 <div className="space-y-2">
-                    <Label htmlFor="password" className="ml-1 text-xs font-bold uppercase tracking-widest text-black">Contraseña</Label>
-                    <div className="relative">
+                    <Label htmlFor="password" className="ml-1 text-[10px] font-black uppercase tracking-[0.3em] text-neutral-500 italic">Código de Acceso</Label>
+                    <div className="relative group">
                         <Input
                             id="password"
                             type={showPassword ? "text" : "password"}
                             placeholder="••••••••"
                             {...register("password")}
-                            className="bg-white border border-neutral-200 h-14 rounded-xl pl-4 pr-12 text-base font-medium text-neutral-900 shadow-sm transition-all focus-visible:ring-2 focus-visible:ring-black placeholder:text-neutral-400"
+                            className="bg-neutral-950/50 border border-white/5 h-14 rounded-2xl pl-4 pr-12 text-sm font-bold text-white shadow-inner transition-all focus-visible:ring-1 focus-visible:ring-red-500/50 placeholder:text-neutral-700"
                         />
                         <Button
                             type="button"
                             variant="ghost"
                             size="icon"
-                            className="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-900 hover:bg-transparent"
+                            className="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-600 hover:text-white hover:bg-transparent transition-colors"
                             onClick={() => setShowPassword(!showPassword)}
                         >
                             {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                         </Button>
                     </div>
-                    {errors.password && <p className="ml-1 text-sm text-red-500 font-medium">{errors.password.message}</p>}
+                    {errors.password && <p className="ml-1 text-[10px] font-black uppercase text-red-500 italic tracking-widest">{errors.password.message}</p>}
                 </div>
 
-                <Button type="submit" className="w-full h-14 rounded-xl bg-red-600 text-white hover:bg-red-700 text-base font-bold tracking-widest uppercase shadow-xl shadow-red-900/20 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300" disabled={loading}>
-                    {loading ? "Iniciando..." : "Iniciar Sesión"}
+                <Button
+                    type="submit"
+                    className="group relative w-full h-14 rounded-2xl bg-red-600 hover:bg-red-700 text-xs font-black tracking-[0.2em] uppercase italic transition-all duration-500 shadow-[0_0_30px_-5px_var(--color-red-600)] hover:shadow-[0_0_50px_-5px_var(--color-red-500)]"
+                    disabled={loading}
+                >
+                    <span className="relative z-10 flex items-center justify-center gap-3">
+                        {loading ? "Sincronizando..." : "Iniciar Protocolo"}
+                        {!loading && <ShieldCheck className="w-5 h-5 group-hover:scale-110 transition-transform" />}
+                    </span>
+                    <div className="absolute inset-0 bg-linear-to-r from-red-400/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl" />
                 </Button>
             </form>
 
-            <div className="relative my-6">
+            <div className="relative my-8">
                 <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t border-neutral-200" />
+                    <span className="w-full border-t border-white/5" />
                 </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-white px-2 text-neutral-400">O continúa con</span>
+                <div className="relative flex justify-center text-[10px] uppercase tracking-[0.3em] font-black">
+                    <span className="bg-transparent px-4 text-neutral-600 italic">External Auth</span>
                 </div>
             </div>
 
             <Button
                 variant="outline"
                 type="button"
-                className="w-full h-14 rounded-2xl border-2 border-neutral-100 bg-black text-white hover:bg-black hover:text-white md:bg-white md:text-black md:hover:bg-black md:hover:text-white font-medium transition-colors"
+                className="w-full h-14 rounded-2xl border border-white/5 bg-white/5 text-white hover:bg-white/10 hover:border-white/10 font-black uppercase italic tracking-widest text-[10px] transition-all flex items-center justify-center gap-4 group"
                 disabled={loading}
                 onClick={handleGoogleLogin}
             >
-                <svg className="mr-2 h-5 w-5" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512">
-                    <path fill="currentColor" d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"></path>
-                </svg>
-                Google
+                <div className="p-1.5 bg-white rounded-lg group-hover:scale-110 transition-transform">
+                    <svg className="h-4 w-4" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512">
+                        <path fill="#000" d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"></path>
+                    </svg>
+                </div>
+                Continuar con Google
             </Button>
         </div>
     );

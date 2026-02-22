@@ -73,24 +73,34 @@ export default async function TrainPage() {
         routine = activeRoutine;
     }
 
-    if (!routine) {
-        return (
-            <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-6 space-y-4">
-                <div className="h-16 w-16 bg-red-900/20 text-red-500 rounded-full flex items-center justify-center mb-4">
-                    <AlertCircle className="w-8 h-8" />
+    return (
+        <div className="flex flex-col items-center justify-center min-h-[85vh] px-6 text-center relative overflow-hidden">
+            {/* Background decorative elements */}
+            <div className="absolute top-1/4 left-1/4 w-[400px] h-[400px] bg-red-600/5 rounded-full blur-[120px] pointer-events-none -z-10" />
+
+            <div className="relative space-y-12 max-w-md w-full animate-in fade-in zoom-in duration-700">
+                <div className="relative mx-auto w-32 h-32 flex items-center justify-center group">
+                    <div className="absolute inset-0 bg-neutral-900/40 backdrop-blur-3xl border border-white/5 rounded-3xl rotate-12 group-hover:rotate-0 transition-transform duration-500" />
+                    <AlertCircle className="w-12 h-12 text-red-500 relative z-10 drop-shadow-[0_0_15px_rgba(239,68,68,0.4)]" />
                 </div>
-                <h1 className="text-2xl font-black text-white">Sin entrenamiento programado para hoy</h1>
-                <p className="text-neutral-400 max-w-md">
-                    No tienes una sesión asignada para esta fecha ni una rutina activa general.
-                </p>
-                <Link href="/dashboard">
-                    <Button variant="outline" className="rounded-full border-neutral-700 text-white hover:bg-neutral-800">
-                        Volver al inicio
+
+                <div className="space-y-4">
+                    <h1 className="text-3xl font-black text-white uppercase italic tracking-tighter">
+                        Frecuencia No Encontrada
+                    </h1>
+                    <p className="text-neutral-500 font-bold text-sm leading-relaxed">
+                        No se ha detectado una secuencia de entrenamiento sincronizada para este ciclo. Pulsa el botón inferior para volver a la base.
+                    </p>
+                </div>
+
+                <Link href="/dashboard" className="block">
+                    <Button className="w-full h-14 bg-white text-black font-black uppercase italic tracking-widest rounded-2xl hover:bg-neutral-200 transition-all shadow-xl shadow-white/5 active:scale-95">
+                        Retorno Seguro
                     </Button>
                 </Link>
             </div>
-        );
-    }
+        </div>
+    );
 
     // Filter the routine to only show the relevant day
     let workoutRoutine = routine as unknown as WorkoutRoutine;

@@ -7,7 +7,7 @@ import { generateRoutineDescription } from "@/actions/ai-actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Plus, Trash2, Wand2, Sparkles, Save, ArrowLeft, Check, ChevronsUpDown, Dumbbell, CalendarDays, Clock, Copy } from "lucide-react";
+import { Loader2, Plus, Trash2, Wand2, Sparkles, Save, ArrowLeft, Check, ChevronsUpDown, Dumbbell, CalendarDays, Clock, Copy, Activity } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -18,6 +18,8 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { RoutineSafetyCheck } from "@/components/routines/routine-safety-check";
 import { ExerciseSelector } from "@/components/routines/exercise-selector";
+import { ClientMotionDiv } from "@/components/ui/client-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 // --- INTERFACES ---
 
@@ -96,7 +98,7 @@ function AIGenerator({ onGenerate, currentType }: { onGenerate: (routine: AIRout
             if (res.success && res.routine) {
                 onGenerate(res.routine);
                 setOpen(false);
-                toast.success("¡Rutina generada por IA!");
+                toast.success("¡Protocolo generado por IA!");
             } else {
                 toast.error(res.error || "Error al generar");
             }
@@ -110,83 +112,102 @@ function AIGenerator({ onGenerate, currentType }: { onGenerate: (routine: AIRout
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button variant="outline" className="border-red-500/30 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white gap-2 transition-all rounded-full px-4 sm:px-8 h-12 text-xs sm:text-sm font-bold tracking-wide">
-                    <Sparkles className="w-4 h-4" />
-                    <span className="hidden sm:inline">GENERAR CON IA</span>
-                    <span className="sm:hidden">IA</span>
+                <Button variant="outline" className="relative h-12 px-8 rounded-full border border-red-500/30 bg-red-500/5 text-red-500 hover:bg-red-500/10 hover:border-red-500 hover:text-white font-black uppercase italic tracking-widest text-[10px] transition-all overflow-hidden group">
+                    <div className="absolute inset-0 bg-linear-to-r from-red-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <Sparkles className="w-4 h-4 mr-2 relative z-10" />
+                    <span className="relative z-10 hidden sm:inline">Activar Generador IA</span>
+                    <span className="relative z-10 sm:hidden">IA</span>
                 </Button>
             </DialogTrigger>
-            <DialogContent className="bg-neutral-900 border-neutral-800 text-white sm:max-w-[500px] p-6 rounded-2xl">
-                <DialogHeader className="mb-4">
-                    <DialogTitle className="flex items-center gap-2 text-2xl font-black uppercase tracking-tighter">
-                        <Wand2 className="w-6 h-6 text-red-500" /> Generador IA
-                    </DialogTitle>
-                    <DialogDescription className="text-neutral-400">
-                        Define tus objetivos y deja que la IA cree el plan perfecto.
-                    </DialogDescription>
-                </DialogHeader>
-                <div className="space-y-5">
-                    <div className="grid grid-cols-2 gap-5">
-                        <div className="space-y-2">
-                            <Label className="text-xs font-bold uppercase tracking-widest text-neutral-500">Objetivo Principal</Label>
-                            <Select value={criteria.goal} onValueChange={(v) => setCriteria({ ...criteria, goal: v })}>
-                                <SelectTrigger className="bg-neutral-800 border-transparent rounded-xl h-12 text-white"><SelectValue /></SelectTrigger>
-                                <SelectContent className="bg-neutral-800 border-neutral-700 text-white">
-                                    <SelectItem value="hypertrophy">Hipertrofia</SelectItem>
-                                    <SelectItem value="strength">Fuerza</SelectItem>
-                                    <SelectItem value="weight_loss">Pérdida de Peso</SelectItem>
-                                    <SelectItem value="endurance">Resistencia</SelectItem>
+            <DialogContent className="bg-black/95 backdrop-blur-3xl border border-white/10 text-white sm:max-w-[550px] p-0 rounded-4xl overflow-hidden shadow-[0_0_100px_-20px_rgba(239,68,68,0.2)]">
+                <div className="absolute inset-0 bg-linear-to-b from-red-600/3 to-transparent pointer-events-none" />
+                <div className="p-8 md:p-10 relative z-10">
+                    <DialogHeader className="mb-10 text-center md:text-left">
+                        <DialogTitle className="flex items-center justify-center md:justify-start gap-4 text-3xl font-black uppercase italic tracking-tighter leading-none">
+                            <div className="w-12 h-12 bg-red-600/10 rounded-2xl flex items-center justify-center border border-red-600/20 shadow-xl">
+                                <Wand2 className="w-6 h-6 text-red-500" />
+                            </div>
+                            <span>Inteligencia <span className="text-neutral-500">Generativa</span></span>
+                        </DialogTitle>
+                        <DialogDescription className="text-[10px] font-black uppercase tracking-[0.3em] text-neutral-500 mt-4 italic">
+                            Configuración Técnica de Parámetros de Entrenamiento
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="space-y-8">
+                        <div className="grid grid-cols-2 gap-6 text-[10px] font-black uppercase tracking-widest text-neutral-500 italic">
+                            <div className="space-y-3">
+                                <Label className="ml-1 opacity-70">Objetivo Estratégico</Label>
+                                <Select value={criteria.goal} onValueChange={(v) => setCriteria({ ...criteria, goal: v })}>
+                                    <SelectTrigger className="bg-neutral-900/50 border border-white/5 rounded-2xl h-12 text-xs font-bold text-white transition-all focus:ring-1 focus:ring-red-500/50 hover:bg-neutral-900 uppercase">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent className="bg-neutral-900 border-white/5 text-white rounded-2xl shadow-2xl">
+                                        <SelectItem value="hypertrophy" className="font-bold uppercase tracking-widest text-[10px] py-3 rounded-xl focus:bg-white focus:text-black italic">Hipertrofia</SelectItem>
+                                        <SelectItem value="strength" className="font-bold uppercase tracking-widest text-[10px] py-3 rounded-xl focus:bg-white focus:text-black italic">Fuerza</SelectItem>
+                                        <SelectItem value="weight_loss" className="font-bold uppercase tracking-widest text-[10px] py-3 rounded-xl focus:bg-white focus:text-black italic">Pérdida Peso</SelectItem>
+                                        <SelectItem value="endurance" className="font-bold uppercase tracking-widest text-[10px] py-3 rounded-xl focus:bg-white focus:text-black italic">Resistencia</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="space-y-3">
+                                <Label className="ml-1 opacity-70">Frecuencia (D/S)</Label>
+                                <Input
+                                    type="number"
+                                    min={1} max={7}
+                                    value={criteria.daysPerWeek}
+                                    onChange={(e) => setCriteria({ ...criteria, daysPerWeek: Number(e.target.value) })}
+                                    className="bg-neutral-900/50 border border-white/5 rounded-2xl h-12 text-xs font-bold text-white transition-all focus:ring-1 focus:ring-red-500/50 text-center"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="space-y-3">
+                            <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-500 ml-1 italic opacity-70">Nivel de Competencia</Label>
+                            <Select value={criteria.experienceLevel} onValueChange={(v) => setCriteria({ ...criteria, experienceLevel: v })}>
+                                <SelectTrigger className="bg-neutral-900/50 border border-white/5 rounded-2xl h-12 text-xs font-bold text-white transition-all focus:ring-1 focus:ring-red-500/50 hover:bg-neutral-900 uppercase">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent className="bg-neutral-900 border-white/5 text-white rounded-2xl shadow-2xl">
+                                    <SelectItem value="beginner" className="font-bold uppercase tracking-widest text-[10px] py-3 rounded-xl focus:bg-white focus:text-black italic">Principiante</SelectItem>
+                                    <SelectItem value="intermediate" className="font-bold uppercase tracking-widest text-[10px] py-3 rounded-xl focus:bg-white focus:text-black italic">Intermedio</SelectItem>
+                                    <SelectItem value="advanced" className="font-bold uppercase tracking-widest text-[10px] py-3 rounded-xl focus:bg-white focus:text-black italic">Avanzado</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
-                        <div className="space-y-2">
-                            <Label className="text-xs font-bold uppercase tracking-widest text-neutral-500">Días / Semana</Label>
-                            <Input
-                                type="number"
-                                min={1} max={7}
-                                value={criteria.daysPerWeek}
-                                onChange={(e) => setCriteria({ ...criteria, daysPerWeek: Number(e.target.value) })}
-                                className="bg-neutral-800 border-transparent rounded-xl h-12 text-white focus-visible:ring-red-500"
+
+                        <div className="space-y-3">
+                            <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-500 ml-1 italic opacity-70">Restricciones Físicas</Label>
+                            <div className="relative">
+                                <Activity className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-600" />
+                                <Input
+                                    placeholder="LESIONES O LIMITACIONES..."
+                                    value={criteria.injuries}
+                                    onChange={(e) => setCriteria({ ...criteria, injuries: e.target.value })}
+                                    className="bg-neutral-900/50 border border-white/5 rounded-2xl h-12 pl-12 pr-4 text-[10px] font-black text-white transition-all focus:ring-1 focus:ring-red-500/50 uppercase placeholder:text-neutral-700 italic tracking-widest"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="space-y-3">
+                            <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-500 ml-1 italic opacity-70">Prompt de Misión (Opcional)</Label>
+                            <Textarea
+                                placeholder="DESCRIBE TU ENFOQUE PERSONALIZADO..."
+                                value={criteria.userPrompt}
+                                onChange={(e) => setCriteria({ ...criteria, userPrompt: e.target.value })}
+                                className="bg-neutral-900/50 border border-white/5 rounded-[2rem] min-h-[120px] p-6 text-[10px] font-black text-white focus:ring-1 focus:ring-red-500/50 transition-all resize-none uppercase placeholder:text-neutral-700 italic tracking-[0.2em] leading-relaxed"
                             />
                         </div>
-                    </div>
 
-                    <div className="space-y-2">
-                        <Label className="text-xs font-bold uppercase tracking-widest text-neutral-500">Nivel de Experiencia</Label>
-                        <Select value={criteria.experienceLevel} onValueChange={(v) => setCriteria({ ...criteria, experienceLevel: v })}>
-                            <SelectTrigger className="bg-neutral-800 border-transparent rounded-xl h-12 text-white"><SelectValue /></SelectTrigger>
-                            <SelectContent className="bg-neutral-800 border-neutral-700 text-white">
-                                <SelectItem value="beginner">Principiante</SelectItem>
-                                <SelectItem value="intermediate">Intermedio</SelectItem>
-                                <SelectItem value="advanced">Avanzado</SelectItem>
-                            </SelectContent>
-                        </Select>
+                        <Button
+                            onClick={handleGenerate}
+                            disabled={loading}
+                            className="w-full h-16 bg-white text-black hover:bg-neutral-200 font-black uppercase italic tracking-[0.3em] text-[10px] rounded-2xl shadow-2xl transition-all shadow-white/5 hover:-translate-y-1"
+                        >
+                            {loading ? <Loader2 className="w-5 h-5 animate-spin mr-3" /> : <Sparkles className="w-5 h-5 mr-3" />}
+                            Iniciar Generación de Datos
+                        </Button>
                     </div>
-
-                    <div className="space-y-2">
-                        <Label className="text-xs font-bold uppercase tracking-widest text-neutral-500">Lesiones (Opcional)</Label>
-                        <Input
-                            placeholder="Ej: rodilla derecha..."
-                            value={criteria.injuries}
-                            onChange={(e) => setCriteria({ ...criteria, injuries: e.target.value })}
-                            className="bg-neutral-800 border-transparent rounded-xl h-12 text-white focus-visible:ring-red-500"
-                        />
-                    </div>
-
-                    <div className="space-y-2">
-                        <Label className="text-xs font-bold uppercase tracking-widest text-neutral-500">¿Qué necesitas? (Prompt Libre)</Label>
-                        <Textarea
-                            placeholder="Ej: Quiero una rutina que incluya ejercicios de peso corporal y se enfoque en la fuerza explosiva para atletismo..."
-                            value={criteria.userPrompt}
-                            onChange={(e) => setCriteria({ ...criteria, userPrompt: e.target.value })}
-                            className="bg-neutral-800 border-transparent rounded-xl min-h-[100px] text-white focus-visible:ring-red-500 resize-none"
-                        />
-                    </div>
-
-                    <Button onClick={handleGenerate} disabled={loading} className="w-full bg-red-600 hover:bg-red-700 text-white font-bold h-14 rounded-xl uppercase tracking-widest text-sm shadow-lg shadow-red-900/20">
-                        {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Sparkles className="w-4 h-4 mr-2" />}
-                        GENERAR RUTINA
-                    </Button>
                 </div>
             </DialogContent>
         </Dialog>
@@ -497,166 +518,207 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
     const [isVariantMode, setIsVariantMode] = useState(false);
 
     return (
-        <div className="max-w-7xl mx-auto pb-20 px-4 sm:px-6">
-            {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 pt-4">
-                <div className="flex items-center gap-3">
-                    <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-full text-neutral-400 hover:text-white hover:bg-white/10 shrink-0">
+        <div className="container mx-auto max-w-7xl pb-40 px-4 md:px-6 relative">
+            {/* Ambient Lighting */}
+            <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-red-600/5 rounded-full blur-[100px] -z-10 animate-pulse pointer-events-none" />
+
+            {/* Header / Breadcrumbs */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-16 pt-10">
+                <div className="flex items-center gap-6">
+                    <Button
+                        variant="link"
+                        onClick={() => router.back()}
+                        className="h-14 w-14 rounded-2xl bg-neutral-900/40 backdrop-blur-3xl border border-white/5 text-neutral-500 hover:text-white hover:border-white/10 transition-all flex items-center justify-center p-0"
+                    >
                         <ArrowLeft className="w-6 h-6" />
                     </Button>
-                    <div>
-                        <h1 className="text-xl sm:text-3xl font-black text-white uppercase tracking-tighter leading-tight">
-                            {isEditing ? "Editar Rutina" : "Constructor de Rutinas"}
+                    <div className="space-y-1">
+                        <div className="flex items-center gap-3 mb-2">
+                            <span className="text-[10px] font-black text-red-500 uppercase tracking-[0.5em] italic">Routine_OS v2.0</span>
+                            <div className="h-px w-8 bg-white/10" />
+                            <span className="text-[10px] font-black text-neutral-600 uppercase tracking-[0.3em] italic">Constructor Mode</span>
+                        </div>
+                        <h1 className="text-4xl md:text-5xl font-black text-white uppercase tracking-tighter italic leading-none">
+                            {isEditing ? "Optimizar" : "Construir"} <span className="text-neutral-500">Plan Técnico</span>
                         </h1>
-                        <p className="text-neutral-500 font-medium text-xs sm:text-base mt-1">Diseña cada detalle del plan.</p>
                     </div>
                 </div>
-                <div className="flex gap-2 sm:gap-3 justify-end">
+                <div className="flex flex-wrap gap-4 items-center">
                     <RoutineSafetyCheck routine={watch()} athleteId={athleteId} />
                     <RoutineImporter routines={availableRoutines} onImport={onAIResult} />
                     <AIGenerator onGenerate={onAIResult} currentType={watch("type") as "weekly" | "daily"} />
-                    <Button onClick={handleSubmit(onSubmit)} disabled={isSaving} className="bg-white text-black hover:bg-neutral-200 font-bold rounded-full px-4 sm:px-8 h-12 tracking-wide transition-all shadow-md hover:shadow-lg text-xs sm:text-sm">
-                        {isSaving ? <Loader2 className="w-4 h-4 animate-spin sm:mr-2" /> : <Save className="w-4 h-4 sm:mr-2" />}
-                        <span className="hidden sm:inline">GUARDAR</span>
-                        <span className="sm:hidden">GUARDAR</span>
+                    <Button
+                        onClick={handleSubmit(onSubmit)}
+                        disabled={isSaving}
+                        className="h-14 px-10 bg-white text-black hover:bg-neutral-200 font-black uppercase italic tracking-widest text-[10px] rounded-2xl shadow-2xl transition-all shadow-white/5 hover:-translate-y-1"
+                    >
+                        {isSaving ? <Loader2 className="w-4 h-4 animate-spin mr-3" /> : <Save className="w-4 h-4 mr-3" />}
+                        Sincronizar Datos
                     </Button>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
 
                 {/* Left Column: Metadata & Day Selection (4 cols) */}
-                <div className="lg:col-span-4 space-y-8">
+                <div className="lg:col-span-4 space-y-12">
                     {/* Basic Info Card */}
-                    <div className="space-y-6">
-                        <div className="space-y-3">
-                            <Label className="text-xs font-bold uppercase tracking-widest text-neutral-500 ml-1">Nombre de la Rutina</Label>
-                            <Input
-                                {...register("name")}
-                                placeholder="Ej: Push Pull Legs Avanzado"
-                                className="bg-neutral-900 border-neutral-800 text-white placeholder:text-neutral-600 rounded-xl h-14 px-4 text-lg font-medium focus-visible:ring-red-500 transition-all"
-                            />
-                        </div>
+                    <ClientMotionDiv
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className="bg-neutral-900/30 backdrop-blur-3xl border border-white/5 rounded-4xl p-10 shadow-2xl relative overflow-hidden group"
+                    >
+                        <div className="absolute inset-0 bg-linear-to-b from-white/2 to-transparent pointer-events-none" />
 
-                        {/* Routine Type Selector */}
-                        <div className="space-y-3">
-                            <Label className="text-xs font-bold uppercase tracking-widest text-neutral-500 ml-1">Tipo de Planificación</Label>
-                            <div className="grid grid-cols-2 gap-2 p-1 bg-neutral-900 rounded-xl border border-neutral-800">
-                                <button
-                                    type="button"
-                                    onClick={() => setValue("type", "weekly")}
-                                    className={cn(
-                                        "flex items-center justify-center gap-2 py-3 rounded-lg text-sm font-bold transition-all",
-                                        routineType === "weekly" ? "bg-neutral-800 text-white shadow-sm border border-neutral-700/50" : "text-neutral-500 hover:text-neutral-300"
-                                    )}
-                                >
-                                    <CalendarDays className="w-4 h-4" /> Semanal
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        setValue("type", "daily");
-                                        // Reducir a 1 solo día al cambiar a diaria
-                                        if (schedule.length > 1) {
-                                            setValue("schedule", [schedule[0]]);
-                                        }
-                                        setActiveDayIndex(0);
-                                    }}
-                                    className={cn(
-                                        "flex items-center justify-center gap-2 py-3 rounded-lg text-sm font-bold transition-all",
-                                        routineType === "daily" ? "bg-neutral-800 text-white shadow-sm border border-neutral-700/50" : "text-neutral-500 hover:text-neutral-300"
-                                    )}
-                                >
-                                    <Clock className="w-4 h-4" /> Diaria
-                                </button>
+                        <div className="space-y-10 relative z-10">
+                            <div className="space-y-4">
+                                <Label className="ml-1 text-[10px] font-black uppercase tracking-[0.3em] text-neutral-500 italic">Identificador de Misión</Label>
+                                <Input
+                                    {...register("name")}
+                                    placeholder="NOMBRE DEL PROTOCOLO..."
+                                    className="bg-neutral-950/50 border border-white/5 h-16 rounded-2xl px-6 text-sm font-black text-white placeholder:text-neutral-800 transition-all focus-visible:ring-1 focus-visible:ring-red-500/50 uppercase italic tracking-widest"
+                                />
+                            </div>
+
+                            <div className="space-y-4">
+                                <Label className="ml-1 text-[10px] font-black uppercase tracking-[0.3em] text-neutral-500 italic">Arquitectura del Ciclo</Label>
+                                <div className="grid grid-cols-2 gap-3 p-1.5 bg-neutral-950/80 rounded-2xl border border-white/5">
+                                    <button
+                                        type="button"
+                                        onClick={() => setValue("type", "weekly")}
+                                        className={cn(
+                                            "flex items-center justify-center gap-3 py-4 rounded-xl text-[10px] font-black uppercase italic tracking-widest transition-all",
+                                            routineType === "weekly" ? "bg-white text-black shadow-xl scale-105" : "text-neutral-600 hover:text-neutral-400"
+                                        )}
+                                    >
+                                        <CalendarDays className="w-4 h-4" /> Semanal
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setValue("type", "daily");
+                                            if (schedule.length > 1) setValue("schedule", [schedule[0]]);
+                                            setActiveDayIndex(0);
+                                        }}
+                                        className={cn(
+                                            "flex items-center justify-center gap-3 py-4 rounded-xl text-[10px] font-black uppercase italic tracking-widest transition-all",
+                                            routineType === "daily" ? "bg-white text-black shadow-xl scale-105" : "text-neutral-600 hover:text-neutral-400"
+                                        )}
+                                    >
+                                        <Clock className="w-4 h-4" /> Diario
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="space-y-4">
+                                <div className="flex justify-between items-center mb-1">
+                                    <Label className="ml-1 text-[10px] font-black uppercase tracking-[0.3em] text-neutral-500 italic">Resumen Operativo</Label>
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        onClick={handleGenerateDescription}
+                                        disabled={isGeneratingDescription}
+                                        className="h-8 px-4 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-full text-[9px] font-black uppercase italic tracking-widest transition-all border border-red-500/20"
+                                    >
+                                        <Sparkles className="w-3 h-3 mr-2" /> Optimizar IA
+                                    </Button>
+                                </div>
+                                <Textarea
+                                    {...register("description")}
+                                    placeholder="DETALLES TÉCNICOS Y OBJETIVOS..."
+                                    className="bg-neutral-950/50 border border-white/5 rounded-3xl min-h-[160px] p-6 text-[10px] font-black text-white placeholder:text-neutral-800 transition-all focus-visible:ring-1 focus-visible:ring-red-500/50 resize-none uppercase italic leading-relaxed tracking-widest shadow-inner overflow-y-auto"
+                                />
                             </div>
                         </div>
+                    </ClientMotionDiv>
 
-                        <div className="space-y-3">
-                            <div className="flex justify-between items-center">
-                                <Label className="text-xs font-bold uppercase tracking-widest text-neutral-500 ml-1">Descripción</Label>
-                                <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={handleGenerateDescription}
-                                    disabled={isGeneratingDescription}
-                                    className="h-6 text-[10px] uppercase font-bold text-red-500 hover:text-white hover:bg-red-500/10 px-2 rounded-full"
-                                >
-                                    {isGeneratingDescription ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <Sparkles className="w-3 h-3 mr-1" />}
-                                    Generar con IA
-                                </Button>
-                            </div>
-                            <Textarea
-                                {...register("description")}
-                                placeholder="Objetivos principales, duración recomendada, notas..."
-                                className="bg-neutral-900 border-neutral-800 text-white placeholder:text-neutral-600 rounded-xl min-h-[120px] p-4 font-medium focus-visible:ring-red-500 transition-all resize-none"
-                            />
-                        </div>
-                    </div>
-
-                    {/* Week Structure */}
+                    {/* Week Structure / Day Management */}
                     {(routineType === "weekly" || (routineType !== "daily" && schedule.length > 1)) && (
-                        <div className="space-y-4">
+                        <div className="space-y-6">
+                            <div className="flex items-center gap-4 mb-2">
+                                <div className="h-px flex-1 bg-linear-to-r from-white/10 to-transparent" />
+                                <span className="text-[10px] font-black text-neutral-500 uppercase tracking-[0.3em] italic">Timeline</span>
+                            </div>
                             <div className="flex items-center justify-between px-1">
                                 <Label className="text-xs font-bold uppercase tracking-widest text-neutral-500">Estructura Semanal</Label>
                                 <span className="text-xs text-neutral-600 font-mono bg-neutral-900 px-2 py-1 rounded-md">{schedule.length} Días</span>
                             </div>
 
-                            <div className="space-y-3">
+                            <div className="space-y-4">
                                 {dayFields.map((field, index) => (
-                                    <div
+                                    <motion.div
                                         key={field.id}
+                                        initial={{ opacity: 0, x: -10 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ delay: index * 0.05 }}
                                         onClick={() => setActiveDayIndex(index)}
                                         className={cn(
-                                            "group relative p-4 rounded-2xl cursor-pointer flex justify-between items-center transition-all duration-300 border-2",
+                                            "group relative p-6 rounded-3xl cursor-pointer flex justify-between items-center transition-all duration-500 overflow-hidden",
                                             activeDayIndex === index
-                                                ? "bg-neutral-900 border-red-600 shadow-[0_0_20px_-5px_var(--color-red-900)]"
-                                                : "bg-neutral-900 border-transparent hover:border-neutral-800 hover:bg-neutral-800"
+                                                ? "bg-white text-black shadow-[0_0_40px_-10px_rgba(255,255,255,0.2)] scale-[1.02] border-transparent"
+                                                : "bg-neutral-900/40 backdrop-blur-xl border border-white/5 hover:border-white/10 text-neutral-500 hover:text-neutral-300"
                                         )}
                                     >
-                                        <div className="flex items-center gap-4">
+                                        <div className="flex items-center gap-5 relative z-10">
                                             <div className={cn(
-                                                "w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold border transition-colors",
-                                                activeDayIndex === index ? "bg-red-600 border-red-500 text-white" : "bg-neutral-800 border-neutral-700 text-neutral-500 group-hover:text-white"
+                                                "w-12 h-12 rounded-2xl flex items-center justify-center text-xs font-black border transition-all duration-500",
+                                                activeDayIndex === index
+                                                    ? "bg-black border-black/10 text-white rotate-12"
+                                                    : "bg-neutral-950 border-white/5 text-neutral-600 group-hover:rotate-6 group-hover:text-red-500"
                                             )}>
-                                                {index + 1}
+                                                {String(index + 1).padStart(2, '0')}
                                             </div>
                                             <div>
-                                                <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 mb-0.5">
-                                                    {WEEKDAYS[index] || `Día ${index + 1}`}
+                                                <p className={cn(
+                                                    "text-[8px] font-black uppercase tracking-[0.4em] mb-1 italic transition-colors",
+                                                    activeDayIndex === index ? "text-black/40" : "text-neutral-600"
+                                                )}>
+                                                    {WEEKDAYS[index] || `DAY_SEQUENCE_${index + 1}`}
                                                 </p>
-                                                <p className={cn("font-bold text-base transition-colors", activeDayIndex === index ? "text-white" : "text-neutral-400 group-hover:text-white")}>
-                                                    {schedule[index]?.name || `Día ${index + 1}`}
-                                                </p>
-                                                <p className="text-xs text-neutral-600 font-medium">
-                                                    {schedule[index]?.exercises?.length || 0} Ejercicios
-                                                </p>
+                                                <h3 className={cn(
+                                                    "font-black text-sm uppercase italic tracking-wider transition-colors",
+                                                    activeDayIndex === index ? "text-black" : "text-neutral-400 group-hover:text-white"
+                                                )}>
+                                                    {schedule[index]?.name || `DATA_NODE_${index + 1}`}
+                                                </h3>
+                                                <div className="flex items-center gap-2 mt-1.5">
+                                                    <div className={cn("h-1 w-1 rounded-full", activeDayIndex === index ? "bg-black/20" : "bg-red-500/40")} />
+                                                    <p className={cn("text-[9px] font-black uppercase tracking-widest", activeDayIndex === index ? "text-black/60" : "text-neutral-600")}>
+                                                        {schedule[index]?.exercises?.length || 0} MODULES
+                                                    </p>
+                                                </div>
                                             </div>
                                         </div>
 
-                                        {activeDayIndex === index && (
-                                            <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-red-600 rounded-l-full" />
-                                        )}
+                                        <div className="flex items-center gap-2 relative z-10">
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className={cn(
+                                                    "h-8 w-8 rounded-xl transition-all",
+                                                    activeDayIndex === index
+                                                        ? "text-black/20 hover:text-red-600 hover:bg-black/5"
+                                                        : "text-neutral-800 hover:text-red-500 opacity-0 group-hover:opacity-100"
+                                                )}
+                                                onClick={(e) => { e.stopPropagation(); removeDay(index); }}
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </Button>
+                                        </div>
 
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            className="h-8 w-8 text-neutral-600 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
-                                            onClick={(e) => { e.stopPropagation(); removeDay(index); }}
-                                        >
-                                            <Trash2 className="w-4 h-4" />
-                                        </Button>
-                                    </div>
+                                        {activeDayIndex === index && (
+                                            <div className="absolute top-0 right-0 w-32 h-32 bg-black/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
+                                        )}
+                                    </motion.div>
                                 ))}
 
                                 {dayFields.length < 5 && (
                                     <Button
                                         variant="outline"
-                                        className="w-full h-14 border-dashed border-neutral-800 bg-transparent text-neutral-500 hover:text-white hover:bg-neutral-900 hover:border-neutral-700 rounded-2xl transition-all"
+                                        className="w-full h-16 border border-dashed border-white/5 bg-transparent text-neutral-600 hover:text-white hover:bg-white/5 hover:border-white/20 rounded-3xl transition-all font-black uppercase italic tracking-[0.3em] text-[10px]"
                                         onClick={() => appendDay({ name: WEEKDAYS[dayFields.length] || `Día ${dayFields.length + 1}`, exercises: [] })}
                                     >
-                                        <Plus className="w-5 h-5 mr-2" /> AÑADIR {WEEKDAYS[dayFields.length]?.toUpperCase() || "DÍA"}
+                                        <Plus className="w-5 h-5 mr-3" /> Añadir Protocolo Diario
                                     </Button>
                                 )}
                             </div>
@@ -664,67 +726,80 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                     )}
                 </div>
 
-                {/* Right Column: Day Editor (8 cols) */}
                 <div className="lg:col-span-8">
                     {schedule[activeDayIndex] ? (
-                        <div className="bg-neutral-900/50 border border-neutral-800 rounded-3xl p-1 overflow-hidden min-h-[600px]">
+                        <div className="bg-neutral-900/40 backdrop-blur-3xl border border-white/5 rounded-[3rem] p-1.5 overflow-hidden min-h-[700px] shadow-2xl relative">
+                            <div className="absolute inset-x-0 top-0 h-40 bg-linear-to-b from-red-600/[0.03] to-transparent pointer-events-none" />
+
                             {/* Header Day */}
-                            <div className="bg-neutral-900 border-b border-neutral-800 p-6 sm:px-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 rounded-t-3xl">
-                                <div>
-                                    <Label className="text-xs font-bold uppercase tracking-widest text-neutral-500 block mb-1">
-                                        {routineType === 'daily' ? 'Sesión Única' : WEEKDAYS[activeDayIndex] || `Día ${activeDayIndex + 1}`}
-                                    </Label>
-                                    <Input
-                                        value={schedule[activeDayIndex].name}
-                                        onChange={(e) => {
-                                            const newSched = [...schedule];
-                                            newSched[activeDayIndex].name = e.target.value;
-                                            setValue("schedule", newSched);
-                                        }}
-                                        className="text-2xl sm:text-3xl font-black bg-transparent border-none text-white p-0 h-auto focus-visible:ring-0 placeholder:text-neutral-700 w-full md:w-[400px]"
-                                        placeholder="Nombre del Día..."
-                                    />
+                            <div className="bg-neutral-950/80 backdrop-blur-2xl border-b border-white/5 p-8 md:p-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 rounded-t-[2.8rem] relative z-10">
+                                <div className="space-y-2 flex-1 w-full">
+                                    <div className="flex items-center gap-3">
+                                        <div className="h-2 w-2 rounded-full bg-red-600 animate-pulse" />
+                                        <Label className="text-[10px] font-black uppercase tracking-[0.4em] text-neutral-500 italic">
+                                            {routineType === 'daily' ? 'OPERATIONAL_SESSION_01' : `SEQUENCE_NODE_0${activeDayIndex + 1}`}
+                                        </Label>
+                                    </div>
+                                    <div className="relative group">
+                                        <Input
+                                            value={schedule[activeDayIndex].name}
+                                            onChange={(e) => {
+                                                const newSched = [...schedule];
+                                                newSched[activeDayIndex].name = e.target.value;
+                                                setValue("schedule", newSched);
+                                            }}
+                                            className="text-4xl md:text-5xl font-black bg-transparent border-none text-white p-0 h-auto focus-visible:ring-0 placeholder:text-neutral-800 w-full uppercase italic tracking-tighter"
+                                            placeholder="IDENTIFICADOR DEL DÍA..."
+                                        />
+                                        <div className="absolute bottom-0 left-0 w-0 h-px bg-red-600 group-hover:w-full transition-all duration-700" />
+                                    </div>
                                 </div>
-                                <Button onClick={() => addExerciseToDay(activeDayIndex)} className="w-full sm:w-auto rounded-full bg-red-600 hover:bg-red-700 text-white font-bold px-6 shadow-lg shadow-red-900/20">
-                                    <Plus className="w-5 h-5 mr-2" /> AGREGAR EJERCICIO
+                                <Button
+                                    onClick={() => addExerciseToDay(activeDayIndex)}
+                                    className="w-full md:w-auto h-14 px-8 rounded-2xl bg-white text-black hover:bg-neutral-200 font-black uppercase italic tracking-widest text-[10px] shadow-xl transition-all hover:-translate-y-1"
+                                >
+                                    <Plus className="w-5 h-5 mr-3" /> Inyectar Ejercicio
                                 </Button>
                             </div>
 
-                            <div className="p-6 sm:p-8 space-y-6">
+                            <div className="p-6 md:p-8 space-y-8 relative z-10">
                                 {schedule[activeDayIndex].exercises?.length === 0 ? (
-                                    <div className="flex flex-col items-center justify-center py-20 text-center space-y-4 opacity-50">
-                                        <div className="w-20 h-20 bg-neutral-800 rounded-full flex items-center justify-center text-neutral-600">
-                                            <Dumbbell className="w-10 h-10" />
+                                    <div className="flex flex-col items-center justify-center py-32 text-center space-y-6 opacity-40">
+                                        <div className="w-24 h-24 bg-neutral-950 border border-white/5 rounded-full flex items-center justify-center text-neutral-700 shadow-inner">
+                                            <Dumbbell className="w-10 h-10 animate-pulse" />
                                         </div>
-                                        <div className="space-y-1">
-                                            <p className="text-neutral-300 font-medium text-lg">Este día está vacío</p>
-                                            <p className="text-neutral-500 text-sm">Comienza agregando ejercicios a la sesión.</p>
+                                        <div className="space-y-2">
+                                            <p className="text-white font-black uppercase italic tracking-widest text-lg">Sesión en estado nulo</p>
+                                            <p className="text-neutral-500 text-xs font-bold uppercase tracking-[0.2em]">Inyecta módulos para comenzar el protocolo</p>
                                         </div>
-                                        <Button variant="link" onClick={() => addExerciseToDay(activeDayIndex)} className="text-red-500 font-bold">
-                                            Añadir primer ejercicio
-                                        </Button>
                                     </div>
                                 ) : (
-                                    <div className="space-y-6">
+                                    <div className="space-y-8">
                                         {schedule[activeDayIndex].exercises?.map((exercise: ScheduleExercise, exIndex: number) => (
-                                            <div key={exIndex} className="bg-neutral-950 rounded-2xl border border-neutral-800 overflow-hidden shadow-sm hover:border-neutral-700 transition-colors group">
+                                            <motion.div
+                                                key={exIndex}
+                                                initial={{ opacity: 0, scale: 0.98 }}
+                                                animate={{ opacity: 1, scale: 1 }}
+                                                className="bg-neutral-950/40 backdrop-blur-3xl rounded-[2.5rem] border border-white/5 overflow-hidden shadow-2xl group/ex relative"
+                                            >
+                                                <div className="absolute inset-0 bg-linear-to-b from-white/1 to-transparent pointer-events-none" />
+
                                                 {/* Exercise Header */}
-                                                <div className="p-3 sm:p-4 bg-neutral-900/50 border-b border-neutral-800 flex flex-row gap-3 justify-between items-center">
-                                                    <div className="flex-1 min-w-0 flex items-center gap-2 sm:gap-3">
-                                                        <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-neutral-800 flex items-center justify-center text-neutral-500 text-[10px] sm:text-xs font-bold shrink-0">
-                                                            {exIndex + 1}
+                                                <div className="p-5 md:p-6 bg-white/2 border-b border-white/5 flex flex-row gap-4 justify-between items-center relative z-10">
+                                                    <div className="flex-1 min-w-0 flex items-center gap-4">
+                                                        <div className="w-10 h-10 rounded-2xl bg-black border border-white/5 flex items-center justify-center text-red-500 text-xs font-black shadow-inner">
+                                                            {String(exIndex + 1).padStart(2, '0')}
                                                         </div>
                                                         <div className="flex-1 min-w-0 relative">
-                                                            {/* Exercise Selector Trigger */}
                                                             <Button
                                                                 variant="ghost"
-                                                                className="w-full justify-between items-center text-left text-base sm:text-lg font-bold text-white hover:bg-neutral-800 hover:text-white px-2 h-auto py-2 whitespace-normal wrap-break-word"
+                                                                className="w-full justify-between items-center text-left text-lg md:text-xl font-black text-white hover:bg-white/5 hover:text-white px-3 h-auto py-3 rounded-2xl transition-all uppercase italic tracking-tighter"
                                                                 onClick={() => openExerciseSelector(activeDayIndex, exIndex)}
                                                             >
-                                                                <span className="mr-2 leading-tight">
-                                                                    {exercise.exerciseName || "Seleccionar ejercicio..."}
+                                                                <span className="mr-4 leading-none truncate">
+                                                                    {exercise.exerciseName || "SISTEMA_NO_IDENTIFICADO"}
                                                                 </span>
-                                                                <ChevronsUpDown className="ml-auto h-4 w-4 shrink-0 opacity-50" />
+                                                                <ChevronsUpDown className="ml-auto h-5 w-5 shrink-0 text-neutral-600" />
                                                             </Button>
                                                         </div>
                                                     </div>
@@ -733,81 +808,142 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                                                         variant="ghost"
                                                         size="icon"
                                                         onClick={() => removeExercise(activeDayIndex, exIndex)}
-                                                        className="h-8 w-8 text-neutral-600 hover:text-red-500 hover:bg-red-500/10 shrink-0"
+                                                        className="h-10 w-10 text-neutral-600 hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all"
                                                     >
-                                                        <Trash2 className="w-4 h-4" />
+                                                        <Trash2 className="w-5 h-5" />
                                                     </Button>
                                                 </div>
 
-                                                <div className="p-3 sm:p-4 space-y-4">
-                                                    <Input
-                                                        value={exercise.notes || ""}
-                                                        onChange={(e) => updateExerciseField(activeDayIndex, exIndex, "notes", e.target.value)}
-                                                        placeholder="Notas técnicas (opcional)..."
-                                                        className="bg-transparent border-transparent border-b-neutral-800 rounded-none px-0 h-auto py-2 text-sm text-neutral-400 focus-visible:ring-0 focus-visible:border-neutral-600 placeholder:text-neutral-700"
-                                                    />
+                                                <div className="p-6 md:p-8 space-y-8 relative z-10">
+                                                    <div className="relative group/note">
+                                                        <div className="flex items-center gap-2 mb-2 opacity-40">
+                                                            <Activity className="w-3 h-3 text-red-500" />
+                                                            <span className="text-[8px] font-black uppercase tracking-[0.3em] text-white italic">Notas Técnicas</span>
+                                                        </div>
+                                                        <Input
+                                                            value={exercise.notes || ""}
+                                                            onChange={(e) => updateExerciseField(activeDayIndex, exIndex, "notes", e.target.value)}
+                                                            placeholder="ESPECIFICACIONES DE EJECUCIÓN..."
+                                                            className="bg-neutral-950/60 border border-white/5 rounded-2xl px-5 h-12 text-xs font-black text-white placeholder:text-neutral-800 focus-visible:ring-1 focus-visible:ring-red-500/40 uppercase italic tracking-widest shadow-inner transition-all w-full"
+                                                        />
+                                                    </div>
 
                                                     {/* Variantes Section */}
-                                                    <div className="space-y-2">
+                                                    <div className="space-y-4 bg-black/20 p-6 rounded-3xl border border-white/2">
                                                         <div className="flex items-center justify-between">
-                                                            <span className="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Variantes / Alternativos</span>
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="h-1 w-5 bg-red-600 rounded-full" />
+                                                                <span className="text-[9px] uppercase font-black text-neutral-500 tracking-[0.3em] italic">Alternativas de Seguridad</span>
+                                                            </div>
                                                             <Button
                                                                 type="button"
                                                                 variant="ghost"
                                                                 size="sm"
-                                                                className="h-6 text-[10px] text-red-500 hover:text-white hover:bg-red-500/10 rounded-full px-2"
+                                                                className="h-8 text-[9px] font-black text-red-500 hover:text-white hover:bg-red-500/10 rounded-full px-4 border border-red-500/10 uppercase italic tracking-widest transition-all"
                                                                 onClick={() => {
                                                                     setIsVariantMode(true);
                                                                     openExerciseSelector(activeDayIndex, exIndex);
                                                                 }}
                                                             >
-                                                                <Plus className="w-3 h-3 mr-1" /> AÑADIR VARIANTE
+                                                                <Plus className="w-3 h-3 mr-2" /> Añadir Variante
                                                             </Button>
                                                         </div>
-                                                        <div className="flex flex-wrap gap-2 min-h-6">
+                                                        <div className="flex flex-wrap gap-3 min-h-[40px]">
                                                             {exercise.variantIds && exercise.variantIds.length > 0 ? (
                                                                 exercise.variantIds.map((vId: string) => {
                                                                     const vEx = availableExercises.find(ex => ex.id === vId);
                                                                     return (
-                                                                        <div key={vId} className="bg-neutral-900 border border-neutral-800 rounded-lg px-2 py-1 flex items-center gap-2 group/var">
-                                                                            <span className="text-[11px] text-white font-medium">{vEx?.name || "Cargando..."}</span>
+                                                                        <motion.div
+                                                                            layout
+                                                                            initial={{ scale: 0.9, opacity: 0 }}
+                                                                            animate={{ scale: 1, opacity: 1 }}
+                                                                            key={vId}
+                                                                            className="bg-neutral-900/80 border border-white/5 rounded-xl px-4 py-2 flex items-center gap-4 group/var transition-all hover:bg-neutral-800"
+                                                                        >
+                                                                            <span className="text-[10px] text-neutral-300 font-black uppercase italic tracking-wider">{vEx?.name || "CARGANDO..."}</span>
                                                                             <button
                                                                                 type="button"
                                                                                 onClick={() => removeVariant(activeDayIndex, exIndex, vId)}
                                                                                 className="text-neutral-600 hover:text-red-500 transition-colors"
                                                                             >
-                                                                                <Trash2 className="w-3 h-3" />
+                                                                                <Trash2 className="w-3.5 h-3.5" />
                                                                             </button>
-                                                                        </div>
+                                                                        </motion.div>
                                                                     );
                                                                 })
                                                             ) : (
-                                                                <p className="text-[10px] text-neutral-600 italic">No hay variantes seleccionadas</p>
+                                                                <div className="w-full py-4 border border-dashed border-white/5 rounded-2xl flex items-center justify-center opacity-20">
+                                                                    <p className="text-[8px] text-white font-black uppercase tracking-[0.4em] italic">Protocolo redundante no definido</p>
+                                                                </div>
                                                             )}
                                                         </div>
                                                     </div>
 
-                                                    {/* Sets Area - Mobile & Desktop Optimized */}
-                                                    <div className="bg-neutral-900 rounded-xl p-2 md:p-1 overflow-hidden mt-2">
-                                                        {/* Desktop Header */}
-                                                        <div className="hidden md:grid grid-cols-12 gap-2 text-[10px] uppercase font-bold text-neutral-500 text-center mb-2 px-2 pt-2">
-                                                            <div className="col-span-3 text-left pl-2">Tipo</div>
-                                                            <div className="col-span-3">Reps</div>
-                                                            <div className="col-span-2">RPE</div>
-                                                            <div className="col-span-3">Descanso (s)</div>
+                                                    {/* Sets Area */}
+                                                    <div className="space-y-4">
+                                                        {/* Table Header */}
+                                                        <div className="hidden md:grid grid-cols-12 gap-4 px-6 text-[8px] font-black uppercase tracking-[0.5em] text-neutral-600 italic">
+                                                            <div className="col-span-1">#</div>
+                                                            <div className="col-span-3">Categoría</div>
+                                                            <div className="col-span-3 px-2">Carga_Reps</div>
+                                                            <div className="col-span-2 text-center">Intensidad</div>
+                                                            <div className="col-span-2 text-center">Cronos</div>
                                                             <div className="col-span-1"></div>
                                                         </div>
 
-                                                        <div className="space-y-2 md:space-y-1">
-                                                            {exercise.sets?.map((set: ExerciseSet, setIndex: number) => (
-                                                                <div key={setIndex} className="relative bg-neutral-800/20 md:bg-transparent p-2.5 md:p-0 rounded-xl md:rounded-none flex flex-col md:grid md:grid-cols-12 gap-3 md:gap-2 items-center group/set border border-white/5 md:border-none">
+                                                        <div className="space-y-4 md:space-y-2">
+                                                            <AnimatePresence mode="popLayout">
+                                                                {exercise.sets?.map((set: ExerciseSet, setIndex: number) => (
+                                                                    <motion.div
+                                                                        key={setIndex}
+                                                                        layout
+                                                                        initial={{ opacity: 0, y: 10 }}
+                                                                        animate={{ opacity: 1, y: 0 }}
+                                                                        exit={{ opacity: 0, scale: 0.9 }}
+                                                                        className="relative bg-neutral-900/40 backdrop-blur-3xl p-5 md:p-3 rounded-2xl md:rounded-3xl flex flex-col md:grid md:grid-cols-12 gap-5 md:gap-4 items-center group/set border border-white/5 shadow-inner"
+                                                                    >
+                                                                        {/* Mobile Header */}
+                                                                        <div className="flex md:hidden w-full justify-between items-center">
+                                                                            <div className="w-8 h-8 rounded-lg bg-black border border-white/5 flex items-center justify-center text-[10px] font-black text-red-500">
+                                                                                {String(setIndex + 1).padStart(2, '0')}
+                                                                            </div>
+                                                                            <div className="flex items-center gap-2">
+                                                                                <Button
+                                                                                    type="button"
+                                                                                    variant="ghost"
+                                                                                    size="icon"
+                                                                                    className="h-9 w-9 text-neutral-600 hover:text-white hover:bg-white/5 rounded-xl"
+                                                                                    onClick={() => {
+                                                                                        const newSets = [...exercise.sets];
+                                                                                        newSets.splice(setIndex + 1, 0, { ...set });
+                                                                                        updateExerciseField(activeDayIndex, exIndex, "sets", newSets);
+                                                                                    }}
+                                                                                >
+                                                                                    <Copy className="w-4 h-4" />
+                                                                                </Button>
+                                                                                <Button
+                                                                                    type="button"
+                                                                                    variant="ghost"
+                                                                                    size="icon"
+                                                                                    className="h-9 w-9 text-neutral-600 hover:text-red-500 hover:bg-red-500/10 rounded-xl"
+                                                                                    onClick={() => {
+                                                                                        const newSets = [...exercise.sets];
+                                                                                        newSets.splice(setIndex, 1);
+                                                                                        updateExerciseField(activeDayIndex, exIndex, "sets", newSets);
+                                                                                    }}
+                                                                                >
+                                                                                    <Trash2 className="w-4 h-4" />
+                                                                                </Button>
+                                                                            </div>
+                                                                        </div>
 
-                                                                    {/* Mobile Row Header: # & Type & Delete */}
-                                                                    <div className="flex md:hidden w-full justify-between items-center mb-1">
-                                                                        <div className="flex items-center gap-2">
-                                                                            <span className="bg-neutral-800 text-neutral-400 text-[10px] font-black w-5 h-5 flex items-center justify-center rounded-full">
-                                                                                {setIndex + 1}
-                                                                            </span>
+                                                                        {/* Desktop Index */}
+                                                                        <div className="hidden md:flex col-span-1 justify-center">
+                                                                            <div className="w-1 h-3 bg-red-600/30 rounded-full" />
+                                                                        </div>
+
+                                                                        {/* Type Selector */}
+                                                                        <div className="col-span-3 w-full">
                                                                             <Select
                                                                                 value={set.type}
                                                                                 onValueChange={(v) => {
@@ -816,23 +952,86 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                                                                                     updateExerciseField(activeDayIndex, exIndex, "sets", newSets);
                                                                                 }}
                                                                             >
-                                                                                <SelectTrigger className="h-6 w-auto min-w-[100px] text-[10px] uppercase font-bold bg-neutral-800 border-transparent text-white focus:bg-neutral-700 p-0 px-2.5 rounded-md gap-2">
+                                                                                <SelectTrigger className="h-12 md:h-10 text-[10px] font-black uppercase italic tracking-widest bg-black border-white/5 text-white hover:border-white/20 px-4 rounded-xl md:rounded-2xl transition-all">
                                                                                     <SelectValue />
                                                                                 </SelectTrigger>
-                                                                                <SelectContent className="bg-neutral-800 border-neutral-700 text-white">
-                                                                                    <SelectItem value="warmup">Calentamiento</SelectItem>
-                                                                                    <SelectItem value="working">Efectiva</SelectItem>
-                                                                                    <SelectItem value="failure">Al Fallo</SelectItem>
-                                                                                    <SelectItem value="drop">Drop Set</SelectItem>
+                                                                                <SelectContent className="bg-neutral-900 border-white/10 text-white rounded-2xl p-2">
+                                                                                    <SelectItem value="warmup" className="rounded-xl p-3 focus:bg-red-600 text-[10px] font-black uppercase italic tracking-widest">Calentamiento</SelectItem>
+                                                                                    <SelectItem value="working" className="rounded-xl p-3 focus:bg-red-600 text-[10px] font-black uppercase italic tracking-widest">Efectiva</SelectItem>
+                                                                                    <SelectItem value="failure" className="rounded-xl p-3 focus:bg-red-600 text-[10px] font-black uppercase italic tracking-widest">Al Fallo</SelectItem>
+                                                                                    <SelectItem value="drop" className="rounded-xl p-3 focus:bg-red-600 text-[10px] font-black uppercase italic tracking-widest">Drop Set</SelectItem>
                                                                                 </SelectContent>
                                                                             </Select>
                                                                         </div>
-                                                                        <div className="flex items-center gap-0.5">
+
+                                                                        {/* Inputs Grid */}
+                                                                        <div className="grid grid-cols-3 md:contents gap-4 w-full">
+                                                                            {/* Reps */}
+                                                                            <div className="col-span-1 md:col-span-3 relative flex flex-col gap-1.5">
+                                                                                <span className="md:hidden text-[7px] font-black uppercase tracking-[0.4em] text-neutral-600 italic text-center">Reps</span>
+                                                                                <Input
+                                                                                    value={set.reps}
+                                                                                    onChange={(e) => {
+                                                                                        const newSets = [...exercise.sets];
+                                                                                        newSets[setIndex].reps = e.target.value;
+                                                                                        updateExerciseField(activeDayIndex, exIndex, "sets", newSets);
+                                                                                    }}
+                                                                                    className="h-12 md:h-10 text-xs bg-black border-white/5 text-center text-white font-black italic focus:ring-1 focus:ring-red-500/40 rounded-xl md:rounded-2xl shadow-inner placeholder:text-neutral-800"
+                                                                                    placeholder="10-12"
+                                                                                />
+                                                                            </div>
+
+                                                                            {/* RPE */}
+                                                                            <div className="col-span-1 md:col-span-2 flex flex-col gap-1.5">
+                                                                                <span className="md:hidden text-[7px] font-black uppercase tracking-[0.4em] text-neutral-600 italic text-center">Rpe</span>
+                                                                                <Select
+                                                                                    value={set.rpeTarget?.toString() || ""}
+                                                                                    onValueChange={(val) => {
+                                                                                        const newSets = [...exercise.sets];
+                                                                                        newSets[setIndex].rpeTarget = Number(val);
+                                                                                        updateExerciseField(activeDayIndex, exIndex, "sets", newSets);
+                                                                                    }}
+                                                                                >
+                                                                                    <SelectTrigger className="h-12 md:h-10 w-full justify-center text-xs bg-black border-white/5 text-white font-black italic focus:ring-1 focus:ring-red-500/40 rounded-xl md:rounded-2xl shadow-inner px-0 [&>svg]:hidden">
+                                                                                        <SelectValue placeholder="8" />
+                                                                                    </SelectTrigger>
+                                                                                    <SelectContent className="bg-neutral-900 border-white/10 text-white min-w-[60px] rounded-2xl">
+                                                                                        {[10, 9, 8, 7, 6, 5].map((val) => (
+                                                                                            <SelectItem key={val} value={val.toString()} className="justify-center focus:bg-red-600 rounded-xl">
+                                                                                                {val}
+                                                                                            </SelectItem>
+                                                                                        ))}
+                                                                                    </SelectContent>
+                                                                                </Select>
+                                                                            </div>
+
+                                                                            {/* Rest */}
+                                                                            <div className="col-span-1 md:col-span-2 flex flex-col gap-1.5">
+                                                                                <span className="md:hidden text-[7px] font-black uppercase tracking-[0.4em] text-neutral-600 italic text-center">Rest</span>
+                                                                                <div className="relative">
+                                                                                    <Input
+                                                                                        type="number"
+                                                                                        value={set.restSeconds}
+                                                                                        onChange={(e) => {
+                                                                                            const newSets = [...exercise.sets];
+                                                                                            newSets[setIndex].restSeconds = Number(e.target.value);
+                                                                                            updateExerciseField(activeDayIndex, exIndex, "sets", newSets);
+                                                                                        }}
+                                                                                        className="h-12 md:h-10 text-xs bg-black border-white/5 text-center text-white font-black italic focus:ring-1 focus:ring-red-500/40 rounded-xl md:rounded-2xl shadow-inner pr-6"
+                                                                                        placeholder="90"
+                                                                                    />
+                                                                                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[8px] font-black text-neutral-700">S</span>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        {/* Desktop Actions */}
+                                                                        <div className="hidden md:flex col-span-1 justify-center gap-1 opacity-0 group-hover/set:opacity-100 transition-opacity">
                                                                             <Button
                                                                                 type="button"
                                                                                 variant="ghost"
                                                                                 size="icon"
-                                                                                className="h-7 w-7 text-neutral-600 hover:text-white"
+                                                                                className="h-8 w-8 text-neutral-600 hover:text-white hover:bg-white/5 rounded-xl"
                                                                                 onClick={() => {
                                                                                     const newSets = [...exercise.sets];
                                                                                     newSets.splice(setIndex + 1, 0, { ...set });
@@ -845,7 +1044,7 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                                                                                 type="button"
                                                                                 variant="ghost"
                                                                                 size="icon"
-                                                                                className="h-7 w-7 text-neutral-600 hover:text-red-500 hover:bg-red-500/10 -mr-1"
+                                                                                className="h-8 w-8 text-neutral-600 hover:text-red-500 hover:bg-red-500/10 rounded-xl"
                                                                                 onClick={() => {
                                                                                     const newSets = [...exercise.sets];
                                                                                     newSets.splice(setIndex, 1);
@@ -855,136 +1054,25 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                                                                                 <Trash2 className="w-3.5 h-3.5" />
                                                                             </Button>
                                                                         </div>
-                                                                    </div>
-
-                                                                    {/* Desktop Type Selector */}
-                                                                    <div className="hidden md:block col-span-3">
-                                                                        <Select
-                                                                            value={set.type}
-                                                                            onValueChange={(v) => {
-                                                                                const newSets = [...exercise.sets];
-                                                                                newSets[setIndex].type = v;
-                                                                                updateExerciseField(activeDayIndex, exIndex, "sets", newSets);
-                                                                            }}
-                                                                        >
-                                                                            <SelectTrigger className="h-8 text-xs bg-transparent border-transparent text-white focus:bg-neutral-800 p-0 px-2">
-                                                                                <SelectValue />
-                                                                            </SelectTrigger>
-                                                                            <SelectContent className="bg-neutral-800 border-neutral-700 text-white">
-                                                                                <SelectItem value="warmup">Calentamiento</SelectItem>
-                                                                                <SelectItem value="working">Efectiva</SelectItem>
-                                                                                <SelectItem value="failure">Al Fallo</SelectItem>
-                                                                                <SelectItem value="drop">Drop Set</SelectItem>
-                                                                            </SelectContent>
-                                                                        </Select>
-                                                                    </div>
-
-                                                                    {/* Inputs Grid */}
-                                                                    <div className="grid grid-cols-3 md:contents gap-2 w-full">
-                                                                        <div className="col-span-1 md:col-span-3 space-y-1">
-                                                                            <div className="md:hidden flex justify-center">
-                                                                                <span className="text-[9px] uppercase font-bold text-neutral-600 tracking-wider">Reps</span>
-                                                                            </div>
-                                                                            <Input
-                                                                                value={set.reps}
-                                                                                onChange={(e) => {
-                                                                                    const newSets = [...exercise.sets];
-                                                                                    newSets[setIndex].reps = e.target.value;
-                                                                                    updateExerciseField(activeDayIndex, exIndex, "sets", newSets);
-                                                                                }}
-                                                                                className="h-10 md:h-8 text-sm md:text-xs bg-neutral-950 md:bg-neutral-800 border border-neutral-800 md:border-transparent text-center text-white font-bold focus:ring-1 focus:ring-white/20 rounded-xl md:rounded-md shadow-sm"
-                                                                                placeholder="10-12"
-                                                                            />
-                                                                        </div>
-                                                                        <div className="col-span-1 md:col-span-2 space-y-1">
-                                                                            <div className="md:hidden flex justify-center">
-                                                                                <span className="text-[9px] uppercase font-bold text-neutral-600 tracking-wider">RPE</span>
-                                                                            </div>
-                                                                            <Select
-                                                                                value={set.rpeTarget?.toString() || ""}
-                                                                                onValueChange={(val) => {
-                                                                                    const newSets = [...exercise.sets];
-                                                                                    newSets[setIndex].rpeTarget = Number(val);
-                                                                                    updateExerciseField(activeDayIndex, exIndex, "sets", newSets);
-                                                                                }}
-                                                                            >
-                                                                                <SelectTrigger
-                                                                                    className="h-10 md:h-8 w-full justify-center text-center text-sm md:text-xs bg-neutral-950 md:bg-neutral-800 border border-neutral-800 md:border-transparent text-white font-bold focus:ring-1 focus:ring-white/20 rounded-xl md:rounded-md shadow-sm px-0 [&>svg]:hidden transition-all"
-                                                                                >
-                                                                                    <SelectValue placeholder="8" />
-                                                                                </SelectTrigger>
-                                                                                <SelectContent className="bg-neutral-900 border-neutral-800 text-white min-w-[60px]">
-                                                                                    {[10, 9, 8, 7, 6, 5].map((val) => (
-                                                                                        <SelectItem key={val} value={val.toString()} className="justify-center focus:bg-neutral-800 focus:text-white">
-                                                                                            {val}
-                                                                                        </SelectItem>
-                                                                                    ))}
-                                                                                </SelectContent>
-                                                                            </Select>
-                                                                        </div>
-                                                                        <div className="col-span-1 md:col-span-3 space-y-1">
-                                                                            <div className="md:hidden flex justify-center">
-                                                                                <span className="text-[9px] uppercase font-bold text-neutral-600 tracking-wider">Rest(s)</span>
-                                                                            </div>
-                                                                            <Input
-                                                                                type="number"
-                                                                                value={set.restSeconds}
-                                                                                onChange={(e) => {
-                                                                                    const newSets = [...exercise.sets];
-                                                                                    newSets[setIndex].restSeconds = Number(e.target.value);
-                                                                                    updateExerciseField(activeDayIndex, exIndex, "sets", newSets);
-                                                                                }}
-                                                                                className="h-10 md:h-8 text-sm md:text-xs bg-neutral-950 md:bg-neutral-800 border border-neutral-800 md:border-transparent text-center text-white font-bold focus:ring-1 focus:ring-white/20 rounded-xl md:rounded-md shadow-sm"
-                                                                                placeholder="90"
-                                                                            />
-                                                                        </div>
-                                                                    </div>
-
-                                                                    {/* Desktop Actions */}
-                                                                    <div className="hidden md:flex col-span-1 justify-center gap-1">
-                                                                        <Button
-                                                                            variant="ghost"
-                                                                            size="icon"
-                                                                            className="h-6 w-6 text-neutral-600 hover:text-white hover:bg-neutral-800 opacity-0 group-hover/set:opacity-100 transition-opacity"
-                                                                            onClick={() => {
-                                                                                const newSets = [...exercise.sets];
-                                                                                newSets.splice(setIndex + 1, 0, { ...set });
-                                                                                updateExerciseField(activeDayIndex, exIndex, "sets", newSets);
-                                                                            }}
-                                                                        >
-                                                                            <Copy className="w-3 h-3" />
-                                                                        </Button>
-                                                                        <Button
-                                                                            variant="ghost"
-                                                                            size="icon"
-                                                                            className="h-6 w-6 text-neutral-600 hover:text-red-500 hover:bg-red-500/10 opacity-0 group-hover/set:opacity-100 transition-opacity"
-                                                                            onClick={() => {
-                                                                                const newSets = [...exercise.sets];
-                                                                                newSets.splice(setIndex, 1);
-                                                                                updateExerciseField(activeDayIndex, exIndex, "sets", newSets);
-                                                                            }}
-                                                                        >
-                                                                            <Trash2 className="w-3 h-3" />
-                                                                        </Button>
-                                                                    </div>
-                                                                </div>
-                                                            ))}
+                                                                    </motion.div>
+                                                                ))}
+                                                            </AnimatePresence>
                                                         </div>
 
                                                         <Button
                                                             variant="ghost"
                                                             size="sm"
-                                                            className="w-full text-xs text-neutral-500 hover:text-white hover:bg-neutral-800 mt-2 h-8 rounded-lg"
+                                                            className="w-full h-12 text-[10px] font-black uppercase italic tracking-widest text-neutral-500 hover:text-white hover:bg-white/5 rounded-2xl border border-dashed border-white/5 transition-all mt-4"
                                                             onClick={() => {
                                                                 const newSets = [...exercise.sets, { type: "working", reps: "8-12", rpeTarget: 8, restSeconds: 90 }];
                                                                 updateExerciseField(activeDayIndex, exIndex, "sets", newSets);
                                                             }}
                                                         >
-                                                            <Plus className="w-3 h-3 mr-1" /> AÑADIR SERIE
+                                                            <Plus className="w-3.5 h-3.5 mr-3" /> Integrar Nueva Serie
                                                         </Button>
                                                     </div>
                                                 </div>
-                                            </div>
+                                            </motion.div>
                                         ))}
                                     </div>
                                 )}
@@ -993,18 +1081,20 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                                     <Button
                                         onClick={() => addExerciseToDay(activeDayIndex)}
                                         variant="outline"
-                                        className="w-full h-14 border border-neutral-800 bg-neutral-900 text-neutral-400 hover:text-white hover:bg-neutral-800 hover:border-neutral-700 rounded-xl transition-all group mt-4 dashed-border-0 shadow-sm"
+                                        className="w-full h-20 border border-white/5 bg-neutral-900/40 backdrop-blur-3xl text-neutral-500 hover:text-white hover:bg-white/5 hover:border-white/20 rounded-[2.5rem] transition-all group mt-8 relative overflow-hidden"
                                     >
-                                        <Plus className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" />
-                                        <span className="text-sm font-bold uppercase tracking-widest">AÑADIR EJERCICIO</span>
+                                        <div className="absolute inset-0 bg-linear-to-r from-red-600/2 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                        <Plus className="w-6 h-6 mr-4 group-hover:scale-110 transition-transform relative z-10" />
+                                        <span className="text-sm font-black uppercase tracking-[0.3em] italic relative z-10">Expandir Módulos de Entrenamiento</span>
                                     </Button>
                                 )}
                             </div>
                         </div>
                     ) : (
-                        <div className="flex flex-col items-center justify-center h-full min-h-[400px] text-neutral-500 border-2 border-dashed border-neutral-800 bg-neutral-900/20 rounded-3xl opacity-50">
-                            <Label className="text-xl font-bold uppercase tracking-widest text-neutral-700">Nada Seleccionado</Label>
-                            <p className="text-sm">Selecciona o crea un día para comenzar a editar.</p>
+                        <div className="flex flex-col items-center justify-center h-full min-h-[600px] border border-dashed border-white/5 bg-neutral-950/20 rounded-[3rem] opacity-30 shadow-inner">
+                            <Label className="text-2xl font-black uppercase tracking-[0.6em] text-neutral-800 italic grayscale mb-4">Módulo de Edición_Inactivo</Label>
+                            <div className="w-12 h-px bg-neutral-800 mb-6" />
+                            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-neutral-600 italic">Desbloquee una secuencia lateral para iniciar el protocolo</p>
                         </div>
                     )}
                 </div>
@@ -1019,7 +1109,7 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                 onSelect={handleExerciseSelect}
                 availableExercises={sortedExercises}
                 isVariantSelector={isVariantMode}
-                title={isVariantMode ? "Añadir Variante" : "Seleccionar Ejercicio"}
+                title={isVariantMode ? "NODO_VARIANTE" : "NODO_PRINCIPAL"}
             />
         </div >
     );

@@ -17,11 +17,14 @@ import { toast } from "sonner";
 import { updateProfile } from "@/actions/profile-actions";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { cn } from "@/lib/utils";
 import { LoaderPremium } from "@/components/ui/loader-premium";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { User } from "lucide-react";
+import { User, ShieldCheck, Activity, Target } from "lucide-react";
+import { ClientMotionDiv } from "@/components/ui/client-motion";
 
 const profileSchema = z.object({
+    // ... (rest of the schema remains same)
     name: z.string().min(2, {
         message: "El nombre debe tener al menos 2 caracteres.",
     }),
@@ -96,59 +99,77 @@ export function ProfileForm({ user }: ProfileFormProps) {
     const bmi = calculateBMI(height, weight);
 
     return (
-        <div className="space-y-8">
-            <div className="flex flex-col md:flex-row items-center md:items-start gap-6 pb-6 border-b border-neutral-800">
+        <div className="space-y-12">
+            <ClientMotionDiv
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="flex flex-col md:flex-row items-center md:items-start gap-8 pb-10 border-b border-white/5"
+            >
                 <div className="relative group">
-                    <div className="absolute -inset-0.5 bg-linear-to-r from-red-600 to-red-900 rounded-full blur opacity-20 group-hover:opacity-40 transition duration-500"></div>
-                    <Avatar className="h-28 w-28 border-4 border-black relative z-10">
+                    <div className="absolute -inset-1 bg-linear-to-r from-red-600 to-red-900 rounded-full blur opacity-20 group-hover:opacity-40 transition duration-700"></div>
+                    <Avatar className="h-32 w-32 border-4 border-black relative z-10 shadow-2xl">
                         <AvatarImage src={user.image} className="object-cover" />
-                        <AvatarFallback className="text-3xl font-black bg-neutral-900 text-neutral-400">
-                            {user.name?.[0]?.toUpperCase() || <User />}
+                        <AvatarFallback className="text-4xl font-black bg-neutral-900 text-neutral-600 italic">
+                            {user.name?.[0]?.toUpperCase() || <User className="w-12 h-12" />}
                         </AvatarFallback>
                     </Avatar>
                 </div>
 
-                <div className="text-center md:text-left space-y-1">
-                    <h2 className="text-3xl font-black text-white tracking-tight">{user.name}</h2>
-                    <p className="text-neutral-400 font-medium">{user.email}</p>
-                    <div className="flex items-center justify-center md:justify-start gap-2 pt-2">
-                        <span className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-xs font-bold uppercase tracking-wider text-white">
-                            {user.role === 'coach' ? 'Entrenador' : 'Atleta'}
-                        </span>
-                        {user.onboardingCompleted && (
-                            <span className="px-3 py-1 bg-green-900/20 border border-green-900/50 rounded-full text-xs font-bold uppercase tracking-wider text-green-500">
-                                Verificado
+                <div className="text-center md:text-left space-y-3 flex-1">
+                    <div className="flex flex-col md:flex-row md:items-center gap-3">
+                        <h2 className="text-4xl font-black text-white tracking-tighter uppercase italic">{user.name}</h2>
+                        <div className="flex items-center justify-center md:justify-start gap-2">
+                            <span className="px-4 py-1.5 bg-white/5 border border-white/10 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] text-white backdrop-blur-xl">
+                                {user.role === 'coach' ? 'Operador Rank: Coach' : 'Módulo: Atleta'}
                             </span>
-                        )}
+                            {user.onboardingCompleted && (
+                                <div className="h-6 w-6 bg-emerald-500/10 border border-emerald-500/20 rounded-full flex items-center justify-center">
+                                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
+                                </div>
+                            )}
+                        </div>
                     </div>
+                    <p className="text-neutral-500 font-bold italic text-sm tracking-tight">{user.email}</p>
                 </div>
 
                 {user.role !== 'coach' && bmi && (
-                    <div className={`md:ml-auto p-4 rounded-2xl border ${bmi.color.split(' ')[0]} bg-white/5 backdrop-blur-sm flex flex-col items-center justify-center min-w-[140px] shadow-lg`}>
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 mb-1">IMC Actual</span>
-                        <span className={`text-3xl font-black ${bmi.color.split(' ')[1]} leading-none mb-1`}>{bmi.value}</span>
-                        <span className="text-[10px] font-bold uppercase text-neutral-500 bg-black/40 px-2 py-0.5 rounded-full">{bmi.label}</span>
+                    <div className={cn(
+                        "md:ml-auto p-6 rounded-3xl border bg-neutral-900/40 backdrop-blur-3xl flex flex-col items-center justify-center min-w-[160px] shadow-2xl transition-all hover:scale-105",
+                        bmi.color.split(' ')[0],
+                        "hover:border-opacity-50"
+                    )}>
+                        <div className="flex items-center gap-2 mb-2">
+                            <Activity className="w-3.5 h-3.5 text-neutral-600" />
+                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-neutral-600">Índice Telemetría (IMC)</span>
+                        </div>
+                        <span className={cn("text-4xl font-black tracking-tighter italic leading-none mb-1", bmi.color.split(' ')[1])}>{bmi.value}</span>
+                        <div className="bg-black/40 px-3 py-1 rounded-xl border border-white/5">
+                            <span className="text-[9px] font-black uppercase tracking-widest text-neutral-400 italic">{bmi.label}</span>
+                        </div>
                     </div>
                 )}
-            </div>
+            </ClientMotionDiv>
 
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <FormField
                             control={form.control}
                             name="name"
                             render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel className="uppercase text-xs font-bold tracking-widest text-neutral-500 ml-1">Nombre Completo</FormLabel>
+                                <FormItem className="space-y-3">
+                                    <FormLabel className="uppercase text-[10px] font-black tracking-[0.3em] text-neutral-500 ml-1 italic flex items-center gap-2">
+                                        <div className="h-1 w-1 rounded-full bg-red-500" />
+                                        Nombre Completo
+                                    </FormLabel>
                                     <FormControl>
                                         <Input
                                             placeholder="Tu nombre"
                                             {...field}
-                                            className="bg-neutral-950/50 border-neutral-800 focus:border-red-500 transition-all h-12 rounded-xl text-white placeholder:text-neutral-600"
+                                            className="bg-neutral-900/20 border-white/5 focus:border-red-500/50 transition-all h-14 rounded-2xl text-white placeholder:text-neutral-700 font-bold italic shadow-inner"
                                         />
                                     </FormControl>
-                                    <FormMessage />
+                                    <FormMessage className="text-[10px] font-black uppercase italic text-red-500" />
                                 </FormItem>
                             )}
                         />
@@ -157,16 +178,19 @@ export function ProfileForm({ user }: ProfileFormProps) {
                             control={form.control}
                             name="phone"
                             render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel className="uppercase text-xs font-bold tracking-widest text-neutral-500 ml-1">Teléfono</FormLabel>
+                                <FormItem className="space-y-3">
+                                    <FormLabel className="uppercase text-[10px] font-black tracking-[0.3em] text-neutral-500 ml-1 italic flex items-center gap-2">
+                                        <div className="h-1 w-1 rounded-full bg-blue-500" />
+                                        Contacto Móvil
+                                    </FormLabel>
                                     <FormControl>
                                         <Input
                                             placeholder="+56 9 ..."
                                             {...field}
-                                            className="bg-neutral-950/50 border-neutral-800 focus:border-red-500 transition-all h-12 rounded-xl text-white placeholder:text-neutral-600"
+                                            className="bg-neutral-900/20 border-white/5 focus:border-blue-500/50 transition-all h-14 rounded-2xl text-white placeholder:text-neutral-700 font-bold italic shadow-inner"
                                         />
                                     </FormControl>
-                                    <FormMessage />
+                                    <FormMessage className="text-[10px] font-black uppercase italic text-red-500" />
                                 </FormItem>
                             )}
                         />
@@ -177,8 +201,11 @@ export function ProfileForm({ user }: ProfileFormProps) {
                                     control={form.control}
                                     name="height"
                                     render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="uppercase text-xs font-bold tracking-widest text-neutral-500 ml-1">Altura (cm)</FormLabel>
+                                        <FormItem className="space-y-3">
+                                            <FormLabel className="uppercase text-[10px] font-black tracking-[0.3em] text-neutral-500 ml-1 italic flex items-center gap-2">
+                                                <Target className="w-3 h-3 text-red-500" />
+                                                Altura (CM)
+                                            </FormLabel>
                                             <FormControl>
                                                 <Input
                                                     {...field}
@@ -191,52 +218,58 @@ export function ProfileForm({ user }: ProfileFormProps) {
                                                         }
                                                     }}
                                                     placeholder="175"
-                                                    className="bg-neutral-950/50 border-neutral-800 focus:border-red-500 transition-all h-12 rounded-xl text-white placeholder:text-neutral-600"
+                                                    className="bg-neutral-900/20 border-white/5 focus:border-red-500/50 transition-all h-14 rounded-2xl text-white placeholder:text-neutral-700 font-bold italic shadow-inner"
                                                 />
                                             </FormControl>
-                                            <FormMessage />
+                                            <FormMessage className="text-[10px] font-black uppercase italic text-red-500" />
                                         </FormItem>
                                     )}
                                 />
 
-                                <div className="space-y-2">
-                                    <FormField
-                                        control={form.control}
-                                        name="weight"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel className="uppercase text-xs font-bold tracking-widest text-neutral-500 ml-1">Peso (kg)</FormLabel>
-                                                <FormControl>
-                                                    <Input
-                                                        {...field}
-                                                        type="text"
-                                                        inputMode="decimal"
-                                                        onChange={(e) => {
-                                                            const val = e.target.value.replace(",", ".");
-                                                            if (val === "" || /^\d*\.?\d*$/.test(val)) {
-                                                                field.onChange(val);
-                                                            }
-                                                        }}
-                                                        placeholder="70"
-                                                        className="bg-neutral-950/50 border-neutral-800 focus:border-red-500 transition-all h-12 rounded-xl text-white placeholder:text-neutral-600"
-                                                    />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                </div>
+                                <FormField
+                                    control={form.control}
+                                    name="weight"
+                                    render={({ field }) => (
+                                        <FormItem className="space-y-3">
+                                            <FormLabel className="uppercase text-[10px] font-black tracking-[0.3em] text-neutral-500 ml-1 italic flex items-center gap-2">
+                                                <Activity className="w-3 h-3 text-emerald-500" />
+                                                Peso Actual (KG)
+                                            </FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    {...field}
+                                                    type="text"
+                                                    inputMode="decimal"
+                                                    onChange={(e) => {
+                                                        const val = e.target.value.replace(",", ".");
+                                                        if (val === "" || /^\d*\.?\d*$/.test(val)) {
+                                                            field.onChange(val);
+                                                        }
+                                                    }}
+                                                    placeholder="70"
+                                                    className="bg-neutral-900/20 border-white/5 focus:border-emerald-500/50 transition-all h-14 rounded-2xl text-white placeholder:text-neutral-700 font-bold italic shadow-inner"
+                                                />
+                                            </FormControl>
+                                            <FormMessage className="text-[10px] font-black uppercase italic text-red-500" />
+                                        </FormItem>
+                                    )}
+                                />
                             </>
                         )}
                     </div>
 
-                    <div className="pt-4 flex justify-end">
+                    <div className="pt-8 flex justify-end">
                         <Button
                             type="submit"
                             disabled={isSubmitting}
-                            className="w-full md:w-auto px-8 bg-red-600 hover:bg-red-700 text-white h-12 rounded-full font-bold shadow-lg shadow-red-900/20 transition-all hover:scale-105"
+                            className="w-full md:w-auto px-12 h-14 bg-white text-black font-black uppercase italic tracking-[0.2em] text-[10px] rounded-2xl hover:bg-neutral-200 transition-all shadow-xl shadow-white/5 active:scale-95 flex items-center justify-center gap-3 group"
                         >
-                            {isSubmitting ? <LoaderPremium size="sm" /> : "Guardar Cambios"}
+                            {isSubmitting ? <LoaderPremium size="sm" /> : (
+                                <>
+                                    <span>Sincronizar Datos</span>
+                                    <Target className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                                </>
+                            )}
                         </Button>
                     </div>
                 </form>
