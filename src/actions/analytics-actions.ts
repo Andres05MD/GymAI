@@ -250,6 +250,119 @@ export async function getStrengthProgress(userId?: string) {
     }
 }
 
+export interface StrengthDataPoint {
+    date: string;
+    e1rm: number;
+    weight: number;
+    reps: number;
+    rpe: number;
+}
+
+export interface ExerciseStrengthHistory {
+    exerciseName: string;
+    dataPoints: StrengthDataPoint[];
+    latestE1RM: number;
+    previousE1RM: number;
+    changePercent: number;
+}
+
+export async function getStrengthHistory(userId?: string) {
+    const session = await auth();
+    if (!session?.user?.id) return { success: false, error: "No autorizado" };
+    const targetUserId = userId || session.user.id;
+
+    try {
+        const logsSnapshot = await adminDb.collection("training_logs")
+            .where("athleteId", "==", targetUserId)
+            .orderBy("date", "desc")
+            .limit(50)
+            .get();
+
+        if (logsSnapshot.empty) {
+            return { success: true, exercises: [] };
+        }
+
+        const exerciseMap = new Map<string, StrengthDataPoint[]>();
+
+        const calculateMaxE1RM = (sets: TrainingSetData[]) => {
+            let maxE1RM = 0;
+            let bestWeight = 0;
+            let bestReps = 0;
+            let bestRpe = 8;
+
+            sets.forEach((s) => {
+                if (s.completed && s.weight && s.reps) {
+                    const rpe = s.rpe || 8;
+                    const e1rm = s.weight * (1 + (s.reps + (10 - rpe)) / 30);
+                    if (e1rm > maxE1RM) {
+                        maxE1RM = e1rm;
+                        bestWeight = s.weight;
+                        bestReps = s.reps;
+                        bestRpe = rpe;
+                    }
+                }
+            });
+
+            return { e1rm: Math.round(maxE1RM * 10) / 10, weight: bestWeight, reps: bestReps, rpe: bestRpe };
+        };
+
+        // Procesar todos los logs (vienen desc, los invertimos al final)
+        logsSnapshot.docs.forEach(doc => {
+            const data = doc.data();
+            const dateObj = data.date?.toDate?.() || new Date();
+            const dateStr = dateObj.toLocaleDateString("es-ES", { day: "numeric", month: "short" });
+
+            if (data.exercises) {
+                data.exercises.forEach((ex: TrainingExerciseData) => {
+                    const name = ex.exerciseName;
+                    const result = calculateMaxE1RM(ex.sets);
+
+                    if (result.e1rm > 0) {
+                        if (!exerciseMap.has(name)) {
+                            exerciseMap.set(name, []);
+                        }
+                        exerciseMap.get(name)!.push({
+                            date: dateStr,
+                            e1rm: result.e1rm,
+                            weight: result.weight,
+                            reps: result.reps,
+                            rpe: result.rpe,
+                        });
+                    }
+                });
+            }
+        });
+
+        // Construir resultado: invertir para que sea cronológico (viejo -> nuevo)
+        const exercises: ExerciseStrengthHistory[] = [];
+
+        exerciseMap.forEach((dataPoints, exerciseName) => {
+            const reversed = [...dataPoints].reverse();
+            const latest = reversed[reversed.length - 1]?.e1rm || 0;
+            const previous = reversed.length >= 2 ? reversed[reversed.length - 2]?.e1rm || 0 : 0;
+            const changePercent = previous > 0 ? parseFloat(((latest - previous) / previous * 100).toFixed(1)) : 0;
+
+            if (reversed.length >= 1) {
+                exercises.push({
+                    exerciseName,
+                    dataPoints: reversed,
+                    latestE1RM: latest,
+                    previousE1RM: previous,
+                    changePercent,
+                });
+            }
+        });
+
+        // Ordenar por nombre
+        exercises.sort((a, b) => a.exerciseName.localeCompare(b.exerciseName));
+
+        return { success: true, exercises };
+    } catch (error) {
+        console.error("Error fetching strength history:", error);
+        return { success: false, error: "Error al cargar historial de fuerza" };
+    }
+}
+
 import { getGroqClient, DEFAULT_AI_MODEL } from "@/lib/ai";
 
 export async function analyzeAthleteProgress(userId: string) {

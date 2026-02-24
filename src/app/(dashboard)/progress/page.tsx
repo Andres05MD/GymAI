@@ -285,20 +285,23 @@ export default async function ProgressPage({ searchParams }: ProgressPageProps) 
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.3 }}
-                    className="bg-neutral-900/20 backdrop-blur-3xl border border-white/5 rounded-4xl p-8 relative overflow-hidden group hover:border-purple-500/30 transition-all h-full flex flex-col items-center justify-center text-center shadow-2xl"
                 >
-                    <div className="absolute top-0 right-0 w-24 h-24 bg-purple-600/5 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none group-hover:bg-purple-600/10 transition-colors"></div>
-                    <div className="relative z-10 flex flex-col items-center gap-4">
-                        <div className="h-16 w-16 bg-purple-500/10 rounded-2xl flex items-center justify-center border border-purple-500/20 shadow-xl group-hover:scale-110 transition-transform duration-500">
-                            <TrendingUp className="h-7 w-7 text-purple-500" />
+                    <Link href={isCoach ? `/progress/strength?athleteId=${targetUserId}` : "/progress/strength"} className="block h-full">
+                        <div className="bg-neutral-900/20 backdrop-blur-3xl border border-white/5 rounded-4xl p-8 relative overflow-hidden group hover:border-purple-500/30 transition-all cursor-pointer h-full flex flex-col items-center justify-center text-center shadow-2xl">
+                            <div className="absolute top-0 right-0 w-24 h-24 bg-purple-600/5 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none group-hover:bg-purple-600/10 transition-colors"></div>
+                            <div className="relative z-10 flex flex-col items-center gap-4">
+                                <div className="h-16 w-16 bg-purple-500/10 rounded-2xl flex items-center justify-center border border-purple-500/20 shadow-xl group-hover:scale-110 transition-transform duration-500">
+                                    <TrendingUp className="h-7 w-7 text-purple-500" />
+                                </div>
+                                <div>
+                                    <p className="text-4xl font-black text-white tracking-tighter uppercase italic leading-none mb-2">
+                                        {isStrengthPositive ? "+" : ""}{strengthProgress}%
+                                    </p>
+                                    <p className="text-[10px] text-neutral-500 uppercase tracking-[0.3em] font-black italic">Evolución Fuerza</p>
+                                </div>
+                            </div>
                         </div>
-                        <div>
-                            <p className="text-4xl font-black text-white tracking-tighter uppercase italic leading-none mb-2">
-                                {isStrengthPositive ? "+" : ""}{strengthProgress}%
-                            </p>
-                            <p className="text-[10px] text-neutral-500 uppercase tracking-[0.3em] font-black italic">Evolución Fuerza</p>
-                        </div>
-                    </div>
+                    </Link>
                 </ClientMotionDiv>
             </div>
 
