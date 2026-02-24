@@ -4,9 +4,9 @@ import { z } from "zod";
 import { RoutineSchema, RoutineDaySchema, RoutineExerciseSchema, RoutineSetSchema } from "@/lib/schemas";
 import { adminDb, serializeFirestoreData } from "@/lib/firebase-admin";
 import { auth } from "@/lib/auth";
-import { getGroqClient } from "@/lib/ai";
+import { getGroqClient, DEFAULT_AI_MODEL } from "@/lib/ai";
 import { getExercises } from "./exercise-actions";
-import { unstable_cache, revalidatePath } from "next/cache";
+import { unstable_cache, revalidatePath, revalidateTag } from "next/cache";
 
 // Schema for generating a routine with AI
 const GenerateRoutineSchema = z.object({
@@ -289,6 +289,8 @@ export async function createRoutine(data: Partial<RoutineInput>) {
         const docRef = await adminDb.collection("routines").add(newRoutine);
         revalidatePath("/routines");
         revalidatePath("/dashboard");
+        revalidateTag("routines", "default");
+        revalidateTag("coach-stats", "default");
         return { success: true, id: docRef.id };
     } catch (error) {
         console.error("Error creating routine:", error);
@@ -328,6 +330,8 @@ export async function deleteRoutine(id: string) {
         await adminDb.collection("routines").doc(id).delete();
         revalidatePath("/routines");
         revalidatePath("/dashboard");
+        revalidateTag("routines", "default");
+        revalidateTag("coach-stats", "default");
         return { success: true };
     } catch (error) {
         return { success: false, error: "Error al eliminar" };
@@ -430,7 +434,7 @@ export async function generateRoutineWithAI(data: z.infer<typeof GenerateRoutine
         const groq = getGroqClient();
         const completion = await groq.chat.completions.create({
             messages: [{ role: "user", content: prompt }],
-            model: "llama-3.3-70b-versatile",
+            model: DEFAULT_AI_MODEL,
             temperature: 0.5,
             response_format: { type: "json_object" },
         });
@@ -439,6 +443,32 @@ export async function generateRoutineWithAI(data: z.infer<typeof GenerateRoutine
         if (!content) return { success: false, error: "La IA no generó respuesta" };
 
         const generatedRoutine = JSON.parse(content);
+
+        // 4. Matching fuzzy: vincular exerciseName de la IA con exerciseId de la biblioteca
+        if (exercisesList && generatedRoutine.schedule) {
+            const normalizeStr = (s: string) => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+
+            for (const day of generatedRoutine.schedule) {
+                if (!day.exercises) continue;
+                for (const ex of day.exercises) {
+                    const normalizedName = normalizeStr(ex.exerciseName);
+
+                    // Buscar match exacto primero, luego parcial
+                    const exactMatch = exercisesList.find(e => normalizeStr(e.name) === normalizedName);
+                    const partialMatch = !exactMatch
+                        ? exercisesList.find(e =>
+                            normalizeStr(e.name).includes(normalizedName) ||
+                            normalizedName.includes(normalizeStr(e.name))
+                        )
+                        : null;
+
+                    const match = exactMatch || partialMatch;
+                    if (match) {
+                        ex.exerciseId = match.id;
+                    }
+                }
+            }
+        }
 
         return { success: true, routine: generatedRoutine };
 

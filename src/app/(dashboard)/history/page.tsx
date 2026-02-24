@@ -7,25 +7,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ClientMotionDiv } from "@/components/ui/client-motion";
 
-// Tipos locales para cálculos
-interface TrainingSet {
-    weight?: number;
-    reps?: number;
-    completed?: boolean;
-    rpe?: number;
-}
-
-interface TrainingExercise {
-    exerciseName: string;
-    sets?: TrainingSet[];
-}
-
-interface TrainingLog {
-    id: string;
-    date: string;
-    exercises?: TrainingExercise[];
-    sessionRpe?: number;
-}
+import type { TrainingSetData, TrainingExerciseData, TrainingLogData } from "@/types";
 
 export default async function HistoryPage() {
     const session = await auth();
@@ -34,13 +16,13 @@ export default async function HistoryPage() {
     const { logs, error } = await getTrainingLogs(session.user.id);
 
     // Calculate some stats for the header
-    const typedLogs = logs as TrainingLog[] | undefined;
+    const typedLogs = logs as TrainingLogData[] | undefined;
     const totalSessions = typedLogs?.length || 0;
 
     // Total Volume
-    const totalVolume = typedLogs?.reduce((acc: number, log: TrainingLog) => {
-        return acc + (log.exercises?.reduce((exAcc: number, ex: TrainingExercise) => {
-            return exAcc + (ex.sets?.reduce((setAcc: number, s: TrainingSet) => setAcc + ((s.weight || 0) * (s.reps || 0)), 0) || 0);
+    const totalVolume = typedLogs?.reduce((acc: number, log: TrainingLogData) => {
+        return acc + (log.exercises?.reduce((exAcc: number, ex: TrainingExerciseData) => {
+            return exAcc + (ex.sets?.reduce((setAcc: number, s: TrainingSetData) => setAcc + ((s.weight || 0) * (s.reps || 0)), 0) || 0);
         }, 0) || 0);
     }, 0) || 0;
 
@@ -50,7 +32,7 @@ export default async function HistoryPage() {
         ? logsWithRpe.reduce((acc, log) => acc + (log.sessionRpe || 0), 0) / logsWithRpe.length
         : 0;
 
-    const thisMonthLogs = typedLogs?.filter((log: TrainingLog) => {
+    const thisMonthLogs = typedLogs?.filter((log: TrainingLogData) => {
         const logDate = new Date(log.date);
         const now = new Date();
         return logDate.getMonth() === now.getMonth() && logDate.getFullYear() === now.getFullYear();

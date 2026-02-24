@@ -2,13 +2,16 @@
 
 import { adminDb } from "@/lib/firebase-admin";
 import { auth } from "@/lib/auth";
-import { getGroqClient } from "@/lib/ai";
+import { getGroqClient, getAthleteContext, DEFAULT_AI_MODEL } from "@/lib/ai";
 
 export async function generateWarmup(muscleGroups: string[]) {
     const session = await auth();
     if (!session?.user?.id) return { success: false, error: "No autorizado" };
 
     try {
+        // Inyectar contexto del atleta para personalizar el calentamiento
+        const athleteCtx = await getAthleteContext(session.user.id);
+
         const prompt = `
             Genera una rutina de calentamiento específica y rápida (5-10 min) para preparar los siguientes grupos musculares: ${muscleGroups.join(", ")}.
             
@@ -19,12 +22,16 @@ export async function generateWarmup(muscleGroups: string[]) {
                 ]
             }
             Incluye movilidad articular, activación y aproximación.
+            IMPORTANTE: Si el atleta tiene lesiones, adapta el calentamiento para proteger las zonas afectadas.
         `;
 
         const groq = getGroqClient();
         const completion = await groq.chat.completions.create({
-            messages: [{ role: "user", content: prompt }],
-            model: "llama-3.3-70b-versatile",
+            messages: [
+                { role: "system", content: `Eres un preparador físico experto. ${athleteCtx}` },
+                { role: "user", content: prompt }
+            ],
+            model: DEFAULT_AI_MODEL,
             temperature: 0.5,
             response_format: { type: "json_object" },
         });
@@ -46,14 +53,16 @@ export async function suggestSubstitute(exerciseName: string, reason: "busy" | "
     if (!session?.user?.id) return { success: false, error: "No autorizado" };
 
     try {
-        // Fetch available exercises to suggest form library if possible, but for now generic is fine
-        // Ideally we would feed the available library but context limit might vary.
-        // Let's rely on LLM general knowledge for now.
+        // Inyectar contexto del atleta para considerar lesiones al sugerir alternativas
+        const athleteCtx = await getAthleteContext(session.user.id);
+
+        const reasonText = reason === "busy" ? "la máquina está ocupada" : reason === "pain" ? "siento dolor/molestia" : "falta equipo";
 
         const prompt = `
-            Soy un atleta en medio de mi entrenamiento. Tenía que hacer "${exerciseName}" pero no puedo porque: ${reason === "busy" ? "la máquina está ocupada" : reason === "pain" ? "siento dolor/molestia" : "falta equipo"}.
+            Soy un atleta en medio de mi entrenamiento. Tenía que hacer "${exerciseName}" pero no puedo porque: ${reasonText}.
             
             Sugiéreme 3 alternativas biomecánicamente equivalentes (mismo patrón de movimiento y músculo objetivo).
+            IMPORTANTE: Si tengo lesiones, NO sugieras ejercicios que puedan agravarlas.
             
             Respuesta JSON estricta:
             {
@@ -65,8 +74,11 @@ export async function suggestSubstitute(exerciseName: string, reason: "busy" | "
 
         const groq = getGroqClient();
         const completion = await groq.chat.completions.create({
-            messages: [{ role: "user", content: prompt }],
-            model: "llama-3.3-70b-versatile",
+            messages: [
+                { role: "system", content: `Eres un biomecánico deportivo experto. ${athleteCtx}` },
+                { role: "user", content: prompt }
+            ],
+            model: DEFAULT_AI_MODEL,
             temperature: 0.4,
             response_format: { type: "json_object" },
         });
@@ -122,7 +134,7 @@ export async function generateRoutinePlan(goal: string, level: string, days: str
         const groq = getGroqClient();
         const completion = await groq.chat.completions.create({
             messages: [{ role: "user", content: prompt }],
-            model: "llama-3.3-70b-versatile",
+            model: DEFAULT_AI_MODEL,
             temperature: 0.6,
             response_format: { type: "json_object" },
         });
@@ -155,18 +167,22 @@ export async function chatWithCoachAI(message: string, context?: { exerciseName?
     if (!session?.user?.id) return { success: false, error: "No autorizado" };
 
     try {
+        // Inyectar contexto del atleta para respuestas personalizadas
+        const athleteCtx = await getAthleteContext(session.user.id);
+
         const contextStr = context?.exerciseName
             ? `Contexto: El atleta está haciendo "${context.exerciseName}" (músculos: ${context.muscleGroups?.join(", ") || "no especificado"}).`
             : "";
 
         const prompt = `
-            Eres un coach de fitness experto y amigable. El atleta te hace la siguiente pregunta:
+            El atleta te hace la siguiente pregunta:
             "${message}"
             
             ${contextStr}
             
             Responde de manera concisa y útil. Si es sobre técnica, da consejos prácticos.
             Si es sobre alternativas, sugiere opciones específicas.
+            IMPORTANTE: Considera las lesiones y condiciones del atleta en tu respuesta.
             
             Respuesta JSON:
             {
@@ -176,8 +192,11 @@ export async function chatWithCoachAI(message: string, context?: { exerciseName?
 
         const groq = getGroqClient();
         const completion = await groq.chat.completions.create({
-            messages: [{ role: "user", content: prompt }],
-            model: "llama-3.3-70b-versatile",
+            messages: [
+                { role: "system", content: `Eres un coach de fitness experto y amigable. ${athleteCtx}` },
+                { role: "user", content: prompt }
+            ],
+            model: DEFAULT_AI_MODEL,
             temperature: 0.7,
             response_format: { type: "json_object" },
         });
@@ -202,30 +221,13 @@ export async function analyzeRoutineSafety(routineData: any, athleteId: string) 
     try {
         const groq = getGroqClient();
 
-        // Get athlete data for context (injuries, experience)
-        let athlete: any = {};
-
-        if (athleteId && typeof athleteId === "string" && athleteId.trim() !== "") {
-            try {
-                const athleteDoc = await adminDb.collection("users").doc(athleteId).get();
-                if (athleteDoc.exists) {
-                    athlete = athleteDoc.data();
-                }
-            } catch (dbError) {
-                console.warn("Could not fetch athlete data for safety analysis:", dbError);
-                // Continue with empty athlete object
-            }
-        }
-
-        const injuries = athlete?.injuries || "Ninguna reportada";
-        const experience = athlete?.experience || "Intermedio";
+        // Usar helper centralizado para obtener perfil del atleta
+        const athleteCtx = athleteId ? await getAthleteContext(athleteId) : "Sin perfil disponible.";
 
         const prompt = `
             Actúa como un fisioterapeuta deportivo experto. Analiza la siguiente rutina de entrenamiento en busca de riesgos de seguridad graves, considerando el perfil del atleta.
 
-            PERFIL ATLETA:
-            - Nivel: ${experience}
-            - Lesiones/Condiciones: ${injuries}
+            ${athleteCtx}
 
             RUTINA A ANALIZAR:
             ${JSON.stringify(routineData, null, 2)}
@@ -250,7 +252,7 @@ export async function analyzeRoutineSafety(routineData: any, athleteId: string) 
 
         const completion = await groq.chat.completions.create({
             messages: [{ role: "user", content: prompt }],
-            model: "llama-3.3-70b-versatile",
+            model: DEFAULT_AI_MODEL,
             temperature: 0.3,
             response_format: { type: "json_object" },
         });
@@ -307,7 +309,7 @@ export async function generateExerciseDetails(exerciseName: string) {
         const groq = getGroqClient();
         const completion = await groq.chat.completions.create({
             messages: [{ role: "user", content: prompt }],
-            model: "llama-3.3-70b-versatile",
+            model: DEFAULT_AI_MODEL,
             temperature: 0.1,
             response_format: { type: "json_object" },
         });
@@ -344,7 +346,7 @@ export async function generateRoutineDescription(schedule: any) {
         const groq = getGroqClient();
         const completion = await groq.chat.completions.create({
             messages: [{ role: "user", content: prompt }],
-            model: "llama-3.3-70b-versatile",
+            model: DEFAULT_AI_MODEL,
             temperature: 0.5,
             response_format: { type: "json_object" },
         });

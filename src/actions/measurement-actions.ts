@@ -23,8 +23,17 @@ export async function logBodyMeasurements(data: z.infer<typeof MeasurementInput>
 
     const userId = targetUserId || session.user.id;
 
-    // Si un coach intenta guardar para un atleta, verificar permiso (opcional, por ahora confiamos en la UI)
-    // Pero al menos usamos el userId correcto.
+    // Si un coach intenta guardar para un atleta, verificar que sea SU atleta
+    if (targetUserId && targetUserId !== session.user.id) {
+        if (session.user.role !== "coach") {
+            return { success: false, error: "No autorizado para editar otros perfiles" };
+        }
+        // Verificar relación coach-atleta
+        const athleteDoc = await adminDb.collection("users").doc(targetUserId).get();
+        if (!athleteDoc.exists || athleteDoc.data()?.coachId !== session.user.id) {
+            return { success: false, error: "Este atleta no está vinculado a tu cuenta" };
+        }
+    }
 
     try {
         // Fetch target user data (not necessarily the current user)
@@ -71,11 +80,11 @@ export async function logBodyMeasurements(data: z.infer<typeof MeasurementInput>
         }
 
         const logData = {
+            ...data,
             userId: userId,
             date: data.date ? new Date(data.date) : new Date(),
             createdAt: new Date(),
-            bodyFat: calculatedBodyFat,
-            ...data
+            bodyFat: calculatedBodyFat ?? undefined,
         };
 
         // Ensure date is a Date object for Firestore

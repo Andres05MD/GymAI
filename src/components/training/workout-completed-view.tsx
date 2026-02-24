@@ -56,7 +56,7 @@ export function WorkoutCompletedView() {
                     </div>
 
                     <p className="text-neutral-400 text-lg font-medium leading-relaxed max-w-md mx-auto">
-                        Has completado la secuencia técnica programada. El sistema ha registrado un incremento en tus niveles de rendimiento operativo.
+                        Has completado la sesión programada. ¡Buen trabajo registrando tu entrenamiento!
                     </p>
                 </div>
 

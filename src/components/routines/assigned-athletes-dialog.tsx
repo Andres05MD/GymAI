@@ -55,7 +55,7 @@ export function AssignedAthletesDialog({ routineId, routineName }: { routineId: 
                             Unidades Activas
                         </DialogTitle>
                         <DialogDescription className="text-neutral-500 font-bold uppercase tracking-[0.2em] text-[10px] mt-1">
-                            Sincronización de Arquitectura: <span className="text-white italic">{routineName}</span>
+                            Atletas con la rutina: <span className="text-white italic">{routineName}</span>
                         </DialogDescription>
                     </DialogHeader>
                 </div>
@@ -96,7 +96,7 @@ export function AssignedAthletesDialog({ routineId, routineName }: { routineId: 
                         ) : (
                             <div className="text-center py-24 border-2 border-dashed border-white/5 rounded-4xl bg-white/5 flex flex-col items-center gap-4">
                                 <Users className="w-12 h-12 text-neutral-800" />
-                                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-neutral-600 italic">Sin Enlaces Activos en este Protocolo</p>
+                                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-neutral-600 italic">No hay atletas asignados a esta rutina</p>
                             </div>
                         )}
                     </ScrollArea>

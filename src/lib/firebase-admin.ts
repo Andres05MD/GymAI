@@ -1,14 +1,8 @@
 import * as admin from "firebase-admin";
 
 const getAdminApp = () => {
-    const projectId = "gymia-b5f4e";
-
     if (admin.apps.length > 0) {
-        const app = admin.app();
-        if (app.options.projectId === projectId) {
-            return app;
-        }
-        app.delete();
+        return admin.app();
     }
 
     const key = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;

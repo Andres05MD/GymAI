@@ -188,7 +188,7 @@ export function AssignRoutineDialog({ routineId, athletes }: { routineId: string
                                     <div className="space-y-1">
                                         <p className="text-[10px] font-black uppercase tracking-[0.2em] italic">Despliegue Programado</p>
                                         <p className="text-xs leading-relaxed text-neutral-400 font-medium">
-                                            La arquitectura se activará de forma secuencial. El sistema de carga comenzará el
+                                            La rutina se activará el día seleccionado. El entrenamiento comenzará el
                                             <span className="text-white font-black"> próximo lunes</span> habilitando los días configurados.
                                         </p>
                                     </div>

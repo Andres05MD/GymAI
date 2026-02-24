@@ -59,7 +59,7 @@ export function LoginPageClient() {
                             </h2>
                             <p className="text-neutral-500 font-bold uppercase tracking-[0.3em] text-[10px] italic">
                                 {isLogin
-                                    ? "Inicia sesión para activar tu protocolo de entrenamiento."
+                                    ? "Inicia sesión para comenzar tu entrenamiento."
                                     : "Regístrate para comenzar la transformación técnica."}
                             </p>
                         </motion.div>

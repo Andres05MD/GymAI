@@ -6,10 +6,15 @@ import { redirect } from "next/navigation";
 
 interface PageProps {
     params: Promise<{ id: string }>;
+    searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
-export default async function EditRoutinePage({ params }: PageProps) {
+export default async function EditRoutinePage({ params, searchParams }: PageProps) {
     const { id } = await params;
+    const resolvedSearchParams = await searchParams;
+    const dayStr = resolvedSearchParams?.day;
+    const initialDayIndex = dayStr ? parseInt(dayStr as string) : undefined;
+
     const session = await auth();
 
     if (!session?.user?.id) redirect("/login");
@@ -24,5 +29,5 @@ export default async function EditRoutinePage({ params }: PageProps) {
         return <div>Error: {error || "Rutina no encontrada"}</div>;
     }
 
-    return <RoutineEditor initialData={routine} isEditing availableExercises={exercises || []} availableRoutines={availableRoutines || []} />;
+    return <RoutineEditor initialData={routine} isEditing availableExercises={exercises || []} availableRoutines={availableRoutines || []} initialDayIndex={initialDayIndex} />;
 }

@@ -42,7 +42,7 @@ export function RestDayView({ dayName }: RestDayViewProps) {
                         className="inline-flex items-center gap-3 px-6 py-2 rounded-2xl bg-blue-600/10 border border-blue-600/20 text-blue-400"
                     >
                         <Sparkles className="w-4 h-4" />
-                        <span className="text-[10px] font-black uppercase tracking-[0.3em] italic">Protocolo de Recuperación</span>
+                        <span className="text-[10px] font-black uppercase tracking-[0.3em] italic">Día de Descanso</span>
                     </ClientMotionDiv>
 
                     <div className="space-y-2">
@@ -55,7 +55,7 @@ export function RestDayView({ dayName }: RestDayViewProps) {
                     </div>
 
                     <p className="text-neutral-400 text-lg font-medium leading-relaxed max-w-md mx-auto">
-                        La eficiencia de tu próximo despliegue depende de la regeneración celular activa. Desconecta los sistemas principales.
+                        La recuperación es clave para mejorar tu rendimiento. Tómate el día para descansar o realiza una actividad ligera.
                     </p>
                 </div>
 
@@ -63,7 +63,7 @@ export function RestDayView({ dayName }: RestDayViewProps) {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-md mx-auto">
                     {[
                         { label: "RECARGA", desc: "Nutrición Óptima", icon: Coffee, color: "text-amber-500", glow: "bg-amber-500/5" },
-                        { label: "SISTEMA", desc: "Ciclo de Sueño +8h", icon: Heart, color: "text-red-500", glow: "bg-red-500/5" }
+                        { label: "DESCANSO", desc: "Dormir +8h", icon: Heart, color: "text-red-500", glow: "bg-red-500/5" }
                     ].map((stat, i) => (
                         <div key={i} className="p-8 bg-neutral-900/20 backdrop-blur-3xl border border-white/5 rounded-4xl group hover:border-blue-500/30 transition-all duration-500 relative overflow-hidden">
                             <div className={cn("absolute top-0 right-0 w-24 h-24 rounded-full blur-3xl -mr-12 -mt-12 opacity-0 group-hover:opacity-100 transition-opacity duration-500", stat.glow)} />

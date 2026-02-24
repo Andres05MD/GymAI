@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,7 +18,7 @@ import {
     Save,
     Zap,
 } from "lucide-react";
-import { logRetroactiveWorkout, RetroactiveWorkoutData } from "@/actions/training-actions";
+import { logRetroactiveWorkout, RetroactiveWorkoutData, getWorkoutLogByDate } from "@/actions/training-actions";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -62,6 +62,9 @@ interface RetroactiveWorkoutLoggerProps {
 export function RetroactiveWorkoutLogger({ routineDay, routineId, routineName: initialRoutineName, defaultDate, onBack }: RetroactiveWorkoutLoggerProps) {
     const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [existingLogId, setExistingLogId] = useState<string | undefined>();
+    const [existingSessionId, setExistingSessionId] = useState<string | undefined>();
+    const [isLoadingLog, setIsLoadingLog] = useState(false);
 
     // Formulario global
     const [routineNameState, setRoutineNameState] = useState(() => {
@@ -104,6 +107,78 @@ export function RetroactiveWorkoutLogger({ routineDay, routineId, routineName: i
             sets: [{ weight: "", reps: "", rpe: "8" }], // Por defecto RPE 8 para evitar vacíos
         };
     }
+
+    // Efecto para buscar si hay un log existente en la fecha seleccionada
+    useEffect(() => {
+        let isMounted = true;
+        const checkExistingLog = async () => {
+            setIsLoadingLog(true);
+            try {
+                const res = await getWorkoutLogByDate(date);
+                if (!isMounted) return;
+
+                if (res.success && res.log) {
+                    const log = res.log;
+                    setExistingLogId(log.id);
+                    setExistingSessionId(log.sessionId);
+                    setRoutineNameState(log.routineName || "");
+                    setDurationMinutes(String(log.durationMinutes || "60"));
+                    setSessionRpe(log.sessionRpe || 7);
+                    setSessionNotes(log.sessionNotes || "");
+
+                    if (log.exercises && log.exercises.length > 0) {
+                        setExercises(log.exercises.map((ex: any) => ({
+                            exerciseName: ex.exerciseName || "",
+                            exerciseId: ex.exerciseId || "",
+                            feedback: ex.feedback || "",
+                            sets: (ex.sets || []).map((s: any) => ({
+                                weight: s.weight ? String(s.weight) : "",
+                                reps: s.reps ? String(s.reps) : "",
+                                rpe: s.rpe ? String(s.rpe) : "8",
+                            })),
+                        })));
+                        toast.info("Cargaste un entrenamiento previo para editar.", { duration: 2500 });
+                    }
+                } else {
+                    setExistingLogId(undefined);
+                    setExistingSessionId(undefined);
+
+                    if (routineDay?.exercises?.length) {
+                        setRoutineNameState((initialRoutineName || "").replace(/\s*\(Assigned\)/gi, "").trim());
+                        setDurationMinutes("60");
+                        setSessionRpe(7);
+                        setSessionNotes("");
+                        setExercises(routineDay.exercises.map((ex) => ({
+                            exerciseName: ex.exerciseName,
+                            exerciseId: ex.exerciseId || "",
+                            feedback: "",
+                            sets: ex.sets.map((s) => ({
+                                weight: "",
+                                reps: "",
+                                rpe: s.rpeTarget?.toString() || "8",
+                                targetReps: s.reps?.toString(),
+                                targetRpe: s.rpeTarget?.toString(),
+                            })),
+                        })));
+                    } else if (res.log === null && existingLogId) {
+                        setRoutineNameState((initialRoutineName || "").replace(/\s*\(Assigned\)/gi, "").trim());
+                        setDurationMinutes("60");
+                        setSessionRpe(7);
+                        setSessionNotes("");
+                        setExercises([createEmptyExercise()]);
+                    }
+                }
+            } catch (err) {
+                console.error(err);
+            } finally {
+                if (isMounted) setIsLoadingLog(false);
+            }
+        };
+
+        checkExistingLog();
+        return () => { isMounted = false; };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [date, initialRoutineName]);
 
     // --- Handlers para ejercicios ---
 
@@ -166,6 +241,8 @@ export function RetroactiveWorkoutLogger({ routineDay, routineId, routineName: i
         setIsSubmitting(true);
 
         const payload: RetroactiveWorkoutData = {
+            id: existingLogId,
+            sessionId: existingSessionId,
             routineId: routineId || undefined,
             dayId: routineDay?.id || undefined,
             routineName: routineNameState.trim() || undefined,
@@ -529,18 +606,18 @@ export function RetroactiveWorkoutLogger({ routineDay, routineId, routineName: i
                 <div className="max-w-2xl mx-auto">
                     <Button
                         onClick={handleSubmit}
-                        disabled={isSubmitting || exercises.length === 0}
+                        disabled={isSubmitting || exercises.length === 0 || isLoadingLog}
                         className="w-full h-14 text-lg font-black bg-white text-black hover:bg-neutral-200 rounded-2xl shadow-[0_0_30px_rgba(255,255,255,0.15)] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:hover:scale-100"
                     >
-                        {isSubmitting ? (
+                        {isSubmitting || isLoadingLog ? (
                             <>
                                 <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                                Guardando...
+                                {isLoadingLog ? "Cargando..." : "Guardando..."}
                             </>
                         ) : (
                             <>
                                 <Save className="w-5 h-5 mr-2" />
-                                Guardar Entrenamiento
+                                {existingLogId ? "Actualizar Entrenamiento" : "Guardar Entrenamiento"}
                             </>
                         )}
                     </Button>

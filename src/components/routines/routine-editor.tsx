@@ -195,7 +195,7 @@ function AIGenerator({ onGenerate, currentType }: { onGenerate: (routine: AIRout
                                 placeholder="DESCRIBE TU ENFOQUE PERSONALIZADO..."
                                 value={criteria.userPrompt}
                                 onChange={(e) => setCriteria({ ...criteria, userPrompt: e.target.value })}
-                                className="bg-neutral-900/50 border border-white/5 rounded-[2rem] min-h-[120px] p-6 text-[10px] font-black text-white focus:ring-1 focus:ring-red-500/50 transition-all resize-none uppercase placeholder:text-neutral-700 italic tracking-[0.2em] leading-relaxed"
+                                className="bg-neutral-900/50 border border-white/5 rounded-4xl min-h-[120px] p-6 text-[10px] font-black text-white focus:ring-1 focus:ring-red-500/50 transition-all resize-none uppercase placeholder:text-neutral-700 italic tracking-[0.2em] leading-relaxed"
                             />
                         </div>
 
@@ -289,9 +289,10 @@ interface RoutineEditorProps {
     athleteId?: string;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     availableRoutines?: any[];
+    initialDayIndex?: number;
 }
 
-export function RoutineEditor({ initialData, isEditing = false, availableExercises = [], athleteId, availableRoutines = [] }: RoutineEditorProps) {
+export function RoutineEditor({ initialData, isEditing = false, availableExercises = [], athleteId, availableRoutines = [], initialDayIndex = 0 }: RoutineEditorProps) {
     const sortedExercises = useMemo(() => {
         return [...availableExercises].sort((a, b) => (a.name || "").localeCompare(b.name || ""));
     }, [availableExercises]);
@@ -299,7 +300,7 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
     const router = useRouter();
     const [isSaving, setIsSaving] = useState(false);
     const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
-    const [activeDayIndex, setActiveDayIndex] = useState(0);
+    const [activeDayIndex, setActiveDayIndex] = useState(initialDayIndex);
 
     const DRAFT_KEY = "gymia-routine-draft";
 
@@ -533,13 +534,8 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                         <ArrowLeft className="w-6 h-6" />
                     </Button>
                     <div className="space-y-1">
-                        <div className="flex items-center gap-3 mb-2">
-                            <span className="text-[10px] font-black text-red-500 uppercase tracking-[0.5em] italic">Routine_OS v2.0</span>
-                            <div className="h-px w-8 bg-white/10" />
-                            <span className="text-[10px] font-black text-neutral-600 uppercase tracking-[0.3em] italic">Constructor Mode</span>
-                        </div>
                         <h1 className="text-4xl md:text-5xl font-black text-white uppercase tracking-tighter italic leading-none">
-                            {isEditing ? "Optimizar" : "Construir"} <span className="text-neutral-500">Plan Técnico</span>
+                            {isEditing ? "Editar" : "Crear"} <span className="text-neutral-500">Rutina</span>
                         </h1>
                     </div>
                 </div>
@@ -553,7 +549,7 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                         className="h-14 px-10 bg-white text-black hover:bg-neutral-200 font-black uppercase italic tracking-widest text-[10px] rounded-2xl shadow-2xl transition-all shadow-white/5 hover:-translate-y-1"
                     >
                         {isSaving ? <Loader2 className="w-4 h-4 animate-spin mr-3" /> : <Save className="w-4 h-4 mr-3" />}
-                        Sincronizar Datos
+                        Guardar
                     </Button>
                 </div>
             </div>
@@ -572,16 +568,16 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
 
                         <div className="space-y-10 relative z-10">
                             <div className="space-y-4">
-                                <Label className="ml-1 text-[10px] font-black uppercase tracking-[0.3em] text-neutral-500 italic">Identificador de Misión</Label>
+                                <Label className="ml-1 text-[10px] font-black uppercase tracking-[0.3em] text-neutral-500 italic">Nombre de la Rutina</Label>
                                 <Input
                                     {...register("name")}
-                                    placeholder="NOMBRE DEL PROTOCOLO..."
+                                    placeholder="NOMBRE DE LA RUTINA..."
                                     className="bg-neutral-950/50 border border-white/5 h-16 rounded-2xl px-6 text-sm font-black text-white placeholder:text-neutral-800 transition-all focus-visible:ring-1 focus-visible:ring-red-500/50 uppercase italic tracking-widest"
                                 />
                             </div>
 
                             <div className="space-y-4">
-                                <Label className="ml-1 text-[10px] font-black uppercase tracking-[0.3em] text-neutral-500 italic">Arquitectura del Ciclo</Label>
+                                <Label className="ml-1 text-[10px] font-black uppercase tracking-[0.3em] text-neutral-500 italic">Tipo de Rutina</Label>
                                 <div className="grid grid-cols-2 gap-3 p-1.5 bg-neutral-950/80 rounded-2xl border border-white/5">
                                     <button
                                         type="button"
@@ -612,7 +608,7 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
 
                             <div className="space-y-4">
                                 <div className="flex justify-between items-center mb-1">
-                                    <Label className="ml-1 text-[10px] font-black uppercase tracking-[0.3em] text-neutral-500 italic">Resumen Operativo</Label>
+                                    <Label className="ml-1 text-[10px] font-black uppercase tracking-[0.3em] text-neutral-500 italic">Resumen</Label>
                                     <Button
                                         type="button"
                                         variant="ghost"
@@ -620,12 +616,12 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                                         disabled={isGeneratingDescription}
                                         className="h-8 px-4 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-full text-[9px] font-black uppercase italic tracking-widest transition-all border border-red-500/20"
                                     >
-                                        <Sparkles className="w-3 h-3 mr-2" /> Optimizar IA
+                                        <Sparkles className="w-3 h-3 mr-2" /> Generar con IA
                                     </Button>
                                 </div>
                                 <Textarea
                                     {...register("description")}
-                                    placeholder="DETALLES TÉCNICOS Y OBJETIVOS..."
+                                    placeholder="DESCRIPCIÓN DE LA RUTINA..."
                                     className="bg-neutral-950/50 border border-white/5 rounded-3xl min-h-[160px] p-6 text-[10px] font-black text-white placeholder:text-neutral-800 transition-all focus-visible:ring-1 focus-visible:ring-red-500/50 resize-none uppercase italic leading-relaxed tracking-widest shadow-inner overflow-y-auto"
                                 />
                             </div>
@@ -637,7 +633,7 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                         <div className="space-y-6">
                             <div className="flex items-center gap-4 mb-2">
                                 <div className="h-px flex-1 bg-linear-to-r from-white/10 to-transparent" />
-                                <span className="text-[10px] font-black text-neutral-500 uppercase tracking-[0.3em] italic">Timeline</span>
+                                <span className="text-[10px] font-black text-neutral-500 uppercase tracking-[0.3em] italic">Días</span>
                             </div>
                             <div className="flex items-center justify-between px-1">
                                 <Label className="text-xs font-bold uppercase tracking-widest text-neutral-500">Estructura Semanal</Label>
@@ -673,18 +669,18 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                                                     "text-[8px] font-black uppercase tracking-[0.4em] mb-1 italic transition-colors",
                                                     activeDayIndex === index ? "text-black/40" : "text-neutral-600"
                                                 )}>
-                                                    {WEEKDAYS[index] || `DAY_SEQUENCE_${index + 1}`}
+                                                    {WEEKDAYS[index] || `DÍA ${index + 1}`}
                                                 </p>
                                                 <h3 className={cn(
                                                     "font-black text-sm uppercase italic tracking-wider transition-colors",
                                                     activeDayIndex === index ? "text-black" : "text-neutral-400 group-hover:text-white"
                                                 )}>
-                                                    {schedule[index]?.name || `DATA_NODE_${index + 1}`}
+                                                    {schedule[index]?.name || `DÍA ${index + 1}`}
                                                 </h3>
                                                 <div className="flex items-center gap-2 mt-1.5">
                                                     <div className={cn("h-1 w-1 rounded-full", activeDayIndex === index ? "bg-black/20" : "bg-red-500/40")} />
                                                     <p className={cn("text-[9px] font-black uppercase tracking-widest", activeDayIndex === index ? "text-black/60" : "text-neutral-600")}>
-                                                        {schedule[index]?.exercises?.length || 0} MODULES
+                                                        {schedule[index]?.exercises?.length || 0} EJERCICIOS
                                                     </p>
                                                 </div>
                                             </div>
@@ -718,7 +714,7 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                                         className="w-full h-16 border border-dashed border-white/5 bg-transparent text-neutral-600 hover:text-white hover:bg-white/5 hover:border-white/20 rounded-3xl transition-all font-black uppercase italic tracking-[0.3em] text-[10px]"
                                         onClick={() => appendDay({ name: WEEKDAYS[dayFields.length] || `Día ${dayFields.length + 1}`, exercises: [] })}
                                     >
-                                        <Plus className="w-5 h-5 mr-3" /> Añadir Protocolo Diario
+                                        <Plus className="w-5 h-5 mr-3" /> Añadir Día
                                     </Button>
                                 )}
                             </div>
@@ -729,18 +725,13 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                 <div className="lg:col-span-8">
                     {schedule[activeDayIndex] ? (
                         <div className="bg-neutral-900/40 backdrop-blur-3xl border border-white/5 rounded-[3rem] p-1.5 overflow-hidden min-h-[700px] shadow-2xl relative">
-                            <div className="absolute inset-x-0 top-0 h-40 bg-linear-to-b from-red-600/[0.03] to-transparent pointer-events-none" />
+                            <div className="absolute inset-x-0 top-0 h-40 bg-linear-to-b from-red-600/3 to-transparent pointer-events-none" />
 
                             {/* Header Day */}
                             <div className="bg-neutral-950/80 backdrop-blur-2xl border-b border-white/5 p-8 md:p-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 rounded-t-[2.8rem] relative z-10">
-                                <div className="space-y-2 flex-1 w-full">
-                                    <div className="flex items-center gap-3">
-                                        <div className="h-2 w-2 rounded-full bg-red-600 animate-pulse" />
-                                        <Label className="text-[10px] font-black uppercase tracking-[0.4em] text-neutral-500 italic">
-                                            {routineType === 'daily' ? 'OPERATIONAL_SESSION_01' : `SEQUENCE_NODE_0${activeDayIndex + 1}`}
-                                        </Label>
-                                    </div>
-                                    <div className="relative group">
+                                <div className="flex items-center gap-4 flex-1 w-full">
+                                    <div className="h-2 w-2 rounded-full bg-red-600 animate-pulse shrink-0" />
+                                    <div className="relative group flex-1">
                                         <Input
                                             value={schedule[activeDayIndex].name}
                                             onChange={(e) => {
@@ -749,7 +740,7 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                                                 setValue("schedule", newSched);
                                             }}
                                             className="text-4xl md:text-5xl font-black bg-transparent border-none text-white p-0 h-auto focus-visible:ring-0 placeholder:text-neutral-800 w-full uppercase italic tracking-tighter"
-                                            placeholder="IDENTIFICADOR DEL DÍA..."
+                                            placeholder="NOMBRE DEL DÍA..."
                                         />
                                         <div className="absolute bottom-0 left-0 w-0 h-px bg-red-600 group-hover:w-full transition-all duration-700" />
                                     </div>
@@ -758,7 +749,7 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                                     onClick={() => addExerciseToDay(activeDayIndex)}
                                     className="w-full md:w-auto h-14 px-8 rounded-2xl bg-white text-black hover:bg-neutral-200 font-black uppercase italic tracking-widest text-[10px] shadow-xl transition-all hover:-translate-y-1"
                                 >
-                                    <Plus className="w-5 h-5 mr-3" /> Inyectar Ejercicio
+                                    <Plus className="w-5 h-5 mr-3" /> Añadir Ejercicio
                                 </Button>
                             </div>
 
@@ -769,8 +760,8 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                                             <Dumbbell className="w-10 h-10 animate-pulse" />
                                         </div>
                                         <div className="space-y-2">
-                                            <p className="text-white font-black uppercase italic tracking-widest text-lg">Sesión en estado nulo</p>
-                                            <p className="text-neutral-500 text-xs font-bold uppercase tracking-[0.2em]">Inyecta módulos para comenzar el protocolo</p>
+                                            <p className="text-white font-black uppercase italic tracking-widest text-lg">Día vacío</p>
+                                            <p className="text-neutral-500 text-xs font-bold uppercase tracking-[0.2em]">Añade un ejercicio para comenzar</p>
                                         </div>
                                     </div>
                                 ) : (
@@ -797,7 +788,7 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                                                                 onClick={() => openExerciseSelector(activeDayIndex, exIndex)}
                                                             >
                                                                 <span className="mr-4 leading-none truncate">
-                                                                    {exercise.exerciseName || "SISTEMA_NO_IDENTIFICADO"}
+                                                                    {exercise.exerciseName || "SELECCIONAR EJERCICIO"}
                                                                 </span>
                                                                 <ChevronsUpDown className="ml-auto h-5 w-5 shrink-0 text-neutral-600" />
                                                             </Button>
@@ -818,12 +809,12 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                                                     <div className="relative group/note">
                                                         <div className="flex items-center gap-2 mb-2 opacity-40">
                                                             <Activity className="w-3 h-3 text-red-500" />
-                                                            <span className="text-[8px] font-black uppercase tracking-[0.3em] text-white italic">Notas Técnicas</span>
+                                                            <span className="text-[8px] font-black uppercase tracking-[0.3em] text-white italic">Notas</span>
                                                         </div>
                                                         <Input
                                                             value={exercise.notes || ""}
                                                             onChange={(e) => updateExerciseField(activeDayIndex, exIndex, "notes", e.target.value)}
-                                                            placeholder="ESPECIFICACIONES DE EJECUCIÓN..."
+                                                            placeholder="AÑADIR NOTAS (OPCIONAL)..."
                                                             className="bg-neutral-950/60 border border-white/5 rounded-2xl px-5 h-12 text-xs font-black text-white placeholder:text-neutral-800 focus-visible:ring-1 focus-visible:ring-red-500/40 uppercase italic tracking-widest shadow-inner transition-all w-full"
                                                         />
                                                     </div>
@@ -833,7 +824,7 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                                                         <div className="flex items-center justify-between">
                                                             <div className="flex items-center gap-3">
                                                                 <div className="h-1 w-5 bg-red-600 rounded-full" />
-                                                                <span className="text-[9px] uppercase font-black text-neutral-500 tracking-[0.3em] italic">Alternativas de Seguridad</span>
+                                                                <span className="text-[9px] uppercase font-black text-neutral-500 tracking-[0.3em] italic">Alternativas</span>
                                                             </div>
                                                             <Button
                                                                 type="button"
@@ -873,7 +864,7 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                                                                 })
                                                             ) : (
                                                                 <div className="w-full py-4 border border-dashed border-white/5 rounded-2xl flex items-center justify-center opacity-20">
-                                                                    <p className="text-[8px] text-white font-black uppercase tracking-[0.4em] italic">Protocolo redundante no definido</p>
+                                                                    <p className="text-[8px] text-white font-black uppercase tracking-[0.4em] italic">Sin variantes</p>
                                                                 </div>
                                                             )}
                                                         </div>
@@ -885,9 +876,9 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                                                         <div className="hidden md:grid grid-cols-12 gap-4 px-6 text-[8px] font-black uppercase tracking-[0.5em] text-neutral-600 italic">
                                                             <div className="col-span-1">#</div>
                                                             <div className="col-span-3">Categoría</div>
-                                                            <div className="col-span-3 px-2">Carga_Reps</div>
+                                                            <div className="col-span-3 px-2">Reps</div>
                                                             <div className="col-span-2 text-center">Intensidad</div>
-                                                            <div className="col-span-2 text-center">Cronos</div>
+                                                            <div className="col-span-2 text-center">Descanso</div>
                                                             <div className="col-span-1"></div>
                                                         </div>
 
@@ -1068,7 +1059,7 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                                                                 updateExerciseField(activeDayIndex, exIndex, "sets", newSets);
                                                             }}
                                                         >
-                                                            <Plus className="w-3.5 h-3.5 mr-3" /> Integrar Nueva Serie
+                                                            <Plus className="w-3.5 h-3.5 mr-3" /> Añadir Serie
                                                         </Button>
                                                     </div>
                                                 </div>
@@ -1085,16 +1076,16 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                                     >
                                         <div className="absolute inset-0 bg-linear-to-r from-red-600/2 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                                         <Plus className="w-6 h-6 mr-4 group-hover:scale-110 transition-transform relative z-10" />
-                                        <span className="text-sm font-black uppercase tracking-[0.3em] italic relative z-10">Expandir Módulos de Entrenamiento</span>
+                                        <span className="text-sm font-black uppercase tracking-[0.3em] italic relative z-10">Añadir Ejercicio</span>
                                     </Button>
                                 )}
                             </div>
                         </div>
                     ) : (
                         <div className="flex flex-col items-center justify-center h-full min-h-[600px] border border-dashed border-white/5 bg-neutral-950/20 rounded-[3rem] opacity-30 shadow-inner">
-                            <Label className="text-2xl font-black uppercase tracking-[0.6em] text-neutral-800 italic grayscale mb-4">Módulo de Edición_Inactivo</Label>
+                            <Label className="text-2xl font-black uppercase tracking-[0.6em] text-neutral-800 italic grayscale mb-4">Ningún día seleccionado</Label>
                             <div className="w-12 h-px bg-neutral-800 mb-6" />
-                            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-neutral-600 italic">Desbloquee una secuencia lateral para iniciar el protocolo</p>
+                            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-neutral-600 italic">Selecciona un día en el panel lateral para empezar</p>
                         </div>
                     )}
                 </div>
@@ -1109,7 +1100,7 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                 onSelect={handleExerciseSelect}
                 availableExercises={sortedExercises}
                 isVariantSelector={isVariantMode}
-                title={isVariantMode ? "NODO_VARIANTE" : "NODO_PRINCIPAL"}
+                title={isVariantMode ? "VARIANTE" : "EJERCICIO"}
             />
         </div >
     );

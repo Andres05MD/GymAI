@@ -100,7 +100,7 @@ export function AthleteDashboardUI({ user, activityData, weeklyCompleted, weekly
 
             {/* Schedule Section */}
             <div className="relative">
-                <ScheduleCalendar athleteId={user?.id || ""} />
+                <ScheduleCalendar athleteId={user?.id || ""} activeRoutine={routine} />
             </div>
 
             {/* Charts Section */}

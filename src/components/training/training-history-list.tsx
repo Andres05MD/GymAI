@@ -8,45 +8,23 @@ import { motion, AnimatePresence } from "framer-motion";
 
 // --- INTERFACES ---
 
-interface TrainingSet {
-    weight?: number;
-    reps?: number;
-    rpe?: number;
-    completed?: boolean;
-}
-
-interface TrainingExercise {
-    exerciseId?: string;
-    exerciseName: string;
-    sets: TrainingSet[];
-    feedback?: string;
-}
-
-interface TrainingLog {
-    id: string;
-    date: string;
-    routineId?: string;
-    routineName?: string;
-    durationMinutes?: number;
-    sessionFeedback?: string;
-    exercises?: TrainingExercise[];
-}
+import type { TrainingSetData, TrainingExerciseData, TrainingLogData } from "@/types";
 
 interface TrainingHistoryListProps {
-    logs: TrainingLog[];
+    logs: TrainingLogData[];
 }
 
-function WorkoutLogItem({ log }: { log: TrainingLog }) {
+function WorkoutLogItem({ log }: { log: TrainingLogData }) {
     const [expanded, setExpanded] = useState(false);
 
     // Calculate summary stats
-    const totalVolume = log.exercises?.reduce((acc: number, ex: TrainingExercise) => {
-        return acc + ex.sets.reduce((sAcc: number, s: TrainingSet) => sAcc + ((s.weight || 0) * (s.reps || 0)), 0);
+    const totalVolume = log.exercises?.reduce((acc: number, ex: TrainingExerciseData) => {
+        return acc + ex.sets.reduce((sAcc: number, s: TrainingSetData) => sAcc + ((s.weight || 0) * (s.reps || 0)), 0);
     }, 0) || 0;
 
-    const totalSets = log.exercises?.reduce((acc: number, ex: TrainingExercise) => acc + ex.sets.length, 0) || 0;
-    const completedSets = log.exercises?.reduce((acc: number, ex: TrainingExercise) =>
-        acc + ex.sets.filter((s: TrainingSet) => s.completed).length, 0) || 0;
+    const totalSets = log.exercises?.reduce((acc: number, ex: TrainingExerciseData) => acc + ex.sets.length, 0) || 0;
+    const completedSets = log.exercises?.reduce((acc: number, ex: TrainingExerciseData) =>
+        acc + ex.sets.filter((s: TrainingSetData) => s.completed).length, 0) || 0;
 
     const completionRate = totalSets > 0 ? Math.round((completedSets / totalSets) * 100) : 0;
     const dateObj = new Date(log.date);
@@ -79,7 +57,7 @@ function WorkoutLogItem({ log }: { log: TrainingLog }) {
                             </h4>
                             {log.routineId && (
                                 <div className="h-5 px-3 rounded-full bg-red-600/10 border border-red-600/20 flex items-center">
-                                    <span className="text-red-500 text-[9px] font-black uppercase tracking-widest">SISTEMA</span>
+                                    <span className="text-red-500 text-[9px] font-black uppercase tracking-widest">RUTINA</span>
                                 </div>
                             )}
                         </div>
@@ -147,7 +125,7 @@ function WorkoutLogItem({ log }: { log: TrainingLog }) {
 
                             {/* Exercises List */}
                             <div className="space-y-6">
-                                {log.exercises?.map((ex: TrainingExercise, i: number) => (
+                                {log.exercises?.map((ex: TrainingExerciseData, i: number) => (
                                     <div key={i} className="bg-black/40 backdrop-blur-md rounded-3xl p-6 md:p-8 border border-white/5 hover:border-white/10 transition-colors group/ex">
                                         <div className="flex justify-between items-end mb-8">
                                             <div className="flex items-center gap-5">
@@ -164,7 +142,7 @@ function WorkoutLogItem({ log }: { log: TrainingLog }) {
 
                                         {/* Sets Matrix */}
                                         <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-3">
-                                            {ex.sets.map((set: TrainingSet, j: number) => (
+                                            {ex.sets.map((set: TrainingSetData, j: number) => (
                                                 <div
                                                     key={j}
                                                     className={cn(
@@ -226,7 +204,7 @@ export function TrainingHistoryList({ logs }: TrainingHistoryListProps) {
                 </div>
                 <h3 className="text-3xl font-black text-white px-2 uppercase italic tracking-tighter mb-4">Núcleo Vacío</h3>
                 <p className="text-neutral-500 font-medium text-sm max-w-sm px-4 leading-relaxed tracking-tight">
-                    No se detectan registros de operaciones en la base técnica. Inicia una secuencia para generar datos temporales.
+                    No tienes entrenamientos registrados aún. ¡Comienza a entrenar para ver tu historial!
                 </p>
             </div>
         );

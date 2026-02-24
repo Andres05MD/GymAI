@@ -223,7 +223,7 @@ export default async function ProfilePage() {
                                 <div className="space-y-6">
                                     <div className="flex items-center gap-3">
                                         <Flame className="w-4 h-4 text-red-500" />
-                                        <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-neutral-500 italic">Protocolo de Lesiones</h4>
+                                        <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-neutral-500 italic">Historial de Lesiones</h4>
                                     </div>
                                     {userData.injuries && userData.injuries.length > 0 ? (
                                         <div className="flex flex-wrap gap-3">

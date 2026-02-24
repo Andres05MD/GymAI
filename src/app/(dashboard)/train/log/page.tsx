@@ -4,23 +4,19 @@ import { RetroactiveWorkoutLogger } from "@/components/training/retroactive-work
 import { WeeklyRoutineView } from "@/components/training/weekly-routine-view";
 import { getActiveRoutine } from "@/actions/athlete-actions";
 
-// Interfaces para tipar la rutina
-interface ScheduleExercise {
-    exerciseId?: string;
-    exerciseName: string;
-    sets: Array<{ reps?: number | string; rpeTarget?: number }>;
-}
-
-interface ScheduleDay {
-    id?: string;
-    name: string;
-    exercises: ScheduleExercise[];
-}
-
+// Tipo para la rutina activa
 interface ActiveRoutine {
     id: string;
     name: string;
-    schedule: ScheduleDay[];
+    schedule: Array<{
+        id?: string;
+        name: string;
+        exercises: Array<{
+            exerciseId?: string;
+            exerciseName: string;
+            sets: Array<{ reps?: number | string; rpeTarget?: number }>;
+        }>;
+    }>;
 }
 
 export default async function LogWorkoutPage() {

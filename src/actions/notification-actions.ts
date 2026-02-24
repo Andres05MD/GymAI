@@ -9,39 +9,80 @@ const getCachedCoachNotifications = unstable_cache(
     async () => {
         const logsSnapshot = await adminDb.collection("training_logs")
             .orderBy("date", "desc")
-            .limit(5)
+            .limit(10)
             .get();
 
         if (logsSnapshot.empty) {
             return [];
         }
 
-        // Recopilar athleteIds únicos para buscar nombres
+        // Batch query para nombres de atletas (evita N+1)
         const athleteIds = [...new Set(logsSnapshot.docs.map(doc => doc.data().athleteId).filter(Boolean))];
-
-        // Buscar nombres de atletas en la colección users
         const athleteNames = new Map<string, string>();
-        for (const athleteId of athleteIds) {
-            try {
-                const userDoc = await adminDb.collection("users").doc(athleteId).get();
-                if (userDoc.exists) {
-                    athleteNames.set(athleteId, userDoc.data()?.name || "Sin nombre");
-                }
-            } catch {
-                // Si falla, se usará el fallback
-            }
+
+        if (athleteIds.length > 0) {
+            const userDocs = await adminDb.collection("users")
+                .where("__name__", "in", athleteIds.slice(0, 10))
+                .get();
+            userDocs.docs.forEach(doc => {
+                athleteNames.set(doc.id, doc.data()?.name || "Sin nombre");
+            });
         }
 
-        const notifications = logsSnapshot.docs.map(doc => {
+        // Agrupar logs por atleta para calcular progreso real
+        const athleteLogs = new Map<string, any[]>();
+        logsSnapshot.docs.forEach(doc => {
+            const data = doc.data();
+            const uid = data.athleteId;
+            if (!athleteLogs.has(uid)) athleteLogs.set(uid, []);
+            athleteLogs.get(uid)!.push({ id: doc.id, ...data });
+        });
+
+        // Solo generar notificaciones de los últimos 5 logs completados
+        const recentDocs = logsSnapshot.docs.slice(0, 5);
+
+        const notifications = recentDocs.map(doc => {
             const data = doc.data();
             const date = data.date.toDate();
             const athleteName = athleteNames.get(data.athleteId) || data.athleteName || "Sin nombre";
             const routineName = data.routineName || "Rutina";
 
+            // Calcular volumen de esta sesión
+            let currentVolume = 0;
+            data.exercises?.forEach((ex: any) => {
+                ex.sets?.forEach((s: any) => {
+                    if (s.completed && s.weight && s.reps) {
+                        currentVolume += (s.weight * s.reps);
+                    }
+                });
+            });
+
+            // Buscar sesión anterior del mismo atleta para comparar
+            const sameLogs = athleteLogs.get(data.athleteId) || [];
+            const prevLog = sameLogs.find((l: any) => l.id !== doc.id);
+            let progressMsg = `Volumen total: ${Math.round(currentVolume).toLocaleString()} kg.`;
+
+            if (prevLog) {
+                let prevVolume = 0;
+                prevLog.exercises?.forEach((ex: any) => {
+                    ex.sets?.forEach((s: any) => {
+                        if (s.completed && s.weight && s.reps) {
+                            prevVolume += (s.weight * s.reps);
+                        }
+                    });
+                });
+
+                if (prevVolume > 0) {
+                    const diff = ((currentVolume - prevVolume) / prevVolume) * 100;
+                    const sign = diff >= 0 ? "+" : "";
+                    progressMsg = `Volumen: ${Math.round(currentVolume).toLocaleString()} kg (${sign}${diff.toFixed(1)}% vs sesión anterior).`;
+                }
+            }
+
             return {
                 id: doc.id,
-                title: "Análisis de Sesión",
-                message: `IA: El atleta ${athleteName} ha completado "${routineName}". Se detectó una mejora del 5% en volumen total.`,
+                title: "Sesión Completada",
+                message: `${athleteName} completó "${routineName}". ${progressMsg}`,
                 time: date.toISOString(),
                 type: "ia_analysis",
                 read: false,

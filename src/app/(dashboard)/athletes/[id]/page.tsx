@@ -139,7 +139,7 @@ export default async function AthleteDetailsPage({ params }: PageProps) {
                             </h1>
                         </div>
                         <p className="text-[10px] font-bold text-neutral-600 uppercase tracking-[0.3em] mt-2">
-                            Sistema de Monitoreo: <span className="text-white italic">{athlete.email}</span>
+                            Email: <span className="text-white italic">{athlete.email}</span>
                         </p>
                     </div>
                 </div>
@@ -152,7 +152,7 @@ export default async function AthleteDetailsPage({ params }: PageProps) {
                                     <Dumbbell className="text-white w-6 h-6" />
                                 </div>
                                 <div className="text-left flex flex-col justify-center">
-                                    <p className="text-[9px] font-black text-neutral-600 uppercase tracking-[0.3em] mb-1.5">Protocolo Activo</p>
+                                    <p className="text-[9px] font-black text-neutral-600 uppercase tracking-[0.3em] mb-1.5">Rutina Activa</p>
                                     <p className="text-white font-black text-base uppercase tracking-tight italic group-hover:text-red-500 transition-colors duration-500 truncate max-w-[180px] md:max-w-[250px]">
                                         {routine.name || "Sin Nombre"}
                                     </p>
@@ -278,7 +278,7 @@ export default async function AthleteDetailsPage({ params }: PageProps) {
                         <div className="bg-neutral-900/20 backdrop-blur-3xl border border-white/5 rounded-4xl p-8 md:p-10 flex flex-col group relative overflow-hidden">
                             <div className="absolute bottom-0 left-0 w-48 h-48 bg-red-600/5 rounded-full blur-3xl -ml-24 -mb-24 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
                             <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter mb-1 relative z-10">Cumplimiento</h3>
-                            <p className="text-[10px] font-bold text-neutral-600 uppercase tracking-widest mb-10 relative z-10">Meta de Protocolos Semanales</p>
+                            <p className="text-[10px] font-bold text-neutral-600 uppercase tracking-widest mb-10 relative z-10">Meta Semanal</p>
                             <div className="flex-1 flex items-center justify-center relative z-10">
                                 <ProgressChart completed={weeklyCompleted} target={weeklyTarget} />
                             </div>

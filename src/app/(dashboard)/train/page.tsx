@@ -11,23 +11,21 @@ import { AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
-// Tipo local para compatibilidad con WorkoutSession
-interface WorkoutRoutine {
+// Tipo inline para compatibilidad con WorkoutSession
+type WorkoutRoutine = {
     id: string;
     name: string;
     schedule: Array<{
         id?: string;
         name: string;
+        isRest?: boolean;
         exercises: Array<{
             exerciseId?: string;
             exerciseName: string;
-            sets: Array<{
-                reps?: number;
-                weight?: number;
-            }>;
+            sets: Array<{ reps?: number; weight?: number }>;
         }>;
     }>;
-}
+};
 
 export default async function TrainPage() {
     const session = await auth();
@@ -73,34 +71,36 @@ export default async function TrainPage() {
         routine = activeRoutine;
     }
 
-    return (
-        <div className="flex flex-col items-center justify-center min-h-[85vh] px-6 text-center relative overflow-hidden">
-            {/* Background decorative elements */}
-            <div className="absolute top-1/4 left-1/4 w-[400px] h-[400px] bg-red-600/5 rounded-full blur-[120px] pointer-events-none -z-10" />
+    if (!routine) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[85vh] px-6 text-center relative overflow-hidden">
+                {/* Background decorative elements */}
+                <div className="absolute top-1/4 left-1/4 w-[400px] h-[400px] bg-red-600/5 rounded-full blur-[120px] pointer-events-none -z-10" />
 
-            <div className="relative space-y-12 max-w-md w-full animate-in fade-in zoom-in duration-700">
-                <div className="relative mx-auto w-32 h-32 flex items-center justify-center group">
-                    <div className="absolute inset-0 bg-neutral-900/40 backdrop-blur-3xl border border-white/5 rounded-3xl rotate-12 group-hover:rotate-0 transition-transform duration-500" />
-                    <AlertCircle className="w-12 h-12 text-red-500 relative z-10 drop-shadow-[0_0_15px_rgba(239,68,68,0.4)]" />
+                <div className="relative space-y-12 max-w-md w-full animate-in fade-in zoom-in duration-700">
+                    <div className="relative mx-auto w-32 h-32 flex items-center justify-center group">
+                        <div className="absolute inset-0 bg-neutral-900/40 backdrop-blur-3xl border border-white/5 rounded-3xl rotate-12 group-hover:rotate-0 transition-transform duration-500" />
+                        <AlertCircle className="w-12 h-12 text-red-500 relative z-10 drop-shadow-[0_0_15px_rgba(239,68,68,0.4)]" />
+                    </div>
+
+                    <div className="space-y-4">
+                        <h1 className="text-3xl font-black text-white uppercase italic tracking-tighter">
+                            Frecuencia No Encontrada
+                        </h1>
+                        <p className="text-neutral-500 font-bold text-sm leading-relaxed">
+                            No tienes una rutina de entrenamiento asignada para hoy. Pulsa el botón inferior para volver a la base.
+                        </p>
+                    </div>
+
+                    <Link href="/dashboard" className="block">
+                        <Button className="w-full h-14 bg-white text-black font-black uppercase italic tracking-widest rounded-2xl hover:bg-neutral-200 transition-all shadow-xl shadow-white/5 active:scale-95">
+                            Retorno Seguro
+                        </Button>
+                    </Link>
                 </div>
-
-                <div className="space-y-4">
-                    <h1 className="text-3xl font-black text-white uppercase italic tracking-tighter">
-                        Frecuencia No Encontrada
-                    </h1>
-                    <p className="text-neutral-500 font-bold text-sm leading-relaxed">
-                        No se ha detectado una secuencia de entrenamiento sincronizada para este ciclo. Pulsa el botón inferior para volver a la base.
-                    </p>
-                </div>
-
-                <Link href="/dashboard" className="block">
-                    <Button className="w-full h-14 bg-white text-black font-black uppercase italic tracking-widest rounded-2xl hover:bg-neutral-200 transition-all shadow-xl shadow-white/5 active:scale-95">
-                        Retorno Seguro
-                    </Button>
-                </Link>
             </div>
-        </div>
-    );
+        );
+    }
 
     // Filter the routine to only show the relevant day
     let workoutRoutine = routine as unknown as WorkoutRoutine;

@@ -120,7 +120,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
                         <h2 className="text-4xl font-black text-white tracking-tighter uppercase italic">{user.name}</h2>
                         <div className="flex items-center justify-center md:justify-start gap-2">
                             <span className="px-4 py-1.5 bg-white/5 border border-white/10 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] text-white backdrop-blur-xl">
-                                {user.role === 'coach' ? 'Operador Rank: Coach' : 'Módulo: Atleta'}
+                                {user.role === 'coach' ? 'Entrenador' : 'Atleta'}
                             </span>
                             {user.onboardingCompleted && (
                                 <div className="h-6 w-6 bg-emerald-500/10 border border-emerald-500/20 rounded-full flex items-center justify-center">

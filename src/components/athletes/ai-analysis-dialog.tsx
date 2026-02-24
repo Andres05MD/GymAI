@@ -11,7 +11,7 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 import { BrainCircuit, Loader2 } from "lucide-react";
-import { analyzeAthleteProgress } from "@/actions/analysis-actions";
+import { analyzeAthleteProgress } from "@/actions/analytics-actions";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import ReactMarkdown from "react-markdown";
 

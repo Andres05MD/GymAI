@@ -25,7 +25,7 @@ export function Sidebar({ role }: SidebarProps) {
     const pathname = usePathname();
 
     const commonItems = [
-        { label: "CONSOLA", href: "/dashboard", icon: LayoutDashboard, prefetch: true },
+        { label: "DASHBOARD", href: "/dashboard", icon: LayoutDashboard, prefetch: true },
     ];
 
     const coachItems = [
@@ -39,9 +39,9 @@ export function Sidebar({ role }: SidebarProps) {
 
     const athleteItems = [
         ...commonItems,
-        { label: "DESPLIEGUE", href: "/train", icon: Dumbbell, prefetch: true },
+        { label: "ENTRENAR", href: "/train", icon: Dumbbell, prefetch: true },
         { label: "MI RUTINA", href: "/my-routine", icon: ClipboardList, prefetch: true },
-        { label: "BITÁCORA", href: "/history", icon: History, prefetch: false },
+        { label: "HISTORIAL", href: "/history", icon: History, prefetch: false },
         { label: "ANÁLISIS", href: "/progress", icon: BarChart2, prefetch: false },
     ];
 
@@ -62,7 +62,7 @@ export function Sidebar({ role }: SidebarProps) {
     ];
 
     return (
-        <aside className="hidden md:flex h-screen w-72 flex-col bg-black relative overflow-hidden">
+        <aside className="hidden md:flex h-screen w-55 flex-col bg-black relative overflow-hidden">
             {/* Geometric Accents */}
             <div className="absolute top-0 left-0 w-full h-[500px] bg-linear-to-b from-red-600/5 to-transparent pointer-events-none" />
             <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-red-600/5 rounded-full blur-[100px] pointer-events-none" />
@@ -78,7 +78,6 @@ export function Sidebar({ role }: SidebarProps) {
                     </div>
                     <div className="flex flex-col">
                         <span className="text-2xl font-black text-white tracking-tighter italic leading-none">GymIA</span>
-                        <span className="text-[8px] font-black text-red-500 uppercase tracking-[0.4em] italic mt-1 bg-red-500/10 px-2 py-0.5 rounded-full border border-red-500/20">OPERATIVE_OS</span>
                     </div>
                 </Link>
             </div>
@@ -87,11 +86,10 @@ export function Sidebar({ role }: SidebarProps) {
                 {/* Menu Central */}
                 <div className="space-y-6">
                     <div className="flex items-center gap-3 px-4">
-                        <div className="h-px flex-1 bg-white/5" />
                         <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-neutral-600 italic">
-                            Protocolos
+                            Rutinas
                         </h3>
-                        <div className="h-px w-4 bg-white/5" />
+                        <div className="h-px flex-1 bg-white/5" />
                     </div>
                     <nav className="space-y-2">
                         {menuItems.map((item) => {
@@ -131,14 +129,13 @@ export function Sidebar({ role }: SidebarProps) {
                     </nav>
                 </div>
 
-                {/* Sistema */}
+                {/* Opciones */}
                 <div className="space-y-6">
                     <div className="flex items-center gap-3 px-4">
-                        <div className="h-px flex-1 bg-white/5" />
                         <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-neutral-600 italic">
                             Operador
                         </h3>
-                        <div className="h-px w-4 bg-white/5" />
+                        <div className="h-px flex-1 bg-white/5" />
                     </div>
                     <nav className="space-y-2">
                         {generalItems.map((item) => {
@@ -180,18 +177,6 @@ export function Sidebar({ role }: SidebarProps) {
                             <div className="absolute inset-0 bg-linear-to-r from-red-600/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                         </button>
                     </nav>
-                </div>
-            </div>
-
-            {/* Footer / Build Version */}
-            <div className="p-8 relative z-10 border-t border-white/5 bg-black/40 backdrop-blur-sm">
-                <div className="flex items-center justify-between opacity-30">
-                    <span className="text-[7px] font-black uppercase tracking-[0.5em] text-white italic">Build_v2.0.4</span>
-                    <div className="flex gap-1">
-                        <div className="h-1 w-1 bg-white rounded-full" />
-                        <div className="h-1 w-1 bg-white/50 rounded-full" />
-                        <div className="h-1 w-1 bg-white/20 rounded-full" />
-                    </div>
                 </div>
             </div>
         </aside>

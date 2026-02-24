@@ -68,7 +68,7 @@ service cloud.firestore {
       allow create: if isAuthenticated() 
                     && isOwner(userId)
                     && hasField('role')
-                    && request.resource.data.role in ['coach', 'athlete'];
+                    && request.resource.data.role in ['coach', 'athlete', 'advanced_athlete'];
       
       allow update: if isAuthenticated() 
                     && isOwner(userId)
@@ -89,17 +89,17 @@ service cloud.firestore {
       
       allow create: if isCoach()
                     && hasField('name')
-                    && hasField('muscleGroup')
-                    && hasField('createdBy')
-                    && request.resource.data.createdBy == request.auth.uid;
+                    && hasField('muscleGroups')
+                    && hasField('coachId')
+                    && request.resource.data.coachId == request.auth.uid;
       
       allow update: if isCoach()
-                    // Solo el creador puede editar, o cualquier coach si no hay creador
-                    && (resource.data.createdBy == request.auth.uid || 
-                        !('createdBy' in resource.data));
+                    // Solo el creador puede editar
+                    && (resource.data.coachId == request.auth.uid || 
+                        !('coachId' in resource.data));
       
       allow delete: if isCoach()
-                    && resource.data.createdBy == request.auth.uid;
+                    && resource.data.coachId == request.auth.uid;
     }
 
     // ----------------------------------------
@@ -189,7 +189,7 @@ service cloud.firestore {
       allow create: if isAuthenticated()
                     && hasField('athleteId')
                     && request.resource.data.athleteId == request.auth.uid
-                    && hasField('workoutId')
+                    && hasField('sessionId')
                     && hasField('exerciseId');
       
       allow update: if isAuthenticated()
@@ -212,7 +212,8 @@ service cloud.firestore {
       
       allow create: if isAuthenticated()
                     && hasField('userId')
-                    && request.resource.data.userId == request.auth.uid
+                    && (request.resource.data.userId == request.auth.uid ||
+                        isCoachOfAthlete(request.resource.data.userId))
                     && hasField('date');
       
       allow update: if isAuthenticated()
@@ -223,21 +224,12 @@ service cloud.firestore {
     }
     
     // ----------------------------------------
-    // MEASUREMENTS (Alias/Compatibilidad)
+    // MEASUREMENTS — DEPRECADO
     // ----------------------------------------
-    // Por si se usa 'measurements' en lugar de 'body_measurements'
+    // Colección legacy. Usar 'body_measurements' en su lugar.
+    // Se deniega todo acceso para forzar la migración.
     match /measurements/{measurementId} {
-      allow read: if isAuthenticated() && (
-        resource.data.userId == request.auth.uid ||
-        isCoachOfAthlete(resource.data.userId)
-      );
-      
-      allow create: if isAuthenticated()
-                    && hasField('userId')
-                    && request.resource.data.userId == request.auth.uid;
-      
-      allow update, delete: if isAuthenticated()
-                            && resource.data.userId == request.auth.uid;
+      allow read, write: if false;
     }
     
     // ----------------------------------------

@@ -44,9 +44,9 @@ export default async function RoutinesPage() {
                 className="flex flex-col gap-6 md:flex-row md:justify-between md:items-end mb-4 md:mb-6"
             >
                 <div className="space-y-1">
-                    <h2 className="text-4xl md:text-5xl font-black text-white tracking-tighter uppercase italic leading-none">Arquitectura</h2>
+                    <h2 className="text-4xl md:text-5xl font-black text-white tracking-tighter uppercase italic leading-none">Mis Rutinas</h2>
                     <p className="text-neutral-500 font-bold uppercase tracking-[0.3em] text-[10px] ml-1">
-                        Sistemas de Carga: <span className="text-red-500">Rutinas & Programación</span>
+                        Explora tus: <span className="text-red-500">Rutinas & Programación</span>
                     </p>
                 </div>
 
@@ -76,12 +76,12 @@ export default async function RoutinesPage() {
                         </div>
                         <h3 className="text-3xl font-black text-white uppercase italic tracking-tighter mb-4">Núcleo Vacío</h3>
                         <p className="text-neutral-500 font-medium text-sm leading-relaxed mb-10">
-                            No se detectan sistemas de entrenamiento programados. Comienza a definir tu arquitectura de carga manualmente o utiliza el motor de IA.
+                            No se han creado rutinas. Puedes crear una rutina manualmente o utilizar la IA.
                         </p>
                         <Link href="/routines/new">
                             <Button className="h-14 px-10 rounded-2xl bg-white text-black hover:bg-neutral-200 font-black uppercase tracking-[0.2em] text-[10px] transition-all shadow-xl hover:shadow-white/10 flex items-center gap-3">
                                 <Zap className="w-4 h-4" />
-                                Inicializar Sistema
+                                Crear Rutina
                             </Button>
                         </Link>
                     </div>
@@ -106,7 +106,7 @@ export default async function RoutinesPage() {
                                 ))}
                             {routines.filter((r: any) => r.type !== 'daily').length === 0 && (
                                 <div className="col-span-full py-16 text-center border-2 border-dashed border-white/5 rounded-4xl bg-white/5 backdrop-blur-sm">
-                                    <p className="text-neutral-500 font-black uppercase tracking-[0.3em] text-[10px] italic">Sin Arquitecturas Semanales</p>
+                                    <p className="text-neutral-500 font-black uppercase tracking-[0.3em] text-[10px] italic">Sin Rutinas Semanales</p>
                                 </div>
                             )}
                         </div>
@@ -130,7 +130,7 @@ export default async function RoutinesPage() {
                                 ))}
                             {routines.filter((r: any) => r.type === 'daily').length === 0 && (
                                 <div className="col-span-full py-16 text-center border-2 border-dashed border-white/5 rounded-4xl bg-white/5 backdrop-blur-sm">
-                                    <p className="text-neutral-500 font-black uppercase tracking-[0.3em] text-[10px] italic">Sin Módulos Diarios Independientes</p>
+                                    <p className="text-neutral-500 font-black uppercase tracking-[0.3em] text-[10px] italic">Sin Rutinas Diarias</p>
                                 </div>
                             )}
                         </div>

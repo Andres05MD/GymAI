@@ -1,14 +1,18 @@
 "use server";
 
-import { getGroqClient } from "@/lib/ai";
-
+import { getGroqClient, getAthleteContext, DEFAULT_AI_MODEL } from "@/lib/ai";
 import { auth } from "@/lib/auth";
 
 export async function chatWithAI(messages: { role: string, content: string }[]) {
     try {
         const session = await auth();
-        const role = session?.user?.role || "athlete";
+        if (!session?.user?.id) return { success: false, error: "No autorizado" };
+
+        const role = session.user.role || "athlete";
         const groq = getGroqClient();
+
+        // Inyectar contexto del atleta para respuestas personalizadas
+        const athleteCtx = await getAthleteContext(session.user.id);
 
         let systemPromptContent = "";
 
@@ -21,7 +25,10 @@ export async function chatWithAI(messages: { role: string, content: string }[]) 
             systemPromptContent = `Eres GymIA, un asistente virtual experto en fitness.
         Tu tono es motivador pero profesional.
         Responde dudas sobre técnica, calentamiento y nutrición básica.
-        Mantén las respuestas concisas.`;
+        Mantén las respuestas concisas.
+        IMPORTANTE: Considera las lesiones y condiciones del atleta en tu respuesta.
+
+        ${athleteCtx}`;
         }
 
         const systemMessage = {
@@ -31,7 +38,7 @@ export async function chatWithAI(messages: { role: string, content: string }[]) 
 
         const completion = await groq.chat.completions.create({
             messages: [systemMessage, ...messages] as any,
-            model: "llama3-70b-8192",
+            model: DEFAULT_AI_MODEL,
             temperature: 0.7,
             max_tokens: 600,
         });
@@ -44,7 +51,7 @@ export async function chatWithAI(messages: { role: string, content: string }[]) 
 
         return { success: true, message: reply };
 
-    } catch (error: any) {
+    } catch (error) {
         console.error("Chat Error:", error);
         return { success: false, error: "Error al conectar con GymIA Assistant." };
     }

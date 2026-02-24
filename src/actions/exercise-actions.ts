@@ -4,7 +4,7 @@ import { z } from "zod";
 import { ExerciseSchema } from "@/lib/schemas";
 import { adminDb, serializeFirestoreData } from "@/lib/firebase-admin";
 import { auth } from "@/lib/auth";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 // Input schema for creating/updating exercises (excludes system fields)
 const ExerciseInputSchema = ExerciseSchema.omit({
@@ -24,9 +24,21 @@ export async function getExercises() {
     }
 
     try {
-        const snapshot = await adminDb
-            .collection("exercises")
-            .get();
+        let exercisesQuery: FirebaseFirestore.Query = adminDb.collection("exercises");
+
+        // Coach ve solo sus propios ejercicios; atleta avanzado ve los suyos y los de su coach
+        if (session.user.role === "coach") {
+            exercisesQuery = exercisesQuery.where("coachId", "==", session.user.id);
+        } else {
+            // Atleta avanzado: ver ejercicios propios y de su coach
+            const userDoc = await adminDb.collection("users").doc(session.user.id).get();
+            const coachId = userDoc.data()?.coachId;
+            const ownerIds = [session.user.id];
+            if (coachId) ownerIds.push(coachId);
+            exercisesQuery = exercisesQuery.where("coachId", "in", ownerIds);
+        }
+
+        const snapshot = await exercisesQuery.get();
 
         if (snapshot.empty) {
             return { success: true, exercises: [] };
@@ -67,6 +79,8 @@ export async function createExercise(data: ExerciseInput) {
 
         revalidatePath("/exercises");
         revalidatePath("/dashboard");
+        revalidateTag("exercises", "default");
+        revalidateTag("coach-stats", "default");
 
         return { success: true, id: docRef.id };
     } catch (error) {
@@ -106,6 +120,8 @@ export async function updateExercise(id: string, data: ExerciseInput) {
 
         revalidatePath("/exercises");
         revalidatePath("/dashboard");
+        revalidateTag("exercises", "default");
+        revalidateTag("coach-stats", "default");
 
         return { success: true };
     } catch (error) {
@@ -137,6 +153,8 @@ export async function deleteExercise(id: string) {
 
         revalidatePath("/exercises");
         revalidatePath("/dashboard");
+        revalidateTag("exercises", "default");
+        revalidateTag("coach-stats", "default");
 
         return { success: true };
     } catch (error) {
@@ -149,15 +167,23 @@ export async function getExerciseNames(ids: string[]) {
 
     try {
         const names: Record<string, string> = {};
-        // Firestore 'in' query works up to 10-30 IDs usually.
-        // If more, we'd need to chunk.
-        const snapshot = await adminDb.collection("exercises")
-            .where("__name__", "in", ids)
-            .get();
 
-        snapshot.docs.forEach(doc => {
-            names[doc.id] = doc.data().name;
-        });
+        // Firestore 'in' query soporta máximo 30 IDs, así que dividimos en chunks
+        const CHUNK_SIZE = 30;
+        const chunks: string[][] = [];
+        for (let i = 0; i < ids.length; i += CHUNK_SIZE) {
+            chunks.push(ids.slice(i, i + CHUNK_SIZE));
+        }
+
+        for (const chunk of chunks) {
+            const snapshot = await adminDb.collection("exercises")
+                .where("__name__", "in", chunk)
+                .get();
+
+            snapshot.docs.forEach(doc => {
+                names[doc.id] = doc.data().name;
+            });
+        }
 
         return { success: true, names };
     } catch (error) {

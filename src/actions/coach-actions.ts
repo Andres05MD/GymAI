@@ -11,7 +11,11 @@ export async function getAllAthletes() {
     }
 
     try {
-        const snapshot = await adminDb.collection("users").get();
+        const snapshot = await adminDb.collection("users")
+            .where("role", "in", ["athlete", "advanced_athlete"])
+            .orderBy("name", "asc")
+            .limit(200)
+            .get();
 
         const athletes = snapshot.docs
             .map(doc => {
@@ -26,9 +30,7 @@ export async function getAllAthletes() {
                     goal: d.goal || null,
                     createdAt: d.createdAt?.toDate ? d.createdAt.toDate().toISOString() : (d.createdAt || null),
                 };
-            })
-            // Exclude coaches from the list
-            .filter(user => user.role !== "coach");
+            });
 
         return { success: true, athletes };
     } catch (error) {

@@ -185,6 +185,40 @@ export interface TrainingExerciseProgress {
 }
 
 // ============================================
+// Tipos de Entrenamiento Compartidos (Server + Client)
+// ============================================
+
+/** Set de entrenamiento — Superset de todas las variantes del proyecto */
+export interface TrainingSetData {
+    completed?: boolean;
+    weight?: number;
+    reps?: number;
+    rpe?: number;
+    rest?: number;
+}
+
+/** Ejercicio dentro de un log de entrenamiento */
+export interface TrainingExerciseData {
+    exerciseId?: string;
+    exerciseName: string;
+    sets: TrainingSetData[];
+    feedback?: string;
+    exerciseIdUsed?: string;
+}
+
+/** Log de entrenamiento (vista para componentes de historial) */
+export interface TrainingLogData {
+    id: string;
+    date: string;
+    routineId?: string;
+    routineName?: string;
+    durationMinutes?: number;
+    sessionFeedback?: string;
+    sessionRpe?: number;
+    exercises?: TrainingExerciseData[];
+}
+
+// ============================================
 // Tipos de Componentes UI
 // ============================================
 

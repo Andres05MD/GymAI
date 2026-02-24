@@ -100,7 +100,7 @@ export default async function UsersManagementPage() {
                                             <div className="relative">
                                                 <div className="absolute inset-0 bg-red-600/20 rounded-xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                                                 <Avatar className="h-12 w-12 border-2 border-white/5 group-hover:border-red-600/30 transition-all duration-500 rounded-xl relative z-10">
-                                                    <AvatarImage src={user.image || user.photoUrl} className="object-cover" />
+                                                    <AvatarImage src={user.image} className="object-cover" />
                                                     <AvatarFallback className="bg-neutral-950 text-white font-black italic">
                                                         {user.name?.[0]?.toUpperCase()}
                                                     </AvatarFallback>
@@ -108,7 +108,7 @@ export default async function UsersManagementPage() {
                                             </div>
                                             <div className="flex flex-col">
                                                 <span className="font-black text-white uppercase italic tracking-tight group-hover:text-red-500 transition-colors duration-300">{user.name}</span>
-                                                <span className="text-[10px] font-bold text-neutral-600 uppercase tracking-widest mt-0.5">Activo en Sistema</span>
+                                                <span className="text-[10px] font-bold text-neutral-600 uppercase tracking-widest mt-0.5">Activo</span>
                                             </div>
                                         </div>
                                     </TableCell>

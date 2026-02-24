@@ -39,6 +39,7 @@ export interface WorkoutSessionData {
     sessionNotes?: string;
     durationMinutes?: number;
     dayId?: string;
+    assignmentId?: string;
 }
 
 export interface ProgressionSuggestion {
@@ -89,15 +90,52 @@ export async function logWorkoutSession(data: WorkoutSessionData) {
     if (!session?.user?.id) return { success: false, error: "No autorizado" };
 
     try {
-        await adminDb.collection("training_logs").add({
+        const sessionId = `session_${Date.now()}_${session.user.id.slice(0, 6)}`;
+        const workoutDate = new Date();
+
+        const batch = adminDb.batch();
+
+        // 1. Crear el training_log principal
+        const logRef = adminDb.collection("training_logs").doc();
+        batch.set(logRef, {
             ...data,
             athleteId: session.user.id,
+            sessionId,
+            assignmentId: data.assignmentId || null,
             status: "completed",
-            date: new Date(),
-            createdAt: new Date()
+            date: workoutDate,
+            createdAt: workoutDate,
         });
 
+        // 2. Escribir workout_sets individuales para consistencia con el sistema de progresión
+        if (data.exercises) {
+            for (const exercise of data.exercises) {
+                for (const set of exercise.sets) {
+                    if ((set.weight || 0) > 0 || (set.reps || 0) > 0) {
+                        const setRef = adminDb.collection("workout_sets").doc();
+                        batch.set(setRef, {
+                            exerciseId: exercise.exerciseId || "",
+                            exerciseName: exercise.exerciseName || "",
+                            weight: set.weight || 0,
+                            reps: set.reps || 0,
+                            rpe: set.rpe || null,
+                            sessionId,
+                            athleteId: session.user.id,
+                            timestamp: workoutDate.getTime(),
+                            createdAt: workoutDate,
+                        });
+                    }
+                }
+            }
+        }
+
+        await batch.commit();
+
         revalidatePath("/train");
+        revalidateTag("training-logs", "default");
+        revalidateTag("weekly-activity", "default");
+        revalidateTag("coach-stats", "default");
+        revalidateTag("recent-activity", "default");
         return { success: true };
     } catch (error) {
         console.error("Error logging session:", error);
@@ -173,6 +211,14 @@ export async function completeWorkout(logId: string) {
             endTime: new Date(),
             updatedAt: new Date()
         });
+
+        revalidateTag("training-logs", "default");
+        revalidateTag("weekly-activity", "default");
+        revalidateTag("coach-stats", "default");
+        revalidateTag("recent-activity", "default");
+        revalidatePath("/train");
+        revalidatePath("/history");
+
         return { success: true };
     } catch (error) {
         console.error("Error completing workout:", error);
@@ -203,7 +249,7 @@ export async function getAthleteRoutines() {
 }
 
 // Start a New Workout Session
-export async function startWorkout(routineId: string) {
+export async function startWorkout(routineId: string, dayIndex: number = 0) {
     const session = await auth();
     if (!session?.user?.id) return { success: false, error: "No autorizado" };
 
@@ -214,14 +260,14 @@ export async function startWorkout(routineId: string) {
 
         const routineData = routineSnap.data();
         const schedule = routineData?.schedule || [];
-        const firstDay = schedule[0] || { name: "Día 1", exercises: [] };
+        const targetDay = schedule[dayIndex] ?? schedule[0] ?? { name: "Día 1", exercises: [] };
 
         const workoutRef = await adminDb.collection("training_logs").add({
             athleteId: session.user.id,
             routineId: routineId,
             routineName: routineData?.name || "Rutina",
-            dayName: firstDay.name,
-            exercises: firstDay.exercises.map((ex: RoutineExercise) => ({
+            dayName: targetDay.name,
+            exercises: targetDay.exercises.map((ex: RoutineExercise) => ({
                 ...ex,
                 sets: ex.sets.map((set: RoutineSet) => ({
                     ...set,
@@ -249,7 +295,7 @@ export async function getAthleteHistory() {
         const snapshot = await adminDb.collection("training_logs")
             .where("athleteId", "==", session.user.id)
             .where("status", "==", "completed")
-            .orderBy("endTime", "desc")
+            .orderBy("date", "desc")
             .limit(50)
             .get();
 
@@ -310,6 +356,25 @@ export async function finishWorkoutSession(
         const calculatedVolume = sets.reduce((acc, set) => acc + (set.weight * set.reps), 0);
         const actualSets = sets.length;
 
+        // Agrupar sets por exerciseId para que cada ejercicio aparezca una sola vez
+        const exerciseMap = new Map<string, { exerciseId: string; exerciseName: string; sets: { reps: number; weight: number; rpe?: number }[] }>();
+
+        for (const set of sets) {
+            const key = set.exerciseId || set.exerciseName;
+            if (!exerciseMap.has(key)) {
+                exerciseMap.set(key, {
+                    exerciseId: set.exerciseId,
+                    exerciseName: set.exerciseName,
+                    sets: []
+                });
+            }
+            exerciseMap.get(key)!.sets.push({
+                reps: set.reps,
+                weight: set.weight,
+                rpe: set.rpe || undefined,
+            });
+        }
+
         await adminDb.collection("training_logs").add({
             athleteId: session.user.id,
             sessionId: sessionId,
@@ -320,12 +385,14 @@ export async function finishWorkoutSession(
             date: new Date(),
             endTime: new Date(),
             createdAt: new Date(),
-            exercises: sets.map(set => ({
-                exerciseId: set.exerciseId,
-                exerciseName: set.exerciseName,
-                sets: [{ reps: set.reps, weight: set.weight, rpe: set.rpe }]
-            }))
+            exercises: Array.from(exerciseMap.values())
         });
+
+        revalidateTag("training-logs", "default");
+        revalidateTag("weekly-activity", "default");
+        revalidateTag("coach-stats", "default");
+        revalidateTag("recent-activity", "default");
+        revalidatePath("/train");
 
         return { success: true };
     } catch (error) {
@@ -404,7 +471,10 @@ export async function getProgressionSuggestion(exerciseId: string): Promise<{ su
         const RPE_THRESHOLD_LOW = 7;
         const RPE_THRESHOLD_HIGH = 9;
 
-        if (rpe <= RPE_THRESHOLD_LOW) {
+        if (rpe == null || rpe === undefined) {
+            suggestedWeight = weight;
+            reason = "Sin RPE registrado. Registra tu esfuerzo percibido para mejores sugerencias.";
+        } else if (rpe <= RPE_THRESHOLD_LOW) {
             suggestedWeight = weight + 2.5;
             reason = `RPE bajo (${rpe}) en última sesión. ¡Sube la carga!`;
         } else if (rpe > RPE_THRESHOLD_HIGH) {
@@ -457,6 +527,8 @@ const RetroactiveExerciseSchema = z.object({
 });
 
 const RetroactiveWorkoutSchema = z.object({
+    id: z.string().optional(),
+    sessionId: z.string().optional(),
     routineId: z.string().optional(),
     routineName: z.string().optional(),
     dayId: z.string().optional(),
@@ -484,8 +556,7 @@ export async function logRetroactiveWorkout(data: RetroactiveWorkoutData) {
     try {
         const workoutDate = new Date(validated.date);
 
-        // Guardar el log de entrenamiento
-        await adminDb.collection("training_logs").add({
+        const logData: any = {
             athleteId: session.user.id,
             routineId: validated.routineId || null,
             dayId: validated.dayId || null,
@@ -495,7 +566,7 @@ export async function logRetroactiveWorkout(data: RetroactiveWorkoutData) {
             sessionRpe: validated.sessionRpe,
             sessionNotes: validated.sessionNotes || "",
             status: "completed",
-            isRetroactive: true, // Marca para distinguir de sesiones en tiempo real
+            isRetroactive: true,
             startTime: workoutDate,
             endTime: new Date(workoutDate.getTime() + validated.durationMinutes * 60000),
             exercises: validated.exercises.map(ex => ({
@@ -509,13 +580,36 @@ export async function logRetroactiveWorkout(data: RetroactiveWorkoutData) {
                     completed: s.completed,
                 })),
             })),
-            createdAt: new Date(),
-        });
+            updatedAt: new Date(),
+        };
 
-        // También guardar sets individuales para que funcione el historial de progresión
-        const sessionId = `retro_${Date.now()}_${session.user.id.slice(0, 6)}`;
         const batch = adminDb.batch();
+        let currentSessionId = validated.sessionId || `retro_${Date.now()}_${session.user.id.slice(0, 6)}`;
+        logData.sessionId = currentSessionId;
 
+        if (validated.id) {
+            // Actualizar log existente
+            const logRef = adminDb.collection("training_logs").doc(validated.id);
+            batch.update(logRef, logData);
+
+            // Borramos los sets anteriores subidos con este sessionId
+            if (validated.sessionId) {
+                const oldSetsSnap = await adminDb.collection("workout_sets")
+                    .where("sessionId", "==", validated.sessionId)
+                    .where("athleteId", "==", session.user.id)
+                    .get();
+                oldSetsSnap.docs.forEach(doc => {
+                    batch.delete(doc.ref);
+                });
+            }
+        } else {
+            // Crear log nuevo
+            logData.createdAt = new Date();
+            const logRef = adminDb.collection("training_logs").doc();
+            batch.set(logRef, logData);
+        }
+
+        // Guardar sets individuales nuevos/reemplazados para historial de progresión
         for (const exercise of validated.exercises) {
             for (const set of exercise.sets) {
                 if (set.weight > 0 || set.reps > 0) {
@@ -526,7 +620,7 @@ export async function logRetroactiveWorkout(data: RetroactiveWorkoutData) {
                         weight: set.weight,
                         reps: set.reps,
                         rpe: set.rpe || null,
-                        sessionId,
+                        sessionId: currentSessionId,
                         athleteId: session.user.id,
                         timestamp: workoutDate.getTime(),
                         createdAt: workoutDate,
@@ -539,11 +633,57 @@ export async function logRetroactiveWorkout(data: RetroactiveWorkoutData) {
 
         // Invalidar cache de historial
         revalidateTag("training-logs", "default");
+        revalidateTag("weekly-activity", "default");
+        revalidateTag("coach-stats", "default");
+        revalidateTag("recent-activity", "default");
         revalidatePath("/train");
+        revalidatePath("/history");
 
         return { success: true };
     } catch (error) {
         console.error("Error al registrar entrenamiento retroactivo:", error);
         return { success: false, error: "Error al guardar el entrenamiento" };
+    }
+}
+
+// Obtener registro completado para la fecha de hoy/especificada
+export async function getWorkoutLogByDate(dateStr: string) {
+    const session = await auth();
+    if (!session?.user?.id) return { success: false, error: "No autorizado" };
+
+    try {
+        // "YYYY-MM-DD" a componentes locales para evitar desfase UTC
+        const [year, month, day] = dateStr.split("-").map(Number);
+        const targetDate = new Date();
+        targetDate.setFullYear(year, month - 1, day);
+        targetDate.setHours(0, 0, 0, 0);
+
+        // Ajustar el inicio y fin del día
+        const startOfDay = new Date(targetDate);
+
+        const endOfDay = new Date(targetDate);
+        endOfDay.setHours(23, 59, 59, 999);
+
+        const snapshot = await adminDb.collection("training_logs")
+            .where("athleteId", "==", session.user.id)
+            .where("date", ">=", startOfDay)
+            .where("date", "<=", endOfDay)
+            .where("status", "==", "completed")
+            .limit(1)
+            .get();
+
+        if (snapshot.empty) {
+            return { success: true, log: null };
+        }
+
+        const doc = snapshot.docs[0];
+
+        return {
+            success: true,
+            log: serializeFirestoreData({ id: doc.id, ...doc.data() })
+        };
+    } catch (error) {
+        console.error("Error fetching log by date:", error);
+        return { success: false, error: "Error al buscar entrenamiento por fecha" };
     }
 }

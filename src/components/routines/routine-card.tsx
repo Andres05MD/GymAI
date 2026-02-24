@@ -122,7 +122,7 @@ export function RoutineCard({ routine, athletes }: RoutineCardProps) {
                                 className="text-neutral-500 hover:text-white hover:bg-white/5 rounded-xl h-9 w-9"
                                 onClick={handleDuplicate}
                                 disabled={isDuplicating}
-                                title="Duplicar Arquitectura"
+                                title="Duplicar Rutina"
                             >
                                 <Copy className="w-4 h-4" />
                             </Button>

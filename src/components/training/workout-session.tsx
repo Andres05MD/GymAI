@@ -328,9 +328,9 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
                     <div className="flex items-center justify-between relative z-10">
                         <div className="flex items-center gap-3 text-neutral-400">
                             <Activity className="w-5 h-5 text-red-500" />
-                            <span className="text-[10px] font-black uppercase tracking-[0.2em]">Secuencia Técnica</span>
+                            <span className="text-[10px] font-black uppercase tracking-[0.2em]">Sesión de Entrenamiento</span>
                         </div>
-                        <span className="text-[10px] font-black text-neutral-600 uppercase tracking-widest">{activeDay.exercises.length} Módulos</span>
+                        <span className="text-[10px] font-black text-neutral-600 uppercase tracking-widest">{activeDay.exercises.length} Ejercicios</span>
                     </div>
 
                     <div className="space-y-4 relative z-10">
@@ -657,7 +657,7 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
                     </Button>
 
                     <div className="flex-1 flex flex-col items-center justify-center gap-1">
-                        <span className="text-[9px] uppercase font-black text-neutral-500 tracking-[0.3em] italic">Módulo Operativo</span>
+                        <span className="text-[9px] uppercase font-black text-neutral-500 tracking-[0.3em] italic">Ejercicio Actual</span>
                         <div className="flex items-center gap-3">
                             <span className="text-2xl font-black text-white italic tracking-tighter">
                                 <span className="text-red-600">{currentExerciseIndex + 1}</span>

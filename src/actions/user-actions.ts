@@ -80,7 +80,7 @@ export async function getCoachAthletes() {
             id: doc.id,
             name: doc.data().name,
             email: doc.data().email,
-            photoUrl: doc.data().photoUrl
+            image: doc.data().image || doc.data().photoUrl || null
         }));
 
         return { success: true, athletes };
@@ -105,8 +105,7 @@ export async function getAllUsers() {
             name: doc.data().name || "Usuario",
             email: doc.data().email,
             role: doc.data().role || "athlete",
-            photoUrl: doc.data().photoUrl || null,
-            image: doc.data().image || null,
+            image: doc.data().image || doc.data().photoUrl || null,
         }));
 
         return { success: true, users };
@@ -126,6 +125,11 @@ export async function updateUserRole(userId: string, newRole: string) {
     const validRoles = ["athlete", "coach", "advanced_athlete"];
     if (!validRoles.includes(newRole)) {
         return { success: false, error: "Rol inválido" };
+    }
+
+    // Impedir que un usuario se cambie el rol a sí mismo
+    if (userId === session.user.id) {
+        return { success: false, error: "No puedes cambiar tu propio rol" };
     }
 
     try {

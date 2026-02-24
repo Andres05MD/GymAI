@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CalendarDays, Clock, Dumbbell, Play, AlertCircle, ClipboardList, Moon, Info, Sparkles, Activity } from "lucide-react";
+import { CalendarDays, Clock, Dumbbell, Play, AlertCircle, ClipboardList, Moon, Info, Sparkles, Activity, Pencil } from "lucide-react";
 import Link from "next/link";
 import { getRoutines } from "@/actions/routine-actions";
 import { differenceInCalendarWeeks } from "date-fns";
@@ -65,7 +65,7 @@ export default async function MyRoutinePage() {
                             Frecuencia No Detectada
                         </h1>
                         <p className="text-neutral-500 font-bold text-sm leading-relaxed">
-                            Tu arquitectura de entrenamiento no ha sido desplegada aún. Contacta con tu coach para sincronizar tu primera secuencia operativa.
+                            Aún no tienes una rutina asignada. Contacta con tu entrenador para que te asigne una rutina.
                         </p>
                     </div>
 
@@ -111,10 +111,9 @@ export default async function MyRoutinePage() {
                 <div className="space-y-3">
                     <div className="flex items-center gap-3">
                         <div className="h-px w-8 bg-red-600/30" />
-                        <span className="text-[10px] font-black text-red-500 uppercase tracking-[0.4em] italic">Estatus Operativo</span>
                     </div>
                     <h2 className="text-4xl md:text-5xl font-black text-white tracking-tighter uppercase italic leading-none">
-                        Mi Arquitectura <span className="text-red-600">Actual</span>
+                        Mi Rutina <span className="text-red-600">Actual</span>
                     </h2>
                 </div>
 
@@ -170,7 +169,7 @@ export default async function MyRoutinePage() {
                 >
                     <Info className="h-6 w-6 shrink-0" />
                     <p className="text-sm font-black uppercase tracking-tight italic">
-                        Secuencia programada para despliegue el <span className="underline">{startDateRaw.toLocaleDateString('es-ES', { day: 'numeric', month: 'long' })}</span>
+                        Rutina programada para iniciar el <span className="underline">{startDateRaw.toLocaleDateString('es-ES', { day: 'numeric', month: 'long' })}</span>
                     </p>
                 </ClientMotionDiv>
             )}
@@ -181,7 +180,7 @@ export default async function MyRoutinePage() {
                     <div className="space-y-2">
                         <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter">
                             {schedule.length === 1
-                                ? "Protocolo Único"
+                                ? "Rutina Única"
                                 : activeRoutine.name.replace(/\s*\(Assigned\)/gi, "").trim()}
                         </h3>
                         {activeRoutine.description && (
@@ -227,12 +226,12 @@ export default async function MyRoutinePage() {
                                         {day.isRest ? (
                                             <span className="flex items-center gap-2 italic">
                                                 <div className="h-1.5 w-1.5 rounded-full bg-neutral-800" />
-                                                Recuperación de Sistemas
+                                                Día de Descanso
                                             </span>
                                         ) : (
                                             <>
                                                 <span className="flex items-center gap-2">
-                                                    <Dumbbell className="h-3.5 w-3.5 text-red-500/50" /> {day.exercises?.length || 0} Módulos
+                                                    <Dumbbell className="h-3.5 w-3.5 text-red-500/50" /> {day.exercises?.length || 0} Ejercicios
                                                 </span>
                                                 <span className="flex items-center gap-2">
                                                     <Clock className="h-3.5 w-3.5 text-blue-500/50" /> {(day.exercises?.length || 0) * 4} Min
@@ -243,11 +242,18 @@ export default async function MyRoutinePage() {
                                 </div>
                             </div>
 
-                            <div className="mt-8 md:mt-0 w-full md:w-auto relative z-10">
+                            <div className="mt-8 md:mt-0 w-full md:w-auto relative z-10 flex gap-2">
                                 {!day.isRest && (
-                                    <Link href={`/my-routine/day/${index}`} className="block">
+                                    <Link href={`/my-routine/day/${index}`} className="block flex-1 md:flex-none">
                                         <Button className="w-full md:w-auto px-8 h-12 rounded-2xl bg-white/5 border border-white/10 text-neutral-300 font-black text-[10px] uppercase tracking-widest hover:bg-white hover:text-black transition-all shadow-lg active:scale-95">
                                             Analizar
+                                        </Button>
+                                    </Link>
+                                )}
+                                {(session.user.role === "advanced_athlete" || session.user.role === "coach") && (
+                                    <Link href={`/routines/${activeRoutine.id}?day=${index}`} className="block">
+                                        <Button variant="outline" className="w-12 h-12 p-0 rounded-2xl bg-white/5 border border-white/10 text-neutral-300 hover:bg-white hover:text-black transition-all shadow-lg active:scale-95 flex items-center justify-center">
+                                            <Pencil className="w-4 h-4" />
                                         </Button>
                                     </Link>
                                 )}
@@ -257,7 +263,7 @@ export default async function MyRoutinePage() {
 
                     {schedule.length === 0 && (
                         <div className="p-20 text-center bg-neutral-900/20 border border-white/5 rounded-4xl backdrop-blur-3xl shadow-2xl">
-                            <span className="text-neutral-600 font-black uppercase tracking-[0.3em] text-[10px]">Sin módulos operativos configurados.</span>
+                            <span className="text-neutral-600 font-black uppercase tracking-[0.3em] text-[10px]">Sin ejercicios configurados para hoy.</span>
                         </div>
                     )}
                 </div>

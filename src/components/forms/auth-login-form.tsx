@@ -139,7 +139,7 @@ export function AuthLoginForm() {
                     disabled={loading}
                 >
                     <span className="relative z-10 flex items-center justify-center gap-3">
-                        {loading ? "Sincronizando..." : "Iniciar Protocolo"}
+                        {loading ? "Iniciando..." : "Entrar"}
                         {!loading && <ShieldCheck className="w-5 h-5 group-hover:scale-110 transition-transform" />}
                     </span>
                     <div className="absolute inset-0 bg-linear-to-r from-red-400/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl" />
