@@ -132,7 +132,10 @@ service cloud.firestore {
         // Coach lee rutinas que creó
         resource.data.coachId == request.auth.uid ||
         // Coach lee rutinas de sus atletas
-        isCoachOfAthlete(resource.data.athleteId)
+        isCoachOfAthlete(resource.data.athleteId) ||
+        // Atleta avanzado lee rutinas de su coach
+        (isAdvancedAthlete() && 
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.coachId == resource.data.coachId)
       );
       
       allow create: if isCoachOrAdvanced()

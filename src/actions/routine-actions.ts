@@ -33,10 +33,18 @@ export async function getRoutines() {
             const snap = await adminDb.collection("routines").where("coachId", "==", session.user.id).get();
             snapshots.push(snap);
         } else if (session.user.role === "advanced_athlete") {
-            // Atleta avanzado ve sus rutinas asignadas Y las que creó
+            // Atleta avanzado ve: rutinas asignadas, creadas por él, y las de su coach
             const assignedSnap = await adminDb.collection("routines").where("athleteId", "==", session.user.id).where("active", "==", true).get();
             const createdSnap = await adminDb.collection("routines").where("coachId", "==", session.user.id).get();
             snapshots.push(assignedSnap, createdSnap);
+
+            // También ver rutinas del coach asignado
+            const userDoc = await adminDb.collection("users").doc(session.user.id).get();
+            const myCoachId = userDoc.data()?.coachId;
+            if (myCoachId) {
+                const coachSnap = await adminDb.collection("routines").where("coachId", "==", myCoachId).get();
+                snapshots.push(coachSnap);
+            }
         } else {
             const snap = await adminDb.collection("routines").where("athleteId", "==", session.user.id).where("active", "==", true).get();
             snapshots.push(snap);
