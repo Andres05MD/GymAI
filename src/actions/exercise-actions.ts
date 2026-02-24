@@ -109,7 +109,18 @@ export async function updateExercise(id: string, data: ExerciseInput) {
             return { success: false, error: "Ejercicio no encontrado" };
         }
 
-        if (docSnap.data()?.coachId !== session.user.id) {
+        const exerciseCoachId = docSnap.data()?.coachId;
+        const isCreator = exerciseCoachId === session.user.id;
+
+        // Atleta avanzado puede editar ejercicios de su coach
+        let isAdvancedWithAccess = false;
+        if (!isCreator && role === 'advanced_athlete') {
+            const userDoc = await adminDb.collection('users').doc(session.user.id).get();
+            const myCoachId = userDoc.data()?.coachId;
+            isAdvancedWithAccess = !!myCoachId && exerciseCoachId === myCoachId;
+        }
+
+        if (!isCreator && !isAdvancedWithAccess) {
             return { success: false, error: "No tienes permiso para editar este ejercicio" };
         }
 
@@ -145,7 +156,18 @@ export async function deleteExercise(id: string) {
             return { success: false, error: "Ejercicio no encontrado" };
         }
 
-        if (docSnap.data()?.coachId !== session.user.id) {
+        const exerciseCoachId = docSnap.data()?.coachId;
+        const isCreator = exerciseCoachId === session.user.id;
+
+        // Atleta avanzado puede eliminar ejercicios de su coach
+        let isAdvancedWithAccess = false;
+        if (!isCreator && role === 'advanced_athlete') {
+            const userDoc = await adminDb.collection('users').doc(session.user.id).get();
+            const myCoachId = userDoc.data()?.coachId;
+            isAdvancedWithAccess = !!myCoachId && exerciseCoachId === myCoachId;
+        }
+
+        if (!isCreator && !isAdvancedWithAccess) {
             return { success: false, error: "No tienes permiso para eliminar este ejercicio" };
         }
 

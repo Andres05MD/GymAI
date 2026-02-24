@@ -34,6 +34,19 @@ service cloud.firestore {
       );
     }
     
+    // Verifica si el usuario tiene rol de atleta avanzado
+    function isAdvancedAthlete() {
+      return isAuthenticated() && (
+        request.auth.token.role == 'advanced_athlete' ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'advanced_athlete'
+      );
+    }
+    
+    // Verifica si el usuario es coach o atleta avanzado
+    function isCoachOrAdvanced() {
+      return isCoach() || isAdvancedAthlete();
+    }
+    
     // Verifica si el coach tiene asignado a un atleta específico
     function isCoachOfAthlete(athleteId) {
       return isCoach() && (
@@ -83,23 +96,27 @@ service cloud.firestore {
     // EXERCISES (Biblioteca de ejercicios)
     // ----------------------------------------
     // - Cualquier autenticado puede leer
-    // - Solo coaches pueden crear/editar/eliminar
+    // - Coaches y atletas avanzados pueden crear/editar/eliminar
     match /exercises/{exerciseId} {
       allow read: if isAuthenticated();
       
-      allow create: if isCoach()
+      allow create: if isCoachOrAdvanced()
                     && hasField('name')
                     && hasField('muscleGroups')
                     && hasField('coachId')
                     && request.resource.data.coachId == request.auth.uid;
       
-      allow update: if isCoach()
-                    // Solo el creador puede editar
+      allow update: if isCoachOrAdvanced()
+                    // Creador o atleta avanzado del mismo coach
                     && (resource.data.coachId == request.auth.uid || 
-                        !('coachId' in resource.data));
+                        !('coachId' in resource.data) ||
+                        (isAdvancedAthlete() && 
+                         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.coachId == resource.data.coachId));
       
-      allow delete: if isCoach()
-                    && resource.data.coachId == request.auth.uid;
+      allow delete: if isCoachOrAdvanced()
+                    && (resource.data.coachId == request.auth.uid ||
+                        (isAdvancedAthlete() && 
+                         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.coachId == resource.data.coachId));
     }
 
     // ----------------------------------------
@@ -107,6 +124,7 @@ service cloud.firestore {
     // ----------------------------------------
     // - Atletas leen sus propias rutinas
     // - Coaches leen/escriben rutinas que ellos crearon
+    // - Atletas avanzados tienen acceso completo a sus propias rutinas
     match /routines/{routineId} {
       allow read: if isAuthenticated() && (
         // Atleta lee su rutina asignada
@@ -117,17 +135,19 @@ service cloud.firestore {
         isCoachOfAthlete(resource.data.athleteId)
       );
       
-      allow create: if isCoach()
+      allow create: if isCoachOrAdvanced()
                     && hasField('coachId')
                     && request.resource.data.coachId == request.auth.uid
                     && hasField('athleteId')
                     && hasField('name');
       
-      allow update: if isCoach()
-                    && resource.data.coachId == request.auth.uid;
+      allow update: if isCoachOrAdvanced()
+                    && (resource.data.coachId == request.auth.uid ||
+                        (isAdvancedAthlete() && resource.data.athleteId == request.auth.uid));
       
-      allow delete: if isCoach()
-                    && resource.data.coachId == request.auth.uid;
+      allow delete: if isCoachOrAdvanced()
+                    && (resource.data.coachId == request.auth.uid ||
+                        (isAdvancedAthlete() && resource.data.athleteId == request.auth.uid));
     }
 
     // ----------------------------------------

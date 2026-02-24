@@ -28,16 +28,23 @@ export async function getRoutines() {
     if (!session?.user?.id) return { success: false, error: "No autorizado" };
 
     try {
-        let snapshot;
+        let snapshots: FirebaseFirestore.QuerySnapshot[] = [];
         if (session.user.role === "coach") {
-            snapshot = await adminDb.collection("routines").where("coachId", "==", session.user.id).get();
+            const snap = await adminDb.collection("routines").where("coachId", "==", session.user.id).get();
+            snapshots.push(snap);
+        } else if (session.user.role === "advanced_athlete") {
+            // Atleta avanzado ve sus rutinas asignadas Y las que creó
+            const assignedSnap = await adminDb.collection("routines").where("athleteId", "==", session.user.id).where("active", "==", true).get();
+            const createdSnap = await adminDb.collection("routines").where("coachId", "==", session.user.id).get();
+            snapshots.push(assignedSnap, createdSnap);
         } else {
-            snapshot = await adminDb.collection("routines").where("athleteId", "==", session.user.id).where("active", "==", true).get();
+            const snap = await adminDb.collection("routines").where("athleteId", "==", session.user.id).where("active", "==", true).get();
+            snapshots.push(snap);
         }
 
-        const routinesRaw = snapshot.docs.map(doc => {
+        const routinesRaw = snapshots.flatMap(snap => snap.docs.map(doc => {
             return serializeFirestoreData({ id: doc.id, ...doc.data() });
-        });
+        }));
 
         const routines = Array.from(new Map(routinesRaw.map(r => [r.id, r])).values());
 
