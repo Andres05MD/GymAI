@@ -30,13 +30,14 @@ export function ExerciseList({ exercises }: ExerciseListProps) {
     const filteredExercises = useMemo(() => {
         return exercises
             .filter((ex) => {
-                const term = searchTerm.toLowerCase().trim();
+                const normalize = (s: string) => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+                const term = normalize(searchTerm);
                 if (!term && !filterGroup) return true;
 
                 const matchesSearch =
                     !term ||
-                    ex.name?.toLowerCase().includes(term) ||
-                    ex.specificMuscles?.some((m: string) => m.toLowerCase().includes(term));
+                    normalize(ex.name || "").includes(term) ||
+                    ex.specificMuscles?.some((m: string) => normalize(m).includes(term));
 
                 const matchesFilter = filterGroup ? ex.muscleGroups?.includes(filterGroup) : true;
 
