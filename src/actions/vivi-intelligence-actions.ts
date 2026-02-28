@@ -42,33 +42,49 @@ export async function analyzeViviIntelligence(userId?: string) {
             adminDb.collection("users").doc(targetUserId).get(),
             adminDb.collection("training_logs")
                 .where("athleteId", "==", targetUserId)
-                .orderBy("date", "desc")
-                .limit(15)
+                .limit(40)
                 .get(),
             adminDb.collection("body_measurements")
                 .where("userId", "==", targetUserId)
-                .orderBy("date", "desc")
-                .limit(5)
+                .limit(20)
                 .get()
         ]);
 
         const userData = userDoc.data();
-        const logs = logsSnap.docs.map(d => ({
-            date: d.data().date?.toDate().toISOString().split('T')[0],
-            routineName: d.data().routineName,
-            duration: d.data().durationMinutes,
-            exercises: d.data().exercises.map((e: any) => ({
+
+        // Ordenar logs en memoria
+        const rawLogs = logsSnap.docs.map(doc => doc.data());
+        const sortedLogs = rawLogs.sort((a, b) => {
+            const dateA = a.date?.toDate ? a.date.toDate().getTime() : 0;
+            const dateB = b.date?.toDate ? b.date.toDate().getTime() : 0;
+            return dateB - dateA;
+        }).slice(0, 15);
+
+        const logs = sortedLogs.map(d => ({
+            date: d.date?.toDate().toISOString().split('T')[0],
+            routineName: d.routineName,
+            duration: d.durationMinutes,
+            exercises: (d.exercises || []).map((e: any) => ({
                 name: e.exerciseName,
-                avgRpe: e.sets.reduce((acc: number, s: any) => acc + (s.rpe || 8), 0) / e.sets.length,
-                topWeight: Math.max(...e.sets.map((s: any) => s.weight || 0))
+                avgRpe: (e.sets || []).reduce((acc: number, s: any) => acc + (s.rpe || 8), 0) / (e.sets?.length || 1),
+                topWeight: Math.max(...(e.sets || []).map((s: any) => s.weight || 0), 0)
             }))
         }));
 
-        const measurements = measurementsSnap.docs.map(d => ({
-            date: d.data().date?.toDate().toISOString().split('T')[0],
-            weight: d.data().weight,
-            bodyFat: d.data().bodyFat
+        // Ordenar medidas en memoria
+        const rawMeasurements = measurementsSnap.docs.map(doc => doc.data());
+        const sortedMeasurements = rawMeasurements.sort((a, b) => {
+            const dateA = a.date?.toDate ? a.date.toDate().getTime() : 0;
+            const dateB = b.date?.toDate ? b.date.toDate().getTime() : 0;
+            return dateB - dateA;
+        }).slice(0, 5);
+
+        const measurements = sortedMeasurements.map(d => ({
+            date: d.date?.toDate().toISOString().split('T')[0],
+            weight: d.weight,
+            bodyFat: d.bodyFat
         }));
+
 
         const prompt = `
             Eres Vivi, una IA entrenadora experta, empática y proactiva. 

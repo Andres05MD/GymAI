@@ -26,19 +26,18 @@ export async function getAthleteContext(userId: string): Promise<string> {
       adminDb.collection("users").doc(userId).get(),
       adminDb.collection("body_measurements")
         .where("userId", "==", userId)
-        .orderBy("date", "desc")
-        .limit(10) // Traemos más para filtrar en memoria si fuera necesario
+        .limit(20) // Traemos suficientes para ordenar en memoria
         .get(),
       adminDb.collection("routines")
         .where("athleteId", "==", userId)
         .get(),
       adminDb.collection("training_logs")
         .where("athleteId", "==", userId)
-        .orderBy("date", "desc")
-        .limit(20)
+        .limit(30)
         .get(),
       getViviIntelligence(userId)
     ]);
+
 
 
     if (!userDoc.exists) return "Sin perfil de atleta disponible.";
@@ -85,14 +84,23 @@ export async function getAthleteContext(userId: string): Promise<string> {
     }
 
     // --- MEDIDAS RECIENTES ---
-    if (!measurementsSnap.empty) {
+    const sortedMeasurements = measurementsSnap.docs
+      .map(doc => doc.data())
+      .sort((a, b) => {
+        const dateA = a.date?.toDate ? a.date.toDate().getTime() : 0;
+        const dateB = b.date?.toDate ? b.date.toDate().getTime() : 0;
+        return dateB - dateA;
+      })
+      .slice(0, 3);
+
+    if (sortedMeasurements.length > 0) {
       parts.push("\n--- ÚLTIMAS MEDIDAS CORPORALES ---");
-      measurementsSnap.docs.forEach((doc, i) => {
-        const m = doc.data();
+      sortedMeasurements.forEach((m, i) => {
         const date = m.date?.toDate ? m.date.toDate().toLocaleDateString("es-ES") : "Fecha desconocida";
         parts.push(`Registro ${i + 1} (${date}): Peso ${m.weight}kg, Grasa ${m.bodyFat || "?"}%, Cintura ${m.waist || "?"}cm`);
       });
     }
+
 
     // --- RUTINA ACTIVA ---
     const activeRoutine = routinesSnap.docs.find(doc => doc.data().active === true);
@@ -111,6 +119,11 @@ export async function getAthleteContext(userId: string): Promise<string> {
     const completedLogs = logsSnap.docs
       .map(doc => doc.data())
       .filter(log => log.status === "completed")
+      .sort((a, b) => {
+        const dateA = a.date?.toDate ? a.date.toDate().getTime() : 0;
+        const dateB = b.date?.toDate ? b.date.toDate().getTime() : 0;
+        return dateB - dateA;
+      })
       .slice(0, 5);
 
     if (completedLogs.length > 0) {
@@ -120,6 +133,7 @@ export async function getAthleteContext(userId: string): Promise<string> {
         parts.push(`- ${date}: ${log.routineName || "Entrenamiento"} (${log.durationMinutes || "?"} min)`);
       });
     }
+
 
 
     return parts.join("\n");
