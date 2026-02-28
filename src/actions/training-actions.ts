@@ -509,6 +509,8 @@ export async function getProgressionSuggestion(exerciseId: string): Promise<{ su
     }
 }
 
+
+
 // --- REGISTRO RETROACTIVO ---
 
 // Schema de validación para entrenamiento retroactivo

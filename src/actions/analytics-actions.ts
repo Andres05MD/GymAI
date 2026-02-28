@@ -379,12 +379,19 @@ export async function analyzeAthleteProgress(userId: string) {
             medicalConditions: userData?.medicalConditions || []
         };
 
-        // 2. Obtener últimos 10 entrenamientos
-        const logsSnapshot = await adminDb.collection("training_logs")
-            .where("athleteId", "==", userId)
-            .orderBy("date", "desc")
-            .limit(10)
-            .get();
+        // 2. Obtener últimos 10 entrenamientos y últimas 5 medidas
+        const [logsSnapshot, measurementsSnapshot] = await Promise.all([
+            adminDb.collection("training_logs")
+                .where("athleteId", "==", userId)
+                .orderBy("date", "desc")
+                .limit(10)
+                .get(),
+            adminDb.collection("body_measurements")
+                .where("userId", "==", userId)
+                .orderBy("date", "desc")
+                .limit(5)
+                .get()
+        ]);
 
         if (logsSnapshot.empty) {
             return {
@@ -407,6 +414,22 @@ export async function analyzeAthleteProgress(userId: string) {
             };
         });
 
+        const measurementHistory = measurementsSnapshot.docs.map(doc => {
+            const d = doc.data();
+            return {
+                date: d.date.toDate().toISOString().split('T')[0],
+                weight: d.weight,
+                bodyFat: d.bodyFat,
+                measurements: {
+                    chest: d.chest,
+                    waist: d.waist,
+                    hips: d.hips,
+                    biceps: d.bicepsRight || d.bicepsLeft,
+                    quads: d.quadsRight || d.quadsLeft
+                }
+            };
+        });
+
         const prompt = `
             Actúa como un Entrenador Experto y Fisioterapeuta. Analiza el progreso y salud de este atleta.
             
@@ -418,17 +441,21 @@ export async function analyzeAthleteProgress(userId: string) {
             HISTORIAL DE ENTRENAMIENTO (Últimos 10):
             ${JSON.stringify(workoutHistory)}
 
+            HISTORIAL DE MEDIDAS CORPORALES (Últimas 5):
+            ${JSON.stringify(measurementHistory)}
+
             TAREAS:
             1. ESTANCAMIENTO: Detecta ejercicios donde el topSet no ha subido en 3 sesiones.
-            2. RECOMENDACIONES: Sugiere sobrecarga progresiva O ajustes de seguridad.
+            2. CORRECCIÓN FÍSICA: Correlaciona si el volumen de entrenamiento coincide con los cambios en las medidas (ej: si busca hipertrofia y el peso/medidas no suben pero el volumen sí).
+            3. RECOMENDACIONES: Sugiere sobrecarga progresiva, ajustes de volumen o nutrición basándote en los nexos encontrados.
             
             REGLA CRÍTICA DE SEGURIDAD: 
-            Si el atleta tiene una lesión (ej: "Espalda Baja"), NO sugieras aumentar peso en ejercicios que la comprometan (ej: Peso Muerto, Sentadilla Pesada). En su lugar, sugiere precaución o variantes más seguras.
+            Si el atleta tiene una lesión, NO sugieras aumentar peso en ejercicios que la comprometan.
 
             Responde ÚNICAMENTE con este JSON en ESPAÑOL:
             {
                 "alerts": [
-                    { "type": "stagnation" | "health_warning", "message": "...", "severity": "low" | "medium" | "high" }
+                    { "type": "stagnation" | "health_warning" | "body_composition", "message": "...", "severity": "low" | "medium" | "high" }
                 ],
                 "suggestions": [
                     "Sugerencia clara y accionable..."

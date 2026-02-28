@@ -362,3 +362,72 @@ export async function generateRoutineDescription(schedule: any) {
         return { success: false, error: "Error al generar descripción" };
     }
 }
+
+export async function getAthleteGoalForecasting(userId: string) {
+    const session = await auth();
+    if (!session?.user?.id) return { success: false, error: "No autorizado" };
+
+    try {
+        const groq = getGroqClient();
+        const athleteCtx = await getAthleteContext(userId);
+
+        // Obtener historial reciente para la proyección
+        const [logsSnapshot, measurementsSnapshot] = await Promise.all([
+            adminDb.collection("training_logs")
+                .where("athleteId", "==", userId)
+                .orderBy("date", "desc")
+                .limit(15)
+                .get(),
+            adminDb.collection("body_measurements")
+                .where("userId", "==", userId)
+                .orderBy("date", "desc")
+                .limit(10)
+                .get()
+        ]);
+
+        const history = {
+            workouts: logsSnapshot.docs.map(d => ({ date: d.data().date.toDate(), exercises: d.data().exercises.length })),
+            measurements: measurementsSnapshot.docs.map(d => ({ date: d.data().date.toDate(), weight: d.data().weight, bodyFat: d.data().bodyFat }))
+        };
+
+        const prompt = `
+            Actúa como un analista de datos deportivo de alto rendimiento. Basado en el siguiente historial y contexto, realiza una proyección de los objetivos del atleta.
+
+            CONTEXTO DEL ATLETA:
+            ${athleteCtx}
+
+            HISTORIAL RECIENTE:
+            ${JSON.stringify(history)}
+
+            TAREAS:
+            1. Analiza el ritmo de cambio (pendiente) en el peso corporal y la fuerza/volumen.
+            2. Proyecta cuánto tiempo le tomará alcanzar su objetivo principal (o el próximo hito lógico).
+            3. Identifica si el ritmo actual es Sostenible, Lento o Demasiado Agresivo.
+
+            Respuesta JSON en ESPAÑOL:
+            {
+                "projection": "Breve resumen de la proyección (ej: Alcanzarás los 80kg en aproximadamente 4 semanas)",
+                "estimatedDate": "2024-XX-XX",
+                "confidence": 0.85, // 0-1
+                "analysis": "Explicación técnica del porqué de esta fecha basada en los datos.",
+                "status": "sustainable" | "slow" | "aggressive"
+            }
+        `;
+
+        const completion = await groq.chat.completions.create({
+            messages: [{ role: "user", content: prompt }],
+            model: DEFAULT_AI_MODEL,
+            temperature: 0.3,
+            response_format: { type: "json_object" },
+        });
+
+        const content = completion.choices[0]?.message?.content;
+        if (!content) return { success: false, error: "Error de proyección" };
+
+        return { success: true, forecasting: JSON.parse(content) };
+
+    } catch (error) {
+        console.error("Forecasting Error:", error);
+        return { success: false, error: "No se pudo generar la proyección en este momento." };
+    }
+}

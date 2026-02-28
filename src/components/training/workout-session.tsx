@@ -6,9 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Check, Clock, Trophy, Info, Loader2, Play, Dumbbell, ChevronLeft, ChevronRight, Save, Activity, Sparkles, Plus, Trash2, RefreshCw } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { logWorkoutSession, getLastSessionExerciseData, WorkoutSessionData } from "@/actions/training-actions";
+import { cn, calculateRealTimeAdjustment } from "@/lib/utils";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { cn } from "@/lib/utils";
 import { AIAssistantDialog } from "@/components/training/ai-assistant-dialog";
 import { getExerciseNames, getExercises } from "@/actions/exercise-actions";
 import { ProgressionTip } from "@/components/training/progression-tip";
@@ -339,8 +339,38 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
     };
 
     const toggleSetComplete = (exerciseIndex: number, setIndex: number) => {
-        const current = sessionLog[exerciseIndex].sets[setIndex].completed;
-        updateSet(exerciseIndex, setIndex, "completed", !current);
+        const currentLogEx = sessionLog[exerciseIndex];
+        const currentSet = currentLogEx.sets[setIndex];
+        const isTurningComplete = !currentSet.completed;
+
+        updateSet(exerciseIndex, setIndex, "completed", isTurningComplete);
+
+        // IA Proactiva: Feedback en tiempo real
+        if (isTurningComplete && currentSet.weight && currentSet.rpe) {
+            const weightNum = Number(currentSet.weight);
+            const rpeNum = Number(currentSet.rpe);
+
+            if (!isNaN(weightNum) && !isNaN(rpeNum)) {
+                const targetRpe = mutableExercises[exerciseIndex].sets[setIndex].rpeTarget;
+                const suggestion = calculateRealTimeAdjustment(weightNum, rpeNum, targetRpe);
+
+                if (suggestion) {
+                    toast(suggestion.message, {
+                        icon: <Sparkles className="w-4 h-4 text-amber-500" />,
+                        duration: 5000,
+                        action: suggestion.adjustment > 0 ? {
+                            label: `Subir +${suggestion.adjustment}kg`,
+                            onClick: () => {
+                                // Aplicar sugerencia al siguiente set si existe
+                                if (setIndex < currentLogEx.sets.length - 1) {
+                                    updateSet(exerciseIndex, setIndex + 1, "weight", (weightNum + suggestion.adjustment).toString());
+                                }
+                            }
+                        } : undefined
+                    });
+                }
+            }
+        }
     };
 
     const handleFinishClick = () => {
