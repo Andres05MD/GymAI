@@ -81,7 +81,7 @@ export function SessionFeedbackDialog({ open, onOpenChange, onConfirm, isSubmitt
                         <Label className="text-sm font-bold uppercase tracking-wider text-neutral-300">Notas de Sesión (Opcional)</Label>
                         <Textarea
                             placeholder="¿Cómo te sentiste? ¿Alguna molestia?"
-                            className="bg-neutral-950 border-neutral-800 focus:border-neutral-700 min-h-[100px] resize-none rounded-xl"
+                            className="bg-neutral-950 border-neutral-800 focus:border-neutral-700 min-h-[100px] text-base md:text-sm resize-none rounded-xl p-4"
                             value={notes}
                             onChange={(e) => setNotes(e.target.value)}
                         />
@@ -89,10 +89,10 @@ export function SessionFeedbackDialog({ open, onOpenChange, onConfirm, isSubmitt
                 </div>
 
                 <DialogFooter className="flex-col sm:flex-row gap-3">
-                    <Button variant="ghost" onClick={() => onOpenChange(false)} disabled={isSubmitting} className="w-full sm:w-auto hover:bg-white/5 hover:text-white rounded-xl">
+                    <Button variant="ghost" onClick={() => onOpenChange(false)} disabled={isSubmitting} className="w-full sm:w-auto h-14 hover:bg-white/5 hover:text-white rounded-xl text-xs font-black uppercase tracking-widest">
                         Atrás
                     </Button>
-                    <Button onClick={handleConfirm} disabled={isSubmitting} className="w-full sm:w-auto bg-white text-black hover:bg-neutral-200 rounded-xl font-bold">
+                    <Button onClick={handleConfirm} disabled={isSubmitting} className="w-full sm:w-auto h-14 bg-white text-black hover:bg-neutral-200 rounded-xl text-xs font-black uppercase tracking-widest shadow-xl shadow-white/5">
                         {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                         Guardar Entrenamiento
                     </Button>

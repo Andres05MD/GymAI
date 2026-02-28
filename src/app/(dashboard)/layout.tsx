@@ -44,7 +44,7 @@ export default async function DashboardLayout({
                     <Chatbot />
                 </main>
             </div>
-            <MobileNav role={role} />
+            <MobileNav role={role} user={headerUser} />
         </div>
     );
 }

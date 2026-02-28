@@ -113,7 +113,7 @@ function WorkoutLogItem({ log }: { log: TrainingLogData }) {
                         transition={{ duration: 0.4, ease: "circOut" }}
                         className="overflow-hidden"
                     >
-                        <div className="border-t border-white/5 bg-white/2 p-8 md:p-10 space-y-10 relative">
+                        <div className="border-t border-white/5 bg-white/2 p-4 sm:p-8 md:p-10 space-y-6 md:space-y-10 relative">
                             {/* Session Feedback */}
                             {log.sessionFeedback && (
                                 <div className="flex gap-4 bg-red-600/5 group/feedback p-6 rounded-3xl border border-red-600/10 relative overflow-hidden">
@@ -126,18 +126,18 @@ function WorkoutLogItem({ log }: { log: TrainingLogData }) {
                             {/* Exercises List */}
                             <div className="space-y-6">
                                 {log.exercises?.map((ex: TrainingExerciseData, i: number) => (
-                                    <div key={i} className="bg-black/40 backdrop-blur-md rounded-3xl p-6 md:p-8 border border-white/5 hover:border-white/10 transition-colors group/ex">
+                                    <div key={i} className="bg-black/40 backdrop-blur-md rounded-2xl md:rounded-3xl p-4 md:p-8 border border-white/5 hover:border-white/10 transition-colors group/ex">
                                         <div className="flex justify-between items-end mb-8">
                                             <div className="flex items-center gap-5">
                                                 <div className="h-10 w-10 rounded-xl bg-neutral-900 border border-white/5 flex items-center justify-center text-neutral-500 text-xs font-black italic group-hover/ex:text-red-500 transition-colors">
                                                     {String(i + 1).padStart(2, '0')}
                                                 </div>
                                                 <div>
-                                                    <h5 className="font-black text-white text-lg md:text-xl uppercase italic tracking-tight">{ex.exerciseName}</h5>
-                                                    <p className="text-[10px] font-black text-neutral-600 uppercase tracking-widest mt-1">MOD_EXECUTION_SEQUENCE</p>
+                                                    <h5 className="font-black text-white text-base md:text-xl uppercase italic tracking-tight">{ex.exerciseName}</h5>
+                                                    <p className="text-[9px] font-black text-neutral-600 uppercase tracking-widest mt-0.5">MOD_EXECUTION_SEQUENCE</p>
                                                 </div>
                                             </div>
-                                            <span className="text-[10px] font-black text-neutral-600 uppercase tracking-widest">{ex.sets.length} VOL_UNITS</span>
+                                            <span className="text-[9px] font-black text-neutral-600 uppercase tracking-widest leading-none">{ex.sets.length} VOL_UNITS</span>
                                         </div>
 
                                         {/* Sets Matrix */}

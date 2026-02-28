@@ -116,7 +116,7 @@ export function EditHealthDialog({ athlete, trigger }: EditHealthDialogProps) {
                                         key={injury}
                                         onClick={() => handleToggleInjury(injury)}
                                         className={cn(
-                                            "p-2.5 rounded-xl border text-sm font-bold transition-all text-center",
+                                            "py-3.5 px-2 rounded-xl border text-sm font-bold transition-all text-center",
                                             "hover:scale-[1.02] active:scale-[0.98]",
                                             isSelected
                                                 ? "bg-red-600 border-red-500 text-white shadow-lg shadow-red-900/20"
@@ -142,12 +142,12 @@ export function EditHealthDialog({ athlete, trigger }: EditHealthDialogProps) {
                                 onChange={(e) => setNewCondition(e.target.value)}
                                 onKeyDown={(e) => e.key === "Enter" && handleAddCondition()}
                                 placeholder="Ej: Asma, Hipertensión..."
-                                className="bg-neutral-900 border-neutral-800 rounded-xl h-11"
+                                className="bg-neutral-900 border-white/10 rounded-xl h-14 text-sm px-4"
                             />
                             <Button
                                 type="button"
                                 onClick={() => handleAddCondition()}
-                                className="bg-neutral-800 hover:bg-neutral-700 text-white font-bold w-11 h-11 p-0 rounded-xl"
+                                className="bg-neutral-800 hover:bg-neutral-700 text-white font-bold w-14 h-14 p-0 rounded-xl"
                             >
                                 <Plus className="w-5 h-5" />
                             </Button>
@@ -179,14 +179,14 @@ export function EditHealthDialog({ athlete, trigger }: EditHealthDialogProps) {
                     <Button
                         variant="ghost"
                         onClick={() => setIsOpen(false)}
-                        className="flex-1 text-neutral-400 font-bold h-12 rounded-2xl"
+                        className="flex-1 text-neutral-400 font-bold h-14 rounded-2xl uppercase tracking-widest text-[10px]"
                     >
                         Cancelar
                     </Button>
                     <Button
                         onClick={handleSubmit}
                         disabled={isLoading}
-                        className="flex-2 bg-red-600 hover:bg-red-700 text-white font-bold h-12 rounded-2xl shadow-lg shadow-red-900/20"
+                        className="flex-2 bg-red-600 hover:bg-red-700 text-white font-black h-14 rounded-2xl shadow-lg shadow-red-900/20 uppercase tracking-widest text-[10px]"
                     >
                         {isLoading ? "Guardando..." : "Guardar Cambios"}
                     </Button>

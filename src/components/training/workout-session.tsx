@@ -1,22 +1,23 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Check, Clock, Trophy, Info, Loader2, Play, Dumbbell, ChevronLeft, ChevronRight, Save, Activity, Sparkles } from "lucide-react";
+import { Check, Clock, Trophy, Info, Loader2, Play, Dumbbell, ChevronLeft, ChevronRight, Save, Activity, Sparkles, Plus, Trash2, RefreshCw } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { logWorkoutSession, getLastSessionExerciseData, WorkoutSessionData } from "@/actions/training-actions";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { AIAssistantDialog } from "@/components/training/ai-assistant-dialog";
-import { getExerciseNames } from "@/actions/exercise-actions";
+import { getExerciseNames, getExercises } from "@/actions/exercise-actions";
 import { ProgressionTip } from "@/components/training/progression-tip";
 import { useOfflineSync } from "@/hooks/use-offline-sync";
 import { SessionFeedbackDialog } from "@/components/training/session-feedback-dialog";
 import { CancelWorkoutDialog } from "@/components/training/cancel-workout-dialog";
 import { ClientMotionDiv } from "@/components/ui/client-motion";
 import { motion, AnimatePresence } from "framer-motion";
+import { ExerciseSelector } from "@/components/routines/exercise-selector";
 
 // --- INTERFACES ---
 
@@ -67,14 +68,17 @@ interface SessionExercise {
 
 interface WorkoutSessionProps {
     routine: Routine;
+    userRole?: string;
 }
 
-export function WorkoutSession({ routine }: WorkoutSessionProps) {
+export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
     const router = useRouter();
     const [elapsedTime, setElapsedTime] = useState(0);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isStarted, setIsStarted] = useState(false);
     const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0);
+
+    const isAdvanced = userRole === "advanced_athlete";
 
     // Form state structure matching schema
     // We map the active day exercises to a local state for logging
@@ -82,6 +86,16 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
     const [showFeedback, setShowFeedback] = useState(false);
     const [showCancelDialog, setShowCancelDialog] = useState(false);
     const { saveLogLocally } = useOfflineSync();
+
+    // Estado mutable de ejercicios del día (permite al atleta avanzado modificar la rutina)
+    const [mutableExercises, setMutableExercises] = useState<RoutineExercise[]>([]);
+
+    // Estado para el selector de ejercicios (cambiar/agregar)
+    const [showExerciseSelector, setShowExerciseSelector] = useState(false);
+    const [exerciseSelectorMode, setExerciseSelectorMode] = useState<"swap" | "add">("add");
+    const [swapTargetIndex, setSwapTargetIndex] = useState<number>(-1);
+    const [availableExercises, setAvailableExercises] = useState<{ id: string; name: string }[]>([]);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState<number | null>(null);
 
     const activeDay = routine.schedule[0]; // El componente padre (TrainPage) filtra la rutina para enviar solo el día activo
     // Estado para guardar el historial de la última sesión
@@ -105,13 +119,18 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
         if (stored) {
             try {
                 const data = JSON.parse(stored);
-                // Validate if stored data matches current routine structure length roughly
-                if (data.sessionLog && data.sessionLog.length === activeDay.exercises.length) {
+                // Restaurar ejercicios mutables si existen
+                if (data.mutableExercises && data.mutableExercises.length > 0) {
+                    setMutableExercises(data.mutableExercises);
+                } else {
+                    setMutableExercises([...activeDay.exercises]);
+                }
+                // Validate if stored data has sessionLog
+                if (data.sessionLog && data.sessionLog.length > 0) {
                     setSessionLog(data.sessionLog);
                     setElapsedTime(data.elapsedTime || 0);
                     setIsStarted(data.isStarted || false);
                     setCurrentExerciseIndex(data.currentExerciseIndex || 0);
-                    // Optional: Resume timer if started? The other effect covers it.
                     return;
                 }
             } catch (e) {
@@ -121,6 +140,7 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
         }
 
         // Default Initialization
+        setMutableExercises([...activeDay.exercises]);
         setSessionLog(activeDay.exercises.map((ex: RoutineExercise) => ({
             exerciseId: ex.exerciseId || "temp-id",
             exerciseName: ex.exerciseName,
@@ -143,16 +163,17 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
         const storageKey = `gymia_session_${routine.id}_${activeDay.name}`;
         const state = {
             sessionLog,
+            mutableExercises,
             elapsedTime,
             isStarted,
             currentExerciseIndex,
             timestamp: Date.now()
         };
         localStorage.setItem(storageKey, JSON.stringify(state));
-    }, [sessionLog, elapsedTime, isStarted, currentExerciseIndex, routine.id, activeDay]);
+    }, [sessionLog, mutableExercises, elapsedTime, isStarted, currentExerciseIndex, routine.id, activeDay]);
 
     useEffect(() => {
-        const currentEx = activeDay?.exercises[currentExerciseIndex];
+        const currentEx = mutableExercises[currentExerciseIndex];
         const currentLog = sessionLog[currentExerciseIndex];
         if (currentEx?.exerciseId && currentEx.exerciseId !== "temp-id") {
             getLastSessionExerciseData(currentLog?.exerciseIdUsed || currentEx.exerciseId)
@@ -167,13 +188,13 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
         } else {
             setHistorySets([]);
         }
-    }, [currentExerciseIndex, activeDay]);
+    }, [currentExerciseIndex, mutableExercises, sessionLog]);
 
     const [variantNames, setVariantNames] = useState<Record<string, string>>({});
 
     useEffect(() => {
         if (!activeDay) return;
-        const allVariantIds = activeDay.exercises.flatMap(ex => ex.variantIds || []);
+        const allVariantIds = mutableExercises.flatMap(ex => ex.variantIds || []);
         if (allVariantIds.length > 0) {
             getExerciseNames(allVariantIds).then(res => {
                 if (res.success && res.names) {
@@ -181,7 +202,115 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
                 }
             });
         }
-    }, [activeDay]);
+    }, [activeDay, mutableExercises]);
+
+    // Cargar ejercicios disponibles para el selector (solo atletas avanzados)
+    useEffect(() => {
+        if (!isAdvanced) return;
+        getExercises().then(res => {
+            if (res.success && res.exercises) {
+                setAvailableExercises(res.exercises.map((ex: any) => ({ id: ex.id, name: ex.name })));
+            }
+        });
+    }, [isAdvanced]);
+
+    // --- Handlers de edición de rutina (solo advanced_athlete) ---
+
+    const openSwapSelector = useCallback((exerciseIndex: number) => {
+        setExerciseSelectorMode("swap");
+        setSwapTargetIndex(exerciseIndex);
+        setShowExerciseSelector(true);
+    }, []);
+
+    const openAddSelector = useCallback(() => {
+        setExerciseSelectorMode("add");
+        setSwapTargetIndex(-1);
+        setShowExerciseSelector(true);
+    }, []);
+
+    const handleExerciseSelected = useCallback((exercise: { id?: string; name: string }) => {
+        if (exerciseSelectorMode === "swap" && swapTargetIndex >= 0) {
+            // Cambiar ejercicio
+            setMutableExercises(prev => {
+                const updated = [...prev];
+                updated[swapTargetIndex] = {
+                    exerciseId: exercise.id || "custom",
+                    exerciseName: exercise.name,
+                    sets: updated[swapTargetIndex].sets,
+                    notes: "",
+                    variantIds: [],
+                };
+                return updated;
+            });
+            setSessionLog(prev => {
+                const updated = [...prev];
+                updated[swapTargetIndex] = {
+                    exerciseId: exercise.id || "custom",
+                    exerciseName: exercise.name,
+                    sets: updated[swapTargetIndex].sets.map(s => ({
+                        ...s,
+                        weight: "",
+                        reps: "",
+                        rpe: "",
+                        completed: false,
+                    })),
+                    feedback: "",
+                    exerciseIdUsed: exercise.id || "custom",
+                };
+                return updated;
+            });
+            toast.success(`Ejercicio cambiado a: ${exercise.name}`);
+        } else {
+            // Agregar ejercicio
+            const defaultSets: RoutineSet[] = [
+                { reps: 12, type: "working" },
+                { reps: 10, type: "working" },
+                { reps: 8, type: "working" },
+            ];
+            const newExercise: RoutineExercise = {
+                exerciseId: exercise.id || "custom",
+                exerciseName: exercise.name,
+                sets: defaultSets,
+                notes: "",
+                variantIds: [],
+            };
+            setMutableExercises(prev => [...prev, newExercise]);
+            setSessionLog(prev => [
+                ...prev,
+                {
+                    exerciseId: exercise.id || "custom",
+                    exerciseName: exercise.name,
+                    sets: defaultSets.map(s => ({
+                        reps: "",
+                        weight: "",
+                        rpe: "",
+                        completed: false,
+                        targetReps: s.reps,
+                    })),
+                    feedback: "",
+                    exerciseIdUsed: exercise.id || "custom",
+                },
+            ]);
+            toast.success(`Ejercicio añadido: ${exercise.name}`);
+        }
+        setShowExerciseSelector(false);
+    }, [exerciseSelectorMode, swapTargetIndex]);
+
+    const handleRemoveExercise = useCallback((index: number) => {
+        if (mutableExercises.length <= 1) {
+            toast.error("Debes tener al menos un ejercicio.");
+            return;
+        }
+        setMutableExercises(prev => prev.filter((_, i) => i !== index));
+        setSessionLog(prev => prev.filter((_, i) => i !== index));
+        setCurrentExerciseIndex(prev => {
+            if (prev >= mutableExercises.length - 1) return Math.max(0, mutableExercises.length - 2);
+            if (prev > index) return prev - 1;
+            return prev;
+        });
+        setShowDeleteConfirm(null);
+        toast.info("Ejercicio eliminado.");
+    }, [mutableExercises.length]);
 
     const switchExerciseVariant = (exerciseIndex: number, variantId: string, variantName: string) => {
         const newLog = [...sessionLog];
@@ -280,7 +409,7 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
     };
 
     const handleNextExercise = () => {
-        if (currentExerciseIndex < activeDay.exercises.length - 1) {
+        if (currentExerciseIndex < mutableExercises.length - 1) {
             setCurrentExerciseIndex(prev => prev + 1);
             window.scrollTo({ top: 0, behavior: 'smooth' });
         } else {
@@ -296,6 +425,7 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
     };
 
     if (!activeDay) return <div className="p-10 text-center">No hay día activo seleccionado.</div>;
+    if (mutableExercises.length === 0 && sessionLog.length === 0) return <div className="p-10 text-center">Cargando...</div>;
 
     if (!isStarted) {
         return (
@@ -330,11 +460,11 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
                             <Activity className="w-5 h-5 text-red-500" />
                             <span className="text-[10px] font-black uppercase tracking-[0.2em]">Sesión de Entrenamiento</span>
                         </div>
-                        <span className="text-[10px] font-black text-neutral-600 uppercase tracking-widest">{activeDay.exercises.length} Ejercicios</span>
+                        <span className="text-[10px] font-black text-neutral-600 uppercase tracking-widest">{mutableExercises.length} Ejercicios</span>
                     </div>
 
                     <div className="space-y-4 relative z-10">
-                        {activeDay.exercises.map((ex, i) => (
+                        {mutableExercises.map((ex, i) => (
                             <div key={i} className="flex items-center gap-4 group/item">
                                 <div className="h-8 w-8 rounded-xl bg-neutral-950 border border-white/5 flex items-center justify-center text-[10px] font-black text-neutral-600 group-hover/item:text-red-500 group-hover/item:border-red-600/30 transition-all duration-300">
                                     {String(i + 1).padStart(2, '0')}
@@ -368,8 +498,9 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
     }
 
     // Get current exercise data
-    const currentExercise = activeDay.exercises[currentExerciseIndex];
+    const currentExercise = mutableExercises[currentExerciseIndex];
     const currentLogExercise = sessionLog[currentExerciseIndex];
+    if (!currentExercise || !currentLogExercise) return <div className="p-10 text-center">Cargando...</div>;
 
     return (
         <div className="max-w-3xl mx-auto pb-24 space-y-6">
@@ -380,12 +511,23 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
                         <div className="flex items-center gap-3">
                             <div className="px-3 py-1 bg-red-600/10 border border-red-600/20 rounded-lg">
                                 <span className="text-[10px] font-black text-red-500 uppercase tracking-widest italic">
-                                    EJ {currentExerciseIndex + 1}/{activeDay.exercises.length}
+                                    EJ {currentExerciseIndex + 1}/{mutableExercises.length}
                                 </span>
                             </div>
                             <h2 className="text-base font-bold text-white tracking-tight truncate uppercase italic">
                                 {currentLogExercise?.exerciseName}
                             </h2>
+                            {isAdvanced && (
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => openSwapSelector(currentExerciseIndex)}
+                                    className="h-7 w-7 rounded-lg text-neutral-500 hover:text-amber-400 hover:bg-amber-400/10 transition-all shrink-0"
+                                    title="Cambiar ejercicio"
+                                >
+                                    <RefreshCw className="w-3.5 h-3.5" />
+                                </Button>
+                            )}
                         </div>
                     </div>
 
@@ -419,7 +561,7 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
                 <div className="absolute bottom-0 left-0 right-0 h-1 bg-neutral-900 overflow-hidden">
                     <motion.div
                         initial={{ width: 0 }}
-                        animate={{ width: `${((currentExerciseIndex + 1) / activeDay.exercises.length) * 100}%` }}
+                        animate={{ width: `${((currentExerciseIndex + 1) / mutableExercises.length) * 100}%` }}
                         transition={{ duration: 0.5, ease: "circOut" }}
                         className="h-full bg-linear-to-r from-red-600 to-red-400 shadow-[0_0_15px_rgba(220,38,38,0.5)]"
                     />
@@ -443,9 +585,54 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
                         <div className="bg-white/2 border-b border-white/5 p-6 md:p-8 space-y-4">
                             <div className="flex justify-between items-start gap-4">
                                 <div className="space-y-3 flex-1">
-                                    <h3 className="text-2xl md:text-3xl font-black text-white uppercase italic tracking-tighter leading-none">
-                                        {currentLogExercise.exerciseName}
-                                    </h3>
+                                    <div className="flex items-center gap-3">
+                                        <h3 className="text-2xl md:text-3xl font-black text-white uppercase italic tracking-tighter leading-none">
+                                            {currentLogExercise.exerciseName}
+                                        </h3>
+                                        {isAdvanced && (
+                                            <div className="flex items-center gap-1 shrink-0">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    onClick={() => openSwapSelector(currentExerciseIndex)}
+                                                    className="h-8 w-8 rounded-lg text-neutral-600 hover:text-amber-400 hover:bg-amber-400/10 transition-all"
+                                                    title="Cambiar ejercicio"
+                                                >
+                                                    <RefreshCw className="w-4 h-4" />
+                                                </Button>
+                                                {showDeleteConfirm === currentExerciseIndex ? (
+                                                    <div className="flex items-center gap-1 animate-in fade-in duration-200">
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            onClick={() => handleRemoveExercise(currentExerciseIndex)}
+                                                            className="h-7 px-2 text-[10px] font-black text-red-500 hover:bg-red-500/20 rounded-lg uppercase"
+                                                        >
+                                                            Sí
+                                                        </Button>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            onClick={() => setShowDeleteConfirm(null)}
+                                                            className="h-7 px-2 text-[10px] font-black text-neutral-500 hover:text-white rounded-lg uppercase"
+                                                        >
+                                                            No
+                                                        </Button>
+                                                    </div>
+                                                ) : (
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        onClick={() => setShowDeleteConfirm(currentExerciseIndex)}
+                                                        className="h-8 w-8 rounded-lg text-neutral-600 hover:text-red-500 hover:bg-red-500/10 transition-all"
+                                                        title="Eliminar ejercicio"
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </Button>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
 
                                     {currentExercise.variantIds && currentExercise.variantIds.length > 0 && (
                                         <Select
@@ -645,6 +832,20 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
                 </AnimatePresence>
             </div>
 
+            {/* Botón agregar ejercicio (solo advanced_athlete) */}
+            {isAdvanced && (
+                <div className="px-2">
+                    <Button
+                        variant="outline"
+                        onClick={openAddSelector}
+                        className="w-full h-14 border border-dashed border-white/10 bg-neutral-900/20 text-neutral-500 hover:text-white hover:bg-white/5 hover:border-white/20 rounded-2xl transition-all group"
+                    >
+                        <Plus className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" />
+                        <span className="text-xs font-black uppercase tracking-[0.2em] italic">Agregar Ejercicio</span>
+                    </Button>
+                </div>
+            )}
+
             {/* Navigation Footer */}
             <div className="fixed bottom-0 left-0 right-0 p-6 bg-black/40 backdrop-blur-3xl border-t border-white/5 flex justify-between items-center gap-6 z-50 animate-in slide-in-from-bottom-full duration-700 shadow-[0_-20px_40px_rgba(0,0,0,0.5)]">
                 <div className="max-w-3xl mx-auto w-full flex justify-between items-center gap-6">
@@ -662,7 +863,7 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
                             <span className="text-2xl font-black text-white italic tracking-tighter">
                                 <span className="text-red-600">{currentExerciseIndex + 1}</span>
                                 <span className="text-neutral-700 mx-1">/</span>
-                                {activeDay.exercises.length}
+                                {mutableExercises.length}
                             </span>
                         </div>
                     </div>
@@ -671,13 +872,13 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
                         onClick={handleNextExercise}
                         className={cn(
                             "h-14 md:h-16 px-6 md:px-8 rounded-2xl font-black text-xs md:text-sm uppercase tracking-[0.2em] transition-all shadow-2xl active:scale-95 flex items-center gap-3",
-                            currentExerciseIndex === activeDay.exercises.length - 1
+                            currentExerciseIndex === mutableExercises.length - 1
                                 ? "bg-red-600 text-white hover:bg-red-500 shadow-red-900/40"
                                 : "bg-white text-black hover:bg-neutral-200 shadow-white/20"
                         )}
                     >
-                        <span>{currentExerciseIndex === activeDay.exercises.length - 1 ? "Finalizar" : "Siguiente"}</span>
-                        {currentExerciseIndex === activeDay.exercises.length - 1 ? (
+                        <span>{currentExerciseIndex === mutableExercises.length - 1 ? "Finalizar" : "Siguiente"}</span>
+                        {currentExerciseIndex === mutableExercises.length - 1 ? (
                             <Trophy className="w-4 h-4 md:w-5 md:h-5" />
                         ) : (
                             <ChevronRight className="w-4 h-4 md:w-5 md:h-5" />
@@ -698,6 +899,17 @@ export function WorkoutSession({ routine }: WorkoutSessionProps) {
                 onOpenChange={setShowCancelDialog}
                 onConfirm={handleCancelConfirm}
             />
+
+            {/* Selector de ejercicios (solo advanced_athlete) */}
+            {isAdvanced && (
+                <ExerciseSelector
+                    open={showExerciseSelector}
+                    onOpenChange={setShowExerciseSelector}
+                    onSelect={handleExerciseSelected}
+                    availableExercises={availableExercises}
+                    title={exerciseSelectorMode === "swap" ? "Cambiar Ejercicio" : "Agregar Ejercicio"}
+                />
+            )}
         </div>
     );
 }

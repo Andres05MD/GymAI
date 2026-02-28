@@ -110,6 +110,7 @@ export function AuthRegisterForm() {
                     <Input
                         id="reg-email"
                         type="email"
+                        inputMode="email"
                         placeholder="tu@email.com"
                         autoComplete="email"
                         {...register("email")}

@@ -64,7 +64,7 @@ export function AthleteDashboardUI({ user, activityData, weeklyCompleted, weekly
             </motion.div>
 
             {/* KPI Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                 <StatCard
                     title="Sesiones"
                     value={weeklyCompleted?.toString() || "0"}
@@ -264,7 +264,7 @@ export function CoachDashboardUI({ user, stats, activities }: CoachDashboardUIPr
             </motion.div>
 
             {/* KPI Row */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                 <StatCard
                     title="Atletas Totales"
                     value={stats?.totalAthletes?.toString() || "0"}

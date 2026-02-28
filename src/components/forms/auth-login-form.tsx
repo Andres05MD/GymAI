@@ -111,10 +111,11 @@ export function AuthLoginForm() {
                     <Input
                         id="login-email"
                         type="email"
+                        inputMode="email"
                         placeholder="tu@email.com"
                         autoComplete="email"
                         {...register("email")}
-                        className="h-[52px] rounded-xl border border-white/[0.06] bg-black/40 px-4 text-[15px] font-medium text-white shadow-inner transition-all placeholder:text-neutral-600 focus-visible:ring-1 focus-visible:ring-red-500/50 focus-visible:border-red-500/30"
+                        className="h-[52px] rounded-xl border border-white/6 bg-black/40 px-4 text-[15px] font-medium text-white shadow-inner transition-all placeholder:text-neutral-600 focus-visible:ring-1 focus-visible:ring-red-500/50 focus-visible:border-red-500/30"
                     />
                     {errors.email && (
                         <p className="ml-1 text-xs font-semibold text-red-500">
@@ -138,7 +139,7 @@ export function AuthLoginForm() {
                             placeholder="••••••••"
                             autoComplete="current-password"
                             {...register("password")}
-                            className="h-[52px] rounded-xl border border-white/[0.06] bg-black/40 pl-4 pr-12 text-[15px] font-medium text-white shadow-inner transition-all placeholder:text-neutral-600 focus-visible:ring-1 focus-visible:ring-red-500/50 focus-visible:border-red-500/30"
+                            className="h-[52px] rounded-xl border border-white/6 bg-black/40 pl-4 pr-12 text-[15px] font-medium text-white shadow-inner transition-all placeholder:text-neutral-600 focus-visible:ring-1 focus-visible:ring-red-500/50 focus-visible:border-red-500/30"
                         />
                         <button
                             type="button"
@@ -183,14 +184,14 @@ export function AuthLoginForm() {
                             </>
                         )}
                     </span>
-                    <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-red-400/20 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+                    <div className="absolute inset-0 rounded-xl bg-linear-to-r from-red-400/20 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
                 </Button>
             </form>
 
             {/* Divider */}
             <div className="relative">
                 <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t border-white/[0.06]" />
+                    <span className="w-full border-t border-white/6" />
                 </div>
                 <div className="relative flex justify-center">
                     <span className="bg-neutral-900/80 px-4 text-[11px] font-bold uppercase tracking-[0.2em] text-neutral-600">
@@ -203,7 +204,7 @@ export function AuthLoginForm() {
             <Button
                 variant="outline"
                 type="button"
-                className="group h-[52px] w-full rounded-xl border border-white/[0.06] bg-white/[0.04] text-sm font-bold uppercase tracking-widest text-white transition-all duration-200 hover:bg-white/[0.08] hover:border-white/10 active:scale-[0.98] cursor-pointer disabled:opacity-60"
+                className="group h-[52px] w-full rounded-xl border border-white/6 bg-white/4 text-sm font-bold uppercase tracking-widest text-white transition-all duration-200 hover:bg-white/8 hover:border-white/10 active:scale-[0.98] cursor-pointer disabled:opacity-60"
                 disabled={isDisabled}
                 onClick={handleGoogleLogin}
             >

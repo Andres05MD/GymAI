@@ -63,9 +63,7 @@ export function LoginPageClient() {
             {/* =========================================
                 LADO IZQUIERDO: CONTENEDOR FROSTED GLASS
             ============================================= */}
-            <div className="relative flex w-full flex-col items-center z-20 
-                            lg:w-[42%] lg:min-w-[500px] lg:max-w-[600px] lg:h-screen lg:shrink-0 lg:overflow-y-auto custom-scrollbar 
-                            lg:bg-black/40 lg:backdrop-blur-[40px] lg:border-r lg:border-white/[0.05] lg:shadow-[20px_0_60px_-15px_rgba(0,0,0,0.8)]">
+            <div className="relative flex w-full flex-col items-center z-20 lg:w-[42%] lg:min-w-[500px] lg:max-w-[600px] lg:h-screen lg:shrink-0 lg:overflow-y-auto custom-scrollbar lg:bg-black/40 lg:backdrop-blur-2xl lg:border-r lg:border-white/5 lg:shadow-[20px_0_60px_-15px_rgba(0,0,0,0.8)]">
 
                 {/* Dot pattern sutil solo en el panel izquierdo en desktop */}
                 <div
@@ -76,7 +74,7 @@ export function LoginPageClient() {
                     }}
                 />
 
-                <div className="flex w-full flex-col items-center justify-center min-h-[100dvh] px-5 py-12 md:px-8 lg:px-12 lg:py-16 relative z-10 lg:min-h-full">
+                <div className="flex w-full flex-col items-center pt-[10dvh] pb-8 px-5 md:px-8 lg:justify-center lg:pt-0 lg:pb-0 lg:px-12 relative z-10 min-h-[100dvh] lg:min-h-full">
 
                     {/* ── Header / Logo ── */}
                     <motion.header
@@ -104,16 +102,16 @@ export function LoginPageClient() {
                                 className="text-center space-y-3"
                             >
                                 <div className="flex items-center justify-center gap-3">
-                                    <span className="h-px w-8 bg-gradient-to-r from-transparent to-red-500/80" />
+                                    <span className="h-px w-8 bg-linear-to-r from-transparent to-red-500/80" />
                                     <span className="text-[10px] font-black uppercase tracking-[0.4em] text-red-500">
                                         {isLogin ? "Acceso Seguro" : "Nuevo Operador"}
                                     </span>
-                                    <span className="h-px w-8 bg-gradient-to-l from-transparent to-red-500/80" />
+                                    <span className="h-px w-8 bg-linear-to-l from-transparent to-red-500/80" />
                                 </div>
 
                                 <h1 className="text-4xl lg:text-5xl font-black uppercase italic tracking-tighter leading-none text-white">
                                     {isLogin ? "Iniciar " : "Crear "}
-                                    <span className="text-transparent bg-clip-text bg-gradient-to-br from-neutral-400 to-neutral-700">
+                                    <span className="text-transparent bg-clip-text bg-linear-to-br from-neutral-400 to-neutral-700">
                                         {isLogin ? "Sesión" : "Cuenta"}
                                     </span>
                                 </h1>
@@ -131,8 +129,8 @@ export function LoginPageClient() {
                                 exit={{ opacity: 0, x: -20, filter: "blur(6px)" }}
                                 transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
                             >
-                                {/* Form Container (Transparente en Desktop, Glass en Móvil) */}
-                                <div className="rounded-[2.5rem] border border-white/[0.04] bg-neutral-900/40 backdrop-blur-xl p-7 shadow-2xl md:p-9 lg:bg-transparent lg:border-transparent lg:shadow-none lg:backdrop-blur-none lg:p-0">
+                                {/* Form Container (Transparente en Desktop, Glass más opaco en Móvil) */}
+                                <div className="rounded-[2.5rem] border border-white/6 bg-black/60 backdrop-blur-2xl p-6 shadow-2xl md:p-9 lg:bg-transparent lg:border-transparent lg:shadow-none lg:backdrop-blur-none lg:p-0">
                                     {isLogin ? <AuthLoginForm /> : <AuthRegisterForm />}
                                 </div>
 
@@ -143,9 +141,9 @@ export function LoginPageClient() {
                                     </p>
                                     <button
                                         onClick={() => setIsLogin(!isLogin)}
-                                        className="group relative h-[52px] w-full rounded-2xl border border-white/[0.08] bg-white/[0.02] text-xs font-bold uppercase italic tracking-[0.15em] text-white transition-all duration-300 hover:border-red-500/30 hover:bg-white/[0.05] active:scale-[0.98] cursor-pointer overflow-hidden"
+                                        className="group relative h-[52px] w-full rounded-2xl border border-white/8 bg-white/2 text-xs font-bold uppercase italic tracking-[0.15em] text-white transition-all duration-300 hover:border-red-500/30 hover:bg-white/5 active:scale-[0.98] cursor-pointer overflow-hidden"
                                     >
-                                        <div className="absolute inset-0 bg-gradient-to-r from-red-600/0 via-red-600/10 to-red-600/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+                                        <div className="absolute inset-0 bg-linear-to-r from-red-600/0 via-red-600/10 to-red-600/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
                                         <span className="relative z-10">
                                             {isLogin ? "Solicitar Acceso (Registro)" : "Volver al Portal"}
                                         </span>
@@ -169,8 +167,8 @@ export function LoginPageClient() {
                         alt="Background Texture"
                         className="w-full h-full object-cover"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80" />
-                    <div className="absolute inset-0 bg-gradient-to-l from-black/60 via-transparent to-transparent" />
+                    <div className="absolute inset-0 bg-linear-to-t from-black via-transparent to-transparent opacity-80" />
+                    <div className="absolute inset-0 bg-linear-to-l from-black/60 via-transparent to-transparent" />
                 </div>
 
                 {/* ── Marcas Holográficas ── */}
@@ -193,21 +191,21 @@ export function LoginPageClient() {
                     transition={{ duration: 1.2, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
                     className="relative z-10 w-full max-w-3xl text-right mt-auto"
                 >
-                    <h2 className="text-[7rem] 2xl:text-[9rem] font-black uppercase italic tracking-tighter leading-[0.85] text-transparent bg-clip-text bg-gradient-to-b from-white to-white/60 relative">
+                    <h2 className="text-[7rem] 2xl:text-[9rem] font-black uppercase italic tracking-tighter leading-[0.85] text-transparent bg-clip-text bg-linear-to-b from-white to-white/60 relative">
                         {/* Texto trasero (Glow) */}
                         <span className="absolute inset-0 text-red-500/20 blur-2xl pointer-events-none" aria-hidden="true">
                             FORJA <br /> TU LEYENDA
                         </span>
                         FORJA <br />
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-red-600 to-red-800">
+                        <span className="text-transparent bg-clip-text bg-linear-to-r from-red-500 via-red-600 to-red-800">
                             TU LEYENDA
                         </span>
                     </h2>
 
                     {/* Tarjeta de descripción tipo Glass */}
-                    <div className="mt-10 ml-auto p-6 rounded-2xl border border-white/[0.05] bg-white/[0.02] backdrop-blur-md max-w-lg shadow-2xl relative overflow-hidden group">
-                        <div className="absolute inset-0 bg-gradient-to-tl from-white/[0.04] to-transparent" />
-                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-red-500 to-red-900 rounded-l-2xl" />
+                    <div className="mt-10 ml-auto p-6 rounded-2xl border border-white/5 bg-white/2 backdrop-blur-md max-w-lg shadow-2xl relative overflow-hidden group">
+                        <div className="absolute inset-0 bg-linear-to-tl from-white/4 to-transparent" />
+                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-linear-to-b from-red-500 to-red-900 rounded-l-2xl" />
 
                         <p className="relative z-10 text-neutral-400 text-lg 2xl:text-xl font-medium tracking-wide leading-relaxed">
                             <span className="text-white font-bold">GymIA</span> combina inteligencia artificial de vanguardia con tus métricas físicas.

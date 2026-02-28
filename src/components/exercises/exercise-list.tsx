@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Dumbbell, MoreVertical, Edit, Trash, PlayCircle, ExternalLink, X, Activity } from "lucide-react";
+import { Search, Dumbbell, MoreVertical, Edit, Trash, PlayCircle, ExternalLink, X, Activity, Plus } from "lucide-react";
 import { ExerciseFormDialog } from "./exercise-form-dialog";
 import {
     DropdownMenu,
@@ -87,14 +87,14 @@ export function ExerciseList({ exercises }: ExerciseListProps) {
             <motion.div
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="sticky top-4 md:top-6 z-20 bg-black/40 backdrop-blur-2xl border border-white/5 rounded-4xl p-2 shadow-2xl shadow-black/50"
+                className="sticky top-2 md:top-6 z-20 bg-black/40 backdrop-blur-2xl border border-white/5 rounded-3xl md:rounded-4xl p-1.5 md:p-2 shadow-2xl shadow-black/50 mx-1 md:mx-0"
             >
                 <div className="flex flex-col gap-2">
                     <div className="relative flex-1 group">
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-neutral-500 group-focus-within:text-white transition-colors" />
                         <Input
                             placeholder="Buscar por nombre o músculo..."
-                            className="pl-12 h-14 bg-transparent border-transparent rounded-full text-white placeholder:text-neutral-500 focus-visible:ring-0 text-lg font-medium"
+                            className="pl-12 h-12 md:h-14 bg-transparent border-transparent rounded-full text-white placeholder:text-neutral-500 focus-visible:ring-0 text-base md:text-lg font-medium"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
@@ -117,7 +117,7 @@ export function ExerciseList({ exercises }: ExerciseListProps) {
                             size="sm"
                             onClick={() => setFilterGroup(null)}
                             className={cn(
-                                "rounded-full h-10 px-5 font-bold transition-all border",
+                                "rounded-full h-8 md:h-10 px-4 md:px-5 font-bold transition-all border text-[10px] md:text-xs",
                                 !filterGroup
                                     ? "bg-white text-black border-white"
                                     : "bg-neutral-800/30 text-neutral-400 border-white/5 hover:bg-neutral-800 hover:text-white"
@@ -144,6 +144,17 @@ export function ExerciseList({ exercises }: ExerciseListProps) {
                     </div>
                 </div>
             </motion.div>
+
+            {/* Floating Action Button for Mobile */}
+            <div className="fixed bottom-24 right-6 z-50 md:hidden">
+                <ExerciseFormDialog
+                    trigger={
+                        <Button className="h-14 w-14 rounded-2xl bg-red-600 text-white shadow-2xl shadow-red-900/40 active:scale-90 transition-transform flex items-center justify-center p-0">
+                            <Plus className="w-8 h-8 font-black" />
+                        </Button>
+                    }
+                />
+            </div>
 
             {/* Grid Grouped by Muscle */}
             <div className="space-y-12 pb-10">
@@ -209,16 +220,16 @@ export function ExerciseList({ exercises }: ExerciseListProps) {
                                                 animate={{ opacity: 1, scale: 1 }}
                                                 transition={{ delay: (gIdx * 0.1) + (eIdx * 0.05) }}
                                                 whileHover={{ y: -5 }}
-                                                className="group flex flex-col bg-neutral-900/40 backdrop-blur-xl border border-white/5 rounded-[2.5rem] p-6 hover:border-red-500/30 transition-all duration-500 relative overflow-hidden h-full shadow-2xl"
+                                                className="group flex flex-col bg-neutral-900/40 backdrop-blur-xl border border-white/5 rounded-3xl md:rounded-[2.5rem] p-4 md:p-6 hover:border-red-500/30 transition-all duration-500 relative overflow-hidden h-full shadow-2xl"
                                             >
                                                 {/* Gradient Blob Overlay */}
                                                 <div className="absolute top-0 right-0 w-32 h-32 bg-red-600/5 rounded-full blur-3xl -mr-12 -mt-12 pointer-events-none group-hover:bg-red-600/15 transition-all duration-700"></div>
 
                                                 {/* Header Actions */}
-                                                <div className="flex justify-between items-start mb-6 relative z-10 transition-transform duration-500 group-hover:-translate-y-1">
-                                                    <div className="h-14 w-14 bg-neutral-950 rounded-2xl flex items-center justify-center text-red-500 group-hover:scale-110 transition-transform duration-500 shadow-2xl border border-white/5 relative overflow-hidden">
+                                                <div className="flex justify-between items-start mb-4 md:mb-6 relative z-10 transition-transform duration-500 group-hover:-translate-y-1">
+                                                    <div className="h-12 w-12 md:h-14 md:w-14 bg-neutral-950 rounded-xl md:rounded-2xl flex items-center justify-center text-red-500 group-hover:scale-110 transition-transform duration-500 shadow-2xl border border-white/5 relative overflow-hidden">
                                                         <div className="absolute inset-0 bg-red-600/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                                        <Dumbbell className="h-7 w-7 relative z-10" />
+                                                        <Dumbbell className="h-6 w-6 md:h-7 md:w-7 relative z-10" />
                                                     </div>
                                                     <DropdownMenu>
                                                         <DropdownMenuTrigger asChild>
@@ -246,7 +257,7 @@ export function ExerciseList({ exercises }: ExerciseListProps) {
                                                 {/* Info Section */}
                                                 <div className="flex-1 space-y-4 relative z-10">
                                                     <div>
-                                                        <h3 className="font-black text-white text-xl leading-tight group-hover:text-red-500 transition-colors tracking-tighter uppercase italic line-clamp-2">
+                                                        <h3 className="font-black text-white text-lg md:text-xl leading-tight group-hover:text-red-500 transition-colors tracking-tighter uppercase italic line-clamp-2">
                                                             {exercise.name}
                                                         </h3>
                                                     </div>
@@ -256,7 +267,7 @@ export function ExerciseList({ exercises }: ExerciseListProps) {
                                                             <span
                                                                 key={g}
                                                                 className={cn(
-                                                                    "text-[9px] uppercase font-black tracking-[0.2em] px-3 py-1.5 rounded-full border shadow-sm backdrop-blur-md transition-colors",
+                                                                    "text-[8px] md:text-[9px] uppercase font-black tracking-[0.2em] px-2.5 md:px-3 py-1 md:py-1.5 rounded-full border shadow-sm backdrop-blur-md transition-colors",
                                                                     getGroupColor(g)
                                                                 )}
                                                             >
@@ -264,7 +275,7 @@ export function ExerciseList({ exercises }: ExerciseListProps) {
                                                             </span>
                                                         ))}
                                                         {(exercise.muscleGroups?.length || 0) > 2 && (
-                                                            <span className="text-[9px] text-neutral-500 py-1.5 px-3 font-black bg-neutral-950/50 rounded-full border border-white/5 uppercase tracking-widest">
+                                                            <span className="text-[8px] md:text-[9px] text-neutral-500 py-1 md:py-1.5 px-2.5 md:px-3 font-black bg-neutral-950/50 rounded-full border border-white/5 uppercase tracking-widest">
                                                                 +{exercise.muscleGroups.length - 2}
                                                             </span>
                                                         )}
@@ -281,23 +292,23 @@ export function ExerciseList({ exercises }: ExerciseListProps) {
                                                 </div>
 
                                                 {/* Footer Action */}
-                                                <div className="relative z-10 w-full mt-8">
+                                                <div className="relative z-10 w-full mt-6 md:mt-8">
                                                     {exercise.videoUrl ? (
                                                         <a
                                                             href={exercise.videoUrl}
                                                             target="_blank"
                                                             rel="noopener noreferrer"
-                                                            className="flex items-center justify-between text-[10px] text-white font-black bg-neutral-950 hover:bg-red-600 px-5 py-4 rounded-2xl transition-all duration-300 w-full group/btn border border-white/5 hover:border-transparent uppercase tracking-[0.2em] shadow-xl"
+                                                            className="flex items-center justify-between text-[9px] md:text-[10px] text-white font-black bg-neutral-950 hover:bg-red-600 px-4 md:px-5 py-3 md:py-4 rounded-xl md:rounded-2xl transition-all duration-300 w-full group/btn border border-white/5 hover:border-transparent uppercase tracking-[0.2em] shadow-xl"
                                                         >
-                                                            <div className="flex items-center gap-3">
-                                                                <PlayCircle className="h-5 w-5 text-red-500 group-hover/btn:text-white transition-colors" />
+                                                            <div className="flex items-center gap-2 md:gap-3">
+                                                                <PlayCircle className="h-4 w-4 md:h-5 md:w-5 text-red-500 group-hover/btn:text-white transition-colors" />
                                                                 <span>Ver Ejecución</span>
                                                             </div>
-                                                            <ExternalLink className="h-4 w-4 opacity-30 group-hover/btn:opacity-100 transition-all duration-300 group-hover/btn:translate-x-1" />
+                                                            <ExternalLink className="h-3 w-3 md:h-4 md:w-4 opacity-30 group-hover/btn:opacity-100 transition-all duration-300 group-hover/btn:translate-x-1" />
                                                         </a>
                                                     ) : (
-                                                        <div className="flex items-center justify-center gap-3 text-[10px] text-neutral-600 font-black bg-neutral-950/30 px-5 py-4 rounded-2xl w-full border border-white/5 border-dashed cursor-not-allowed uppercase tracking-[0.2em]">
-                                                            <Activity className="h-5 w-5 opacity-20" />
+                                                        <div className="flex items-center justify-center gap-2 md:gap-3 text-[9px] md:text-[10px] text-neutral-600 font-black bg-neutral-950/30 px-4 md:px-5 py-3 md:py-4 rounded-xl md:rounded-2xl w-full border border-white/5 border-dashed cursor-not-allowed uppercase tracking-[0.2em]">
+                                                            <Activity className="h-4 w-4 md:h-5 md:w-5 opacity-20" />
                                                             <span>Sin Media</span>
                                                         </div>
                                                     )}

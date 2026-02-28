@@ -58,7 +58,7 @@ export function ExerciseSelector({ open, onOpenChange, onSelect, availableExerci
                         </CommandEmpty>
 
                         <CommandGroup heading="Biblioteca" className="text-neutral-500">
-                            {availableExercises.map((ex) => (
+                            {[...availableExercises].sort((a, b) => a.name.localeCompare(b.name, 'es')).map((ex) => (
                                 <CommandItem
                                     key={ex.id}
                                     value={ex.name}
@@ -68,7 +68,7 @@ export function ExerciseSelector({ open, onOpenChange, onSelect, availableExerci
                                     }}
                                     className="data-[selected='true']:bg-red-600 data-[selected='true']:text-white text-neutral-300 py-3 px-3 rounded-lg mb-1 cursor-pointer transition-colors"
                                 >
-                                    <span className="font-medium text-base">{ex.name}</span>
+                                    <span className="font-medium text-base uppercase">{ex.name}</span>
                                 </CommandItem>
                             ))}
                         </CommandGroup>

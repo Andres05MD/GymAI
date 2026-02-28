@@ -24,6 +24,7 @@ interface WeeklyRoutineViewProps {
     routineId?: string;
     routineName?: string;
     routineType?: string; // "daily" | "weekly"
+    userRole?: string;
 }
 
 // --- Constantes ---
@@ -64,7 +65,7 @@ function getDateForWeekday(dayIndex: number): string {
 
 // --- Componente Principal ---
 
-export function WeeklyRoutineView({ schedule, routineId, routineName, routineType }: WeeklyRoutineViewProps) {
+export function WeeklyRoutineView({ schedule, routineId, routineName, routineType, userRole }: WeeklyRoutineViewProps) {
     const [selectedDayIndex, setSelectedDayIndex] = useState<number | null>(null);
     const todayIndex = getTodayWeekdayIndex();
 
@@ -95,6 +96,7 @@ export function WeeklyRoutineView({ schedule, routineId, routineName, routineTyp
                 routineName={loggerName}
                 defaultDate={defaultDate}
                 onBack={() => setSelectedDayIndex(null)}
+                userRole={userRole}
             />
         );
     }

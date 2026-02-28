@@ -17,11 +17,14 @@ import {
     Dumbbell,
     Save,
     Zap,
+    RefreshCw,
 } from "lucide-react";
 import { logRetroactiveWorkout, RetroactiveWorkoutData, getWorkoutLogByDate } from "@/actions/training-actions";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { ExerciseSelector } from "@/components/routines/exercise-selector";
+import { getExercises } from "@/actions/exercise-actions";
 
 // --- INTERFACES ---
 
@@ -57,14 +60,25 @@ interface RetroactiveWorkoutLoggerProps {
     routineName?: string;
     defaultDate?: string;
     onBack?: () => void;
+    userRole?: string;
 }
 
-export function RetroactiveWorkoutLogger({ routineDay, routineId, routineName: initialRoutineName, defaultDate, onBack }: RetroactiveWorkoutLoggerProps) {
+export function RetroactiveWorkoutLogger({ routineDay, routineId, routineName: initialRoutineName, defaultDate, onBack, userRole }: RetroactiveWorkoutLoggerProps) {
     const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [existingLogId, setExistingLogId] = useState<string | undefined>();
     const [existingSessionId, setExistingSessionId] = useState<string | undefined>();
     const [isLoadingLog, setIsLoadingLog] = useState(false);
+
+    const isAdvanced = userRole === "advanced_athlete";
+    // Permite editar si no hay routineDay (modo libre) O si es atleta avanzado
+    const canEdit = !routineDay || isAdvanced;
+
+    // Estado para el selector de ejercicios
+    const [showExerciseSelector, setShowExerciseSelector] = useState(false);
+    const [exerciseSelectorMode, setExerciseSelectorMode] = useState<"swap" | "add">("add");
+    const [swapTargetIndex, setSwapTargetIndex] = useState<number>(-1);
+    const [availableExercises, setAvailableExercises] = useState<{ id: string; name: string }[]>([]);
 
     // Formulario global
     const [routineNameState, setRoutineNameState] = useState(() => {
@@ -180,10 +194,60 @@ export function RetroactiveWorkoutLogger({ routineDay, routineId, routineName: i
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [date, initialRoutineName]);
 
+    // Cargar ejercicios disponibles para el selector (solo atletas avanzados)
+    useEffect(() => {
+        if (!isAdvanced) return;
+        getExercises().then(res => {
+            if (res.success && res.exercises) {
+                setAvailableExercises(res.exercises.map((ex: any) => ({ id: ex.id, name: ex.name })));
+            }
+        });
+    }, [isAdvanced]);
+
     // --- Handlers para ejercicios ---
 
     const addExercise = () => {
         setExercises((prev) => [...prev, createEmptyExercise()]);
+    };
+
+    const openAddSelector = () => {
+        setExerciseSelectorMode("add");
+        setSwapTargetIndex(-1);
+        setShowExerciseSelector(true);
+    };
+
+    const openSwapSelector = (index: number) => {
+        setExerciseSelectorMode("swap");
+        setSwapTargetIndex(index);
+        setShowExerciseSelector(true);
+    };
+
+    const handleExerciseSelected = (exercise: { id?: string; name: string }) => {
+        if (exerciseSelectorMode === "swap" && swapTargetIndex >= 0) {
+            setExercises((prev) => {
+                const copy = [...prev];
+                copy[swapTargetIndex] = {
+                    ...copy[swapTargetIndex],
+                    exerciseName: exercise.name,
+                    exerciseId: exercise.id || "",
+                    sets: copy[swapTargetIndex].sets.map(s => ({ ...s, weight: "", reps: "", rpe: "8" })),
+                };
+                return copy;
+            });
+            toast.success(`Ejercicio cambiado a: ${exercise.name}`);
+        } else {
+            setExercises((prev) => [
+                ...prev,
+                {
+                    exerciseName: exercise.name,
+                    exerciseId: exercise.id || "",
+                    feedback: "",
+                    sets: [{ weight: "", reps: "", rpe: "8" }],
+                },
+            ]);
+            toast.success(`Ejercicio añadido: ${exercise.name}`);
+        }
+        setShowExerciseSelector(false);
     };
 
     const removeExercise = (index: number) => {
@@ -393,11 +457,11 @@ export function RetroactiveWorkoutLogger({ routineDay, routineId, routineName: i
                         <Dumbbell className="w-3.5 h-3.5" />
                         Ejercicios ({exercises.length})
                     </div>
-                    {!routineDay && (
+                    {canEdit && (
                         <Button
                             variant="ghost"
                             size="sm"
-                            onClick={addExercise}
+                            onClick={isAdvanced ? openAddSelector : addExercise}
                             className="text-red-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg text-xs font-bold"
                         >
                             <Plus className="w-3.5 h-3.5 mr-1" />
@@ -424,16 +488,29 @@ export function RetroactiveWorkoutLogger({ routineDay, routineId, routineName: i
                                 rows={1}
                                 style={{ fieldSizing: "content" } as React.CSSProperties}
                             />
-                            {!routineDay && exercises.length > 1 && (
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={() => removeExercise(exIndex)}
-                                    className="h-8 w-8 text-neutral-600 hover:text-red-500 hover:bg-red-500/10 shrink-0"
-                                >
-                                    <Trash2 className="w-4 h-4" />
-                                </Button>
-                            )}
+                            <div className="flex items-center gap-1">
+                                {isAdvanced && (
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        onClick={() => openSwapSelector(exIndex)}
+                                        className="h-8 w-8 text-neutral-600 hover:text-amber-400 hover:bg-amber-400/10 shrink-0"
+                                        title="Cambiar ejercicio"
+                                    >
+                                        <RefreshCw className="w-4 h-4" />
+                                    </Button>
+                                )}
+                                {canEdit && exercises.length > 1 && (
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        onClick={() => removeExercise(exIndex)}
+                                        className="h-8 w-8 text-neutral-600 hover:text-red-500 hover:bg-red-500/10 shrink-0"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                    </Button>
+                                )}
+                            </div>
                         </div>
 
                         {/* Series */}
@@ -501,7 +578,7 @@ export function RetroactiveWorkoutLogger({ routineDay, routineId, routineName: i
                                         </SelectContent>
                                     </Select>
                                     <div className="flex justify-center">
-                                        {!routineDay && exercise.sets.length > 1 ? (
+                                        {canEdit && exercise.sets.length > 1 ? (
                                             <Button
                                                 variant="ghost"
                                                 size="icon"
@@ -518,7 +595,7 @@ export function RetroactiveWorkoutLogger({ routineDay, routineId, routineName: i
                             ))}
 
                             {/* Añadir serie */}
-                            {!routineDay && (
+                            {canEdit && (
                                 <Button
                                     variant="ghost"
                                     size="sm"
@@ -542,10 +619,10 @@ export function RetroactiveWorkoutLogger({ routineDay, routineId, routineName: i
                 ))}
 
                 {/* Botón añadir ejercicio al final */}
-                {!routineDay && (
+                {canEdit && (
                     <Button
                         variant="outline"
-                        onClick={addExercise}
+                        onClick={isAdvanced ? openAddSelector : addExercise}
                         className="w-full h-12 border border-dashed border-neutral-800 bg-neutral-900/30 text-neutral-500 hover:text-white hover:bg-neutral-800 hover:border-neutral-700 rounded-xl transition-all group"
                     >
                         <Plus className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />
@@ -623,6 +700,17 @@ export function RetroactiveWorkoutLogger({ routineDay, routineId, routineName: i
                     </Button>
                 </div>
             </div>
+
+            {/* Selector de ejercicios (solo advanced_athlete) */}
+            {isAdvanced && (
+                <ExerciseSelector
+                    open={showExerciseSelector}
+                    onOpenChange={setShowExerciseSelector}
+                    onSelect={handleExerciseSelected}
+                    availableExercises={availableExercises}
+                    title={exerciseSelectorMode === "swap" ? "Cambiar Ejercicio" : "Agregar Ejercicio"}
+                />
+            )}
         </div>
     );
 }

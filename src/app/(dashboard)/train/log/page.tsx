@@ -35,6 +35,8 @@ export default async function LogWorkoutPage() {
         // Si no hay rutina activa, el formulario estará en blanco
     }
 
+    const userRole = (session.user.role as string) || "athlete";
+
     return (
         <div className="px-4 sm:px-6 pt-4 pb-4">
             {routine && routine.schedule?.length > 0 ? (
@@ -43,9 +45,10 @@ export default async function LogWorkoutPage() {
                     routineId={routine.id}
                     routineName={routine.name}
                     routineType={routine.schedule.length === 1 ? "daily" : "weekly"}
+                    userRole={userRole}
                 />
             ) : (
-                <RetroactiveWorkoutLogger />
+                <RetroactiveWorkoutLogger userRole={userRole} />
             )}
         </div>
     );

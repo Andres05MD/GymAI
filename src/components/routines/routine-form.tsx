@@ -129,7 +129,7 @@ function ExerciseSets({ nestIndex, control, register }: { nestIndex: string; con
             {fields.map((item, k) => (
                 <div key={item.id} className="grid grid-cols-12 gap-2 items-center">
                     <div className="col-span-3">
-                        <select {...register(`${nestIndex}.${k}.type`)} className="w-full text-xs p-1 border rounded bg-background">
+                        <select {...register(`${nestIndex}.${k}.type`)} className="w-full text-sm md:text-xs h-14 md:h-10 px-2 border border-white/10 rounded-xl bg-neutral-900 focus:ring-1 focus:ring-red-500">
                             <option value="warmup">Calentamiento</option>
                             <option value="working">Efectiva</option>
                             <option value="failure">Fallo</option>
@@ -137,7 +137,7 @@ function ExerciseSets({ nestIndex, control, register }: { nestIndex: string; con
                         </select>
                     </div>
                     <div className="col-span-3">
-                        <Input {...register(`${nestIndex}.${k}.reps`)} className="h-7 text-xs" placeholder="10" />
+                        <Input inputMode="numeric" {...register(`${nestIndex}.${k}.reps`)} className="h-14 md:h-10 text-sm md:text-xs text-center rounded-xl bg-neutral-900 border-white/10" placeholder="10" />
                     </div>
                     <div className="col-span-3">
                         <Controller
@@ -148,12 +148,12 @@ function ExerciseSets({ nestIndex, control, register }: { nestIndex: string; con
                                     onValueChange={(val) => field.onChange(Number(val))}
                                     value={field.value?.toString()}
                                 >
-                                    <SelectTrigger className="h-7 text-xs w-full [&>svg]:hidden px-1 justify-center text-center">
+                                    <SelectTrigger className="h-14 md:h-10 text-sm md:text-xs w-full [&>svg]:hidden px-1 justify-center text-center rounded-xl bg-neutral-900 border-white/10">
                                         <SelectValue placeholder="8" />
                                     </SelectTrigger>
-                                    <SelectContent className="bg-neutral-900 border-neutral-800 text-white min-w-[60px]">
+                                    <SelectContent className="bg-neutral-900 border-neutral-800 text-white min-w-[60px] rounded-2xl">
                                         {[10, 9, 8, 7, 6, 5].map((val) => (
-                                            <SelectItem key={val} value={val.toString()} className="justify-center focus:bg-neutral-800 focus:text-white">
+                                            <SelectItem key={val} value={val.toString()} className="justify-center focus:bg-red-600 focus:text-white py-3">
                                                 {val}
                                             </SelectItem>
                                         ))}
@@ -163,11 +163,11 @@ function ExerciseSets({ nestIndex, control, register }: { nestIndex: string; con
                         />
                     </div>
                     <div className="col-span-2">
-                        <Input {...register(`${nestIndex}.${k}.restSeconds`, { valueAsNumber: true })} className="h-7 text-xs" placeholder="60" type="number" />
+                        <Input inputMode="numeric" {...register(`${nestIndex}.${k}.restSeconds`, { valueAsNumber: true })} className="h-14 md:h-10 text-sm md:text-xs text-center rounded-xl bg-neutral-900 border-white/10" placeholder="60" type="number" />
                     </div>
-                    <div className="col-span-1 text-right">
-                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => remove(k)}>
-                            <Trash2 className="h-3 w-3" />
+                    <div className="col-span-1 text-right flex items-center justify-end">
+                        <Button variant="ghost" size="icon" className="h-14 w-10 md:h-10 hover:bg-red-500/20 hover:text-red-500 rounded-xl" onClick={() => remove(k)}>
+                            <Trash2 className="h-4 w-4 md:h-3 md:w-3" />
                         </Button>
                     </div>
                 </div>
@@ -175,11 +175,10 @@ function ExerciseSets({ nestIndex, control, register }: { nestIndex: string; con
             <Button
                 type="button"
                 variant="outline"
-                size="sm"
-                className="w-full h-7 text-xs mt-1"
+                className="w-full h-14 md:h-12 text-sm border-dashed border-white/20 hover:border-white/40 hover:bg-white/5 rounded-xl mt-4 text-neutral-400 font-bold tracking-widest uppercase transition-all"
                 onClick={() => append({ type: "working", reps: "10-12", rpeTarget: 8, restSeconds: 60 })}
             >
-                <Plus className="h-3 w-3 mr-1" /> Añadir Serie
+                <Plus className="h-4 w-4 mr-2" /> Añadir Serie
             </Button>
         </div>
     )
@@ -229,15 +228,15 @@ export function RoutineForm() {
 
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-            <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                    <Label htmlFor="name">Nombre de Rutina</Label>
-                    <Input id="name" {...register("name")} placeholder="Ej: Hipertrofia 4 Días" />
-                    {errors.name && <p className="text-sm text-red-500">{errors.name.message}</p>}
+            <div className="grid gap-6 md:grid-cols-2">
+                <div className="space-y-3">
+                    <Label htmlFor="name" className="text-xs font-black uppercase tracking-widest text-neutral-400 ml-1">Nombre de Rutina</Label>
+                    <Input id="name" {...register("name")} placeholder="Ej: Hipertrofia 4 Días" className="h-14 rounded-2xl bg-neutral-900 border-white/5 text-base" />
+                    {errors.name && <p className="text-[10px] uppercase font-black tracking-widest text-red-500 ml-1">{errors.name.message}</p>}
                 </div>
-                <div className="space-y-2">
-                    <Label htmlFor="description">Descripción</Label>
-                    <Input id="description" {...register("description")} placeholder="Objetivo principal..." />
+                <div className="space-y-3">
+                    <Label htmlFor="description" className="text-xs font-black uppercase tracking-widest text-neutral-400 ml-1">Descripción</Label>
+                    <Input id="description" {...register("description")} placeholder="Objetivo principal..." className="h-14 rounded-2xl bg-neutral-900 border-white/5 text-base" />
                 </div>
                 {/* TODO: Selector de Atleta aquí */}
                 <input type="hidden" {...register("athleteId")} value="temp-id" />
@@ -262,7 +261,7 @@ export function RoutineForm() {
                             // Pero mejor extraigamos replace arriba
                             replaceDay(scheduleWithIds);
                         }} />
-                        <Button type="button" onClick={() => appendDay({ id: crypto.randomUUID(), name: `Día ${dayFields.length + 1}`, exercises: [] })} variant="secondary">
+                        <Button type="button" onClick={() => appendDay({ id: crypto.randomUUID(), name: `Día ${dayFields.length + 1}`, exercises: [] })} variant="secondary" className="h-12 rounded-xl text-xs font-black uppercase tracking-widest">
                             <Plus className="mr-2 h-4 w-4" /> Añadir Día
                         </Button>
                     </div>
@@ -276,7 +275,7 @@ export function RoutineForm() {
                                     <span className="font-semibold">Día {index + 1}</span>
                                     <Input
                                         {...register(`schedule.${index}.name`)}
-                                        className="h-8 w-[200px] bg-background"
+                                        className="h-12 md:h-10 w-[200px] bg-neutral-900 border-white/10 rounded-xl"
                                         onClick={(e) => e.stopPropagation()}
                                     />
                                     <div className="ml-auto mr-4 flex items-center" onClick={(e) => e.stopPropagation()}>
@@ -300,9 +299,9 @@ export function RoutineForm() {
                 </Accordion>
             </div>
 
-            <div className="flex justify-end gap-4">
-                <Button type="button" variant="outline" onClick={() => router.back()}>Cancelar</Button>
-                <Button type="submit" disabled={isSubmitting}>
+            <div className="flex justify-end gap-3 pt-6">
+                <Button type="button" variant="ghost" onClick={() => router.back()} className="h-14 rounded-2xl hover:bg-white/5 font-black uppercase tracking-widest text-xs px-6">Cancelar</Button>
+                <Button type="submit" disabled={isSubmitting} className="h-14 rounded-2xl font-black uppercase tracking-widest text-xs px-8 bg-white text-black hover:bg-neutral-200">
                     {isSubmitting ? "Guardando..." : "Crear Rutina"}
                 </Button>
             </div>

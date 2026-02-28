@@ -132,5 +132,5 @@ export default async function TrainPage() {
         };
     }
 
-    return <WorkoutSession routine={workoutRoutine} />;
+    return <WorkoutSession routine={workoutRoutine} userRole={(session.user.role as string) || "athlete"} />;
 }

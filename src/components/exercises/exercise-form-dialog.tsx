@@ -180,16 +180,16 @@ export function ExerciseFormDialog({ exercise, trigger, open, onOpenChange }: Ex
             <DialogContent className="sm:max-w-[650px] bg-neutral-950 border-neutral-800 text-white p-0 gap-0 rounded-3xl shadow-2xl shadow-black/50 max-h-[95vh] flex flex-col">
 
                 {/* Header Estilizado */}
-                <div className="bg-linear-to-br from-neutral-900 via-neutral-950 to-black p-8 border-b border-white/5 relative overflow-hidden">
+                <div className="bg-linear-to-br from-neutral-900 via-neutral-950 to-black p-6 md:p-8 border-b border-white/5 relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-red-600/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
                     <DialogHeader className="relative z-10">
-                        <DialogTitle className="flex items-center gap-4 text-3xl font-black uppercase tracking-tighter italic text-white">
-                            <div className="h-12 w-12 rounded-2xl bg-red-600/10 flex items-center justify-center border border-red-600/20 shadow-2xl">
-                                <Dumbbell className="h-6 w-6 text-red-600" />
+                        <DialogTitle className="flex items-center gap-3 md:gap-4 text-2xl md:text-3xl font-black uppercase tracking-tighter italic text-white">
+                            <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl bg-red-600/10 flex items-center justify-center border border-red-600/20 shadow-2xl">
+                                <Dumbbell className="h-5 w-5 md:h-6 md:w-6 text-red-600" />
                             </div>
                             {exercise ? "Editar Ejercicio" : "Nuevo Ejercicio"}
                         </DialogTitle>
-                        <DialogDescription className="text-neutral-500 font-bold uppercase tracking-[0.2em] text-[10px] ml-16 mt-1">
+                        <DialogDescription className="text-neutral-500 font-bold uppercase tracking-[0.2em] text-[8px] md:text-[10px] ml-13 md:ml-16 mt-1">
                             Biblioteca Técnica <span className="text-red-500">/ Engine AI</span>
                         </DialogDescription>
                     </DialogHeader>
@@ -204,27 +204,27 @@ export function ExerciseFormDialog({ exercise, trigger, open, onOpenChange }: Ex
                                 <div className="flex gap-3">
                                     <Input
                                         {...register("name")}
-                                        placeholder="Ej: Press de Banca Plano con Barra"
-                                        className="bg-neutral-900/40 backdrop-blur-md border border-white/5 text-white h-16 rounded-2xl px-6 text-lg font-black uppercase italic tracking-tight focus-visible:ring-red-600/30 focus-visible:border-red-600/50 transition-all placeholder:text-neutral-700 placeholder:not-italic flex-1 shadow-2xl"
+                                        placeholder="Ej: Press de Banca"
+                                        className="bg-neutral-900/40 backdrop-blur-md border border-white/5 text-white h-14 md:h-16 rounded-xl md:rounded-2xl px-4 md:px-6 text-base md:text-lg font-black uppercase italic tracking-tight focus-visible:ring-red-600/30 focus-visible:border-red-600/50 transition-all placeholder:text-neutral-700 placeholder:not-italic flex-1 shadow-2xl"
                                     />
                                     <Button
                                         type="button"
                                         onClick={handleSearch}
                                         disabled={isSearching || isSubmitting}
-                                        className="h-16 w-16 rounded-2xl bg-neutral-900 border border-white/5 hover:bg-neutral-800 text-white transition-all shadow-xl group"
+                                        className="h-14 w-14 md:h-16 md:w-16 rounded-xl md:rounded-2xl bg-neutral-900 border border-white/5 hover:bg-neutral-800 text-white transition-all shadow-xl group shrink-0"
                                         title="Buscar detalles con IA"
                                     >
-                                        {isSearching ? <Loader2 className="w-6 h-6 animate-spin" /> : <Search className="w-6 h-6 group-hover:scale-110 transition-transform text-red-500" />}
+                                        {isSearching ? <Loader2 className="w-5 h-5 md:w-6 md:h-6 animate-spin" /> : <Search className="w-5 h-5 md:w-6 md:h-6 group-hover:scale-110 transition-transform text-red-500" />}
                                     </Button>
                                     <Button
                                         type="button"
                                         onClick={handleClear}
                                         disabled={isSearching || isSubmitting}
                                         variant="outline"
-                                        className="h-16 w-16 rounded-2xl border-white/5 bg-neutral-900/20 hover:bg-neutral-800 text-neutral-500 hover:text-white transition-all shadow-xl"
+                                        className="h-14 w-14 md:h-16 md:w-16 rounded-xl md:rounded-2xl border-white/5 bg-neutral-900/20 hover:bg-neutral-800 text-neutral-500 hover:text-white transition-all shadow-xl shrink-0"
                                         title="Limpiar datos de músculos"
                                     >
-                                        <Eraser className="w-6 h-6" />
+                                        <Eraser className="w-5 h-5 md:w-6 md:h-6" />
                                     </Button>
                                 </div>
                                 {errors.name && <p className="text-red-500 text-[10px] font-black uppercase tracking-widest ml-2">{errors.name.message}</p>}
@@ -235,7 +235,7 @@ export function ExerciseFormDialog({ exercise, trigger, open, onOpenChange }: Ex
                                 <Label className="text-[10px] font-black uppercase tracking-[0.3em] text-neutral-500 ml-1 flex items-center gap-2">
                                     <Tag className="w-3 h-3 text-red-500" /> Grupos Musculares Primarios
                                 </Label>
-                                <div className="flex flex-wrap gap-2.5 p-6 bg-black/40 backdrop-blur-md rounded-4xl border border-white/5 shadow-inner">
+                                <div className="flex flex-wrap gap-2 p-4 md:p-6 bg-black/40 backdrop-blur-md rounded-3xl md:rounded-4xl border border-white/5 shadow-inner">
                                     {MUSCLE_GROUPS.map(group => {
                                         const isSelected = selectedGroups?.includes(group);
                                         return (
@@ -243,7 +243,7 @@ export function ExerciseFormDialog({ exercise, trigger, open, onOpenChange }: Ex
                                                 key={group}
                                                 onClick={() => toggleMuscleGroup(group)}
                                                 className={cn(
-                                                    "px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.15em] cursor-pointer transition-all border select-none shadow-sm",
+                                                    "px-3.5 md:px-5 py-2 md:py-2.5 rounded-lg md:rounded-xl text-[9px] md:text-[10px] font-black uppercase tracking-[0.15em] cursor-pointer transition-all border select-none shadow-sm",
                                                     isSelected
                                                         ? "bg-red-600 text-white border-red-500 shadow-xl shadow-red-900/40 -translate-y-0.5"
                                                         : "bg-neutral-900/50 border-white/5 text-neutral-500 hover:bg-neutral-800 hover:text-white"
@@ -306,7 +306,7 @@ export function ExerciseFormDialog({ exercise, trigger, open, onOpenChange }: Ex
                                     <ImagePlay className="w-3 h-3 text-red-500" /> Multimedia & Referencia
                                 </Label>
 
-                                <div className="p-8 bg-black/40 backdrop-blur-md rounded-4xl border border-white/5 shadow-inner space-y-6">
+                                <div className="p-6 md:p-8 bg-black/40 backdrop-blur-md rounded-3xl md:rounded-4xl border border-white/5 shadow-inner space-y-6">
                                     <MediaUpload
                                         value={watch("videoUrl") || ""}
                                         onChange={(url) => setValue("videoUrl", url)}
@@ -320,8 +320,8 @@ export function ExerciseFormDialog({ exercise, trigger, open, onOpenChange }: Ex
                                         </div>
                                         <Input
                                             {...register("videoUrl")}
-                                            placeholder="URL de referencia (YouTube, Vimeo, etc...)"
-                                            className="bg-neutral-950/50 border border-white/5 text-white h-14 pl-12 rounded-2xl focus-visible:ring-red-600/20 focus-visible:border-red-600/30 transition-all font-medium text-xs placeholder:text-neutral-700"
+                                            placeholder="URL de referencia (YouTube...)"
+                                            className="bg-neutral-950/50 border border-white/5 text-white h-12 md:h-14 pl-12 rounded-xl md:rounded-2xl focus-visible:ring-red-600/20 focus-visible:border-red-600/30 transition-all font-medium text-[10px] md:text-xs placeholder:text-neutral-700"
                                         />
                                     </div>
                                 </div>
@@ -329,26 +329,26 @@ export function ExerciseFormDialog({ exercise, trigger, open, onOpenChange }: Ex
                         </div>
                     </div>
 
-                    <DialogFooter className="p-8 border-t border-white/5 gap-4 bg-black/60 backdrop-blur-2xl">
+                    <DialogFooter className="p-6 md:p-8 border-t border-white/5 gap-3 md:gap-4 bg-black/60 backdrop-blur-2xl flex-row">
                         <Button
                             type="button"
                             variant="ghost"
                             onClick={() => setOpen(false)}
-                            className="h-16 rounded-2xl text-neutral-500 hover:text-white hover:bg-white/5 font-black uppercase tracking-[0.2em] text-[10px] px-8 transition-all"
+                            className="h-14 md:h-16 rounded-xl md:rounded-2xl text-neutral-500 hover:text-white hover:bg-white/5 font-black uppercase tracking-[0.2em] text-[9px] md:text-[10px] px-4 md:px-8 transition-all flex-1 md:flex-none"
                         >
                             Cancelar
                         </Button>
                         <Button
                             type="submit"
                             disabled={isSubmitting}
-                            className="h-16 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-black uppercase tracking-[0.2em] text-[10px] px-10 shadow-2xl shadow-red-900/40 hover:shadow-red-600/40 hover:-translate-y-1 transition-all duration-500 flex-1 md:flex-none"
+                            className="h-14 md:h-16 rounded-xl md:rounded-2xl bg-red-600 hover:bg-red-700 text-white font-black uppercase tracking-[0.2em] text-[9px] md:text-[10px] px-6 md:px-10 shadow-2xl shadow-red-900/40 hover:shadow-red-600/40 hover:-translate-y-1 transition-all duration-500 flex-2 md:flex-none"
                         >
                             {isSubmitting ? (
                                 <Loader2 className="w-5 h-5 animate-spin" />
                             ) : (
-                                <span className="flex items-center gap-3">
-                                    {exercise ? "Actualizar Registro" : "Publicar Ejercicio"}
-                                    <ChevronRight className="w-5 h-5" />
+                                <span className="flex items-center gap-2 md:gap-3">
+                                    {exercise ? "Actualizar" : "Publicar"}
+                                    <ChevronRight className="w-4 h-4 md:w-5 md:h-5" />
                                 </span>
                             )}
                         </Button>

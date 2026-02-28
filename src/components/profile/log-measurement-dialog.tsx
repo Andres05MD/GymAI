@@ -108,8 +108,8 @@ export function LogMeasurementDialog({ onLogSuccess, children, initialData, init
                     <div className="bg-neutral-950/30 p-5 rounded-2xl border border-neutral-800/50 space-y-5">
                         <div className="grid grid-cols-2 gap-6">
                             <div className="space-y-2">
-                                <Label className="text-xs font-bold text-neutral-400 uppercase tracking-widest pl-1">Fecha</Label>
-                                <Input type="date" {...form.register("date")} className="bg-neutral-950 border-neutral-800 focus:border-red-500 h-11 text-white placeholder:text-neutral-500" />
+                                <Label className="text-[10px] font-black text-neutral-400 uppercase tracking-widest pl-1">Fecha</Label>
+                                <Input type="date" {...form.register("date")} className="bg-neutral-950 border-white/5 focus:border-red-500/50 h-14 text-sm text-white placeholder:text-neutral-500 rounded-xl" />
                             </div>
                             <div className="space-y-2">
                                 <Label className="text-xs font-bold text-neutral-400 uppercase tracking-widest pl-1">Peso (kg)</Label>
@@ -127,10 +127,10 @@ export function LogMeasurementDialog({ onLogSuccess, children, initialData, init
                                                 }
                                             }
                                         })}
-                                        className="bg-neutral-950 border-neutral-800 focus:border-red-500 h-11 text-white pl-4 placeholder:text-neutral-500"
+                                        className="bg-neutral-950 border-white/5 focus:border-red-500/50 h-14 text-sm text-white pl-5 placeholder:text-neutral-500 rounded-xl"
                                         placeholder="0.0"
                                     />
-                                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-600 text-sm font-medium">kg</span>
+                                    <span className="absolute right-5 top-1/2 -translate-y-1/2 text-neutral-600 text-[10px] font-black uppercase tracking-widest">kg</span>
                                 </div>
                             </div>
                         </div>
@@ -150,7 +150,7 @@ export function LogMeasurementDialog({ onLogSuccess, children, initialData, init
                                     type="text"
                                     inputMode="decimal"
                                     {...form.register("neck", { onChange: (e) => { e.target.value = e.target.value.replace(",", "."); } })}
-                                    className="bg-neutral-950 border-neutral-800 focus:border-red-500 h-11 text-white placeholder:text-neutral-500"
+                                    className="bg-neutral-950 border-white/5 focus:border-red-500/50 h-14 text-sm text-white placeholder:text-neutral-500 rounded-xl text-center"
                                     placeholder="0"
                                 />
                             </div>
@@ -160,7 +160,7 @@ export function LogMeasurementDialog({ onLogSuccess, children, initialData, init
                                     type="text"
                                     inputMode="decimal"
                                     {...form.register("chest", { onChange: (e) => { e.target.value = e.target.value.replace(",", "."); } })}
-                                    className="bg-neutral-950 border-neutral-800 focus:border-red-500 h-11 text-white placeholder:text-neutral-500"
+                                    className="bg-neutral-950 border-white/5 focus:border-red-500/50 h-14 text-sm text-white placeholder:text-neutral-500 rounded-xl text-center"
                                     placeholder="0"
                                 />
                             </div>
@@ -170,7 +170,7 @@ export function LogMeasurementDialog({ onLogSuccess, children, initialData, init
                                     type="text"
                                     inputMode="decimal"
                                     {...form.register("shoulders", { onChange: (e) => { e.target.value = e.target.value.replace(",", "."); } })}
-                                    className="bg-neutral-950 border-neutral-800 focus:border-red-500 h-11 text-white placeholder:text-neutral-500"
+                                    className="bg-neutral-950 border-white/5 focus:border-red-500/50 h-14 text-sm text-white placeholder:text-neutral-500 rounded-xl text-center"
                                     placeholder="0"
                                 />
                             </div>
@@ -180,7 +180,7 @@ export function LogMeasurementDialog({ onLogSuccess, children, initialData, init
                                     type="text"
                                     inputMode="decimal"
                                     {...form.register("waist", { onChange: (e) => { e.target.value = e.target.value.replace(",", "."); } })}
-                                    className="bg-neutral-950 border-neutral-800 focus:border-red-500 h-11 text-white placeholder:text-neutral-500"
+                                    className="bg-neutral-950 border-white/5 focus:border-red-500/50 h-14 text-sm text-white placeholder:text-neutral-500 rounded-xl text-center"
                                     placeholder="0"
                                 />
                             </div>
@@ -190,7 +190,7 @@ export function LogMeasurementDialog({ onLogSuccess, children, initialData, init
                                     type="text"
                                     inputMode="decimal"
                                     {...form.register("hips", { onChange: (e) => { e.target.value = e.target.value.replace(",", "."); } })}
-                                    className="bg-neutral-950 border-neutral-800 focus:border-red-500 h-11 text-white placeholder:text-neutral-500"
+                                    className="bg-neutral-950 border-white/5 focus:border-red-500/50 h-14 text-sm text-white placeholder:text-neutral-500 rounded-xl text-center"
                                     placeholder="0"
                                 />
                             </div>
@@ -200,7 +200,7 @@ export function LogMeasurementDialog({ onLogSuccess, children, initialData, init
                                     type="text"
                                     inputMode="decimal"
                                     {...form.register("glutes", { onChange: (e) => { e.target.value = e.target.value.replace(",", "."); } })}
-                                    className="bg-neutral-950 border-neutral-800 focus:border-red-500 h-11 text-white placeholder:text-neutral-500"
+                                    className="bg-neutral-950 border-white/5 focus:border-red-500/50 h-14 text-sm text-white placeholder:text-neutral-500 rounded-xl text-center"
                                     placeholder="0"
                                 />
                             </div>
@@ -230,14 +230,14 @@ export function LogMeasurementDialog({ onLogSuccess, children, initialData, init
                                         type="text"
                                         inputMode="decimal"
                                         {...form.register("bicepsLeft", { onChange: (e) => { e.target.value = e.target.value.replace(",", "."); } })}
-                                        className="col-span-4 bg-neutral-950 border-neutral-800 focus:border-red-500 h-10 text-center text-white placeholder:text-neutral-500"
+                                        className="col-span-4 bg-neutral-950 border-white/5 focus:border-red-500/50 h-14 rounded-xl text-sm text-center text-white placeholder:text-neutral-700 font-bold"
                                         placeholder="-"
                                     />
                                     <Input
                                         type="text"
                                         inputMode="decimal"
                                         {...form.register("bicepsRight", { onChange: (e) => { e.target.value = e.target.value.replace(",", "."); } })}
-                                        className="col-span-4 bg-neutral-950 border-neutral-800 focus:border-red-500 h-10 text-center text-white placeholder:text-neutral-500"
+                                        className="col-span-4 bg-neutral-950 border-white/5 focus:border-red-500/50 h-14 rounded-xl text-sm text-center text-white placeholder:text-neutral-700 font-bold"
                                         placeholder="-"
                                     />
                                 </div>
@@ -249,14 +249,14 @@ export function LogMeasurementDialog({ onLogSuccess, children, initialData, init
                                         type="text"
                                         inputMode="decimal"
                                         {...form.register("forearmsLeft", { onChange: (e) => { e.target.value = e.target.value.replace(",", "."); } })}
-                                        className="col-span-4 bg-neutral-950 border-neutral-800 focus:border-red-500 h-10 text-center text-white placeholder:text-neutral-500"
+                                        className="col-span-4 bg-neutral-950 border-white/5 focus:border-red-500/50 h-14 rounded-xl text-sm text-center text-white placeholder:text-neutral-700 font-bold"
                                         placeholder="-"
                                     />
                                     <Input
                                         type="text"
                                         inputMode="decimal"
                                         {...form.register("forearmsRight", { onChange: (e) => { e.target.value = e.target.value.replace(",", "."); } })}
-                                        className="col-span-4 bg-neutral-950 border-neutral-800 focus:border-red-500 h-10 text-center text-white placeholder:text-neutral-500"
+                                        className="col-span-4 bg-neutral-950 border-white/5 focus:border-red-500/50 h-14 rounded-xl text-sm text-center text-white placeholder:text-neutral-700 font-bold"
                                         placeholder="-"
                                     />
                                 </div>
@@ -268,14 +268,14 @@ export function LogMeasurementDialog({ onLogSuccess, children, initialData, init
                                         type="text"
                                         inputMode="decimal"
                                         {...form.register("quadsLeft", { onChange: (e) => { e.target.value = e.target.value.replace(",", "."); } })}
-                                        className="col-span-4 bg-neutral-950 border-neutral-800 focus:border-red-500 h-10 text-center text-white placeholder:text-neutral-500"
+                                        className="col-span-4 bg-neutral-950 border-white/5 focus:border-red-500/50 h-14 rounded-xl text-sm text-center text-white placeholder:text-neutral-700 font-bold"
                                         placeholder="-"
                                     />
                                     <Input
                                         type="text"
                                         inputMode="decimal"
                                         {...form.register("quadsRight", { onChange: (e) => { e.target.value = e.target.value.replace(",", "."); } })}
-                                        className="col-span-4 bg-neutral-950 border-neutral-800 focus:border-red-500 h-10 text-center text-white placeholder:text-neutral-500"
+                                        className="col-span-4 bg-neutral-950 border-white/5 focus:border-red-500/50 h-14 rounded-xl text-sm text-center text-white placeholder:text-neutral-700 font-bold"
                                         placeholder="-"
                                     />
                                 </div>
@@ -287,14 +287,14 @@ export function LogMeasurementDialog({ onLogSuccess, children, initialData, init
                                         type="text"
                                         inputMode="decimal"
                                         {...form.register("calvesLeft", { onChange: (e) => { e.target.value = e.target.value.replace(",", "."); } })}
-                                        className="col-span-4 bg-neutral-950 border-neutral-800 focus:border-red-500 h-10 text-center text-white placeholder:text-neutral-500"
+                                        className="col-span-4 bg-neutral-950 border-white/5 focus:border-red-500/50 h-14 rounded-xl text-sm text-center text-white placeholder:text-neutral-700 font-bold"
                                         placeholder="-"
                                     />
                                     <Input
                                         type="text"
                                         inputMode="decimal"
                                         {...form.register("calvesRight", { onChange: (e) => { e.target.value = e.target.value.replace(",", "."); } })}
-                                        className="col-span-4 bg-neutral-950 border-neutral-800 focus:border-red-500 h-10 text-center text-white placeholder:text-neutral-500"
+                                        className="col-span-4 bg-neutral-950 border-white/5 focus:border-red-500/50 h-14 rounded-xl text-sm text-center text-white placeholder:text-neutral-700 font-bold"
                                         placeholder="-"
                                     />
                                 </div>
@@ -304,11 +304,11 @@ export function LogMeasurementDialog({ onLogSuccess, children, initialData, init
 
                     <div className="space-y-2 pt-4 border-t border-neutral-800">
                         <Label className="text-xs font-bold text-neutral-500 uppercase">Notas Adicionales</Label>
-                        <Input {...form.register("notes")} className="bg-neutral-950 border-neutral-800 focus:border-red-500 h-11 text-white placeholder:text-neutral-500" placeholder="Ej: En ayunas, post-entreno..." />
+                        <Input {...form.register("notes")} className="bg-neutral-950 border-white/5 focus:border-red-500/50 h-14 rounded-xl text-sm text-white placeholder:text-neutral-700" placeholder="Ej: En ayunas, post-entreno..." />
                     </div>
 
                     <div className="flex justify-center pt-4 pb-2">
-                        <Button type="submit" disabled={isSubmitting} className="bg-white text-black hover:bg-neutral-300 w-full md:w-auto font-black rounded-full px-12 h-12 text-sm uppercase tracking-wide shadow-lg shadow-white/10 hover:scale-105 transition-all">
+                        <Button type="submit" disabled={isSubmitting} className="bg-white text-black hover:bg-neutral-300 w-full md:w-auto font-black rounded-2xl px-12 h-14 text-[10px] uppercase tracking-[0.2em] shadow-lg shadow-white/10 hover:scale-105 transition-all">
                             {isSubmitting ? <LoaderPremium size="sm" /> : "Guardar Registro"}
                         </Button>
                     </div>

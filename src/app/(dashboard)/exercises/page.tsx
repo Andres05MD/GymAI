@@ -29,11 +29,11 @@ export default async function ExercisesPage() {
             <ClientMotionDiv
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="flex flex-col gap-6 md:flex-row md:justify-between md:items-end mb-4 md:mb-6"
+                className="flex flex-col gap-4 md:gap-6 md:flex-row md:justify-between md:items-end mb-4 md:mb-6"
             >
-                <div className="space-y-1">
-                    <h2 className="text-4xl md:text-5xl font-black text-white tracking-tighter uppercase italic leading-none">Biblioteca</h2>
-                    <p className="text-neutral-500 font-bold uppercase tracking-[0.3em] text-[10px] ml-1">
+                <div className="space-y-0.5 md:space-y-1">
+                    <h2 className="text-3xl md:text-5xl font-black text-white tracking-tighter uppercase italic leading-none">Biblioteca</h2>
+                    <p className="text-neutral-500 font-bold uppercase tracking-[0.3em] text-[8px] md:text-[10px] ml-1">
                         Gestión Técnica: <span className="text-red-500">Ejercicios</span>
                     </p>
                 </div>

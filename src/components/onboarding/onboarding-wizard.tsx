@@ -236,15 +236,16 @@ export function OnboardingWizard({ authProvider }: OnboardingWizardProps) {
                                                 <Label className="uppercase text-xs font-bold text-neutral-500">Edad</Label>
                                                 <Input
                                                     type="number"
+                                                    inputMode="numeric"
                                                     {...register("age")}
-                                                    className="bg-black/50 border-neutral-800 h-12 rounded-xl text-lg text-white focus:ring-red-500/50"
+                                                    className="bg-black/50 border-neutral-800 h-[52px] rounded-xl text-lg text-white focus:ring-red-500/50"
                                                 />
                                                 {errors.age && <p className="text-red-500 text-xs">{errors.age.message}</p>}
                                             </div>
                                             <div className="space-y-2">
                                                 <Label className="uppercase text-xs font-bold text-neutral-500">Género</Label>
                                                 <Select onValueChange={(v: string) => setValue("gender", v as any)} defaultValue={formData.gender}>
-                                                    <SelectTrigger className="bg-black/50 border-neutral-800 h-12 rounded-xl text-white">
+                                                    <SelectTrigger className="bg-black/50 border-neutral-800 h-[52px] rounded-xl text-white">
                                                         <SelectValue placeholder="Selecciona" />
                                                     </SelectTrigger>
                                                     <SelectContent className="bg-neutral-900 border-neutral-800 text-white">
@@ -258,16 +259,18 @@ export function OnboardingWizard({ authProvider }: OnboardingWizardProps) {
                                                 <Label className="uppercase text-xs font-bold text-neutral-500">Peso (kg)</Label>
                                                 <Input
                                                     type="number"
+                                                    inputMode="decimal"
                                                     {...register("weight")}
-                                                    className="bg-black/50 border-neutral-800 h-12 rounded-xl text-lg text-white"
+                                                    className="bg-black/50 border-neutral-800 h-[52px] rounded-xl text-lg text-white"
                                                 />
                                             </div>
                                             <div className="space-y-2">
                                                 <Label className="uppercase text-xs font-bold text-neutral-500">Altura (cm)</Label>
                                                 <Input
                                                     type="number"
+                                                    inputMode="decimal"
                                                     {...register("height")}
-                                                    className="bg-black/50 border-neutral-800 h-12 rounded-xl text-lg text-white"
+                                                    className="bg-black/50 border-neutral-800 h-[52px] rounded-xl text-lg text-white"
                                                 />
                                             </div>
                                         </div>
@@ -311,7 +314,7 @@ export function OnboardingWizard({ authProvider }: OnboardingWizardProps) {
                                             <div className="space-y-3">
                                                 <Label className="uppercase text-xs font-bold text-neutral-500">Objetivo Principal</Label>
                                                 <Select onValueChange={(v: string) => setValue("goal", v)} defaultValue={formData.goal}>
-                                                    <SelectTrigger className="bg-black/50 border-neutral-800 h-14 rounded-xl text-white text-lg">
+                                                    <SelectTrigger className="bg-black/50 border-neutral-800 h-[52px] rounded-xl text-white text-md">
                                                         <SelectValue placeholder="Selecciona tu meta" />
                                                     </SelectTrigger>
                                                     <SelectContent className="bg-neutral-900 border-neutral-800 text-white">
@@ -378,7 +381,7 @@ export function OnboardingWizard({ authProvider }: OnboardingWizardProps) {
                                                 <Label className="uppercase text-xs font-bold text-neutral-500 mb-2 block">Otras condiciones médicas (Opcional)</Label>
                                                 <Input
                                                     placeholder="Ej: Asma, Hipertensión..."
-                                                    className="bg-black/50 border-neutral-800 rounded-xl text-white"
+                                                    className="bg-black/50 border-neutral-800 h-[52px] rounded-xl text-white"
                                                     onKeyDown={(e) => {
                                                         if (e.key === 'Enter') {
                                                             e.preventDefault();
@@ -442,9 +445,10 @@ export function OnboardingWizard({ authProvider }: OnboardingWizardProps) {
                                                     <Label className="uppercase text-xs font-bold text-neutral-500">{m.label} (cm)</Label>
                                                     <Input
                                                         type="number"
+                                                        inputMode="decimal"
                                                         {...register(m.id as any)}
                                                         placeholder="0"
-                                                        className="bg-black/50 border-neutral-800 h-12 rounded-xl text-white"
+                                                        className="bg-black/50 border-neutral-800 h-[52px] rounded-xl text-white"
                                                     />
                                                 </div>
                                             ))}
@@ -475,7 +479,7 @@ export function OnboardingWizard({ authProvider }: OnboardingWizardProps) {
                                                         type={showPassword ? "text" : "password"}
                                                         {...register("password")}
                                                         placeholder="Mínimo 6 caracteres"
-                                                        className="pl-10 pr-10 bg-black/50 border-neutral-800 h-12 rounded-xl text-white focus:ring-red-500/50"
+                                                        className="pl-10 pr-10 bg-black/50 border-neutral-800 h-[52px] rounded-xl text-white focus:ring-red-500/50"
                                                     />
                                                     <button
                                                         type="button"
@@ -497,7 +501,7 @@ export function OnboardingWizard({ authProvider }: OnboardingWizardProps) {
                                                         type={showConfirm ? "text" : "password"}
                                                         {...register("confirmPassword")}
                                                         placeholder="Repite tu contraseña"
-                                                        className="pl-10 pr-10 bg-black/50 border-neutral-800 h-12 rounded-xl text-white focus:ring-red-500/50"
+                                                        className="pl-10 pr-10 bg-black/50 border-neutral-800 h-[52px] rounded-xl text-white focus:ring-red-500/50"
                                                     />
                                                     <button
                                                         type="button"
