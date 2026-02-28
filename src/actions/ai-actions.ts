@@ -161,13 +161,19 @@ export async function suggestAlternativeExercise(exerciseName: string, reason: "
     return suggestSubstitute(exerciseName, reason);
 }
 
+import { analyzeViviIntelligence, saveViviMemory } from "@/actions/vivi-intelligence-actions";
+
 // Chat con el coach AI - usado por ai-coach-chat.tsx
 export async function chatWithCoachAI(message: string, context?: { exerciseName?: string; muscleGroups?: string[] }) {
     const session = await auth();
     if (!session?.user?.id) return { success: false, error: "No autorizado" };
 
     try {
-        // Inyectar contexto del atleta para respuestas personalizadas
+        // 1. Ejecutar análisis rápido de inteligencia si es necesario (o proactivamente)
+        // Esto asegura que Vivi tenga los datos más frescos de los últimos entrenos
+        await analyzeViviIntelligence(session.user.id);
+
+        // 2. Inyectar contexto enriquecido (incluye los nuevos insights y memorias)
         const athleteCtx = await getAthleteContext(session.user.id);
 
         const contextStr = context?.exerciseName
@@ -180,20 +186,25 @@ export async function chatWithCoachAI(message: string, context?: { exerciseName?
             
             ${contextStr}
             
-            Responde de manera concisa y útil. Si es sobre técnica, da consejos prácticos.
-            Si es sobre alternativas, sugiere opciones específicas.
-            IMPORTANTE: Considera las lesiones y condiciones del atleta en tu respuesta.
+            Responde de manera concisa y útil. Eres Vivi, su coach personal.
             
+            REGLAS PROACTIVAS:
+            1. Si detectas fatiga en el contexto, adviértele.
+            2. Si hay un PR sugerido en el contexto, motívalo.
+            3. Si el atleta te da un dato importante (ej: "me duele el hombro", "voy a viajar"), IDENTIFÍCALO para guardarlo en tu memoria.
+
             Respuesta JSON:
             {
-                "response": "Tu respuesta aquí"
+                "response": "Tu respuesta aquí",
+                "importantInsight": "Algo importante que recordar (opcional, solo si el usuario dijo algo clave)",
+                "insightCategory": "health" | "technique" | "personal"
             }
         `;
 
         const groq = getGroqClient();
         const completion = await groq.chat.completions.create({
             messages: [
-                { role: "system", content: `Eres un coach de fitness experto y amigable. ${athleteCtx}` },
+                { role: "system", content: `Eres un coach de fitness experto y amigable llamado Vivi. ${athleteCtx}` },
                 { role: "user", content: prompt }
             ],
             model: DEFAULT_AI_MODEL,
@@ -205,6 +216,12 @@ export async function chatWithCoachAI(message: string, context?: { exerciseName?
         if (!content) return { success: false, error: "Error de IA" };
 
         const result = JSON.parse(content);
+
+        // 3. Si Vivi identificó un insight importante en la conversación, guardarlo en memoria
+        if (result.importantInsight) {
+            await saveViviMemory(result.importantInsight, result.insightCategory || "general");
+        }
+
         return { success: true, response: result.response };
 
     } catch (error) {
@@ -212,6 +229,7 @@ export async function chatWithCoachAI(message: string, context?: { exerciseName?
         return { success: false, error: "Error al procesar tu mensaje" };
     }
 }
+
 
 export async function analyzeRoutineSafety(routineData: any, athleteId: string) {
     const session = await auth();
