@@ -7,23 +7,23 @@ import { z } from "zod";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { registerUser } from "@/actions/auth-actions"; // Importar Server Action
+import { registerUser } from "@/actions/auth-actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Eye, EyeOff, Sparkles } from "lucide-react";
+import { Eye, EyeOff, Sparkles, Loader2 } from "lucide-react";
 
-const RegisterSchema = z.object({
-    name: z.string().min(1, "Nombre requerido"),
-    email: z.string().email("Email inválido"),
-    password: z.string().min(6, "Mínimo 6 caracteres"),
-    confirmPassword: z.string().min(6, "Mínimo 6 caracteres"),
-
-}).refine((data) => data.password === data.confirmPassword, {
-    message: "Las contraseñas no coinciden",
-    path: ["confirmPassword"],
-});
+const RegisterSchema = z
+    .object({
+        name: z.string().min(1, "Nombre requerido"),
+        email: z.string().email("Email inválido"),
+        password: z.string().min(6, "Mínimo 6 caracteres"),
+        confirmPassword: z.string().min(6, "Mínimo 6 caracteres"),
+    })
+    .refine((data) => data.password === data.confirmPassword, {
+        message: "Las contraseñas no coinciden",
+        path: ["confirmPassword"],
+    });
 
 type RegisterFormValues = z.infer<typeof RegisterSchema>;
 
@@ -39,11 +39,9 @@ export function AuthRegisterForm() {
         formState: { errors },
     } = useForm<RegisterFormValues>({
         resolver: zodResolver(RegisterSchema),
-        defaultValues: {
-
-        }
+        defaultValues: {},
     });
-    // ... (onSubmit igual) ...
+
     const onSubmit = async (data: RegisterFormValues) => {
         setLoading(true);
         try {
@@ -51,14 +49,12 @@ export function AuthRegisterForm() {
                 name: data.name,
                 email: data.email,
                 password: data.password,
-                // confirmPassword no se envía al backend
                 role: "athlete",
             });
 
             if (result.success) {
                 toast.success("Cuenta creada exitosamente");
 
-                // Iniciar sesión automáticamente
                 await signIn("credentials", {
                     email: data.email,
                     password: data.password,
@@ -77,85 +73,150 @@ export function AuthRegisterForm() {
         }
     };
 
+    /** Clases reutilizables para inputs */
+    const inputClass =
+        "h-[52px] rounded-xl border border-white/[0.06] bg-black/40 px-4 text-[15px] font-medium text-white shadow-inner transition-all placeholder:text-neutral-600 focus-visible:ring-1 focus-visible:ring-red-500/50 focus-visible:border-red-500/30";
+    const inputPasswordClass =
+        "h-[52px] rounded-xl border border-white/[0.06] bg-black/40 pl-4 pr-12 text-[15px] font-medium text-white shadow-inner transition-all placeholder:text-neutral-600 focus-visible:ring-1 focus-visible:ring-red-500/50 focus-visible:border-red-500/30";
+    const labelClass =
+        "ml-1 text-xs font-bold uppercase tracking-[0.2em] text-neutral-400";
+    const errorClass = "ml-1 text-xs font-semibold text-red-500";
+
     return (
-        <div className="w-full space-y-6">
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-                <div className="space-y-2">
-                    <Label htmlFor="name" className="ml-1 text-[10px] font-black uppercase tracking-[0.3em] text-neutral-500 italic">Nombre del Operador</Label>
+        <div className="w-full space-y-5">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                {/* Nombre */}
+                <div className="space-y-1.5">
+                    <Label htmlFor="reg-name" className={labelClass}>
+                        Nombre completo
+                    </Label>
                     <Input
-                        id="name"
-                        placeholder="NOMBRE COMPLETO"
+                        id="reg-name"
+                        placeholder="Tu nombre"
+                        autoComplete="name"
                         {...register("name")}
-                        className="bg-neutral-950/50 border border-white/5 h-14 rounded-2xl px-4 text-sm font-bold text-white shadow-inner transition-all focus-visible:ring-1 focus-visible:ring-red-500/50 placeholder:text-neutral-700 uppercase"
+                        className={inputClass}
                     />
-                    {errors.name && <p className="ml-1 text-[10px] font-black uppercase text-red-500 italic tracking-widest">{errors.name.message}</p>}
+                    {errors.name && (
+                        <p className={errorClass}>{errors.name.message}</p>
+                    )}
                 </div>
 
-                <div className="space-y-2">
-                    <Label htmlFor="email" className="ml-1 text-[10px] font-black uppercase tracking-[0.3em] text-neutral-500 italic">Canal de Comunicación / Email</Label>
+                {/* Email */}
+                <div className="space-y-1.5">
+                    <Label htmlFor="reg-email" className={labelClass}>
+                        Email
+                    </Label>
                     <Input
-                        id="email"
+                        id="reg-email"
                         type="email"
-                        placeholder="OPERATOR@GYMIA.COM"
+                        placeholder="tu@email.com"
+                        autoComplete="email"
                         {...register("email")}
-                        className="bg-neutral-950/50 border border-white/5 h-14 rounded-2xl px-4 text-sm font-bold text-white shadow-inner transition-all focus-visible:ring-1 focus-visible:ring-red-500/50 placeholder:text-neutral-700 uppercase"
+                        className={inputClass}
                     />
-                    {errors.email && <p className="ml-1 text-[10px] font-black uppercase text-red-500 italic tracking-widest">{errors.email.message}</p>}
+                    {errors.email && (
+                        <p className={errorClass}>{errors.email.message}</p>
+                    )}
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                        <Label htmlFor="password" className="ml-1 text-[10px] font-black uppercase tracking-[0.3em] text-neutral-500 italic">Nueva Clave</Label>
-                        <div className="relative group">
-                            <Input
-                                id="password"
-                                type={showPassword ? "text" : "password"}
-                                {...register("password")}
-                                className="bg-neutral-950/50 border border-white/5 h-14 rounded-2xl pl-4 pr-10 text-sm font-bold text-white shadow-inner transition-all focus-visible:ring-1 focus-visible:ring-red-500/50 placeholder:text-neutral-700"
-                            />
-                            <Button
-                                type="button"
-                                variant="ghost"
-                                size="icon"
-                                className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 text-neutral-600 hover:text-white hover:bg-transparent transition-colors"
-                                onClick={() => setShowPassword(!showPassword)}
-                            >
-                                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                            </Button>
-                        </div>
-                        {errors.password && <p className="ml-1 text-[10px] font-black uppercase text-red-500 italic tracking-widest">{errors.password.message}</p>}
+                {/* Contraseña */}
+                <div className="space-y-1.5">
+                    <Label htmlFor="reg-password" className={labelClass}>
+                        Contraseña
+                    </Label>
+                    <div className="relative">
+                        <Input
+                            id="reg-password"
+                            type={showPassword ? "text" : "password"}
+                            placeholder="Mínimo 6 caracteres"
+                            autoComplete="new-password"
+                            {...register("password")}
+                            className={inputPasswordClass}
+                        />
+                        <button
+                            type="button"
+                            className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-neutral-500 transition-colors hover:text-white cursor-pointer"
+                            onClick={() => setShowPassword(!showPassword)}
+                            aria-label={
+                                showPassword
+                                    ? "Ocultar contraseña"
+                                    : "Mostrar contraseña"
+                            }
+                        >
+                            {showPassword ? (
+                                <EyeOff className="h-5 w-5" />
+                            ) : (
+                                <Eye className="h-5 w-5" />
+                            )}
+                        </button>
                     </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="confirmPassword" className="ml-1 text-[10px] font-black uppercase tracking-[0.3em] text-neutral-500 italic">Validar Clave</Label>
-                        <div className="relative group">
-                            <Input
-                                id="confirmPassword"
-                                type={showConfirmPassword ? "text" : "password"}
-                                {...register("confirmPassword")}
-                                className="bg-neutral-950/50 border border-white/5 h-14 rounded-2xl pl-4 pr-10 text-sm font-bold text-white shadow-inner transition-all focus-visible:ring-1 focus-visible:ring-red-500/50 placeholder:text-neutral-700"
-                            />
-                            <Button
-                                type="button"
-                                variant="ghost"
-                                size="icon"
-                                className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 text-neutral-600 hover:text-white hover:bg-transparent transition-colors"
-                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                            >
-                                {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                            </Button>
-                        </div>
-                        {errors.confirmPassword && <p className="ml-1 text-[10px] font-black uppercase text-red-500 italic tracking-widest">{errors.confirmPassword.message}</p>}
-                    </div>
+                    {errors.password && (
+                        <p className={errorClass}>{errors.password.message}</p>
+                    )}
                 </div>
 
+                {/* Confirmar contraseña */}
+                <div className="space-y-1.5">
+                    <Label
+                        htmlFor="reg-confirmPassword"
+                        className={labelClass}
+                    >
+                        Confirmar contraseña
+                    </Label>
+                    <div className="relative">
+                        <Input
+                            id="reg-confirmPassword"
+                            type={showConfirmPassword ? "text" : "password"}
+                            placeholder="Repite la contraseña"
+                            autoComplete="new-password"
+                            {...register("confirmPassword")}
+                            className={inputPasswordClass}
+                        />
+                        <button
+                            type="button"
+                            className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-neutral-500 transition-colors hover:text-white cursor-pointer"
+                            onClick={() =>
+                                setShowConfirmPassword(!showConfirmPassword)
+                            }
+                            aria-label={
+                                showConfirmPassword
+                                    ? "Ocultar contraseña"
+                                    : "Mostrar contraseña"
+                            }
+                        >
+                            {showConfirmPassword ? (
+                                <EyeOff className="h-5 w-5" />
+                            ) : (
+                                <Eye className="h-5 w-5" />
+                            )}
+                        </button>
+                    </div>
+                    {errors.confirmPassword && (
+                        <p className={errorClass}>
+                            {errors.confirmPassword.message}
+                        </p>
+                    )}
+                </div>
+
+                {/* Submit */}
                 <Button
                     type="submit"
-                    className="group relative w-full h-14 rounded-2xl bg-white text-black hover:bg-neutral-200 text-xs font-black tracking-[0.2em] uppercase italic transition-all duration-500 shadow-xl hover:shadow-2xl hover:-translate-y-0.5"
+                    className="group relative mt-2 h-[52px] w-full rounded-xl bg-white text-sm font-bold uppercase tracking-[0.15em] text-black transition-all duration-300 hover:bg-neutral-200 shadow-xl hover:shadow-2xl active:scale-[0.98] cursor-pointer disabled:opacity-60"
                     disabled={loading}
                 >
-                    <span className="relative z-10 flex items-center justify-center gap-3">
-                        {loading ? "Generando..." : "Finalizar Registro"}
-                        {!loading && <Sparkles className="w-5 h-5 group-hover:rotate-12 transition-transform" />}
+                    <span className="relative z-10 flex items-center justify-center gap-2.5">
+                        {loading ? (
+                            <>
+                                <Loader2 className="h-5 w-5 animate-spin" />
+                                Creando cuenta...
+                            </>
+                        ) : (
+                            <>
+                                Crear cuenta
+                                <Sparkles className="h-5 w-5 transition-transform group-hover:rotate-12" />
+                            </>
+                        )}
                     </span>
                 </Button>
             </form>

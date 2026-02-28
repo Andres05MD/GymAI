@@ -1,117 +1,220 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { AuthLoginForm } from "@/components/forms/auth-login-form";
 import { AuthRegisterForm } from "@/components/forms/auth-register-form";
 import { Dumbbell } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { cn } from "@/lib/utils";
 
 /**
- * Client Component para la página de login/registro
- * La verificación de sesión se hace en el Server Component padre
+ * Client Component: Página de Login/Registro Ultra-Premium
+ * Estética "Dark Liquid Glass / Aurora" para Desktop.
+ * Mantiene Layout de columna única en Mobile.
  */
 export function LoginPageClient() {
     const [isLogin, setIsLogin] = useState(true);
 
     return (
-        <div className="flex flex-col md:flex-row min-h-screen w-full bg-black overflow-hidden relative">
-            {/* Ambient Background Effects */}
-            <div className="absolute top-0 left-0 w-full h-full pointer-events-none -z-10">
-                <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-red-600/10 rounded-full blur-[120px] animate-pulse" />
-                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-red-900/5 rounded-full blur-[120px]" />
+        <div className="relative flex min-h-[100dvh] w-full flex-col lg:flex-row bg-[#030303] overflow-hidden font-sans">
+
+            {/* =========================================
+                BACKGROUND: LIQUID AURORA (Global)
+            ============================================= */}
+            <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+                {/* Orbe 1 (Rojo vibrante, sup-der) */}
+                <motion.div
+                    animate={{
+                        x: [0, -100, 50, 0],
+                        y: [0, 50, -100, 0],
+                        scale: [1, 1.2, 0.9, 1],
+                    }}
+                    transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                    className="absolute -top-[20%] -right-[10%] h-[60vw] w-[60vw] max-h-[800px] max-w-[800px] rounded-full bg-red-600/15 blur-[120px] mix-blend-screen"
+                />
+
+                {/* Orbe 2 (Carmesí oscuro, central-izq) */}
+                <motion.div
+                    animate={{
+                        x: [0, 80, -60, 0],
+                        y: [0, -80, 40, 0],
+                        scale: [1, 0.85, 1.15, 1],
+                    }}
+                    transition={{ duration: 25, repeat: Infinity, ease: "linear", delay: 1 }}
+                    className="absolute top-[40%] -left-[20%] h-[70vw] w-[70vw] max-h-[900px] max-w-[900px] rounded-full bg-red-800/20 blur-[150px] mix-blend-screen"
+                />
+
+                {/* Orbe 3 (Naranja sutil, inf-der) */}
+                <motion.div
+                    animate={{
+                        x: [0, -50, 30, 0],
+                        y: [0, -30, -80, 0],
+                    }}
+                    transition={{ duration: 18, repeat: Infinity, ease: "linear", delay: 2 }}
+                    className="absolute -bottom-[20%] right-[10%] h-[40vw] w-[40vw] max-h-[600px] max-w-[600px] rounded-full bg-orange-600/10 blur-[100px] mix-blend-screen"
+                />
+
+                {/* Ruido cinematográfico sobre luces */}
+                <div
+                    className="absolute inset-0 opacity-[0.04] mix-blend-overlay"
+                    style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }}
+                />
             </div>
 
-            {/* Tactical Sidebar (Left) */}
-            <div className={cn(
-                "relative flex flex-col items-center justify-center p-8 transition-all duration-700 delay-100",
-                "h-[30vh] w-full border-b border-white/5",
-                "md:min-h-screen md:w-[45%] md:p-12 md:border-b-0 md:border-r border-white/5"
-            )}>
-                {/* Decorative Pattern */}
-                <div className="absolute inset-0 opacity-[0.03] pointer-events-none"
-                    style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
+            {/* =========================================
+                LADO IZQUIERDO: CONTENEDOR FROSTED GLASS
+            ============================================= */}
+            <div className="relative flex w-full flex-col items-center z-20 
+                            lg:w-[42%] lg:min-w-[500px] lg:max-w-[600px] lg:h-screen lg:shrink-0 lg:overflow-y-auto custom-scrollbar 
+                            lg:bg-black/40 lg:backdrop-blur-[40px] lg:border-r lg:border-white/[0.05] lg:shadow-[20px_0_60px_-15px_rgba(0,0,0,0.8)]">
 
-                <Link href="/dashboard">
-                    <motion.div
-                        layout
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="relative z-10 bg-linear-to-b from-white to-neutral-400 p-4 rounded-4xl shadow-[0_0_50px_-12px_rgba(255,255,255,0.3)] mb-6 md:scale-125 lg:scale-150 transition-transform cursor-pointer"
+                {/* Dot pattern sutil solo en el panel izquierdo en desktop */}
+                <div
+                    className="pointer-events-none absolute inset-0 opacity-[0.03] lg:opacity-[0.05]"
+                    style={{
+                        backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1px)",
+                        backgroundSize: "24px 24px",
+                    }}
+                />
+
+                <div className="flex w-full flex-col items-center justify-center min-h-[100dvh] px-5 py-12 md:px-8 lg:px-12 lg:py-16 relative z-10 lg:min-h-full">
+
+                    {/* ── Header / Logo ── */}
+                    <motion.header
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                        className="flex w-full flex-col items-center mb-8 lg:mb-12 cursor-default"
                     >
-                        <Dumbbell className="w-10 h-10 text-black shrink-0" />
-                    </motion.div>
-                </Link>
-
-                <div className="z-10 text-center space-y-4 max-w-sm mt-8 hidden md:block">
-                    <AnimatePresence mode="wait">
                         <motion.div
-                            key={isLogin ? "login-text" : "register-text"}
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.9 }}
-                            transition={{ duration: 0.5, ease: "circOut" }}
-                            className="space-y-4"
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.98 }}
+                            className="relative mb-6 rounded-full bg-gradient-to-b from-white to-neutral-300 p-[18px] shadow-[0_0_50px_-12px_rgba(255,255,255,0.4)]"
                         >
-                            <h2 className="text-5xl font-black text-white uppercase italic tracking-tighter leading-none">
-                                {isLogin ? "System\nCheck" : "Access\nGranted"}
-                            </h2>
-                            <p className="text-neutral-500 font-bold uppercase tracking-[0.3em] text-[10px] italic">
-                                {isLogin
-                                    ? "Inicia sesión para comenzar tu entrenamiento."
-                                    : "Regístrate para comenzar la transformación técnica."}
-                            </p>
+                            <Dumbbell className="h-8 w-8 text-black shrink-0 relative z-10" />
+                            <div className="absolute inset-0 rounded-full border border-white/40 shadow-[inset_0_2px_10px_rgba(255,255,255,0.8)] pointer-events-none" />
                         </motion.div>
-                    </AnimatePresence>
-                </div>
-            </div>
 
-            {/* Content Area (Right) */}
-            <div className="flex-1 flex flex-col items-center justify-center relative p-6 md:p-12 overflow-y-auto">
-                <div className="w-full max-w-md relative z-10">
-                    <AnimatePresence mode="wait">
-                        <motion.div
-                            key={isLogin ? "login-form" : "register-form"}
-                            initial={{ opacity: 0, x: 40, filter: "blur(10px)" }}
-                            animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
-                            exit={{ opacity: 0, x: -40, filter: "blur(10px)" }}
-                            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                            className="space-y-10"
-                        >
-                            <div className="space-y-3">
-                                <div className="flex items-center gap-4 mb-2">
-                                    <div className="h-px flex-1 bg-linear-to-r from-red-600/50 to-transparent" />
-                                    <span className="text-[10px] font-black text-red-500 uppercase tracking-[0.5em] italic">Auth Security</span>
+                        <AnimatePresence mode="wait">
+                            <motion.div
+                                key={isLogin ? "login-heading" : "register-heading"}
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -10 }}
+                                transition={{ duration: 0.4, ease: "easeOut" }}
+                                className="text-center space-y-3"
+                            >
+                                <div className="flex items-center justify-center gap-3">
+                                    <span className="h-px w-8 bg-gradient-to-r from-transparent to-red-500/80" />
+                                    <span className="text-[10px] font-black uppercase tracking-[0.4em] text-red-500">
+                                        {isLogin ? "Acceso Seguro" : "Nuevo Operador"}
+                                    </span>
+                                    <span className="h-px w-8 bg-gradient-to-l from-transparent to-red-500/80" />
                                 </div>
-                                <h1 className="text-4xl md:text-6xl font-black text-white uppercase italic tracking-tighter leading-none">
-                                    {isLogin ? "Iniciar" : "Crear"} <span className="text-neutral-500">{isLogin ? "Sesión" : "Cuenta"}</span>
-                                </h1>
-                            </div>
 
-                            <div className="bg-neutral-900/40 backdrop-blur-3xl border border-white/5 p-8 md:p-10 rounded-[3rem] shadow-2xl relative overflow-hidden group">
-                                <div className="absolute inset-0 bg-linear-to-b from-white/2 to-transparent pointer-events-none" />
-                                <div className="relative z-10">
+                                <h1 className="text-4xl lg:text-5xl font-black uppercase italic tracking-tighter leading-none text-white">
+                                    {isLogin ? "Iniciar " : "Crear "}
+                                    <span className="text-transparent bg-clip-text bg-gradient-to-br from-neutral-400 to-neutral-700">
+                                        {isLogin ? "Sesión" : "Cuenta"}
+                                    </span>
+                                </h1>
+                            </motion.div>
+                        </AnimatePresence>
+                    </motion.header>
+
+                    {/* ── Form Card ── */}
+                    <div className="w-full max-w-[420px] lg:max-w-[440px]">
+                        <AnimatePresence mode="wait">
+                            <motion.div
+                                key={isLogin ? "login-form" : "register-form"}
+                                initial={{ opacity: 0, x: 20, filter: "blur(6px)" }}
+                                animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+                                exit={{ opacity: 0, x: -20, filter: "blur(6px)" }}
+                                transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+                            >
+                                {/* Form Container (Transparente en Desktop, Glass en Móvil) */}
+                                <div className="rounded-[2.5rem] border border-white/[0.04] bg-neutral-900/40 backdrop-blur-xl p-7 shadow-2xl md:p-9 lg:bg-transparent lg:border-transparent lg:shadow-none lg:backdrop-blur-none lg:p-0">
                                     {isLogin ? <AuthLoginForm /> : <AuthRegisterForm />}
                                 </div>
-                            </div>
 
-                            <div className="text-center group">
-                                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-500 mb-4 transition-colors group-hover:text-neutral-400">
-                                    {isLogin ? "¿Nuevo en el programa?" : "¿Ya tienes credenciales?"}
-                                </p>
-                                <button
-                                    onClick={() => setIsLogin(!isLogin)}
-                                    className="relative h-12 px-8 rounded-full border border-white/10 hover:border-red-500/50 hover:bg-red-500/5 text-white font-black uppercase italic tracking-widest text-[10px] transition-all overflow-hidden"
-                                >
-                                    <span className="relative z-10">
-                                        {isLogin ? "Registrar nueva cuenta" : "Volver al acceso"}
-                                    </span>
-                                </button>
-                            </div>
-                        </motion.div>
-                    </AnimatePresence>
+                                {/* ── Toggle login/registro ── */}
+                                <div className="mt-8 text-center px-4">
+                                    <p className="mb-4 text-[11px] font-bold uppercase tracking-[0.2em] text-neutral-500">
+                                        {isLogin ? "¿No tienes cuenta en GymIA?" : "¿Ya posees credenciales?"}
+                                    </p>
+                                    <button
+                                        onClick={() => setIsLogin(!isLogin)}
+                                        className="group relative h-[52px] w-full rounded-2xl border border-white/[0.08] bg-white/[0.02] text-xs font-bold uppercase italic tracking-[0.15em] text-white transition-all duration-300 hover:border-red-500/30 hover:bg-white/[0.05] active:scale-[0.98] cursor-pointer overflow-hidden"
+                                    >
+                                        <div className="absolute inset-0 bg-gradient-to-r from-red-600/0 via-red-600/10 to-red-600/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+                                        <span className="relative z-10">
+                                            {isLogin ? "Solicitar Acceso (Registro)" : "Volver al Portal"}
+                                        </span>
+                                    </button>
+                                </div>
+                            </motion.div>
+                        </AnimatePresence>
+                    </div>
                 </div>
+            </div>
+
+            {/* =========================================
+                LADO DERECHO: BRANDING INMERSIVO LIQUID GLASS
+            ============================================= */}
+            <div className="hidden lg:flex relative flex-1 flex-col justify-end items-end p-20 z-10">
+
+                {/* ── Overlay Textura Imagen (Skeuomorphing oscuro) ── */}
+                <div className="absolute inset-0 z-0 opacity-30 mix-blend-luminosity pointer-events-none">
+                    <img
+                        src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=2070&auto=format&fit=crop"
+                        alt="Background Texture"
+                        className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80" />
+                    <div className="absolute inset-0 bg-gradient-to-l from-black/60 via-transparent to-transparent" />
+                </div>
+
+                {/* ── Marcas Holográficas ── */}
+                <div className="absolute inset-0 z-0 pointer-events-none">
+                    <div className="absolute top-16 right-16 w-32 h-32 border-t border-r border-white/10" />
+                    <div className="absolute bottom-16 right-16 flex flex-col items-end gap-1.5 opacity-40">
+                        <div className="flex gap-1.5">
+                            {[...Array(12)].map((_, i) => (
+                                <div key={i} className={`h-1 w-2 rounded-sm ${i % 3 === 0 ? 'bg-red-500' : 'bg-white/30'}`} />
+                            ))}
+                        </div>
+                        <span className="text-[10px] font-mono tracking-[0.3em] text-white/50">SECTOR.7G</span>
+                    </div>
+                </div>
+
+                {/* ── Tipografía Hero Premium ── */}
+                <motion.div
+                    initial={{ opacity: 0, y: 30, filter: "blur(10px)" }}
+                    animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                    transition={{ duration: 1.2, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                    className="relative z-10 w-full max-w-3xl text-right mt-auto"
+                >
+                    <h2 className="text-[7rem] 2xl:text-[9rem] font-black uppercase italic tracking-tighter leading-[0.85] text-transparent bg-clip-text bg-gradient-to-b from-white to-white/60 relative">
+                        {/* Texto trasero (Glow) */}
+                        <span className="absolute inset-0 text-red-500/20 blur-2xl pointer-events-none" aria-hidden="true">
+                            FORJA <br /> TU LEYENDA
+                        </span>
+                        FORJA <br />
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-red-600 to-red-800">
+                            TU LEYENDA
+                        </span>
+                    </h2>
+
+                    {/* Tarjeta de descripción tipo Glass */}
+                    <div className="mt-10 ml-auto p-6 rounded-2xl border border-white/[0.05] bg-white/[0.02] backdrop-blur-md max-w-lg shadow-2xl relative overflow-hidden group">
+                        <div className="absolute inset-0 bg-gradient-to-tl from-white/[0.04] to-transparent" />
+                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-red-500 to-red-900 rounded-l-2xl" />
+
+                        <p className="relative z-10 text-neutral-400 text-lg 2xl:text-xl font-medium tracking-wide leading-relaxed">
+                            <span className="text-white font-bold">GymIA</span> combina inteligencia artificial de vanguardia con tus métricas físicas.
+                            <br /><span className="mt-2 block text-sm uppercase tracking-widest text-red-400 font-bold">Analiza. Adapta. Supera.</span>
+                        </p>
+                    </div>
+                </motion.div>
             </div>
         </div>
     );

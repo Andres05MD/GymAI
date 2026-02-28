@@ -43,7 +43,7 @@ export const authConfig = {
                     }
                     return true;
                 }
-                return false; // Redirige usuarios no autenticados al login
+                return Response.redirect(new URL("/", nextUrl)); // Redirige explícitamente a la raíz
             }
 
             return true;
