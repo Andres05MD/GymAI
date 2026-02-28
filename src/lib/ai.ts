@@ -27,21 +27,19 @@ export async function getAthleteContext(userId: string): Promise<string> {
       adminDb.collection("body_measurements")
         .where("userId", "==", userId)
         .orderBy("date", "desc")
-        .limit(3)
+        .limit(10) // Traemos más para filtrar en memoria si fuera necesario
         .get(),
       adminDb.collection("routines")
         .where("athleteId", "==", userId)
-        .where("active", "==", true)
-        .limit(1)
         .get(),
       adminDb.collection("training_logs")
         .where("athleteId", "==", userId)
-        .where("status", "==", "completed")
         .orderBy("date", "desc")
-        .limit(5)
+        .limit(20)
         .get(),
       getViviIntelligence(userId)
     ]);
+
 
     if (!userDoc.exists) return "Sin perfil de atleta disponible.";
 
@@ -97,11 +95,12 @@ export async function getAthleteContext(userId: string): Promise<string> {
     }
 
     // --- RUTINA ACTIVA ---
-    if (!routinesSnap.empty) {
-      const routine = routinesSnap.docs[0].data();
+    const activeRoutine = routinesSnap.docs.find(doc => doc.data().active === true);
+    if (activeRoutine) {
+      const routine = activeRoutine.data();
       parts.push(`\n--- RUTINA ACTUAL: ${routine.name} ---`);
       if (routine.schedule) {
-        routine.schedule.forEach((day: any) => {
+        routine.schedule.slice(0, 3).forEach((day: any) => { // Limitado para ahorrar tokens
           const exerciseNames = day.exercises?.map((ex: any) => ex.exerciseName).join(", ");
           parts.push(`- ${day.name}: ${exerciseNames}`);
         });
@@ -109,14 +108,19 @@ export async function getAthleteContext(userId: string): Promise<string> {
     }
 
     // --- HISTORIAL RECIENTE ---
-    if (!logsSnap.empty) {
+    const completedLogs = logsSnap.docs
+      .map(doc => doc.data())
+      .filter(log => log.status === "completed")
+      .slice(0, 5);
+
+    if (completedLogs.length > 0) {
       parts.push("\n--- ÚLTIMOS ENTRENAMIENTOS ---");
-      logsSnap.docs.forEach(doc => {
-        const log = doc.data();
+      completedLogs.forEach(log => {
         const date = log.date?.toDate ? log.date.toDate().toLocaleDateString("es-ES") : "Fecha desconocida";
         parts.push(`- ${date}: ${log.routineName || "Entrenamiento"} (${log.durationMinutes || "?"} min)`);
       });
     }
+
 
     return parts.join("\n");
   } catch (error) {
