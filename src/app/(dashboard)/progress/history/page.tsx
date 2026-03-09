@@ -82,7 +82,7 @@ export default async function MeasurementHistoryPage({ searchParams }: HistoryPa
                 </div>
             </ClientMotionDiv>
 
-            <div className="max-w-4xl mx-auto w-full px-2 mt-8">
+            <div className="max-w-screen-2xl mx-auto w-full px-4 mt-8">
                 {sortedHistory.length > 0 ? (
                     <div className="relative border-l-2 border-white/5 ml-4 md:ml-8 space-y-16">
                         {sortedHistory.map((item, index) => {
@@ -147,7 +147,7 @@ export default async function MeasurementHistoryPage({ searchParams }: HistoryPa
                                                         <AlignLeft className="w-5 h-5 text-neutral-400" />
                                                         <span className="text-sm font-black text-neutral-300 uppercase tracking-[0.2em] italic">Perímetros Corporales</span>
                                                     </div>
-                                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
+                                                    <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 gap-4 md:gap-6">
                                                         {loggedMeasurements.map(key => (
                                                             <div key={key} className="bg-neutral-900/60 border border-white/5 rounded-[1.25rem] p-5 flex flex-col justify-between items-start group/card hover:bg-neutral-800 hover:border-red-500/40 hover:-translate-y-1 transition-all duration-300 shadow-xl relative overflow-hidden">
                                                                 <div className="absolute inset-0 bg-linear-to-br from-red-500/0 via-transparent to-red-500/0 group-hover/card:to-red-500/5 pointer-events-none transition-colors duration-500" />
