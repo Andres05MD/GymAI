@@ -119,8 +119,13 @@ export function ProfileForm({ user }: ProfileFormProps) {
                     <div className="flex flex-col md:flex-row md:items-center gap-3">
                         <h2 className="text-4xl font-black text-white tracking-tighter uppercase italic">{user.name}</h2>
                         <div className="flex items-center justify-center md:justify-start gap-2">
-                            <span className="px-4 py-1.5 bg-white/5 border border-white/10 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] text-white backdrop-blur-xl">
-                                {user.role === 'coach' ? 'Entrenador' : 'Atleta'}
+                            <span className={cn(
+                                "px-4 py-1.5 border rounded-xl text-[9px] font-black uppercase tracking-[0.2em] backdrop-blur-xl",
+                                user.role === 'coach' ? "bg-red-500/10 border-red-500/20 text-red-500" :
+                                user.role === 'advanced_athlete' ? "bg-amber-500/10 border-amber-500/20 text-amber-500" :
+                                "bg-white/5 border-white/10 text-white"
+                            )}>
+                                {user.role === 'coach' ? 'Entrenador' : user.role === 'advanced_athlete' ? 'Atleta PRO' : 'Atleta'}
                             </span>
                             {user.onboardingCompleted && (
                                 <div className="h-6 w-6 bg-emerald-500/10 border border-emerald-500/20 rounded-full flex items-center justify-center">

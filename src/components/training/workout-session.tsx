@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Check, Clock, Trophy, Info, Loader2, Play, Dumbbell, ChevronLeft, ChevronRight, Save, Activity, Sparkles, Plus, Trash2, RefreshCw } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 import { logWorkoutSession, getLastSessionExerciseData, WorkoutSessionData } from "@/actions/training-actions";
 import { cn, calculateRealTimeAdjustment } from "@/lib/utils";
 import { toast } from "sonner";
@@ -455,7 +456,12 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
     };
 
     if (!activeDay) return <div className="p-10 text-center">No hay día activo seleccionado.</div>;
-    if (mutableExercises.length === 0 && sessionLog.length === 0) return <div className="p-10 text-center">Cargando...</div>;
+    
+    // Si la rutina NO es libre y no hay ejercicios, mostramos cargando. (Si es libre, length es 0)
+    const isFreeWorkout = routine.id.startsWith('free_workout');
+    if (mutableExercises.length === 0 && sessionLog.length === 0 && !isFreeWorkout) {
+        return <div className="p-10 text-center">Cargando...</div>;
+    }
 
     if (!isStarted) {
         return (
@@ -494,16 +500,26 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
                     </div>
 
                     <div className="space-y-4 relative z-10">
-                        {mutableExercises.map((ex, i) => (
-                            <div key={i} className="flex items-center gap-4 group/item">
-                                <div className="h-8 w-8 rounded-xl bg-neutral-950 border border-white/5 flex items-center justify-center text-[10px] font-black text-neutral-600 group-hover/item:text-red-500 group-hover/item:border-red-600/30 transition-all duration-300">
-                                    {String(i + 1).padStart(2, '0')}
-                                </div>
-                                <span className="text-neutral-400 font-bold text-sm tracking-tight group-hover/item:text-white transition-colors">
-                                    {ex.exerciseName}
-                                </span>
+                        {mutableExercises.length === 0 ? (
+                            <div className="py-8 flex flex-col items-center justify-center text-center space-y-3">
+                                <Dumbbell className="w-10 h-10 text-neutral-800" />
+                                <p className="text-neutral-500 font-bold text-sm tracking-tight">Sesión en blanco lista.</p>
+                                <p className="text-neutral-600 text-[10px] uppercase font-black tracking-widest px-4">
+                                    Podrás agregar ejercicios libremente al iniciar.
+                                </p>
                             </div>
-                        ))}
+                        ) : (
+                            mutableExercises.map((ex, i) => (
+                                <div key={i} className="flex items-center gap-4 group/item">
+                                    <div className="h-8 w-8 rounded-xl bg-neutral-950 border border-white/5 flex items-center justify-center text-[10px] font-black text-neutral-600 group-hover/item:text-red-500 group-hover/item:border-red-600/30 transition-all duration-300">
+                                        {String(i + 1).padStart(2, '0')}
+                                    </div>
+                                    <span className="text-neutral-400 font-bold text-sm tracking-tight group-hover/item:text-white transition-colors">
+                                        {ex.exerciseName}
+                                    </span>
+                                </div>
+                            ))
+                        )}
                     </div>
                 </ClientMotionDiv>
 
@@ -530,6 +546,78 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
     // Get current exercise data
     const currentExercise = mutableExercises[currentExerciseIndex];
     const currentLogExercise = sessionLog[currentExerciseIndex];
+
+    // Check if it's an empty started session
+    if (isStarted && mutableExercises.length === 0 && isAdvanced) {
+        return (
+            <div className="max-w-3xl mx-auto pb-24 space-y-6 pt-4">
+                <div className="sticky top-0 z-50 bg-black/40 backdrop-blur-3xl border-b border-white/5 py-4 px-4 -mx-4 md:rounded-b-4xl md:mx-0 shadow-2xl transition-all duration-300">
+                    <div className="flex justify-between items-center max-w-3xl mx-auto gap-4">
+                        <div className="flex-1 min-w-0">
+                            <h2 className="text-base font-bold text-white tracking-tight truncate uppercase italic">
+                                Rutina Libre
+                            </h2>
+                        </div>
+                        <div className="flex gap-2 items-center shrink-0">
+                            <Button
+                                onClick={() => setShowCancelDialog(true)}
+                                variant="ghost"
+                                className="text-neutral-500 hover:text-red-500 hover:bg-red-500/10 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all h-9 px-3"
+                            >
+                                Abortar
+                            </Button>
+                            <Button
+                                onClick={handleFinishClick}
+                                disabled={isSubmitting}
+                                className="hidden lg:flex rounded-xl bg-white text-black font-black text-[10px] uppercase tracking-widest hover:bg-neutral-200 transition-all h-9 px-4 shadow-lg shadow-white/5"
+                            >
+                                Finalizar
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="py-20 flex flex-col items-center justify-center text-center space-y-6 border border-dashed border-white/10 rounded-3xl bg-neutral-900/20">
+                    <Dumbbell className="w-16 h-16 text-neutral-800" />
+                    <div className="space-y-2 max-w-xs">
+                        <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter">Sesión Vacía</h3>
+                        <p className="text-xs text-neutral-500 font-bold">Inicia tu entrenamiento añadiendo el primer ejercicio de tu rutina libre.</p>
+                    </div>
+                    <Button
+                        onClick={openAddSelector}
+                        className="h-14 px-8 bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 border border-amber-500/20 rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] transition-all shadow-xl group"
+                    >
+                        <Plus className="w-4 h-4 mr-3 group-hover:scale-110 transition-transform" />
+                        Agregar Ejercicio
+                    </Button>
+                </div>
+
+                {isAdvanced && (
+                    <ExerciseSelector
+                        open={showExerciseSelector}
+                        onOpenChange={setShowExerciseSelector}
+                        onSelect={handleExerciseSelected}
+                        availableExercises={availableExercises}
+                        title={exerciseSelectorMode === "swap" ? "Cambiar Ejercicio" : "Agregar Ejercicio"}
+                    />
+                )}
+                
+                <SessionFeedbackDialog
+                    open={showFeedback}
+                    onOpenChange={setShowFeedback}
+                    onConfirm={handleCompleteSession}
+                    isSubmitting={isSubmitting}
+                />
+
+                <CancelWorkoutDialog
+                    open={showCancelDialog}
+                    onOpenChange={setShowCancelDialog}
+                    onConfirm={handleCancelConfirm}
+                />
+            </div>
+        );
+    }
+    
     if (!currentExercise || !currentLogExercise) return <div className="p-10 text-center">Cargando...</div>;
 
     return (
@@ -665,32 +753,62 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
                                     </div>
 
                                     {currentExercise.variantIds && currentExercise.variantIds.length > 0 && (
-                                        <Select
-                                            value={currentLogExercise.exerciseIdUsed}
-                                            onValueChange={(val) => {
-                                                const name = val === currentExercise.exerciseId
-                                                    ? currentExercise.exerciseName
-                                                    : variantNames[val] || "Variante";
-                                                switchExerciseVariant(currentExerciseIndex, val, name);
-                                            }}
-                                        >
-                                            <SelectTrigger className="h-8 text-[10px] font-black uppercase tracking-[0.2em] bg-red-600/10 border-red-600/20 text-red-500 w-fit px-4 rounded-xl hover:bg-red-600/20 transition-all shadow-lg shadow-red-950/20 group">
-                                                <div className="flex items-center gap-2">
-                                                    <Dumbbell className="w-3 h-3 group-hover:rotate-12 transition-transform" />
-                                                    <span>Optimizar Configuración</span>
+                                        <Sheet>
+                                            <SheetTrigger asChild>
+                                                <Button variant="outline" className="h-8 text-[10px] font-black uppercase tracking-[0.2em] bg-red-600/10 border-red-600/20 text-red-500 w-fit px-4 rounded-xl hover:bg-red-600/20 transition-all shadow-lg shadow-red-950/20 group">
+                                                    <Dumbbell className="w-3 h-3 group-hover:rotate-12 transition-transform mr-2" />
+                                                    Máquina Ocupada
+                                                </Button>
+                                            </SheetTrigger>
+                                            <SheetContent side="bottom" className="bg-neutral-950 border-white/10 rounded-t-3xl min-h-[40vh] max-h-[80vh] overflow-y-auto w-full md:max-w-md md:mx-auto md:rounded-3xl md:mb-4 px-4 py-6">
+                                                <SheetHeader className="pb-4 text-left">
+                                                    <SheetTitle className="text-xl font-black uppercase italic tracking-wider text-white">Alternativas</SheetTitle>
+                                                    <SheetDescription className="text-neutral-400 text-xs">
+                                                        Selecciona otra variante si buscas un estímulo distinto o el equipo está ocupado.
+                                                    </SheetDescription>
+                                                </SheetHeader>
+                                                
+                                                <div className="flex flex-col gap-3 mt-2">
+                                                    <SheetClose asChild>
+                                                        <button
+                                                            onClick={() => switchExerciseVariant(currentExerciseIndex, currentExercise.exerciseId || "primary", currentExercise.exerciseName)}
+                                                            className={cn(
+                                                                "text-left bg-neutral-900 border border-white/5 p-4 rounded-2xl transition-all hover:border-red-500/50 hover:bg-red-500/5 flex items-center justify-between",
+                                                                currentLogExercise.exerciseIdUsed === (currentExercise.exerciseId || "primary") && "border-red-500/50 bg-red-500/10"
+                                                            )}
+                                                        >
+                                                            <div>
+                                                                <div className="font-bold text-white uppercase italic text-sm">{currentExercise.exerciseName}</div>
+                                                                <div className="text-[10px] text-neutral-500 uppercase tracking-widest font-black mt-1">Recomendación Principal</div>
+                                                            </div>
+                                                            {currentLogExercise.exerciseIdUsed === (currentExercise.exerciseId || "primary") && (
+                                                                <Check className="w-5 h-5 text-red-500" />
+                                                            )}
+                                                        </button>
+                                                    </SheetClose>
+
+                                                    {currentExercise.variantIds.map(vId => (
+                                                        <SheetClose asChild key={vId}>
+                                                            <button
+                                                                onClick={() => switchExerciseVariant(currentExerciseIndex, vId, variantNames[vId] || "Variante")}
+                                                                className={cn(
+                                                                    "text-left bg-neutral-900 border border-white/5 p-4 rounded-2xl transition-all hover:border-amber-500/50 hover:bg-amber-500/5 flex items-center justify-between",
+                                                                    currentLogExercise.exerciseIdUsed === vId && "border-amber-500/50 bg-amber-500/10"
+                                                                )}
+                                                            >
+                                                                <div>
+                                                                    <div className="font-bold text-white uppercase italic text-sm">{variantNames[vId] || "Cargando variante..."}</div>
+                                                                    <div className="text-[10px] text-neutral-500 uppercase tracking-widest font-black mt-1">Alternativa</div>
+                                                                </div>
+                                                                {currentLogExercise.exerciseIdUsed === vId && (
+                                                                    <Check className="w-5 h-5 text-amber-500" />
+                                                                )}
+                                                            </button>
+                                                        </SheetClose>
+                                                    ))}
                                                 </div>
-                                            </SelectTrigger>
-                                            <SelectContent className="bg-neutral-900 border-white/10 text-white rounded-2xl overflow-hidden backdrop-blur-3xl">
-                                                <SelectItem value={currentExercise.exerciseId || "primary"} className="focus:bg-red-600 focus:text-white font-bold py-3 px-4">
-                                                    {currentExercise.exerciseName} (Base)
-                                                </SelectItem>
-                                                {currentExercise.variantIds.map(vId => (
-                                                    <SelectItem key={vId} value={vId} className="focus:bg-red-600 focus:text-white font-bold py-3 px-4">
-                                                        {variantNames[vId] || "Cargando variante..."}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
+                                            </SheetContent>
+                                        </Sheet>
                                     )}
                                 </div>
 

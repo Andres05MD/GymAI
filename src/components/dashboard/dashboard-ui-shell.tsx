@@ -44,8 +44,11 @@ export function AthleteDashboardUI({ user, activityData, weeklyCompleted, weekly
             >
                 <div className="space-y-1">
                     <h2 className="text-4xl md:text-5xl font-black text-white tracking-tighter uppercase italic">Dashboard</h2>
-                    <p className="text-neutral-500 font-bold uppercase tracking-[0.3em] text-[10px] ml-1">
+                    <p className="text-neutral-500 font-bold uppercase tracking-[0.3em] text-[10px] ml-1 flex items-center gap-2">
                         Bienvenido de nuevo, <span className="text-red-500">{user?.name?.split(' ')[0]}</span>
+                        {user?.role === 'advanced_athlete' && (
+                            <span className="bg-amber-500/10 text-amber-500 px-2 py-0.5 rounded-lg text-[8px] font-black tracking-widest border border-amber-500/20">PRO</span>
+                        )}
                     </p>
                 </div>
                 <div className="grid grid-cols-2 gap-4 w-full md:w-auto md:flex md:gap-4">
