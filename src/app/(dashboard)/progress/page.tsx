@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { Activity, Flame, Scale, TrendingUp, Trophy, Ruler, Users, ArrowLeft, Dumbbell, Sparkles } from "lucide-react";
 import { getPersonalRecords, getStrengthProgress } from "@/actions/analytics-actions";
+import { getBodyMeasurementsHistory } from "@/actions/measurement-actions";
 import { adminDb } from "@/lib/firebase-admin";
 import { getAllAthletes } from "@/actions/coach-actions";
 import Link from "next/link";
@@ -9,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { LogMeasurementDialog } from "@/components/profile/log-measurement-dialog";
 import { ClientMotionDiv } from "@/components/ui/client-motion";
+import { MeasurementHistorySheet } from "@/components/profile/measurement-history-sheet";
 
 interface PersonalRecord {
     exercise: string;
@@ -153,15 +155,17 @@ export default async function ProgressPage({ searchParams }: ProgressPageProps) 
         );
     }
 
-    const [prsResult, metrics, strengthResult] = await Promise.all([
+    const [prsResult, metrics, strengthResult, historyResult] = await Promise.all([
         getPersonalRecords(targetUserId),
         getLatestBodyMetrics(targetUserId),
-        getStrengthProgress(targetUserId)
+        getStrengthProgress(targetUserId),
+        getBodyMeasurementsHistory(targetUserId)
     ]);
 
     const prs = prsResult.success ? prsResult.prs : [];
     const strengthProgress = strengthResult.success && strengthResult.progress ? strengthResult.progress : 0;
     const isStrengthPositive = strengthProgress >= 0;
+    const measurementHistory = historyResult.success && historyResult.data ? historyResult.data : [];
 
     return (
         <div className="flex flex-col gap-12 pb-32 relative overflow-hidden">
@@ -309,16 +313,18 @@ export default async function ProgressPage({ searchParams }: ProgressPageProps) 
             <div id="measurements-section" className="bg-neutral-900/20 backdrop-blur-3xl border border-white/5 rounded-4xl overflow-hidden shadow-2xl scroll-mt-24 relative">
                 <div className="absolute inset-0 bg-linear-to-b from-red-600/5 to-transparent pointer-events-none" />
 
-                <div className="border-b border-white/5 p-8 flex items-center justify-between bg-black/20 relative z-10">
+                <div className="border-b border-white/5 p-8 flex items-center justify-between bg-black/20 relative z-10 w-full overflow-hidden">
                     <div className="flex items-center gap-6">
-                        <div className="w-14 h-14 bg-red-500/10 rounded-2xl flex items-center justify-center border border-red-500/20 shadow-xl">
+                        <div className="w-14 h-14 bg-red-500/10 rounded-2xl flex items-center justify-center border border-red-500/20 shadow-xl shrink-0">
                             <Ruler className="h-7 w-7 text-red-500" />
                         </div>
-                        <div>
-                            <h3 className="text-xl font-black text-white uppercase italic tracking-tighter">Biometría Detallada</h3>
-                            <p className="text-[10px] text-neutral-500 font-black uppercase tracking-[0.2em] italic">Tracking de Perímetros (CM)</p>
+                        <div className="min-w-0 pr-4">
+                            <h3 className="text-xl font-black text-white uppercase italic tracking-tighter truncate">Biometría Detallada</h3>
+                            <p className="text-[10px] text-neutral-500 font-black uppercase tracking-[0.2em] italic truncate">Tracking de Perímetros (CM)</p>
                         </div>
                     </div>
+                    
+                    <MeasurementHistorySheet history={measurementHistory as any} />
                 </div>
 
                 <div className="p-8 relative z-10">
