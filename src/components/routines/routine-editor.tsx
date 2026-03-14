@@ -373,19 +373,31 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
         }
     }, [formData, isEditing]);
 
-    const addExerciseToDay = (dayIndex: number) => {
-        const currentExercises = schedule[dayIndex].exercises || [];
+    const addExerciseToDay = (dayIndex: number, insertAt?: number) => {
+        const currentExercises = Array.isArray(schedule[dayIndex]?.exercises) ? schedule[dayIndex].exercises : [];
         const newExercise = {
             exerciseId: "",
             exerciseName: "Nuevo Ejercicio",
             sets: [
                 { type: "working", reps: "10-12", rpeTarget: 8, restSeconds: 60 }
             ],
-            order: currentExercises.length + 1,
+            order: 0,
             variantIds: []
         };
         const updatedSchedule = [...schedule];
-        updatedSchedule[dayIndex].exercises.push(newExercise);
+        
+        if (!updatedSchedule[dayIndex].exercises) {
+            updatedSchedule[dayIndex].exercises = [];
+        }
+        
+        if (insertAt !== undefined) {
+             updatedSchedule[dayIndex].exercises.splice(insertAt, 0, newExercise);
+        } else {
+             updatedSchedule[dayIndex].exercises.push(newExercise);
+        }
+        
+        updatedSchedule[dayIndex].exercises = updatedSchedule[dayIndex].exercises.map((ex: any, idx: number) => ({...ex, order: idx + 1}));
+        
         setValue("schedule", updatedSchedule);
     };
 
@@ -795,14 +807,26 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                                                         </div>
                                                     </div>
 
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        onClick={() => removeExercise(activeDayIndex, exIndex)}
-                                                        className="h-10 w-10 text-neutral-600 hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all"
-                                                    >
-                                                        <Trash2 className="w-5 h-5" />
-                                                    </Button>
+                                                    <div className="flex items-center gap-1 md:gap-2">
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            onClick={() => addExerciseToDay(activeDayIndex, exIndex)}
+                                                            className="h-10 px-3 text-[10px] font-black uppercase text-neutral-500 hover:text-white hover:bg-white/10 rounded-xl transition-all flex items-center"
+                                                        >
+                                                            <Plus className="w-4 h-4 md:mr-1" />
+                                                            <span className="hidden md:inline">Insertar Antes</span>
+                                                            <span className="md:hidden ml-1">Antes</span>
+                                                        </Button>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            onClick={() => removeExercise(activeDayIndex, exIndex)}
+                                                            className="h-10 w-10 text-neutral-600 hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all"
+                                                        >
+                                                            <Trash2 className="w-5 h-5" />
+                                                        </Button>
+                                                    </div>
                                                 </div>
 
                                                 <div className="p-6 md:p-8 space-y-8 relative z-10">
